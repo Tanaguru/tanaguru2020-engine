@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <include file="db/changelogs/00000000_changelog_auditParameters.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000001_changelog_audits.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000002_changelog_test.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000003_changelog_results.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000004_changelog_users.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000005_changelog_contracts.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/00000006_changelog_projects.xml" relativeToChangelogFile="false"/>
+
+    <include file="db/changelogs/20200319_changelog_auditLog.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200325_changelog_act.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200326_changelog_authorityOverride.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200401_changelog_ResourcesAndScenario.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200406_changelog_auditSchedulers.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200728_changelog_statusResult.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200729_changelog_TestHierarchyResultIndex.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200731_changelog_untestedStatus.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200811_changelog_referenceAuthorities.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200824_changelog_userPasswordModificationToken.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200826_changelog_updatePageNameAndColumnType.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200827_changelog_updateAuditLog_date.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20200904_changelog_updateAuditParameters_enableScreenshot.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog>

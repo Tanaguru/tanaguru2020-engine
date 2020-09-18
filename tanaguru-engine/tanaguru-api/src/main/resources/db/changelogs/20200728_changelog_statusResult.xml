@@ -1,0 +1,43 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    
+    <changeSet id="create_StatusResult" author="rcharre">
+        <createTable tableName="status_result">
+            <column type="bigint" name="id" autoIncrement="true"/>
+            <column name="page_id" type="bigint"/>
+            <column name="reference_id" type="bigint"/>
+            <column name="nb_element_cant_tell" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_inapplicable" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_cant_tell" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_tested" type="int" defaultValueNumeric="0"/>
+        </createTable>
+
+        <addPrimaryKey tableName="status_result" columnNames="id"/>
+        <addNotNullConstraint tableName="status_result" columnName="reference_id"/>
+        <addNotNullConstraint tableName="status_result" columnName="page_id"/>
+        <addForeignKeyConstraint
+                baseTableName="status_result"
+                baseColumnNames="page_id"
+                constraintName="fk_status_result_page_id__page_id"
+                referencedTableName="page"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="status_result"
+                baseColumnNames="reference_id"
+                constraintName="fk_status_result_reference_id__test_hierarchy_id"
+                referencedTableName="test_hierarchy"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="status_result"/>
+        </rollback>
+    </changeSet>
+    
+</databaseChangeLog>

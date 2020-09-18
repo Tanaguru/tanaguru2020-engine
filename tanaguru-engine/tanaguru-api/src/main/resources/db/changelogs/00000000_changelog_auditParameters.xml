@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="createaudit_parameter_family" author="rcharre">
+        <createTable tableName="audit_parameter_family">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="code" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="audit_parameter_family" columnNames="id" constraintName="pk_audit_parameter_family"/>
+        <addUniqueConstraint tableName="audit_parameter_family" columnNames="code" constraintName="unique_audit_parameter_family_code"/>
+
+        <rollback>
+            <dropTable tableName="audit_parameter_family"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="createaudit_parameter" author="rcharre">
+        <createTable tableName="audit_parameter">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="code" type="varchar(30)"/>
+            <column name="audit_parameter_family_id" type="bigint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="audit_parameter" columnNames="id" constraintName="pk_audit_parameter"/>
+        <addUniqueConstraint tableName="audit_parameter" columnNames="code" constraintName="unique_audit_parameter_code"/>
+        <addForeignKeyConstraint baseTableName="audit_parameter" baseColumnNames="audit_parameter_family_id"
+                                 constraintName="audit_parameter_family_id"
+                                 referencedTableName="audit_parameter_family" referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="audit_parameter"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="createaudit_parameter_value" author="rcharre">
+        <createTable tableName="audit_parameter_value">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="audit_parameter_id" type="bigint"/>
+            <column name="value" type="text"/>
+            <column name="is_default" type="boolean"/>
+        </createTable>
+
+        <addPrimaryKey tableName="audit_parameter_value" columnNames="id" constraintName="pk_audit_parameter_value"/>
+        <addNotNullConstraint tableName="audit_parameter_value" columnName="is_default" constraintName="notNull_audit_parameter_value_isDefault"/>
+        <addForeignKeyConstraint baseTableName="audit_parameter_value" baseColumnNames="audit_parameter_id"
+                                 constraintName="fk_audit_parameter_value_audit_parameter_id__audit_parameter_id"
+                                 referencedTableName="audit_parameter" referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="audit_parameter_value"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populateaudit_parameter_family" author="rcharre">
+        <sql>
+            INSERT INTO audit_parameter_family (code) VALUES
+            ('SITE'),
+            ('SCENARIO'),
+            ('UPLOAD'),
+            ('PAGE'),
+            ('GENERAL'),
+            ('WEBDRIVER'),
+            ('RULE'),
+            ('CRAWLER');
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM 'audit_parameter_family';
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populateaudit_parameter" author="rcharre">
+        <sql>
+            INSERT INTO audit_parameter (code, audit_parameter_family_id) VALUES
+            ('SCENARIO_ID', (SELECT id FROM audit_parameter_family WHERE code = 'SCENARIO')),
+            ('DOM_ID', (SELECT id FROM audit_parameter_family WHERE code = 'UPLOAD')),
+            ('SITE_SEEDS', (SELECT id FROM audit_parameter_family WHERE code = 'SITE')),
+            ('PAGE_URLS', (SELECT id FROM audit_parameter_family WHERE code = 'PAGE')),
+
+            ('CRAWLER_MAX_DEPTH', (SELECT id FROM audit_parameter_family WHERE code = 'CRAWLER')),
+            ('CRAWLER_MAX_DURATION', (SELECT id FROM audit_parameter_family WHERE code = 'CRAWLER')),
+            ('CRAWLER_MAX_DOCUMENT', (SELECT id FROM audit_parameter_family WHERE code = 'CRAWLER')),
+            ('CRAWLER_EXCLUSION_REGEX', (SELECT id FROM audit_parameter_family WHERE code = 'CRAWLER')),
+            ('CRAWLER_INCLUSION_REGEX', (SELECT id FROM audit_parameter_family WHERE code = 'CRAWLER')),
+
+            ('WAIT_TIME', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL')),
+            ('BASICAUTH_LOGIN', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL')),
+            ('BASICAUTH_PASSWORD', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL')),
+            ('BASICAUTH_URL', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL')),
+
+            ('WEBDRIVER_RESOLUTIONS', (SELECT id FROM audit_parameter_family WHERE code = 'WEBDRIVER'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM audit_parameter;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populateaudit_parameter_value" author="rcharre">
+        <sql>
+            INSERT INTO audit_parameter_value (audit_parameter_id, value, is_default) VALUES
+            ((SELECT id FROM audit_parameter WHERE code = 'SCENARIO_ID'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'DOM_ID'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'SITE_SEEDS'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'PAGE_URLS'), '', true),
+
+            ((SELECT id FROM audit_parameter WHERE code = 'CRAWLER_MAX_DEPTH'), '10', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'CRAWLER_MAX_DURATION'), '86400', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'CRAWLER_MAX_DOCUMENT'), '100', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'CRAWLER_EXCLUSION_REGEX'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'CRAWLER_INCLUSION_REGEX'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'WAIT_TIME'), '500', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'BASICAUTH_LOGIN'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'BASICAUTH_PASSWORD'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'BASICAUTH_URL'), '', true),
+            ((SELECT id FROM audit_parameter WHERE code = 'WEBDRIVER_RESOLUTIONS'), '1920', true);
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM audit_parameter_value;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

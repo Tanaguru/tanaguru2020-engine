@@ -1,0 +1,63 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    
+    <changeSet id="populate_app_authority__reference_authorities" author="rcharre">
+        <insert tableName="app_authority">
+            <column name="name" value="CREATE_TEST"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="CREATE_REFERENCE"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="DELETE_TEST"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="DELETE_REFERENCE"/>
+        </insert>
+        <rollback>
+            DELETE FROM app_authority WHERE name='CREATE_TEST';
+            DELETE FROM app_authority WHERE name='CREATE_REFERENCE';
+            DELETE FROM app_authority WHERE name='DELETE_TEST';
+            DELETE FROM app_authority WHERE name='DELETE_REFERENCE';
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_app_role_app_authority_reference" author="rcharre">
+        <sql>
+            INSERT INTO app_role_app_authority(app_role_id, app_authority_id) VALUES
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'CREATE_TEST')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'CREATE_REFERENCE')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'DELETE_TEST')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'DELETE_REFERENCE'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM app_role_app_authority WHERE app_authority_id = (SELECT id from app_authority WHERE name='CREATE_TEST');
+                DELETE FROM app_role_app_authority WHERE app_authority_id = (SELECT id from app_authority WHERE name='CREATE_REFERENCE');
+                DELETE FROM app_role_app_authority WHERE app_authority_id = (SELECT id from app_authority WHERE name='DELETE_TEST');
+                DELETE FROM app_role_app_authority WHERE app_authority_id = (SELECT id from app_authority WHERE name='DELETE_REFERENCE');
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="update_testHierarchy_isDeleted" author="rcharre">
+        <addColumn tableName="test_hierarchy">
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="test_hierarchy" columnName="is_deleted"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="update_tanaguruTest_isDeleted" author="rcharre">
+        <addColumn tableName="tanaguru_test">
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="tanaguru_test" columnName="is_deleted"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

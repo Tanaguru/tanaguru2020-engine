@@ -1,0 +1,960 @@
+{
+  "name": "WCAG",
+  "rank": 0,
+  "code": "wcag20",
+  "urls": [
+    "https://www.w3.org/TR/WCAG21"
+  ],
+  "children": [
+    {
+      "rank": 0,
+      "name": "Perceivable",
+      "code": "1",
+      "urls": [
+        "https://www.w3.org/TR/WCAG21/#perceivable"
+      ],
+      "children": [
+        {
+          "rank": 0,
+          "name": "Text Alternatives",
+          "code": "1.1",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#text-alternatives"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Non-text Content",
+              "code": "1.1.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#non-text-content",
+                "https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 1,
+          "name": "Time-based Media",
+          "code": "1.2",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#time-based-media"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Audio-only and Video-only (Prerecorded)",
+              "code": "1.2.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#audio-only-and-video-only-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Captions (Prerecorded)",
+              "code": "1.2.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#captions-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Audio Description or Media Alternative (Prerecorded)",
+              "code": "1.2.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#audio-description-or-media-alternative-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/audio-description-or-media-alternative-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Captions (Live)",
+              "code": "1.2.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/Understanding/captions-live.html",
+                "https://www.w3.org/WAI/WCAG21/Understanding/captions-live.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Audio Description (Prerecorded)",
+              "code": "1.2.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#audio-description-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Sign Language (Prerecorded)",
+              "code": "1.2.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#sign-language-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/sign-language-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 6,
+              "name": "Extended Audio Description (Prerecorded)",
+              "code": "1.2.7",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#extended-audio-description-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/extended-audio-description-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 7,
+              "name": "Media Alternative (Prerecorded)",
+              "code": "1.2.8",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#media-alternative-prerecorded",
+                "https://www.w3.org/WAI/WCAG21/Understanding/media-alternative-prerecorded.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 8,
+              "name": "Audio-only (Live)",
+              "code": "1.2.9",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#audio-only-live",
+                "https://www.w3.org/WAI/WCAG21/Understanding/audio-only-live.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "name": "Adaptable",
+          "code": "1.3",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#adaptable"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Info and Relationships",
+              "code": "1.3.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#info-and-relationships",
+                "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Meaningful Sequence",
+              "code": "1.3.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#meaningful-sequence",
+                "https://www.w3.org/WAI/WCAG21/Understanding/meaningful-sequence.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Sensory Characteristics",
+              "code": "1.3.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#sensory-characteristics",
+                "https://www.w3.org/WAI/WCAG21/Understanding/sensory-characteristics.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Orientation",
+              "code": "1.3.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#orientation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/orientation.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Identify Input Purpose",
+              "code": "1.3.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#identify-input-purpose",
+                "https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Identify Purpose",
+              "code": "1.3.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#identify-purpose",
+                "https://www.w3.org/WAI/WCAG21/Understanding/identify-purpose.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 3,
+          "name": "Distinguishable",
+          "code": "1.4",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#distinguishable"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Use of Color",
+              "code": "1.4.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#use-of-color",
+                "https://www.w3.org/WAI/WCAG21/Understanding/use-of-color.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Audio Control",
+              "code": "1.4.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#audio-control",
+                "https://www.w3.org/WAI/WCAG21/Understanding/audio-control.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Contrast (Minimum)",
+              "code": "1.4.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#contrast-minimum",
+                "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Resize text",
+              "code": "1.4.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#resize-text",
+                "https://www.w3.org/WAI/WCAG21/Understanding/resize-text.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Images of Text",
+              "code": "1.4.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#images-of-text",
+                "https://www.w3.org/WAI/WCAG21/Understanding/images-of-text.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Contrast (Enhanced)",
+              "code": "1.4.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#contrast-enhanced",
+                "https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 6,
+              "name": "Low or No Background Audio",
+              "code": "1.4.7",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#low-or-no-background-audio",
+                "https://www.w3.org/WAI/WCAG21/Understanding/low-or-no-background-audio.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 7,
+              "name": "Visual Presentation",
+              "code": "1.4.8",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#visual-presentation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/visual-presentation.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 8,
+              "name": "Images of Text (No Exception)",
+              "code": "1.4.9",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#images-of-text-no-exception",
+                "https://www.w3.org/WAI/WCAG21/Understanding/images-of-text-no-exception.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 9,
+              "name": "Reflow",
+              "code": "1.4.10",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#reflow",
+                "https://www.w3.org/WAI/WCAG21/Understanding/reflow.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 10,
+              "name": "Non-text Contrast",
+              "code": "1.4.11",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#non-text-contrast",
+                "https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 11,
+              "name": "Text Spacing",
+              "code": "1.4.12",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#text-spacing",
+                "https://www.w3.org/WAI/WCAG21/Understanding/text-spacing.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 12,
+              "name": "Content on Hover or Focus",
+              "code": "1.4.13",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#content-on-hover-or-focus",
+                "https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus.html"
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rank": 1,
+      "name": "Operable",
+      "code": "2",
+      "urls": [
+        "https://www.w3.org/TR/WCAG21/#operable"
+      ],
+      "children": [
+        {
+          "rank": 0,
+          "name": "Keyboard Accessible",
+          "code": "2.1",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#keyboard-accessible"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Keyboard",
+              "code": "2.1.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#keyboard",
+                "https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "No Keyboard Trap",
+              "code": "2.1.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#no-keyboard-trap",
+                "https://www.w3.org/WAI/WCAG21/Understanding/no-keyboard-trap.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Keyboard (No Exception)",
+              "code": "2.1.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#keyboard-no-exception",
+                "https://www.w3.org/WAI/WCAG21/Understanding/keyboard-no-exception.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Character Key Shortcuts",
+              "code": "2.1.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#character-key-shortcuts",
+                "https://www.w3.org/WAI/WCAG21/Understanding/character-key-shortcuts.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 1,
+          "name": "Enough Time",
+          "code": "2.2",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#enough-time"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Timing Adjustable",
+              "code": "2.2.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#timing-adjustable",
+                "https://www.w3.org/WAI/WCAG21/Understanding/timing-adjustable.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Pause, Stop, Hide",
+              "code": "2.2.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#pause-stop-hide",
+                "https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "No Timing",
+              "code": "2.2.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#no-timing",
+                "https://www.w3.org/WAI/WCAG21/Understanding/no-timing.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Interruptions",
+              "code": "2.2.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#interruptions",
+                "https://www.w3.org/WAI/WCAG21/Understanding/interruptions.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Re-authenticating",
+              "code": "2.2.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#re-authenticating",
+                "https://www.w3.org/WAI/WCAG21/Understanding/re-authenticating.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Timeouts",
+              "code": "2.2.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#timeouts",
+                "https://www.w3.org/WAI/WCAG21/Understanding/timeouts.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "name": "Seizures",
+          "code": "2.3",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#seizures-and-physical-reactions"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Three Flashes or Below Threshold",
+              "code": "2.3.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#three-flashes-or-below-threshold",
+                "https://www.w3.org/WAI/WCAG21/Understanding/three-flashes-or-below-threshold.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Three Flashes",
+              "code": "2.3.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#three-flashes",
+                "https://www.w3.org/WAI/WCAG21/Understanding/three-flashes.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Animation from Interactions",
+              "code": "2.3.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#animation-from-interactions",
+                "https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 3,
+          "name": "Navigable",
+          "code": "2.4",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#navigable"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Bypass Blocks",
+              "code": "2.4.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#bypass-blocks",
+                "https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Page Titled",
+              "code": "2.4.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#page-titled",
+                "https://www.w3.org/WAI/WCAG21/Understanding/page-titled.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Focus Order",
+              "code": "2.4.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#focus-order",
+                "https://www.w3.org/WAI/WCAG21/Understanding/focus-order.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Link Purpose (In Context)",
+              "code": "2.4.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#link-purpose-in-context",
+                "https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Multiple Ways",
+              "code": "2.4.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#multiple-ways",
+                "https://www.w3.org/WAI/WCAG21/Understanding/multiple-ways.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Headings and Labels",
+              "code": "2.4.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#headings-and-labels",
+                "https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 6,
+              "name": "Focus Visible",
+              "code": "2.4.7",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#focus-visible",
+                "https://www.w3.org/WAI/WCAG21/Understanding/focus-visible.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 7,
+              "name": "Location",
+              "code": "2.4.8",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#location",
+                "https://www.w3.org/WAI/WCAG21/Understanding/location.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 8,
+              "name": "Link Purpose (Link Only)",
+              "code": "2.4.9",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#link-purpose-link-only",
+                "https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-link-only.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 9,
+              "name": "Section Headings",
+              "code": "2.4.10",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#section-headings",
+                "https://www.w3.org/WAI/WCAG21/Understanding/section-headings.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 4,
+          "name": "Input Modalities",
+          "code": "2.5",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#input-modalities"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Pointer Gestures",
+              "code": "2.5.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#pointer-gestures",
+                "https://www.w3.org/WAI/WCAG21/Understanding/pointer-gestures.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Pointer Cancellation",
+              "code": "2.5.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#pointer-cancellation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/pointer-cancellation.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Label in Name",
+              "code": "2.5.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#label-in-name",
+                "https://www.w3.org/WAI/WCAG21/Understanding/label-in-name.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Motion Actuation",
+              "code": "2.5.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#motion-actuation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/motion-actuation.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Target Size",
+              "code": "2.5.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#target-size",
+                "https://www.w3.org/WAI/WCAG21/Understanding/target-size.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Concurrent Input Mechanisms",
+              "code": "2.5.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#concurrent-input-mechanisms",
+                "https://www.w3.org/WAI/WCAG21/Understanding/concurrent-input-mechanisms.html"
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "Understandable",
+      "code": "3",
+      "urls": [
+        "https://www.w3.org/TR/WCAG21/#understandable"
+      ],
+      "children": [
+        {
+          "rank": 0,
+          "name": "Readable",
+          "code": "3.1",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#readable"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Language of Page",
+              "code": "3.1.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#language-of-page",
+                "https://www.w3.org/WAI/WCAG21/Understanding/language-of-page.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Language of Parts",
+              "code": "3.1.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#language-of-parts",
+                "https://www.w3.org/WAI/WCAG21/Understanding/language-of-parts.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Unusual Words",
+              "code": "3.1.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#unusual-words",
+                "https://www.w3.org/WAI/WCAG21/Understanding/unusual-words.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Abbreviations",
+              "code": "3.1.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#abbreviations",
+                "https://www.w3.org/WAI/WCAG21/Understanding/abbreviations.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Reading Level",
+              "code": "3.1.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#reading-level",
+                "https://www.w3.org/WAI/WCAG21/Understanding/reading-level.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Pronunciation",
+              "code": "3.1.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#pronunciation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/pronunciation.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 1,
+          "name": "Predictable",
+          "code": "3.2",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#predictable"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "On Focus",
+              "code": "3.2.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#on-focus",
+                "https://www.w3.org/WAI/WCAG21/Understanding/on-focus.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "On Input",
+              "code": "3.2.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#on-input",
+                "https://www.w3.org/WAI/WCAG21/Understanding/on-input.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Consistent Navigation",
+              "code": "3.2.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#consistent-navigation",
+                "https://www.w3.org/WAI/WCAG21/Understanding/consistent-navigation.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Consistent Identification",
+              "code": "3.2.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#consistent-identification",
+                "https://www.w3.org/WAI/WCAG21/Understanding/consistent-identification.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Change on Request",
+              "code": "3.2.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#change-on-request",
+                "https://www.w3.org/WAI/WCAG21/Understanding/change-on-request.html"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "name": "Input Assistance",
+          "code": "3.3",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#input-assistance"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Error Identification",
+              "code": "3.3.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#error-identification",
+                "https://www.w3.org/WAI/WCAG21/Understanding/error-identification.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Labels or Instructions",
+              "code": "3.3.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#labels-or-instructions",
+                "https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Error Suggestion",
+              "code": "3.3.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#error-suggestion",
+                "https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 3,
+              "name": "Error Prevention (Legal, Financial, Data)",
+              "code": "3.3.4",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#error-prevention-legal-financial-data",
+                "https://www.w3.org/WAI/WCAG21/Understanding/error-prevention-legal-financial-data.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 4,
+              "name": "Help",
+              "code": "3.3.5",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#help",
+                "https://www.w3.org/WAI/WCAG21/Understanding/help.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 5,
+              "name": "Error Prevention (All)",
+              "code": "3.3.6",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#error-prevention-all",
+                "https://www.w3.org/WAI/WCAG21/Understanding/error-prevention-all.html"
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "Robust",
+      "code": "4",
+      "urls": [
+        "https://www.w3.org/TR/WCAG21/#robust"
+      ],
+      "children": [
+        {
+          "rank": 0,
+          "name": "Compatible",
+          "code": "4.1",
+          "urls": [
+            "https://www.w3.org/TR/WCAG21/#compatible"
+          ],
+          "children": [
+            {
+              "rank": 0,
+              "name": "Parsing",
+              "code": "4.1.1",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#parsing",
+                "https://www.w3.org/WAI/WCAG21/Understanding/parsing.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 1,
+              "name": "Name, Role, Value",
+              "code": "4.1.2",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#name-role-value",
+                "https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html"
+              ],
+              "children": []
+            },
+            {
+              "rank": 2,
+              "name": "Status Messages",
+              "code": "4.1.3",
+              "urls": [
+                "https://www.w3.org/WAI/WCAG21/quickref/#status-messages",
+                "https://www.w3.org/WAI/WCAG21/Understanding/status-messages.html"
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

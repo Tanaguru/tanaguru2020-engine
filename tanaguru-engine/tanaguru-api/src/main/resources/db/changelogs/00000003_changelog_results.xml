@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="createpage" author="rcharre">
+        <createTable tableName="page">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="url" type="varchar(200)"/>
+            <column name="name" type="varchar(200)"/>
+            <column name="rank" type="int unsigned "/>
+            <column name="audit_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
+        <addForeignKeyConstraint baseTableName="page" baseColumnNames="audit_id"
+                                 constraintName="fk_page_audit_id__audit_id"
+                                 referencedTableName="audit" referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="page"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="createpage_content" author="rcharre">
+        <createTable tableName="page_content">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="screenshot" type="text"/>
+            <column name="source" type="text"/>
+            <column name="page_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="page_content" columnNames="id" constraintName="pk_page_content"/>
+        <addForeignKeyConstraint
+                baseTableName="page_content"
+                baseColumnNames="page_id"
+                constraintName="fk_page_content_page_id__page_id"
+                referencedTableName="page"
+                referencedColumnNames="id"/>
+        <addNotNullConstraint tableName="page_content" columnName="page_id" constraintName="notNull_page_content_page_id"/>
+
+        <rollback>
+            <dropTable tableName="page_content"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_test_result" author="rcharre">
+        <createTable tableName="test_result">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="tanaguru_test_id" type="bigint"/>
+            <column name="page_id" type="bigint"/>
+            <column name="status" type="text"/>
+            <column name="marks" type="jsonb"/>
+            <column name="nb_element_tested" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_cant_tell" type="int" defaultValueNumeric="0"/>
+        </createTable>
+        <addPrimaryKey tableName="test_result" columnNames="id"/>
+        <addNotNullConstraint tableName="test_result" columnName="tanaguru_test_id"/>
+        <addNotNullConstraint tableName="test_result" columnName="page_id"/>
+        <addForeignKeyConstraint baseTableName="test_result"
+                                 baseColumnNames="tanaguru_test_id"
+                                 constraintName="fk_test_result_tanaguru_test_id__tanaguru_test_id"
+                                 referencedTableName="tanaguru_test"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="test_result"
+                                 baseColumnNames="page_id"
+                                 constraintName="fk_test_result_page_id__page_id"
+                                 referencedTableName="page"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="test_result"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_element_result" author="rcharre">
+        <createTable tableName="element_result">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="test_result_id" type="bigint"/>
+            <column name="accessible_name" type="text"/>
+            <column name="status" type="text"/>
+            <column name="xpath" type="text"/>
+            <column name="css_selector" type="text"/>
+            <column name="can_be_reached_using_keyboard_with" type="jsonb"/>
+            <column name="is_not_exposed_due_to" type="jsonb"/>
+            <column name="is_not_visible_due_to" type="jsonb"/>
+            <column name="role" type="jsonb"/>
+        </createTable>
+        <addPrimaryKey tableName="element_result" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="element_result"
+                                 baseColumnNames="test_result_id"
+                                 constraintName="fk_element_result_test_result_id__test_result_id"
+                                 referencedTableName="test_result"
+                                 referencedColumnNames="id"/>
+        <rollback>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_test_hierarchy_result" author="rcharre">
+        <createTable tableName="test_hierarchy_result">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="parent_id" type="bigint"/>
+            <column name="page_id" type="bigint"/>
+            <column name="test_hierarchy_id" type="bigint"/>
+            <column name="nb_element_cant_tell" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_inapplicable" type="int" defaultValueNumeric="0"/>
+            <column name="nb_test_cant_tell" type="int" defaultValueNumeric="0"/>
+            <column name="nb_failed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_passed" type="int" defaultValueNumeric="0"/>
+            <column name="nb_inapplicable" type="int" defaultValueNumeric="0"/>
+            <column name="nb_untested" type="int" defaultValueNumeric="0"/>
+            <column name="nb_cant_tell" type="int" defaultValueNumeric="0"/>
+            <column name="nb_element_tested" type="int" defaultValueNumeric="0"/>
+            <column name="nb_anomaly_ignored" type="int" defaultValueNumeric="0"/>
+            <column name="status" type="text"/>
+        </createTable>
+
+        <addPrimaryKey tableName="test_hierarchy_result" columnNames="id"/>
+        <addNotNullConstraint tableName="test_hierarchy_result" columnName="test_hierarchy_id"/>
+        <addNotNullConstraint tableName="test_hierarchy_result" columnName="page_id"/>
+        <addForeignKeyConstraint
+                baseTableName="test_hierarchy_result"
+                baseColumnNames="parent_id"
+                constraintName="fk_test_hierarchy_result_parent_id__test_hierarchy_result_id"
+                referencedTableName="test_hierarchy_result"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="test_hierarchy_result"
+                baseColumnNames="page_id"
+                constraintName="fk_test_hierarchy_result_page_id__page_id"
+                referencedTableName="page"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="test_hierarchy_result"
+                baseColumnNames="test_hierarchy_id"
+                constraintName="fk_test_hierarchy_result_test_hierarchy_id__test_hierarchy_id"
+                referencedTableName="test_hierarchy"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="test_hierarchy_result"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_test_hierarchy_result_test_result" author="rcharre">
+        <createTable tableName="test_hierarchy_result_test_result">
+            <column name="test_hierarchy_result_id" type="bigint"/>
+            <column name="test_result_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="test_hierarchy_result_test_result" columnNames="test_hierarchy_result_id, test_result_id"/>
+        <addNotNullConstraint tableName="test_hierarchy_result_test_result" columnName="test_hierarchy_result_id"/>
+        <addNotNullConstraint tableName="test_hierarchy_result_test_result" columnName="test_result_id"/>
+        <addForeignKeyConstraint
+                baseTableName="test_hierarchy_result_test_result"
+                baseColumnNames="test_hierarchy_result_id"
+                constraintName="fk_test_hierarchy_result_test_result_test_hierarchy_result_id__test_hierarchy_result_id"
+                referencedTableName="test_hierarchy_result"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="test_hierarchy_result_test_result"
+                baseColumnNames="test_result_id"
+                constraintName="fk_test_hierarchy_result_test_result_test_result_id__test_result_id"
+                referencedTableName="test_result"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="test_hierarchy_result_test_result"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

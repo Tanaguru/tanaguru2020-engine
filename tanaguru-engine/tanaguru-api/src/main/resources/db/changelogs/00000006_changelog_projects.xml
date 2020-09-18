@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_project_role" author="rcharre">
+        <createTable tableName="project_role">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="is_hidden" type="boolean"/>
+        </createTable>
+        <addPrimaryKey tableName="project_role" columnNames="id" constraintName="pk_project_role"/>
+        <addUniqueConstraint tableName="project_role" columnNames="name"/>
+        <addNotNullConstraint tableName="project_role" columnName="is_hidden"/>
+
+        <rollback>
+            <dropTable tableName="project_role"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_project_role" author="rcharre">
+        <insert tableName="project_role">
+            <column name="name" value="PROJECT_GUEST"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="project_role">
+            <column name="name" value="PROJECT_USER"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="project_role">
+            <column name="name" value="PROJECT_MANAGER"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="project_role">
+            <column name="name" value="PROJECT_VISITOR"/>
+            <column name="is_hidden" valueBoolean="true"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM project_role;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_project_authority" author="rcharre">
+        <createTable tableName="project_authority">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="project_authority" columnNames="id" constraintName="pk_project_authority"/>
+        <addUniqueConstraint tableName="project_authority" columnNames="name"/>
+        <rollback>
+            <dropTable tableName="project_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_project_authority_basicauthorities" author="rcharre">
+        <insert tableName="project_authority">
+            <column name="name" value="SHOW_PROJECT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="MODIFY_PROJECT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="DELETE_PROJECT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="INVITE_MEMBER"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="REMOVE_MEMBER"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="PROMOTE_MEMBER"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="SHOW_AUDIT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="START_AUDIT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="DELETE_AUDIT"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="ADD_RESOURCE"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="DELETE_RESOURCE"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="ADD_SCENARIO"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="SHOW_SCENARIO"/>
+        </insert>
+        <insert tableName="project_authority">
+            <column name="name" value="DELETE_SCENARIO"/>
+        </insert>
+
+        <rollback>
+            <sql>
+                DELETE FROM project_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_project_role_project_authority" author="rcharre">
+        <createTable tableName="project_role_project_authority">
+            <column name="project_role_id" type="bigint"/>
+            <column name="project_authority_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="project_role_project_authority"
+                       columnNames="project_role_id,project_authority_id"
+                       constraintName="pk_project_role_project_authority"/>
+        <addForeignKeyConstraint baseTableName="project_role_project_authority"
+                                 baseColumnNames="project_role_id"
+                                 constraintName="fk_project_role_project_authority_project_role_id__project_role_id"
+                                 referencedTableName="project_role"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="project_role_project_authority"
+                                 baseColumnNames="project_authority_id"
+                                 constraintName="fk_project_role_project_authority_project_authority_id__project_authority_id"
+                                 referencedTableName="project_authority"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="project_role_project_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_project_role_project_authority_user" author="rcharre">
+        <sql>
+            INSERT INTO project_role_project_authority(project_role_id, project_authority_id) VALUES
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'SHOW_PROJECT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'MODIFY_PROJECT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'DELETE_PROJECT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'INVITE_MEMBER')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'REMOVE_MEMBER')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'PROMOTE_MEMBER')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'SHOW_AUDIT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'START_AUDIT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'DELETE_AUDIT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'ADD_RESOURCE')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'DELETE_RESOURCE')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'ADD_SCENARIO')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'SHOW_SCENARIO')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_MANAGER'), (SELECT id FROM project_authority WHERE name = 'DELETE_SCENARIO')),
+
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_USER'), (SELECT id FROM project_authority WHERE name = 'SHOW_PROJECT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_USER'), (SELECT id FROM project_authority WHERE name = 'SHOW_AUDIT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_USER'), (SELECT id FROM project_authority WHERE name = 'START_AUDIT')),
+
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_GUEST'), (SELECT id FROM project_authority WHERE name = 'SHOW_PROJECT')),
+            ((SELECT id FROM project_role WHERE name = 'PROJECT_GUEST'), (SELECT id FROM project_authority WHERE name = 'SHOW_AUDIT'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM project_role_project_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_project" author="rcharre">
+        <createTable tableName="project">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="contract_id" type="bigint"/>
+            <column name="domain" type="text"/>
+        </createTable>
+        <addNotNullConstraint tableName="project" columnName="name"/>
+        <addPrimaryKey tableName="project" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="project"
+                                 baseColumnNames="contract_id"
+                                 constraintName="fk_project_contract_id__contract_id"
+                                 referencedTableName="contract"
+                                 referencedColumnNames="id"/>
+    <rollback>
+        <dropTable tableName="project"/>
+    </rollback>
+    </changeSet>
+
+    <changeSet id="create_project_app_user" author="rcharre">
+        <createTable tableName="project_app_user">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="project_id" type="bigint"/>
+            <column name="contract_app_user_id" type="bigint"/>
+            <column name="project_role_id" type="bigint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="project_app_user" columnNames="id"/>
+        <addUniqueConstraint tableName="project_app_user" columnNames="project_id,contract_app_user_id"/>
+        <addNotNullConstraint tableName="project_app_user" columnName="project_role_id"/>
+
+        <addForeignKeyConstraint baseTableName="project_app_user"
+                                 baseColumnNames="project_role_id"
+                                 constraintName="fk_project_app_user_project_role_id__project_role_id"
+                                 referencedTableName="project_role"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="project_app_user"
+                                 baseColumnNames="project_id"
+                                 constraintName="fk_project_app_user_project_id__project_id"
+                                 referencedTableName="project"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="project_app_user"
+                                 baseColumnNames="contract_app_user_id"
+                                 constraintName="fk_project_app_user_contract_app_user_id__contract_app_user_id"
+                                 referencedTableName="contract_app_user"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="project_app_user"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_act" author="rcharre">
+        <createTable tableName="act">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="project_id" type="bigint"/>
+            <column name="audit_id" type="bigint"/>
+            <column name="date" type="timestamp"/>
+        </createTable>
+        <addPrimaryKey tableName="act" columnNames="id"/>
+        <createIndex tableName="act" indexName="index_act_date_desc">
+            <column name="date" descending="true"/>
+        </createIndex>
+        <addNotNullConstraint tableName="act" columnName="project_id"/>
+        <addNotNullConstraint tableName="act" columnName="audit_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="act"
+                baseColumnNames="project_id"
+                constraintName="fk_act_project_id__project_id"
+                referencedTableName="project"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="act"
+                baseColumnNames="audit_id"
+                constraintName="fk_act_audit_id__audit_id"
+                referencedTableName="audit"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="act"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    
+    <changeSet id="update_page_nameAndUrlTypes" author="rcharre">
+        <modifyDataType tableName="page" columnName="url" newDataType="text"/>
+        <modifyDataType tableName="page" columnName="name" newDataType="text"/>
+        <rollback>
+            <modifyDataType tableName="page" columnName="url" newDataType="varchar(200)"/>
+            <modifyDataType tableName="page" columnName="name" newDataType="varchar(200)"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_Scenario" author="rcharre">
+        <createTable tableName="scenario">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="project_id" type="bigint"/>
+            <column name="content" type="text"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+        
+        <addPrimaryKey tableName="scenario" columnNames="id"/>
+        <addNotNullConstraint tableName="scenario" columnName="name"/>
+        <addNotNullConstraint tableName="scenario" columnName="project_id"/>
+        <addNotNullConstraint tableName="scenario" columnName="content"/>
+        <addNotNullConstraint tableName="scenario" columnName="is_deleted"/>
+        
+        <addForeignKeyConstraint 
+                baseTableName="scenario" 
+                baseColumnNames="project_id" 
+                constraintName="fk_scenario_project_id__project_id" 
+                referencedTableName="project"
+                referencedColumnNames="id"/>
+        
+        <rollback>
+            <dropTable tableName="scenario"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_Resource" author="rcharre">
+        <createTable tableName="resource">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="project_id" type="bigint"/>
+            <column name="content" type="text"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addPrimaryKey tableName="resource" columnNames="id"/>
+        <addNotNullConstraint tableName="resource" columnName="name"/>
+        <addNotNullConstraint tableName="resource" columnName="project_id"/>
+        <addNotNullConstraint tableName="resource" columnName="content"/>
+        <addNotNullConstraint tableName="resource" columnName="is_deleted"/>
+
+        <addForeignKeyConstraint
+                baseTableName="resource"
+                baseColumnNames="project_id"
+                constraintName="fk_resource_project_id__project_id"
+                referencedTableName="project"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="resource"/>
+        </rollback>
+    </changeSet>
+    
+</databaseChangeLog>

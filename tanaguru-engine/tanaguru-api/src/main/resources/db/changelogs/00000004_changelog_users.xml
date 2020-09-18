@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_app_role" author="rcharre">
+        <createTable tableName="app_role">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="app_role" columnNames="id" constraintName="pk_app_role"/>
+        <addUniqueConstraint tableName="app_role" columnNames="name"/>
+        <rollback>
+            <dropTable tableName="app_role"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="createUser" author="rcharre">
+        <createTable tableName="app_user">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="username" type="varchar(30)"/>
+            <column name="password" type="varchar(100)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="is_enabled" type="boolean" defaultValueBoolean="false"/>
+            <column name="date_creation" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="app_role_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="app_user" columnNames="id" constraintName="pk_app_user"/>
+        <addUniqueConstraint tableName="app_user" columnNames="username"/>
+        <addUniqueConstraint tableName="app_user" columnNames="email"/>
+        <addForeignKeyConstraint baseTableName="app_user"
+                                 baseColumnNames="app_role_id"
+                                 constraintName="fk_app_user_app_role_id_app_role_id"
+                                 referencedTableName="app_role"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="app_user"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_app_role" author="rcharre">
+        <insert tableName="app_role">
+            <column name="name" value="USER"/>
+        </insert>
+        <insert tableName="app_role">
+            <column name="name" value="ADMIN"/>
+        </insert>
+        <insert tableName="app_role">
+            <column name="name" value="SUPER_ADMIN"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM app_role;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_app_authority" author="rcharre">
+        <createTable tableName="app_authority">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="app_authority" columnNames="id" constraintName="pk_app_authority"/>
+        <addUniqueConstraint tableName="app_authority" columnNames="name"/>
+        <rollback>
+            <dropTable tableName="app_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_app_authority_user" author="rcharre">
+        <insert tableName="app_authority">
+            <column name="name" value="CREATE_CONTRACT"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="DELETE_CONTRACT"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="MODIFY_CONTRACT"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="CREATE_USER"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="SHOW_USER"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="PROMOTE_USER"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="MODIFY_USER"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="DELETE_USER"/>
+        </insert>
+        <insert tableName="app_authority">
+            <column name="name" value="PUBLIC_SCHEDULE_ACCESS"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM app_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_app_role_app_authority" author="rcharre">
+        <createTable tableName="app_role_app_authority">
+            <column name="app_role_id" type="bigint"/>
+            <column name="app_authority_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="app_role_app_authority"
+                       columnNames="app_role_id,app_authority_id"
+                       constraintName="pk_app_role_app_authority"/>
+        <addForeignKeyConstraint baseTableName="app_role_app_authority"
+                                 baseColumnNames="app_role_id"
+                                 constraintName="fk_app_role_app_authority_app_role_id__app_role_id"
+                                 referencedTableName="app_role"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="app_role_app_authority"
+                                 baseColumnNames="app_authority_id"
+                                 constraintName="fk_app_role_app_authority_app_authority_id__app_authority_id"
+                                 referencedTableName="app_authority"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="app_role_app_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_app_role_app_authority_user" author="rcharre">
+        <sql>
+            INSERT INTO app_role_app_authority(app_role_id, app_authority_id) VALUES
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'CREATE_CONTRACT')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'DELETE_CONTRACT')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'MODIFY_CONTRACT')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'CREATE_USER')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'SHOW_USER')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'PROMOTE_USER')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'MODIFY_USER')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'DELETE_USER')),
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'PUBLIC_SCHEDULE_ACCESS')),
+
+            ((SELECT id FROM app_role WHERE name = 'ADMIN'), (SELECT id FROM app_authority WHERE name = 'CREATE_USER')),
+            ((SELECT id FROM app_role WHERE name = 'ADMIN'), (SELECT id FROM app_authority WHERE name = 'SHOW_USER')),
+            ((SELECT id FROM app_role WHERE name = 'ADMIN'), (SELECT id FROM app_authority WHERE name = 'MODIFY_USER')),
+            ((SELECT id FROM app_role WHERE name = 'ADMIN'), (SELECT id FROM app_authority WHERE name = 'DELETE_USER')),
+            ((SELECT id FROM app_role WHERE name = 'ADMIN'), (SELECT id FROM app_authority WHERE name = 'PUBLIC_SCHEDULE_ACCESS')),
+
+            ((SELECT id FROM app_role WHERE name = 'USER'), (SELECT id FROM app_authority WHERE name = 'SHOW_USER'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM app_role_app_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

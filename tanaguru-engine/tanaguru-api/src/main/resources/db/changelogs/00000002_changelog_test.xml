@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_tanaguru_test" author="rcharre">
+        <createTable tableName="tanaguru_test">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="text"/>
+            <column name="description" type="text"/>
+            <column name="query" type="text"/>
+            <column name="expected_nb_elements" type="text"/>
+            <column name="filter" type="text"/>
+            <column name="analyze_elements" type="text"/>
+            <column name="tags" type="jsonb"/>
+            <column name="ressources" type="jsonb"/>
+        </createTable>
+        <addPrimaryKey tableName="tanaguru_test" columnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="tanaguru_test"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_test_hierarchy" author="rcharre">
+        <createTable tableName="test_hierarchy">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="parent_id" type="bigint"/>
+            <column name="reference_id" type="bigint"/>
+            <column name="name" type="text"/>
+            <column name="code" type="varchar(30)"/>
+            <column name="urls" type="jsonb"/>
+            <column name="rank" type="int unsigned" defaultValueNumeric="0"/>
+        </createTable>
+        <addPrimaryKey tableName="test_hierarchy" columnNames="id" constraintName="pk_test_hierarchy"/>
+        <addUniqueConstraint tableName="test_hierarchy" columnNames="reference_id,code"/>
+        <addUniqueConstraint tableName="test_hierarchy" columnNames="parent_id,rank"/>
+        <addNotNullConstraint tableName="test_hierarchy" columnName="code"/>
+        <addNotNullConstraint tableName="test_hierarchy" columnName="rank"/>
+        <addForeignKeyConstraint baseTableName="test_hierarchy"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_test_hierarchy_parent_id__test_hierarchy_id"
+                                 referencedTableName="test_hierarchy"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="test_hierarchy"
+                                 baseColumnNames="reference_id"
+                                 constraintName="fk_test_hierarchy_reference_id__test_hierarchy_id"
+                                 referencedTableName="test_hierarchy"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="test_hierarchy"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_audit_reference" author="rcharre">
+        <createTable tableName="audit_reference">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="audit_id" type="bigint"/>
+            <column name="test_hierarchy_id" type="bigint"/>
+            <column name="is_main" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+        <addNotNullConstraint tableName="audit_reference" columnName="audit_id"/>
+        <addNotNullConstraint tableName="audit_reference" columnName="test_hierarchy_id"/>
+        <addNotNullConstraint tableName="audit_reference" columnName="is_main"/>
+        <addPrimaryKey tableName="audit_reference" columnNames="id"/>
+        <addUniqueConstraint tableName="audit_reference" columnNames="audit_id,test_hierarchy_id"/>
+        <addForeignKeyConstraint baseTableName="audit_reference"
+                                 baseColumnNames="test_hierarchy_id"
+                                 constraintName="fk_audit_reference_test_hierarchy_id__test_hierarchy_id"
+                                 referencedTableName="test_hierarchy"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="audit_reference"
+                                 baseColumnNames="audit_id"
+                                 constraintName="fk_audit_reference_audit_id__audit_id"
+                                 referencedTableName="audit"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="audit_reference"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_test_hierarchy_tanaguru_test" author="rcharre">
+        <createTable tableName="test_hierarchy_tanaguru_test">
+            <column name="test_hierarchy_id" type="bigint"/>
+            <column name="tanaguru_test_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="test_hierarchy_tanaguru_test" columnNames="test_hierarchy_id,tanaguru_test_id"/>
+        <addNotNullConstraint tableName="test_hierarchy_tanaguru_test" columnName="test_hierarchy_id"/>
+        <addNotNullConstraint tableName="test_hierarchy_tanaguru_test" columnName="tanaguru_test_id"/>
+        <addForeignKeyConstraint baseTableName="test_hierarchy_tanaguru_test"
+                                 baseColumnNames="test_hierarchy_id"
+                                 constraintName="fk_test_hierarchy_tanaguru_test_test_hierarchy_id__test_hierarchy_id"
+                                 referencedTableName="test_hierarchy"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="test_hierarchy_tanaguru_test"
+                                 baseColumnNames="tanaguru_test_id"
+                                 constraintName="fk_test_hierarchy_tanaguru_test_tanaguru_test_id__tanaguru_test_id"
+                                 referencedTableName="tanaguru_test"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="test_hierarchy_tanaguru_test"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

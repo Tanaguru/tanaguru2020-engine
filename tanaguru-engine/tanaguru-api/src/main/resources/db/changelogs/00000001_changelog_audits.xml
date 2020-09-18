@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+
+    <changeSet id="createaudit" author="rcharre">
+        <createTable tableName="audit">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(50)"/>
+            <column name="date_start" type="timestamp" defaultOnNull="true"/>
+            <column name="date_end" type="timestamp" defaultOnNull="true"/>
+            <column name="type" type="varchar(20)"/>
+            <column name="share_code" type="varchar(30)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="audit" columnNames="id" constraintName="pk_audit"/>
+        <addNotNullConstraint tableName="audit" columnName="type"/>
+
+        <rollback>
+            <dropTable tableName="audit"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="createaudit_audit_parameter_value" author="rcharre">
+        <createTable tableName="audit_audit_parameter_value">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="audit_id" type="bigint"/>
+            <column name="audit_parameter_value_id" type="bigint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="audit_audit_parameter_value" columnNames="audit_id, audit_parameter_value_id" constraintName="pk_audit_audit_parameter_value"/>
+        <addUniqueConstraint tableName="audit_audit_parameter_value" columnNames="audit_id,audit_parameter_value_id"/>
+        <addForeignKeyConstraint baseTableName="audit_audit_parameter_value" baseColumnNames="audit_parameter_value_id"
+                                 constraintName="fk_audit_audit_parameter_value_audit_parameter_value_id__audit_parameter_value_id"
+                                 referencedTableName="audit_parameter_value" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="audit_audit_parameter_value" baseColumnNames="audit_id"
+                                 constraintName="fk_audit_audit_parameter_value_audit_id__audit_id"
+                                 referencedTableName="audit" referencedColumnNames="id"/>
+    <rollback>
+        <dropTable tableName="audit_audit_parameter_value"/>
+    </rollback>
+    </changeSet>
+
+    <changeSet id="updateaudit__add_is_private" author="rcharre">
+        <addColumn tableName="audit">
+            <column name="is_private" type="boolean" defaultValueBoolean="true"/>
+        </addColumn>
+        <addNotNullConstraint tableName="audit" columnName="is_private" constraintName="notNull_audit_is_private"/>
+        <rollback>
+            <dropNotNullConstraint tableName="audit" columnName="is_private"/>
+            <dropColumn tableName="audit" columnName="is_private"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="updateaudit__add_status" author="rcharre">
+        <addColumn tableName="audit">
+            <column name="status" type="varchar(30)" defaultValue="PENDING"/>
+        </addColumn>
+        <addNotNullConstraint tableName="audit" columnName="status" constraintName="notNull_audit_status"/>
+        <rollback>
+            <dropNotNullConstraint tableName="audit" columnName="status"/>
+            <dropColumn tableName="audit" columnName="status"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

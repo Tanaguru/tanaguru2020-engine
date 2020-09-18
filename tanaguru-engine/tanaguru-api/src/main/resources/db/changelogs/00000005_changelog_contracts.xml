@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_contract_role" author="rcharre">
+        <createTable tableName="contract_role">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="is_hidden" type="boolean"/>
+        </createTable>
+        <addPrimaryKey tableName="contract_role" columnNames="id" constraintName="pk_contract_role"/>
+        <addUniqueConstraint tableName="contract_role" columnNames="name"/>
+        <addNotNullConstraint tableName="contract_role" columnName="is_hidden"/>
+        <rollback>
+            <dropTable tableName="contract_role"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_contract_role" author="rcharre">
+        <insert tableName="contract_role">
+            <column name="name" value="CONTRACT_GUEST"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="contract_role">
+            <column name="name" value="CONTRACT_USER"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="contract_role">
+            <column name="name" value="CONTRACT_MANAGER"/>
+            <column name="is_hidden" valueBoolean="false"/>
+        </insert>
+        <insert tableName="contract_role">
+            <column name="name" value="CONTRACT_OWNER"/>
+            <column name="is_hidden" valueBoolean="true"/>
+        </insert>
+        <insert tableName="contract_role">
+            <column name="name" value="CONTRACT_VISITOR"/>
+            <column name="is_hidden" valueBoolean="true"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM contract_role;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_contract_authority" author="rcharre">
+        <createTable tableName="contract_authority">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="contract_authority" columnNames="id" constraintName="pk_contract_authority"/>
+        <addUniqueConstraint tableName="contract_authority" columnNames="name"/>
+        <rollback>
+            <dropTable tableName="contract_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_contract_authority_basicauthorities" author="rcharre">
+        <insert tableName="contract_authority">
+            <column name="name" value="SHOW_CONTRACT"/>
+        </insert>
+        <insert tableName="contract_authority">
+            <column name="name" value="CREATE_PROJECT"/>
+        </insert>
+
+        <insert tableName="contract_authority">
+            <column name="name" value="INVITE_MEMBER"/>
+        </insert>
+        <insert tableName="contract_authority">
+            <column name="name" value="PROMOTE_MEMBER"/>
+        </insert>
+        <insert tableName="contract_authority">
+            <column name="name" value="REMOVE_MEMBER"/>
+        </insert>
+
+        <rollback>
+            <sql>
+                DELETE FROM contract_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_contract_role_contract_authority" author="rcharre">
+        <createTable tableName="contract_role_contract_authority">
+            <column name="contract_role_id" type="bigint"/>
+            <column name="contract_authority_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="contract_role_contract_authority"
+                       columnNames="contract_role_id,contract_authority_id"
+                       constraintName="pk_contract_role_contract_authority"/>
+        <addForeignKeyConstraint baseTableName="contract_role_contract_authority"
+                                 baseColumnNames="contract_role_id"
+                                 constraintName="fk_contract_role_contract_authority_contract_role_id__contract_role_id"
+                                 referencedTableName="contract_role"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="contract_role_contract_authority"
+                                 baseColumnNames="contract_authority_id"
+                                 constraintName="fk_contract_role_contract_authority_contract_authority_id__contract_authority_id"
+                                 referencedTableName="contract_authority"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="contract_role_contract_authority"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_contract_role_contract_authority_user" author="rcharre">
+        <sql>
+            INSERT INTO contract_role_contract_authority(contract_role_id, contract_authority_id) VALUES
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_OWNER'), (SELECT id FROM contract_authority WHERE name = 'SHOW_CONTRACT')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_OWNER'), (SELECT id FROM contract_authority WHERE name = 'INVITE_MEMBER')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_OWNER'), (SELECT id FROM contract_authority WHERE name = 'REMOVE_MEMBER')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_OWNER'), (SELECT id FROM contract_authority WHERE name = 'CREATE_PROJECT')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_OWNER'), (SELECT id FROM contract_authority WHERE name = 'PROMOTE_MEMBER')),
+
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_MANAGER'), (SELECT id FROM contract_authority WHERE name = 'SHOW_CONTRACT')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_MANAGER'), (SELECT id FROM contract_authority WHERE name = 'INVITE_MEMBER')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_MANAGER'), (SELECT id FROM contract_authority WHERE name = 'REMOVE_MEMBER')),
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_MANAGER'), (SELECT id FROM contract_authority WHERE name = 'CREATE_PROJECT')),
+
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_USER'), (SELECT id FROM contract_authority WHERE name = 'SHOW_CONTRACT')),
+
+            ((SELECT id FROM contract_role WHERE name = 'CONTRACT_GUEST'), (SELECT id FROM contract_authority WHERE name = 'SHOW_CONTRACT'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM contract_role_contract_authority;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_contract" author="rcharre">
+        <createTable tableName="contract">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+            <column name="owner_id" type="bigint"/>
+            <column name="date_start" type="timestamp"/>
+            <column name="date_end" type="timestamp"/>
+            <column name="audit_limit" type="int" defaultValueNumeric="0"/>
+            <column name="project_limit" type="int" defaultValueNumeric="0"/>
+            <column name="restrict_domain" type="boolean" defaultValueBoolean="true"/>
+        </createTable>
+        <addNotNullConstraint tableName="contract" columnName="name"/>
+        <addPrimaryKey tableName="contract" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="contract"
+                                 baseColumnNames="owner_id"
+                                 constraintName="fk_contract_owner_id__app_user_id"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="contract"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_contract_app_user" author="rcharre">
+        <createTable tableName="contract_app_user">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="contract_id" type="bigint"/>
+            <column name="app_user_id" type="bigint"/>
+            <column name="contract_role_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="contract_app_user" columnNames="id"/>
+
+        <addUniqueConstraint tableName="contract_app_user" columnNames="contract_id,app_user_id"/>
+        <addNotNullConstraint tableName="contract_app_user" columnName="contract_role_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="contract_app_user"
+                baseColumnNames="contract_role_id"
+                constraintName="fk_contract_app_user_contract_role_id__contract_role_id"
+                referencedTableName="contract_role"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="contract_app_user"
+                                 baseColumnNames="contract_id"
+                                 constraintName="fk_contract_app_user_contract_id__contract_id"
+                                 referencedTableName="contract"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="contract_app_user"
+                                 baseColumnNames="app_user_id"
+                                 constraintName="fk_contract_app_user_app_user_id__app_user_id"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropTable tableName="contract_app_user"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
