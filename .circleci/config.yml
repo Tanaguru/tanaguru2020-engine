@@ -1,4 +1,4 @@
-version: 2.1
+version: 2
 
 jobs:
   build_backend:
@@ -26,7 +26,7 @@ jobs:
           paths:
             - tanaguru-rest.zip
   workflows:
-    version: 2.1
+    version: 2
     build_and_deploy:
       jobs:
         - build_backend:
