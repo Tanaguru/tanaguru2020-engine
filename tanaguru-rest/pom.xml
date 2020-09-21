@@ -109,7 +109,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <finalName>tanaguru-rest</finalName>
+                            <finalName>tanaguru-rest-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
