@@ -32,7 +32,7 @@ public class AuditLog {
     private String message;
 
     @Column
-    private Date date;
+    private Date date = new Date();
 
     public long getId() {
         return id;
