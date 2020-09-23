@@ -9,6 +9,8 @@ import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.service.TestHierarchyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -19,13 +21,12 @@ import org.springframework.util.StreamUtils;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
 public class TestHierarchyServiceImpl implements TestHierarchyService {
+    private final Logger LOGGER = LoggerFactory.getLogger(TestHierarchyServiceImpl.class);
 
     private final TestHierarchyRepository testHierarchyRepository;
     private final AuditReferenceRepository auditReferenceRepository;
@@ -38,7 +39,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     private ClassPathResource actTestsPath;
 
     @Autowired
-    public TestHierarchyServiceImpl(TestHierarchyRepository testHierarchyRepository, AuditReferenceRepository auditReferenceRepository, TanaguruTestRepository tanaguruTestRepository){
+    public TestHierarchyServiceImpl(TestHierarchyRepository testHierarchyRepository, AuditReferenceRepository auditReferenceRepository, TanaguruTestRepository tanaguruTestRepository) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.auditReferenceRepository = auditReferenceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
@@ -46,26 +47,41 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
 
     @PostConstruct
     public void insertBaseTestHierarchy() throws IOException {
-        if(testHierarchyRepository.count() == 0){
-            Gson gson = new Gson();
-            JsonTestHierarchy wcag = gson.fromJson(
-                    StreamUtils.copyToString(
-                            wcagResource.getInputStream(),
-                            Charset.defaultCharset()),
-                    JsonTestHierarchy.class);
-            TestHierarchy actRef = importTestHierarchy(wcag, null);
+        Gson gson = new Gson();
+        JsonTestHierarchy wcag = gson.fromJson(
+                StreamUtils.copyToString(
+                        wcagResource.getInputStream(),
+                        Charset.defaultCharset()),
+                JsonTestHierarchy.class);
 
+        if (!testHierarchyRepository.findByCodeAndParentIsNull(wcag.getCode()).isPresent()) {
+            LOGGER.info("Create reference " + wcag.getCode());
+            TestHierarchy actRef = importTestHierarchy(wcag, null);
             String actJson = StreamUtils.copyToString(
                     actTestsPath.getInputStream(),
                     Charset.defaultCharset());
 
-            for(JsonTanaguruWebextTest webextTest :  gson.fromJson(actJson, JsonTanaguruWebextTest[].class)){
-                for(String referenceName : webextTest.getRessources().keySet()){
-                    Optional<TestHierarchy> referenceOpt = testHierarchyRepository.findByCodeAndParentIsNull(referenceName);
-                    if(referenceOpt.isPresent()){
-                        for(String ruleCode : webextTest.getRessources().get(referenceName)){
-                            Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceOpt.get());
-                            if(testHierarchyOpt.isPresent()){
+            Map<String, TestHierarchy> referenceByCode = new HashMap<>();
+            referenceByCode.put(actRef.getCode(), actRef);
+
+            for (JsonTanaguruWebextTest webextTest : gson.fromJson(actJson, JsonTanaguruWebextTest[].class)) {
+                for (String referenceName : webextTest.getRessources().keySet()) {
+                    TestHierarchy reference = null;
+                    if (!referenceByCode.containsKey(referenceName)) {
+                        Optional<TestHierarchy> referenceOpt = testHierarchyRepository.findByCodeAndParentIsNull(referenceName);
+                        if (referenceOpt.isPresent()) {
+                            TestHierarchy ref = referenceOpt.get();
+                            referenceByCode.put(ref.getCode(), ref);
+                            reference = ref;
+                        }
+                    } else {
+                        reference = referenceByCode.get(referenceName);
+                    }
+
+                    if (reference != null) {
+                        for (String ruleCode : webextTest.getRessources().get(referenceName)) {
+                            Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceByCode.get(referenceName));
+                            if (testHierarchyOpt.isPresent()) {
                                 TanaguruTest test = new TanaguruTest();
                                 Collection<TestHierarchy> testHierarchies = new ArrayList<>();
                                 testHierarchies.add(testHierarchyOpt.get());
@@ -82,47 +98,46 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                             }
                         }
                     }
-
                 }
             }
         }
     }
 
-    private TestHierarchy importTestHierarchy(JsonTestHierarchy jsonTestHierarchy, TestHierarchy parent){
+    private TestHierarchy importTestHierarchy(JsonTestHierarchy jsonTestHierarchy, TestHierarchy parent) {
         TestHierarchy testHierarchy = new TestHierarchy();
-        testHierarchy.setName( jsonTestHierarchy.getName());
+        testHierarchy.setName(jsonTestHierarchy.getName());
         testHierarchy.setRank(jsonTestHierarchy.getRank());
         testHierarchy.setUrls(jsonTestHierarchy.getUrls());
         testHierarchy.setCode(jsonTestHierarchy.getCode());
         testHierarchy.setParent(parent);
 
-        if(parent == null){
+        if (parent == null) {
             testHierarchy.setReference(testHierarchy);
-        }else{
+        } else {
             testHierarchy.setReference(parent.getReference());
         }
 
         testHierarchy = testHierarchyRepository.save(testHierarchy);
 
         Collection<TestHierarchy> children = new ArrayList<>();
-        for(JsonTestHierarchy childJson : jsonTestHierarchy.getChildren()){
+        for (JsonTestHierarchy childJson : jsonTestHierarchy.getChildren()) {
             children.add(importTestHierarchy(childJson, testHierarchy));
         }
         testHierarchy.setChildren(children);
         return testHierarchy;
     }
 
-    public void deleteReference(TestHierarchy reference){
-        if(auditReferenceRepository.existsByTestHierarchy(reference)){
+    public void deleteReference(TestHierarchy reference) {
+        if (auditReferenceRepository.existsByTestHierarchy(reference)) {
             testHierarchyRepository.delete(reference);
-        }else{
+        } else {
             tagDeletedWithChild(reference);
         }
     }
 
-    public void tagDeletedWithChild(TestHierarchy testHierarchy){
+    public void tagDeletedWithChild(TestHierarchy testHierarchy) {
         testHierarchy.setDeleted(true);
-        for(TestHierarchy child : testHierarchy.getChildren()){
+        for (TestHierarchy child : testHierarchy.getChildren()) {
             tagDeletedWithChild(child);
         }
         testHierarchyRepository.save(testHierarchy);
