@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +67,7 @@ public class AuditServiceImpl implements AuditService {
         AuditLog auditLog = new AuditLog();
         auditLog.setAudit(audit);
         auditLog.setLevel(level);
+        auditLog.setDate(new Date());
         auditLog.setMessage(message);
         auditLogRepository.save(auditLog);
     }
