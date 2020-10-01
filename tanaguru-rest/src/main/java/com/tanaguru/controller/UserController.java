@@ -113,7 +113,7 @@ public class UserController {
             @ApiResponse(code = 404, message = "User not found")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER) || " +
-            "@tanaguruUserDetailsServiceImpl.getCurrentUser().getId() == #id")
+            "(@tanaguruUserDetailsServiceImpl.getCurrentUser() != null && @tanaguruUserDetailsServiceImpl.getCurrentUser().getId() == #id)")
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     User getUser(@PathVariable long id) {

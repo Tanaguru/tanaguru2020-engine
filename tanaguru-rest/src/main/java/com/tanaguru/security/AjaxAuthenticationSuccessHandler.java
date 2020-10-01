@@ -16,10 +16,6 @@ public class AjaxAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication)
             throws IOException, ServletException {
-        String cookie = response.getHeader("Set-Cookie");
-        if(cookie != null){
-            response.setHeader("Set-Cookie", cookie + "; HttpOnly; SameSite=None");
-        }
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }
