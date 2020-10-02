@@ -46,6 +46,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     }
 
     @PostConstruct
+    @Transactional
     public void insertBaseTestHierarchy() throws IOException {
         Gson gson = new Gson();
         JsonTestHierarchy wcag = gson.fromJson(
@@ -65,6 +66,16 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
             referenceByCode.put(actRef.getCode(), actRef);
 
             for (JsonTanaguruWebextTest webextTest : gson.fromJson(actJson, JsonTanaguruWebextTest[].class)) {
+                TanaguruTest test = new TanaguruTest();
+                test.setName(webextTest.getName());
+                test.setQuery(webextTest.getQuery());
+                test.setExpectedNbElements(webextTest.getExpectedNbElements());
+                test.setTags(webextTest.getTags());
+                test.setAnalyzeElements(webextTest.getAnalyzeElements());
+                test.setDescription(webextTest.getDescription());
+                test.setFilter(webextTest.getFilter());
+                test = tanaguruTestRepository.save(test);
+
                 for (String referenceName : webextTest.getRessources().keySet()) {
                     TestHierarchy reference = null;
                     if (!referenceByCode.containsKey(referenceName)) {
@@ -82,19 +93,11 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                         for (String ruleCode : webextTest.getRessources().get(referenceName)) {
                             Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceByCode.get(referenceName));
                             if (testHierarchyOpt.isPresent()) {
-                                TanaguruTest test = new TanaguruTest();
-                                Collection<TestHierarchy> testHierarchies = new ArrayList<>();
-                                testHierarchies.add(testHierarchyOpt.get());
-                                test.setTestHierarchies(testHierarchies);
-
-                                test.setName(webextTest.getName());
-                                test.setQuery(webextTest.getQuery());
-                                test.setExpectedNbElements(webextTest.getExpectedNbElements());
-                                test.setTags(webextTest.getTags());
-                                test.setAnalyzeElements(webextTest.getAnalyzeElements());
-                                test.setDescription(webextTest.getDescription());
-                                test.setFilter(webextTest.getFilter());
-                                tanaguruTestRepository.save(test);
+                                TestHierarchy testHierarchy = testHierarchyOpt.get();
+                                Collection<TanaguruTest> tests = new ArrayList<>(testHierarchy.getTanaguruTests());
+                                tests.add(test);
+                                testHierarchy.setTanaguruTests(tests);
+                                testHierarchyRepository.save(testHierarchy);
                             }
                         }
                     }

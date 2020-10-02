@@ -40,7 +40,7 @@ public class TestHierarchy implements Serializable {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE)
     private Collection<TestHierarchy> children;
 
-    @ManyToMany(targetEntity = TanaguruTest.class, cascade = CascadeType.MERGE)
+    @ManyToMany(targetEntity = TanaguruTest.class, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "test_hierarchy_tanaguru_test",
             joinColumns = {@JoinColumn(name = "test_hierarchy_id")},
