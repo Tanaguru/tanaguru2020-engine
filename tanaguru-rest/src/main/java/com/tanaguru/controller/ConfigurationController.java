@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/config")
 public class ConfigurationController {
-    @Value("${server.servlet.session.timeout}")
+    @Value("${session.duration}")
     private long sessionDuration;
 
     @ApiOperation(

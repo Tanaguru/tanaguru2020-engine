@@ -4,6 +4,7 @@ import com.tanaguru.domain.dto.ErrorDTO;
 import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.domain.exception.InvalidEntityException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +38,13 @@ public class TanaguruControllerAdvice {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     ErrorDTO entityForbidden(ForbiddenException ex) {
+        return new ErrorDTO(ex.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ErrorDTO badCredential(BadCredentialsException ex) {
         return new ErrorDTO(ex.getMessage());
     }
 
