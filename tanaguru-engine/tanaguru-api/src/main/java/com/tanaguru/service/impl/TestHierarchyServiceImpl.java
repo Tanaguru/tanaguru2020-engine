@@ -65,6 +65,16 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
             referenceByCode.put(actRef.getCode(), actRef);
 
             for (JsonTanaguruWebextTest webextTest : gson.fromJson(actJson, JsonTanaguruWebextTest[].class)) {
+                TanaguruTest test = new TanaguruTest();
+                test.setName(webextTest.getName());
+                test.setQuery(webextTest.getQuery());
+                test.setExpectedNbElements(webextTest.getExpectedNbElements());
+                test.setTags(webextTest.getTags());
+                test.setAnalyzeElements(webextTest.getAnalyzeElements());
+                test.setDescription(webextTest.getDescription());
+                test.setFilter(webextTest.getFilter());
+                test = tanaguruTestRepository.save(test);
+
                 for (String referenceName : webextTest.getRessources().keySet()) {
                     TestHierarchy reference = null;
                     if (!referenceByCode.containsKey(referenceName)) {
@@ -79,16 +89,6 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                     }
 
                     if (reference != null) {
-                        TanaguruTest test = new TanaguruTest();
-                        test.setName(webextTest.getName());
-                        test.setQuery(webextTest.getQuery());
-                        test.setExpectedNbElements(webextTest.getExpectedNbElements());
-                        test.setTags(webextTest.getTags());
-                        test.setAnalyzeElements(webextTest.getAnalyzeElements());
-                        test.setDescription(webextTest.getDescription());
-                        test.setFilter(webextTest.getFilter());
-                        test = tanaguruTestRepository.save(test);
-
                         for (String ruleCode : webextTest.getRessources().get(referenceName)) {
                             Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceByCode.get(referenceName));
                             if (testHierarchyOpt.isPresent()) {
