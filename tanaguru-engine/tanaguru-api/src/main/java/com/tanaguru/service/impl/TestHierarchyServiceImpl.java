@@ -46,6 +46,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     }
 
     @PostConstruct
+    @Transactional
     public void insertBaseTestHierarchy() throws IOException {
         Gson gson = new Gson();
         JsonTestHierarchy wcag = gson.fromJson(
@@ -93,8 +94,9 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                             Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceByCode.get(referenceName));
                             if (testHierarchyOpt.isPresent()) {
                                 TestHierarchy testHierarchy = testHierarchyOpt.get();
-                                Collection<TanaguruTest> tests = testHierarchy.getTanaguruTests();
+                                Collection<TanaguruTest> tests = new ArrayList<>(testHierarchy.getTanaguruTests());
                                 tests.add(test);
+                                testHierarchy.setTanaguruTests(tests);
                                 testHierarchyRepository.save(testHierarchy);
                             }
                         }
