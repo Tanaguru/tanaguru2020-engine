@@ -79,22 +79,23 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                     }
 
                     if (reference != null) {
+                        TanaguruTest test = new TanaguruTest();
+                        test.setName(webextTest.getName());
+                        test.setQuery(webextTest.getQuery());
+                        test.setExpectedNbElements(webextTest.getExpectedNbElements());
+                        test.setTags(webextTest.getTags());
+                        test.setAnalyzeElements(webextTest.getAnalyzeElements());
+                        test.setDescription(webextTest.getDescription());
+                        test.setFilter(webextTest.getFilter());
+                        test = tanaguruTestRepository.save(test);
+
                         for (String ruleCode : webextTest.getRessources().get(referenceName)) {
                             Optional<TestHierarchy> testHierarchyOpt = testHierarchyRepository.findByCodeAndReference(ruleCode, referenceByCode.get(referenceName));
                             if (testHierarchyOpt.isPresent()) {
-                                TanaguruTest test = new TanaguruTest();
-                                Collection<TestHierarchy> testHierarchies = new ArrayList<>();
-                                testHierarchies.add(testHierarchyOpt.get());
-                                test.setTestHierarchies(testHierarchies);
-
-                                test.setName(webextTest.getName());
-                                test.setQuery(webextTest.getQuery());
-                                test.setExpectedNbElements(webextTest.getExpectedNbElements());
-                                test.setTags(webextTest.getTags());
-                                test.setAnalyzeElements(webextTest.getAnalyzeElements());
-                                test.setDescription(webextTest.getDescription());
-                                test.setFilter(webextTest.getFilter());
-                                tanaguruTestRepository.save(test);
+                                TestHierarchy testHierarchy = testHierarchyOpt.get();
+                                Collection<TanaguruTest> tests = testHierarchy.getTanaguruTests();
+                                tests.add(test);
+                                testHierarchyRepository.save(testHierarchy);
                             }
                         }
                     }
