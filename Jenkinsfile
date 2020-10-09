@@ -6,12 +6,16 @@ pipeline {
 	  	docker 'maven'
 	  }
 	  steps {
-	    sh 'ls -la'
 	    sh 'mvn clean install -X'
 		sh '''
-			REST_VERSION=$(find /tanaguru-rest/target/tanaguru-rest-*.tar.gz | awk -F"-" '{ print $3 }')
+			REST_VERSION=$(mvn -q \
+                           -Dexec.executable=echo \
+                           -Dexec.args='${project.version}' \
+                           --non-recursive \
+                           exec:exec)
 			echo ${REST_VERSION} > version.txt
 		'''
+		sh 'ls -la /tanaguru-rest/target/'
 		stash name: 'tanaguru2020-rest', includes: '/tanaguru-rest/target/tanaguru-rest-*.tar.gz'
 		stash name: 'version', includes: 'version.txt'
 	  }
