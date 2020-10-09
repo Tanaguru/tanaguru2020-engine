@@ -29,7 +29,7 @@ pipeline {
 		  }
 		  steps {
 			git(url: 'https://github.com/Tanaguru/tanaguru2020-docker', branch: 'master', credentialsId: 'github-rcharre')
-			unstash 'tanaguru2020-webapp'
+			unstash 'tanaguru2020-rest'
 			unstash 'version'
 			sh '''
 				REST_VERSION=$(cat version.txt)
