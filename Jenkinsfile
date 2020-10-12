@@ -33,7 +33,7 @@ pipeline {
 			unstash 'version'
 			sh '''
 				REST_VERSION=$(cat version.txt)
-				mv tanaguru-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
+				mv tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
 				docker build -t tanaguru2020-rest:dev --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz --build-arg FIREFOX_ARCHIVE_PATH=http://download-origin.cdn.mozilla.net/pub/firefox/releases/69.0/linux-x86_64/en-US/firefox-69.0.tar.bz2 --build-arg GECKODRIVER_ARCHIVE_PATH=https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz ./tanaguru2020-rest/image/
 			'''
 			sh 'docker image prune -f'
