@@ -15,7 +15,7 @@ pipeline {
                            exec:exec)
 			echo ${REST_VERSION} > version.txt
 		'''
-		stash name: 'tanaguru2020-rest', includes: 'tanaguru2020-rest/target/tanaguru-rest-*.tar.gz'
+		stash name: 'tanaguru2020-rest', includes: 'tanaguru-rest/target/tanaguru2020-rest-*.tar.gz'
 		stash name: 'version', includes: 'version.txt'
 	  }
 	}
