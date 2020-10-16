@@ -122,7 +122,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     protected abstract void runImpl();
 
 
-    public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {
+    public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {   //passage parametre webdriver
         int firstHash = url.indexOf('#');
         int lastSlash = url.lastIndexOf('/');
 
@@ -131,7 +131,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             url = url.substring(0, firstHash);
         }
 
-        boolean alreadyVisited = visitedUrl.contains(url);
+        boolean alreadyVisited = visitedUrl.contains(url);    //gérer les pages visités en fct du webdriver : Map<WebDriver, url associée>
 
         if (alreadyVisited) {
             if (auditIfAlreadyVisited) {
@@ -272,7 +272,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.stop = stop;
     }
 
-    public void webDriverGet(String url) {
+    public void webDriverGet(String url) {    //passer en parametre le web driver puis faire la BOUCLE sur les webDrivers + dans les messages de logs afficher le webdriver en question
         try {
             tanaguruDriver.get(url);
         } catch (TimeoutException e) {
@@ -298,4 +298,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     public RemoteWebDriver getDriver(){
         return tanaguruDriver;
     }
+    
+    
 }

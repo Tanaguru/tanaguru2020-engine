@@ -234,7 +234,13 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                         int webdriverWidth = Integer.parseInt(resolution);
                         return webdriverWidth <= MAX_WEBDRIVER_WIDTH && webdriverWidth > 0;
                     });
-                break;
+                    break;
+                
+                case WEBDRIVER_BROWSER:
+                	//verif a la fois que le nom du navigateur est dans l'enum + dans le fichier de paramettre audit-runner
+                    String browser = value;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals);
+                    break;
 
                 case CRAWLER_MAX_DOCUMENT:
                     long crawlerMaxDocument = Long.parseLong(value);
