@@ -17,6 +17,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -71,6 +72,9 @@ public class AuditParameterServiceImpl implements AuditParameterService {
     private final ResourceRepository resourceRepository;
 
     private UrlValidator urlValidator;
+    
+    @Value("${auditrunner.active}")
+    private String browserActive;
 
     @Autowired
     public AuditParameterServiceImpl(
@@ -237,9 +241,8 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                     break;
                 
                 case WEBDRIVER_BROWSER:
-                	//verif a la fois que le nom du navigateur est dans l'enum + dans le fichier de paramettre audit-runner
                     String browser = value;
-                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals);
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browser.toLowerCase().equals(browserActive.toLowerCase());
                     break;
 
                 case CRAWLER_MAX_DOCUMENT:

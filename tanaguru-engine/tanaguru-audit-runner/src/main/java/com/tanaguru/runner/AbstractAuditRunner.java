@@ -272,7 +272,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.stop = stop;
     }
 
-    public void webDriverGet(String url) {    //passer en parametre le web driver puis faire la BOUCLE sur les webDrivers + dans les messages de logs afficher le webdriver en question
+    public void webDriverGet(String url) {
         try {
             tanaguruDriver.get(url);
         } catch (TimeoutException e) {

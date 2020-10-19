@@ -14,23 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
 import com.tanaguru.domain.constant.BrowserName;
-import com.tanaguru.domain.constant.EAuditLogLevel;
-import com.tanaguru.domain.constant.EAuditParameter;
-import com.tanaguru.domain.entity.audit.Resource;
-import com.tanaguru.domain.entity.audit.Scenario;
-
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityNotFoundException;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -87,19 +74,19 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     }
 
     @Override
-    public Optional<RemoteWebDriver> create(BrowserName browserName) {   //retourner une liste de remotewebdriver
+    public Optional<RemoteWebDriver> create(BrowserName browserName) {
     	Optional<RemoteWebDriver> result = Optional.empty();
     	RemoteWebDriver remoteWebDriver = null;
     	switch (browserName) {
         case CHROME:
-        	LOGGER.info("Chrome Browser selected");        	
         	ChromeOptions chromeOptions = new ChromeOptions();
-        	
+
         	chromeOptions.setBinary(chromeBinaryPath);
-        	//chromeOptions.setHeadless(true);
         	chromeOptions.addArguments("--headless");
         	setChromePreferences(chromeOptions);
         	remoteWebDriver = new ChromeDriver(chromeOptions);
+        	remoteWebDriver.manage().deleteAllCookies();
+        	
         	result = Optional.ofNullable(remoteWebDriver);
             break;
 
@@ -111,6 +98,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
             firefoxOptions.setHeadless(true);
             firefoxOptions.setProfile(firefoxProfile);
             remoteWebDriver = new FirefoxDriver(firefoxOptions);
+            remoteWebDriver.manage().deleteAllCookies();
 
             result = Optional.ofNullable(remoteWebDriver);
             break;
@@ -137,6 +125,9 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--safebrowsing-disable-auto-update");
         options.addArguments("--disable-component-update");
         options.addArguments("--ignore-certificate-errors");
+        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        chromePrefs.put("profile.block_third_party_cookies", true);
+        options.setExperimentalOption("prefs", chromePrefs);
         setUpChromeProxy(options);
     }
     

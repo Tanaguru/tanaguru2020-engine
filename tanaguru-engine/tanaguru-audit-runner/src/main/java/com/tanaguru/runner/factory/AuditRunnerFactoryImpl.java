@@ -77,7 +77,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String basicAuthLogin = parameterStringMap.get(EAuditParameter.BASICAUTH_LOGIN).getValue();
         String basicAuthPassword = parameterStringMap.get(EAuditParameter.BASICAUTH_PASSWORD).getValue();
         
-        //transformer par une enumération
         String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
         BrowserName browserName = BrowserName.CHROME;
         if(webdriverBrowser.equals("chrome")) {
