@@ -1,5 +1,6 @@
 package com.tanaguru;
 
+import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.factory.AuditFactory;
@@ -12,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -30,6 +33,22 @@ public class TanaguruCLI implements CommandLineRunner {
     private static final String SITE_OPTION_NAME = "site";
     private static final String SCENARIO_OPTION_NAME = "scenario";
     private static final String FILE_OPTION_NAME = "file";
+
+    private static final String WAIT_TIME = "waitTime";
+    private static final String BASICAUTH_URL = "basicAuthUrl";
+    private static final String BASICAUTH_LOGIN = "basicAuthLogin";
+    private static final String BASICAUTH_PASSWORD = "basicAuthPassword";
+    
+    private static final String ENABLE_SCREENSHOT = "enableScreenshot";
+
+    private static final String CRAWLER_MAX_DEPTH = "crawlerMaxDepth";
+    private static final String CRAWLER_MAX_DURATION = "crawlerMaxDuration";
+    private static final String CRAWLER_MAX_DOCUMENT = "crawlerMaxDocument";
+    private static final String CRAWLER_EXCLUSION_REGEX = "crawlerExclusionRegex";
+    private static final String CRAWLER_INCLUSION_REGEX = "crawlerInclusionRegex";
+
+    private static final String WEBDRIVER_RESOLUTIONS = "webdriverResolution";
+    private static final String WEBDRIVER_BROWSER = "webdriverBrowser";
 
     @Autowired
     public TanaguruCLI(AuditFactory auditFactory, AuditRunnerService auditRunnerService) {
@@ -71,9 +90,9 @@ public class TanaguruCLI implements CommandLineRunner {
                 } else {
                     throw new IllegalStateException("No audit type given");
                 }
+                auditRunnerService.runAudit(audit);
             }
-
-            auditRunnerService.runAudit(audit);
+            
         } catch (ParseException e) {
             LOGGER.error(e.getMessage());
             formatter.printHelp(TANAGURU_HELP_CMD_SYNTAX, options);
@@ -91,30 +110,46 @@ public class TanaguruCLI implements CommandLineRunner {
 
         Option siteOption = new Option(SITE_OPTION_NAME, SITE_OPTION_NAME, true, "Site seeds");
         siteOption.setArgs(Option.UNLIMITED_VALUES);
-        siteOption.setValueSeparator(',');
+        siteOption.setValueSeparator(';');
         auditOptionGroup.addOption(siteOption);
 
         Option pageOption = new Option(PAGE_OPTION_NAME, PAGE_OPTION_NAME, true, "Pages urls");
         pageOption.setArgs(Option.UNLIMITED_VALUES);
-        pageOption.setValueSeparator(',');
+        pageOption.setValueSeparator(';');
         auditOptionGroup.addOption(pageOption);
 
         auditOptionGroup.addOption(new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, true, "Selenese scenario path"));
+        auditOptionGroup.addOption(new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, true, "File path"));
+        auditOptionGroup.setRequired(true);
         options.addOptionGroup(auditOptionGroup);
+        
+        options.addOption(WAIT_TIME,WAIT_TIME,true,"Wait time (for JS frameworks like Angular, React...) ");
+        options.addOption(BASICAUTH_URL,BASICAUTH_URL,true,"Basic auth url");
+        options.addOption(BASICAUTH_LOGIN,BASICAUTH_LOGIN,true, "Basic auth login");
+        options.addOption(BASICAUTH_PASSWORD,BASICAUTH_PASSWORD, true, "Basic auth password");
+        options.addOption(ENABLE_SCREENSHOT, "Enable screenshots for the audit");
+        options.addOption(CRAWLER_MAX_DEPTH,CRAWLER_MAX_DEPTH,true, "Crawler max depth");
+        options.addOption(CRAWLER_MAX_DURATION,CRAWLER_MAX_DURATION,true, "Crawler max duration");
+        options.addOption(CRAWLER_MAX_DOCUMENT,CRAWLER_MAX_DOCUMENT,true, "Crawler maw document");
+        options.addOption(CRAWLER_EXCLUSION_REGEX,CRAWLER_EXCLUSION_REGEX,true, "Crawler exclusion regex");
+        options.addOption(CRAWLER_INCLUSION_REGEX,CRAWLER_INCLUSION_REGEX,true, "Crawler inclusion regex");
+        options.addOption(WEBDRIVER_RESOLUTIONS,WEBDRIVER_RESOLUTIONS,true, "Webdriver resolutions");
+        options.addOption(WEBDRIVER_BROWSER,WEBDRIVER_BROWSER,true, "Webdriver browser");
+        
         return options;
     }
 
     private Optional<Audit> cliSite(CommandLine commandLine) {
-        //Audit audit = auditFactory.createAudit("", new HashMap<>(), EAuditType.SITE, false, null);
-        String[] seedsArgs = commandLine.getOptionValues(SITE_OPTION_NAME);
-        return Optional.empty();
+    	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,EAuditType.SITE);
+        Optional<Audit> audit = Optional.ofNullable(auditFactory.createAudit("", auditParameters, EAuditType.SITE, false, null, new ArrayList<>(),null));
+        return audit;
     }
 
     private Optional<Audit> cliPage(CommandLine commandLine) {
-        //Audit audit = auditFactory.createAudit("", new HashMap<>(), EAuditType.PAGE, false, null);
-        String[] urlsArgs = commandLine.getOptionValues(PAGE_OPTION_NAME);
-        return Optional.empty();
-       // return auditRequestFactory.createAuditPageRequest(audit, List.of(urlsArgs));
+    	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,EAuditType.PAGE);
+        Optional<Audit> audit = Optional.ofNullable(auditFactory.createAudit("", auditParameters, EAuditType.PAGE, false, null, new ArrayList<>(),null));
+        return audit;
+       //return auditRequestFactory.createAuditPageRequest(audit, List.of(urlsArgs));
     }
 
     private Optional<Audit> cliScenario(CommandLine commandLine) throws IOException {
@@ -143,5 +178,90 @@ public class TanaguruCLI implements CommandLineRunner {
             LOGGER.error("File : {} could not be find", path);
         }
         return auditUploadRequestOptional;
+    }
+    
+    
+    /**
+     * Filled the hashmap of audit parameters with the correct args from the user command line
+     * @param commandLine commandLine wich contains the args
+     * @param auditType audit type selected
+     * @return hashmap<EAuditParameter,String> filled with the args corresponding
+     */
+    private HashMap<EAuditParameter, String> fillAuditParameters(CommandLine commandLine, EAuditType auditType){
+    	HashMap<EAuditParameter, String> auditParameters = new HashMap<EAuditParameter, String>();
+    	switch(auditType) {
+    	case PAGE:
+    		String[] urlsArgs = commandLine.getOptionValues(PAGE_OPTION_NAME);
+    		if(urlsArgs != null){
+	    		String urls = "";
+	        	for(String url : urlsArgs) {
+	        		urls = url + ";";
+	        	}
+	        	auditParameters.put(EAuditParameter.PAGE_URLS, urls);
+    		}		 		
+    	case SITE:
+    		String[] seedsArgs = commandLine.getOptionValues(SITE_OPTION_NAME);
+    		if(seedsArgs != null){
+	    		String urls = "";
+	        	for(String url : seedsArgs) {
+	        		urls = url + ";";
+	        	}
+	        	auditParameters.put(EAuditParameter.SITE_SEEDS, urls);
+    		}
+    		String crawlerMaxDepth = commandLine.getOptionValue(CRAWLER_MAX_DEPTH);
+    		if(crawlerMaxDepth != null) {
+    			auditParameters.put(EAuditParameter.CRAWLER_MAX_DEPTH, crawlerMaxDepth);
+    		}
+    		String crawlerMaxDuration = commandLine.getOptionValue(CRAWLER_MAX_DURATION);
+    		if(crawlerMaxDuration != null) {
+    			auditParameters.put(EAuditParameter.CRAWLER_MAX_DURATION, crawlerMaxDuration);
+    		}
+    		String crawlerMaxDocument = commandLine.getOptionValue(CRAWLER_MAX_DOCUMENT);
+    		if(crawlerMaxDocument != null) {
+    			auditParameters.put(EAuditParameter.CRAWLER_MAX_DOCUMENT, crawlerMaxDocument);
+    		}
+    		String crawlerExclusionRegex = commandLine.getOptionValue(CRAWLER_EXCLUSION_REGEX);
+    		if(crawlerExclusionRegex != null) {
+    			auditParameters.put(EAuditParameter.CRAWLER_EXCLUSION_REGEX, crawlerExclusionRegex);
+    		}
+    		String crawlerInclusionRegex = commandLine.getOptionValue(CRAWLER_INCLUSION_REGEX);
+    		if(crawlerInclusionRegex != null) {
+    			auditParameters.put(EAuditParameter.CRAWLER_INCLUSION_REGEX, crawlerInclusionRegex);
+    		}
+    	case SCENARIO:
+    		
+    	case UPLOAD:
+    		
+    		
+    	}
+    	String waitTime = commandLine.getOptionValue(WAIT_TIME);
+		if(waitTime != null) {
+			auditParameters.put(EAuditParameter.WAIT_TIME, waitTime);
+		}
+		String login = commandLine.getOptionValue(BASICAUTH_LOGIN);
+		if(login != null) {
+			auditParameters.put(EAuditParameter.BASICAUTH_LOGIN, login);
+		}
+		//password : a voir niveau sécurité, mieux comprendre ici si on doit faire ça
+		String password = commandLine.getOptionValue(BASICAUTH_PASSWORD);
+		if(login != null) {
+			auditParameters.put(EAuditParameter.BASICAUTH_PASSWORD, password);
+		}
+		String basicAuthUrl = commandLine.getOptionValue(BASICAUTH_URL);
+		if(basicAuthUrl != null) {
+			auditParameters.put(EAuditParameter.BASICAUTH_URL, basicAuthUrl);
+		}
+		String webdriverResolutions = commandLine.getOptionValue(WEBDRIVER_RESOLUTIONS);
+		if(webdriverResolutions != null) {
+			auditParameters.put(EAuditParameter.WEBDRIVER_RESOLUTIONS, webdriverResolutions);
+		}
+		String webdriverBrowser = commandLine.getOptionValue(WEBDRIVER_BROWSER);
+		if(webdriverBrowser != null) {
+			auditParameters.put(EAuditParameter.WEBDRIVER_BROWSER, webdriverBrowser);
+		}
+		if(commandLine.hasOption(ENABLE_SCREENSHOT)) {
+			auditParameters.put(EAuditParameter.ENABLE_SCREENSHOT, "True");
+		}  	
+    	return auditParameters;
     }
 }
