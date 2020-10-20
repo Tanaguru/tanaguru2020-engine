@@ -98,7 +98,7 @@ pipeline {
             --label "traefik.enable=true" \
             --label "traefik.frontend.redirect.entryPoint=secure" \
             --label "traefik.http.routers.tanaguru-rest-dev.entrypoints=secure" \
-            --label "traefik.http.routers.tanaguru-rest-dev.rule=Host(`devapi.tanaguru.com`)" \
+            --label "traefik.http.routers.tanaguru-rest-dev.rule=Host(\\`devapi.tanaguru.com\\`)" \
             --label "traefik.http.routers.tanaguru-rest-dev.tls=true" \
             --label "traefik.port=9002" \
             --network=web \
