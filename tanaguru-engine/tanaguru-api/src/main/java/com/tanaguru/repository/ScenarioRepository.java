@@ -11,4 +11,5 @@ import java.util.Collection;
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
     Collection<Scenario> findAllByProjectAndIsDeletedIsFalse(Project project);
     Collection<Scenario> findAllByProject_IdAndIsDeletedIsFalse(long projectId);
+    Collection<Scenario> findByIsDeletedIsFalse();
 }

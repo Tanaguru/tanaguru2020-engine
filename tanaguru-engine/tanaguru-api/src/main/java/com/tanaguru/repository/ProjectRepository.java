@@ -14,5 +14,4 @@ import java.util.Collection;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     Collection<Project> findAllByContract(Contract contract);
     
-    Project findByName(String name);
 }

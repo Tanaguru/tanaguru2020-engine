@@ -26,9 +26,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -97,7 +101,10 @@ public class TanaguruCLI implements CommandLineRunner {
             if (commandLine.hasOption("h")) {
                 formatter.printHelp(TANAGURU_HELP_CMD_SYNTAX, options);
             } else {
-            	String auditName = commandLine.getOptionValue(AUDIT_NAME_OPTION_NAME) != null ? commandLine.getOptionValue(AUDIT_NAME_OPTION_NAME) : "";
+            	String pattern = "dd-MM-yyyy HH:mm";
+            	DateFormat df = new SimpleDateFormat(pattern);
+            	Date today = Calendar.getInstance().getTime();
+            	String auditName = commandLine.getOptionValue(AUDIT_NAME_OPTION_NAME) != null ? commandLine.getOptionValue(AUDIT_NAME_OPTION_NAME) : "cli "+df.format(today);
         		boolean privateAudit = commandLine.hasOption(PRIVATE_AUDIT_OPTION_NAME);
                 if (commandLine.hasOption(SITE_OPTION_NAME)) {
                     audit = cliPageOrSite(commandLine, auditName, privateAudit, EAuditType.SITE).orElseThrow(
@@ -125,7 +132,7 @@ public class TanaguruCLI implements CommandLineRunner {
             LOGGER.error(e.getMessage());
             formatter.printHelp(TANAGURU_HELP_CMD_SYNTAX, options);
         } catch (IOException e) {
-            LOGGER.error("Unable to parse scenario, please check syntax");
+            LOGGER.error("Unable to parse file or scenario, please check syntax");
         } catch (IllegalStateException e) {
             LOGGER.error(e.getMessage());
         }
@@ -145,9 +152,16 @@ public class TanaguruCLI implements CommandLineRunner {
         pageOption.setArgs(Option.UNLIMITED_VALUES);
         pageOption.setValueSeparator(';');
         auditOptionGroup.addOption(pageOption);
-
-        auditOptionGroup.addOption(new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, true, "Selenese scenario path"));
-        auditOptionGroup.addOption(new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, true, "File path"));
+        
+        Option scenarioOption = new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, false, "Selenese scenario path (if no scenario path informed : mode select resource in project)");
+        scenarioOption.setOptionalArg(true);
+        scenarioOption.setArgs(1);
+        auditOptionGroup.addOption(scenarioOption);
+        
+        Option fileOption = new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, false, "File path (if no file path informed : mode select resource in project)");
+        fileOption.setOptionalArg(true);
+        fileOption.setArgs(1);
+        auditOptionGroup.addOption(fileOption);
         auditOptionGroup.setRequired(true);
         options.addOptionGroup(auditOptionGroup);
         
@@ -162,7 +176,7 @@ public class TanaguruCLI implements CommandLineRunner {
         
         options.addOption(CRAWLER_MAX_DEPTH_OPTION_NAME,CRAWLER_MAX_DEPTH_OPTION_NAME,true, "Crawler max depth");
         options.addOption(CRAWLER_MAX_DURATION_OPTION_NAME,CRAWLER_MAX_DURATION_OPTION_NAME,true, "Crawler max duration");
-        options.addOption(CRAWLER_MAX_DOCUMENT_OPTION_NAME,CRAWLER_MAX_DOCUMENT_OPTION_NAME,true, "Crawler maw document");
+        options.addOption(CRAWLER_MAX_DOCUMENT_OPTION_NAME,CRAWLER_MAX_DOCUMENT_OPTION_NAME,true, "Crawler max document");
         options.addOption(CRAWLER_EXCLUSION_REGEX_OPTION_NAME,CRAWLER_EXCLUSION_REGEX_OPTION_NAME,true, "Crawler exclusion regex");
         options.addOption(CRAWLER_INCLUSION_REGEX_OPTION_NAME,CRAWLER_INCLUSION_REGEX_OPTION_NAME,true, "Crawler inclusion regex");
         
@@ -173,7 +187,7 @@ public class TanaguruCLI implements CommandLineRunner {
     }
 
     /**
-     * Return an audit configured for PAGE audit or SITE audit depending of type of the parameter
+     * Return an audit configured for PAGE audit or SITE audit depending of parameter type
      * @param commandLine the commandLine of the user with args
      * @param auditName the name of the audit to create
      * @param privateAudit false if the audit is public
@@ -181,22 +195,31 @@ public class TanaguruCLI implements CommandLineRunner {
      * @return audit
      */
     private Optional<Audit> cliPageOrSite(CommandLine commandLine,String auditName, boolean privateAudit, EAuditType auditType) {
+    	Optional<Audit> audit = Optional.empty();
     	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,auditType);
-    	Project project = null;
-    	if(privateAudit) {
-    		showProjects();
-    		String projectName = askDetailsToUser("project name");
-    		project = projectRepository.findByName(projectName);
-    		while(project == null) {
-    			System.out.println("Please enter a correct project's name.");
-    			projectName = askDetailsToUser("project name");
-    			project = projectRepository.findByName(projectName);
-    		}
+    	Optional<Project> project = Optional.empty();
+    	if(projectRepository.count() >0) {
+	    	if(privateAudit) {
+	    		showProjects();
+	    		long projectId = askId("project");
+	    		project = projectRepository.findById(projectId);
+	    		while(project.isEmpty()) {
+	    			System.out.println("Please enter a correct project's id.");
+	    			projectId = askId("project");
+	    			project = projectRepository.findById(projectId);
+	    		}
+	    	}
+    	}else {
+    		LOGGER.info("No project found");
     	}
     	TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1)); //by default use the wcag20 (first line table test_hierarchy)
     	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
     	testsHierarchy.add(main);
-        Optional<Audit> audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project, testsHierarchy,main));
+    	if(project.isEmpty()) {
+    		audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, null, testsHierarchy,main));
+    	}else {
+    		audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
+    	}
         return audit;
     }
 
@@ -212,6 +235,48 @@ public class TanaguruCLI implements CommandLineRunner {
     private Optional<Audit> cliFile(CommandLine commandLine,String auditName, boolean privateAudit, EAuditType auditType) throws IOException {
     	Optional<Audit> audit = Optional.empty();
     	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,auditType);
+    	if(commandLine.getOptionValue(FILE_OPTION_NAME) != null) {
+	    	audit = cliFileWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
+    	}else {
+    		audit = cliFileWithoutPath(commandLine,auditParameters,auditName,auditType);   //The user want to launch an audit on a resource associated with a project
+    	}																				//An audit asociated with a project is private, no need of the param privateAudit (not taken into account)
+
+        return audit;
+    }
+    
+    /**
+     * 
+     * @param commandLine
+     * @param auditName
+     * @param privateAudit
+     * @param auditType
+     * @return
+     * @throws IOException
+     */
+    private Optional<Audit> cliScenario(CommandLine commandLine,String auditName, boolean privateAudit, EAuditType auditType) throws IOException {
+    	Optional<Audit> audit = Optional.empty();
+    	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,auditType);
+    	if(commandLine.getOptionValue(SCENARIO_OPTION_NAME) != null) {
+	    	audit = cliScenarioWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
+    	}else {
+    		audit = cliScenarioWithoutPath(commandLine,auditParameters,auditName,auditType);
+    	}
+        return audit;
+    }
+    
+    
+    /**
+     * 
+     * @param commandLine
+     * @param auditParameters
+     * @param auditName
+     * @param privateAudit
+     * @param auditType
+     * @return
+     * @throws IOException
+     */
+    private Optional<Audit> cliFileWithPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, boolean privateAudit, EAuditType auditType) throws IOException{
+    	Optional<Audit> audit = Optional.empty();
     	String path = commandLine.getOptionValue(FILE_OPTION_NAME);
         File file = new File(path);
         if (file.exists()) {
@@ -219,19 +284,27 @@ public class TanaguruCLI implements CommandLineRunner {
             Project project = null;
             Resource resource = new Resource();
         	if(privateAudit) {
-        		showProjects();
-        		String projectName = askDetailsToUser("project name");
-        		project = projectRepository.findByName(projectName);
-        		while(project == null) {
-        			System.out.println("Please enter a correct project's name.");
-        			projectName = askDetailsToUser("project name");
-        			project = projectRepository.findByName(projectName);
+        		if(projectRepository.count() >0) {
+	        		showProjects();
+	        		long projectId = askId("project");
+	        		if(!projectRepository.findById(projectId).isEmpty()) {
+	        			project = projectRepository.findById(projectId).get();
+	        		}
+	        		while(project == null) {
+	        			System.out.println("Please enter a correct project's id.");
+	        			projectId = askId("project");
+	        			if(!projectRepository.findById(projectId).isEmpty()) {
+	            			project = projectRepository.findById(projectId).get();
+	            		}
+	        		}
+        		}else {
+        			LOGGER.info("No project found - a new one will be created");
         		}
         	}else {
         		project = new Project();
-        		project.setName(askDetailsToUser("new project name"));
+        		project.setName(askName("project"));
         	}
-        	resource.setName(askDetailsToUser("resource file name"));
+        	resource.setName(askName("resource"));
             resource.setContent(fileContent);
             resource.setProject(project);
             Collection<Resource> resources = new ArrayList<>();
@@ -251,17 +324,67 @@ public class TanaguruCLI implements CommandLineRunner {
     }
     
     /**
-     * Return an audit configured for SCENARIO audit 
-     * @param commandLine the commandLine of the user with args
-     * @param auditName the name of the audit to create
-     * @param privateAudit false if the audit is public
-     * @param auditType the type of the audit
-     * @return audit
+     * 
+     * @param commandLine
+     * @param auditParameters
+     * @param auditName
+     * @param privateAudit
+     * @param auditType
+     * @return
      * @throws IOException
      */
-    private Optional<Audit> cliScenario(CommandLine commandLine,String auditName, boolean privateAudit,  EAuditType auditType) throws IOException {
+    private Optional<Audit> cliFileWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, EAuditType auditType) throws IOException{
     	Optional<Audit> audit = Optional.empty();
-    	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,auditType);
+    	Project project = null;
+		Resource resource = null;
+		if(resourceRepository.findByIsDeletedIsFalse().size() > 0) {
+			showProjectsWithResources();
+			long projectId = askId("project");
+			if(!projectRepository.findById(projectId).isEmpty()) {
+				project = projectRepository.findById(projectId).get();
+			}
+			while(project == null) {
+				System.out.println("Please enter a correct project's id.");
+				projectId = askId("project");
+				if(!projectRepository.findById(projectId).isEmpty()) {
+	    			project = projectRepository.findById(projectId).get();
+	    		}
+			}
+			showFilesResource(projectId);
+			long resourceId = askId("resource");
+			if(!resourceRepository.findById(resourceId).isEmpty()) {
+				resource = resourceRepository.findById(resourceId).get();
+			}
+			while(resource == null) {
+				System.out.println("Please enter a correct resource's id.");
+				resourceId = askId("resource");
+				if(!resourceRepository.findById(resourceId).isEmpty()) {
+	    			resource = resourceRepository.findById(resourceId).get();
+	    		}
+			}
+			auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(resource.getId())); 
+			TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
+	    	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
+	    	testsHierarchy.add(main);
+	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, true, project, testsHierarchy,main));
+		}else {
+    		LOGGER.info("No files resources found");
+    	}
+        return audit;
+    }
+    
+    /**
+     * 
+     * @param commandLine
+     * @param auditParameters
+     * @param auditName
+     * @param privateAudit
+     * @param auditType
+     * @return
+     * @throws IOException
+     */
+    private Optional<Audit> cliScenarioWithPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters,String auditName, boolean privateAudit,  EAuditType auditType) throws IOException {
+    	Optional<Audit> audit = Optional.empty();
     	String path = commandLine.getOptionValue(SCENARIO_OPTION_NAME);
         File scenarioFile = new File(path);
         if (scenarioFile.exists()) {
@@ -269,19 +392,23 @@ public class TanaguruCLI implements CommandLineRunner {
             Project project = null;
             Scenario scenario = new Scenario();
         	if(privateAudit) {
-        		showProjects();
-        		String projectName = askDetailsToUser("project name");
-        		project = projectRepository.findByName(projectName);
-        		while(project == null) {
-        			System.out.println("Please enter a correct project's name.");
-        			projectName = askDetailsToUser("project name");
-        			project = projectRepository.findByName(projectName);
+        		if(projectRepository.count() >0) {
+	        		showProjects();
+	        		long projectId = askId("project");
+	        		project = projectRepository.findById(projectId).get();
+	        		while(project == null) {
+	        			System.out.println("Please enter a correct project's id.");
+	        			projectId = askId("project");
+	        			project = projectRepository.findById(projectId).get();
+	        		}
+        		}else {
+        			LOGGER.info("No project found - a new one will be created");
         		}
         	}else {
         		project = new Project();
-        		project.setName(askDetailsToUser("new project name"));
+        		project.setName(askName("project"));
         	}
-        	scenario.setName(askDetailsToUser("resource scenario name"));
+        	scenario.setName(askName("scenario"));
             scenario.setContent(scenarioContent);
             scenario.setProject(project);
             Collection<Scenario> scenarios = new ArrayList<>();
@@ -301,19 +428,89 @@ public class TanaguruCLI implements CommandLineRunner {
     }
     
     /**
-     * Wait an input from the user in the prompt, different of empty string, for the parameter specified in args
-     * @param detailToAsk the parameter to ask
+     * 
+     * @param commandLine
+     * @param auditParameters
+     * @param auditName
+     * @param auditType
+     * @return
+     * @throws IOException
+     */
+    private Optional<Audit> cliScenarioWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, EAuditType auditType) throws IOException{
+    	Optional<Audit> audit = Optional.empty();
+    	Project project = null;
+		Scenario scenario = null;
+		if(scenarioRepository.findByIsDeletedIsFalse().size() > 0) {
+			showProjectsWithScenarios();
+			long projectId = askId("project");
+			if(!projectRepository.findById(projectId).isEmpty()) {
+				project = projectRepository.findById(projectId).get();
+			}
+			while(project == null) {
+				System.out.println("Please enter a correct project's id.");
+				projectId = askId("project");
+				if(!projectRepository.findById(projectId).isEmpty()) {
+	    			project = projectRepository.findById(projectId).get();
+	    		}
+			}
+			showScenarios(projectId);
+			long scenarioId = askId("scenario");
+			if(!scenarioRepository.findById(scenarioId).isEmpty()) {
+				scenario = scenarioRepository.findById(scenarioId).get();
+			}
+			while(scenario == null) {
+				System.out.println("Please enter a correct scenario's id.");
+				scenarioId = askId("scenario");
+				if(!scenarioRepository.findById(scenarioId).isEmpty()) {
+	    			scenario = scenarioRepository.findById(scenarioId).get();
+	    		}
+			}
+			auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId())); 
+			TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
+	    	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
+	    	testsHierarchy.add(main);
+	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, true, project, testsHierarchy,main));
+		}else {
+			LOGGER.info("No scenarios found");
+		}
+        return audit;
+    }
+    
+    /**
+     * Wait an input number from the user, different of -1
      * @return the response of the user
      */
-    private String askDetailsToUser(String detailToAsk) {
+    private long askId(String detail) {
+    	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    	long result = -1;
+    	while(result == -1) {
+    		System.out.print("Please enter the "+detail+" id : ");
+	    	try {
+	    		result = Long.parseLong(reader.readLine());
+	    	} catch (IOException e) {
+	    		LOGGER.error(e.getMessage());
+	    	} catch (RuntimeException e) {
+	            //LOGGER.error("Unable to parse the input value");
+	            System.out.println("Please enter a correct "+detail+"'s id.");
+	        }
+    	}
+    	return result;
+    }
+    
+    /**
+     * Wait an input string from the user, different of empty string
+     * @param the parameter that we want is name
+     * @return the response of the user
+     */
+    private String askName(String detail) {
     	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     	String result = "";
-    	while(result.equals("")) {
-    		System.out.print("Please enter "+detailToAsk+" : ");
+    	while(result == "") {
+    		System.out.print("Please enter the "+detail+" name : ");
 	    	try {
 	    		result = reader.readLine();
 	    	} catch (IOException e) {
-	    		e.printStackTrace();
+	    		LOGGER.error(e.getMessage());
 	    	}
     	}
     	return result;
@@ -323,12 +520,67 @@ public class TanaguruCLI implements CommandLineRunner {
      * Show all the project with their domain
      */
     private void showProjects() {
-    	String projectsAvailable = "Projet disponibles : \n";
+    	String projectsAvailable = "Available projects : \n";
 		for(Project proj : projectRepository.findAll()) {
-			projectsAvailable = "Projet : " +projectsAvailable + proj.getName() + " Domain : "+ proj.getDomain() + "\n";
+			projectsAvailable += "Project ID : "+proj.getId() +" | Project name : " + proj.getName() + " | Domain : "+ proj.getDomain() + "\n";
 		}
 		System.out.println(projectsAvailable);
     }
+    
+    /**
+     * Show all the project containing files
+     */
+    private void showProjectsWithResources() {
+    	String projectsAvailable = "Available projects : \n";
+    	ArrayList<Project> projects = new ArrayList<Project>();
+		for(Resource resource : resourceRepository.findByIsDeletedIsFalse()) {
+			Project project = resource.getProject();
+			if(!projects.contains(project)) {
+				projectsAvailable += "Project ID : "+project.getId() +" | Project name : " + project.getName() + " | Domain : "+ project.getDomain() + "\n";
+			}
+			projects.add(project);
+		}
+		System.out.println(projectsAvailable);
+    }
+    
+    /**
+     * Show all the project containing scenarios
+     */
+    private void showProjectsWithScenarios() {
+    	String projectsAvailable = "Available projects : \n";
+    	ArrayList<Project> projects = new ArrayList<Project>();
+		for(Scenario scenario : scenarioRepository.findByIsDeletedIsFalse()) {
+			Project project = scenario.getProject();
+			if(!projects.contains(project)) {
+				projectsAvailable += "Project ID : "+project.getId() +" | Project name : " + project.getName() + " | Domain : "+ project.getDomain() + "\n";
+			}
+			projects.add(project);
+		}
+		System.out.println(projectsAvailable);
+    }
+    
+    /**
+     * Show all the files resources
+     */
+    private void showFilesResource(Long projectId) {
+    	String projectsAvailable = "Available files : \n";
+		for(Resource resource : resourceRepository.findAllByProject_IdAndIsDeletedIsFalse(projectId)) {
+			projectsAvailable += "Resource ID : "+resource.getId() +" | Resource name : " + resource.getName()+ "\n";
+		}
+		System.out.println(projectsAvailable);
+    }
+    
+    /**
+     * Show all the scenarios 
+     */
+    private void showScenarios(Long projectId) {
+    	String projectsAvailable = "Available scenarios : \n";
+		for(Scenario scenario : scenarioRepository.findAllByProject_IdAndIsDeletedIsFalse(projectId)) {
+			projectsAvailable += "Resource ID : "+scenario.getId() +" | Resource name : " + scenario.getName()+ "\n";
+		}
+		System.out.println(projectsAvailable);
+    }
+    
     
     /**
      * Filled the hashmap of audit parameters with the args from the user command line
@@ -386,7 +638,6 @@ public class TanaguruCLI implements CommandLineRunner {
 		if(login != null) {
 			auditParameters.put(EAuditParameter.BASICAUTH_LOGIN, login);
 		}
-		//password : a voir niveau sécurité, mieux comprendre ici si on doit faire ça
 		String password = commandLine.getOptionValue(BASICAUTH_PASSWORD_OPTION_NAME);
 		if(password != null) {
 			auditParameters.put(EAuditParameter.BASICAUTH_PASSWORD, password);
