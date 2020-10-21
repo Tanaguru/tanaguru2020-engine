@@ -171,7 +171,7 @@ pipeline {
             sh '''
                 REST_VERSION=$(cat version.txt)
                 mkdir -p /html/tanaguru2020-rest/${REST_VERSION}
-                mv -f tanaguru2020-rest.tar.gz /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
+                mv -f tanaguru-rest/target/tanaguru2020-rest-*.tar.gz /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 chown 1000:1000 /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
             '''
         }
