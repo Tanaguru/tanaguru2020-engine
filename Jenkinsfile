@@ -199,7 +199,7 @@ pipeline {
               docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
               docker push registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
 
-              docker tag tanaguru2020-rest:${WEBAPP_VERSION} registry.tanaguru.com/tanaguru2020-rest:latest
+              docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:latest
               docker push registry.tanaguru.com/tanaguru2020-rest:latest
             '''
         }
