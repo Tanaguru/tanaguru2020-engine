@@ -153,12 +153,12 @@ public class TanaguruCLI implements CommandLineRunner {
         pageOption.setValueSeparator(';');
         auditOptionGroup.addOption(pageOption);
         
-        Option scenarioOption = new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, false, "Selenese scenario path (if no scenario path informed : mode select resource in project)");
+        Option scenarioOption = new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, false, "Selenese scenario path (if no scenario path informed : mode select scenario in project)");
         scenarioOption.setOptionalArg(true);
         scenarioOption.setArgs(1);
         auditOptionGroup.addOption(scenarioOption);
         
-        Option fileOption = new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, false, "File path (if no file path informed : mode select resource in project)");
+        Option fileOption = new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, false, "File path (if no file path informed : mode select file in project)");
         fileOption.setOptionalArg(true);
         fileOption.setArgs(1);
         auditOptionGroup.addOption(fileOption);
@@ -198,21 +198,23 @@ public class TanaguruCLI implements CommandLineRunner {
     	Optional<Audit> audit = Optional.empty();
     	HashMap<EAuditParameter, String> auditParameters = fillAuditParameters(commandLine,auditType);
     	Optional<Project> project = Optional.empty();
-    	if(privateAudit) {
-	    	if(projectRepository.count() >0) {
-		    	showProjects();
-		    	long projectId = askId("project");
-		    	project = projectRepository.findById(projectId);
-		    	while(project.isEmpty()) {
-		    		System.out.println("Please enter a correct project's id.");
-		    		projectId = askId("project");
-		    		project = projectRepository.findById(projectId);
-		    	}    	
-	    	}else {
-	    		LOGGER.info("No project found");
-	    	}
-    	}
-    	TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1)); //by default use the wcag20 (first line table test_hierarchy)
+    	if(projectRepository.count() >0) {
+		    showProjects();
+		    String projectId = askStringId("project");
+		    if(!projectId.equals("")) {
+		    	try {
+		    		project = projectRepository.findById(Long.parseLong(projectId));
+		    	}catch(NumberFormatException e) {
+		    		LOGGER.info("Not a number id writed, no project reference used");
+		    	}
+		    }else {
+		    	LOGGER.info("No project reference used");
+		    }
+	    }else {
+	    	LOGGER.info("No project found, no project reference used");
+	    }
+    	long hierarchyId = selectTestHierarchyId();
+    	TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
     	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
     	testsHierarchy.add(main);
     	if(project.isEmpty()) {
@@ -238,9 +240,8 @@ public class TanaguruCLI implements CommandLineRunner {
     	if(commandLine.getOptionValue(FILE_OPTION_NAME) != null) {
 	    	audit = cliFileWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
     	}else {
-    		audit = cliFileWithoutPath(commandLine,auditParameters,auditName,auditType);   //The user want to launch an audit on a resource associated with a project
-    	}																				//An audit asociated with a project is private, no need of the param privateAudit (not taken into account)
-
+    		audit = cliFileWithoutPath(commandLine,auditParameters,auditName,privateAudit,auditType);   //The user want to launch an audit on a resource associated with a project
+    	}																				
         return audit;
     }
     
@@ -259,7 +260,7 @@ public class TanaguruCLI implements CommandLineRunner {
     	if(commandLine.getOptionValue(SCENARIO_OPTION_NAME) != null) {
 	    	audit = cliScenarioWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
     	}else {
-    		audit = cliScenarioWithoutPath(commandLine,auditParameters,auditName,auditType);
+    		audit = cliScenarioWithoutPath(commandLine,auditParameters,auditName,privateAudit,auditType);
     	}
         return audit;
     }
@@ -281,44 +282,28 @@ public class TanaguruCLI implements CommandLineRunner {
         File file = new File(path);
         if (file.exists()) {
             String fileContent = FileHelper.getFileContent(file);
-            Project project = null;
+            Optional<Project> project = Optional.empty();
             Resource resource = new Resource();
-        	if(privateAudit) {
-        		if(projectRepository.count() >0) {
-	        		showProjects();
-	        		long projectId = askId("project");
-	        		if(!projectRepository.findById(projectId).isEmpty()) {
-	        			project = projectRepository.findById(projectId).get();
-	        		}
-	        		while(project == null) {
-	        			System.out.println("Please enter a correct project's id.");
-	        			projectId = askId("project");
-	        			if(!projectRepository.findById(projectId).isEmpty()) {
-	            			project = projectRepository.findById(projectId).get();
-	            		}
-	        		}
-        		}else {
-        			LOGGER.info("No project found - a new one will be created");
-        			project = new Project();
-            		project.setName(askName("project"));
-        		}
-        	}else {
-        		project = new Project();
-        		project.setName(askName("project"));
-        	}
-        	resource.setName(askName("resource"));
-            resource.setContent(fileContent);
-            resource.setProject(project);
-            Collection<Resource> resources = new ArrayList<>();
-            resources.add(resource);
-            project.setResources(resources);
-            projectRepository.save(project);
-            resourceRepository.save(resource);
-            auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(resource.getId()));        
-            TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
-        	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
-        	testsHierarchy.add(main);
-            audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project, testsHierarchy,main));
+            if(projectRepository.count() >0) {
+            	showProjects();
+            	project = selectProject();	    
+    			resource.setName(askName("resource"));
+    		    resource.setContent(fileContent);
+    		    resource.setProject(project.get());
+    		    Collection<Resource> resources = new ArrayList<>();
+    		    resources.add(resource);
+    		    project.get().setResources(resources);
+    		    projectRepository.save(project.get());
+    		    resourceRepository.save(resource);
+    		    auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(resource.getId()));        
+    		    long hierarchyId = selectTestHierarchyId();
+    	    	TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
+    		    ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
+    		    testsHierarchy.add(main);
+    		    audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
+            }else {
+            	LOGGER.info("No project found");
+            }
         } else {
             LOGGER.error("File : {} could not be find", path);
         }
@@ -335,40 +320,30 @@ public class TanaguruCLI implements CommandLineRunner {
      * @return audit
      * @throws IOException
      */
-    private Optional<Audit> cliFileWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, EAuditType auditType) throws IOException{
+    private Optional<Audit> cliFileWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, boolean privateAudit, EAuditType auditType) throws IOException{
     	Optional<Audit> audit = Optional.empty();
-    	Project project = null;
-		Resource resource = null;
+    	Optional<Project> project = Optional.empty();
+		Optional<Resource> resource = Optional.empty();
 		if(resourceRepository.findByIsDeletedIsFalse().size() > 0) {
 			showProjectsWithFileResources();
-			long projectId = askId("project");
-			if(!projectRepository.findById(projectId).isEmpty()) {
-				project = projectRepository.findById(projectId).get();
-			}
-			while(project == null) {
-				System.out.println("Please enter a correct project's id.");
-				projectId = askId("project");
-				if(!projectRepository.findById(projectId).isEmpty()) {
-	    			project = projectRepository.findById(projectId).get();
-	    		}
-			}
-			showFilesResource(projectId);
-			long resourceId = askId("resource");
+			project = selectProject();
+			showFilesResource(project.get().getId());
+			long resourceId = askLongId("resource");
 			if(!resourceRepository.findById(resourceId).isEmpty()) {
-				resource = resourceRepository.findById(resourceId).get();
+				resource = resourceRepository.findById(resourceId);
 			}
-			while(resource == null) {
-				System.out.println("Please enter a correct resource's id.");
-				resourceId = askId("resource");
+			while(resource.isEmpty()) {
+				resourceId = askLongId("resource");
 				if(!resourceRepository.findById(resourceId).isEmpty()) {
-	    			resource = resourceRepository.findById(resourceId).get();
+	    			resource = resourceRepository.findById(resourceId);
 	    		}
 			}
-			auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(resource.getId())); 
-			TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
+			auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(resource.get().getId())); 
+			long hierarchyId = selectTestHierarchyId();
+	    	TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
 	    	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
 	    	testsHierarchy.add(main);
-	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, true, project, testsHierarchy,main));
+	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
 		}else {
     		LOGGER.info("No files resources found");
     	}
@@ -390,41 +365,29 @@ public class TanaguruCLI implements CommandLineRunner {
     	String path = commandLine.getOptionValue(SCENARIO_OPTION_NAME);
         File scenarioFile = new File(path);
         if (scenarioFile.exists()) {
-            String scenarioContent = Base64.getEncoder().encodeToString(FileHelper.getFileContent(scenarioFile).getBytes());
-            Project project = null;
+        	String scenarioContent = Base64.getEncoder().encodeToString(FileHelper.getFileContent(scenarioFile).getBytes());
+            Optional<Project> project = Optional.empty();
             Scenario scenario = new Scenario();
-        	if(privateAudit) {
-        		if(projectRepository.count() >0) {
-	        		showProjects();
-	        		long projectId = askId("project");
-	        		project = projectRepository.findById(projectId).get();
-	        		while(project == null) {
-	        			System.out.println("Please enter a correct project's id.");
-	        			projectId = askId("project");
-	        			project = projectRepository.findById(projectId).get();
-	        		}
-        		}else {
-        			LOGGER.info("No project found - a new one will be created");
-        			project = new Project();
-            		project.setName(askName("project"));
-        		}
-        	}else {
-        		project = new Project();
-        		project.setName(askName("project"));
-        	}
-        	scenario.setName(askName("scenario"));
-            scenario.setContent(scenarioContent);
-            scenario.setProject(project);
-            Collection<Scenario> scenarios = new ArrayList<>();
-            scenarios.add(scenario);
-            project.setScenarios(scenarios);
-            projectRepository.save(project);
-            scenarioRepository.save(scenario);
-            auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId()));        
-            TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
-        	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
-        	testsHierarchy.add(main);
-            audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project, testsHierarchy,main));
+            if(projectRepository.count() >0) {
+            	showProjects();
+            	project = selectProject();
+    			scenario.setName(askName("scenario"));
+    		    scenario.setContent(scenarioContent);
+    		    scenario.setProject(project.get());
+    		    Collection<Scenario> scenarios = new ArrayList<>();
+    		    scenarios.add(scenario);
+    		    project.get().setScenarios(scenarios);
+    		    projectRepository.save(project.get());
+    		    scenarioRepository.save(scenario);
+    		    auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId()));        
+    		    long hierarchyId = selectTestHierarchyId();
+    	    	TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
+    		    ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
+    		    testsHierarchy.add(main);
+    		    audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
+            }else {
+            	LOGGER.info("No project found");
+            }
         } else {
             LOGGER.error("File : {} could not be find", path);
         }
@@ -441,70 +404,81 @@ public class TanaguruCLI implements CommandLineRunner {
      * @return audit
      * @throws IOException
      */
-    private Optional<Audit> cliScenarioWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, EAuditType auditType) throws IOException{
+    private Optional<Audit> cliScenarioWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, boolean privateAudit,EAuditType auditType) throws IOException{
     	Optional<Audit> audit = Optional.empty();
-    	Project project = null;
-		Scenario scenario = null;
+    	Optional<Project> project = Optional.empty();
+		Optional<Scenario> scenario = Optional.empty();
 		if(scenarioRepository.findByIsDeletedIsFalse().size() > 0) {
 			showProjectsWithScenarios();
-			long projectId = askId("project");
-			if(!projectRepository.findById(projectId).isEmpty()) {
-				project = projectRepository.findById(projectId).get();
-			}
-			while(project == null) {
-				System.out.println("Please enter a correct project's id.");
-				projectId = askId("project");
-				if(!projectRepository.findById(projectId).isEmpty()) {
-	    			project = projectRepository.findById(projectId).get();
-	    		}
-			}
-			showScenarios(projectId);
-			long scenarioId = askId("scenario");
+			project = selectProject();
+			showScenarios(project.get().getId());
+			long scenarioId = askLongId("scenario");
 			if(!scenarioRepository.findById(scenarioId).isEmpty()) {
-				scenario = scenarioRepository.findById(scenarioId).get();
+				scenario = scenarioRepository.findById(scenarioId);
 			}
-			while(scenario == null) {
-				System.out.println("Please enter a correct scenario's id.");
-				scenarioId = askId("scenario");
+			while(scenario.isEmpty()) {
+				System.out.println("Please enter a correct resource's id.");
+				scenarioId = askLongId("resource");
 				if(!scenarioRepository.findById(scenarioId).isEmpty()) {
-	    			scenario = scenarioRepository.findById(scenarioId).get();
+	    			scenario = scenarioRepository.findById(scenarioId);
 	    		}
 			}
-			auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId())); 
-			TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(1));
+			auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.get().getId())); 
+			long hierarchyId = selectTestHierarchyId();
+	    	TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
 	    	ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
 	    	testsHierarchy.add(main);
-	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, true, project, testsHierarchy,main));
+	        audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
 		}else {
-			LOGGER.info("No scenarios found");
-		}
+    		LOGGER.info("No files resources found");
+    	}
         return audit;
     }
     
+    
+    
     /**
-     * Return an input number from the user, different of -1
+     * Return an input with id from the user, empty for no project reference
+     * @param detail the description of the "object" we want id
      * @return the response of the user
      */
-    private long askId(String detail) {
+    private String askStringId(String detail) {
+    	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    	String result = "";
+    	System.out.print("Please enter the "+detail+" id (or nothing if you want no project reference ) : ");
+	    try {
+	    	result = reader.readLine();
+	    } catch (IOException e) {
+	    	LOGGER.error(e.getMessage());
+	    } catch (RuntimeException e) {
+	        System.out.println("Please enter a correct "+detail+"'s id.");
+	    }
+    	return result;
+    }
+    
+    /**
+     * Return an input number from the user
+     * @param detail the description of the "object" we want id
+     * @return the response of the user
+     */
+    private long askLongId(String detail) {
     	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     	long result = -1;
-    	while(result == -1) {
-    		System.out.print("Please enter the "+detail+" id : ");
-	    	try {
-	    		result = Long.parseLong(reader.readLine());
-	    	} catch (IOException e) {
-	    		LOGGER.error(e.getMessage());
-	    	} catch (RuntimeException e) {
-	            //LOGGER.error("Unable to parse the input value");
-	            System.out.println("Please enter a correct "+detail+"'s id.");
-	        }
-    	}
+    	System.out.print("Please enter the "+detail+" id : ");
+	    try {
+	    	result = Long.parseLong(reader.readLine());
+	    } catch (IOException e) {
+	    	LOGGER.error(e.getMessage());
+	    } catch (RuntimeException e) {
+	        //LOGGER.error("Unable to parse the input value");
+	        System.out.println("Please enter a correct "+detail+"'s id.");
+	    }
     	return result;
     }
     
     /**
      * Return an input string from the user, different of empty string
-     * @param the parameter that we want is name
+     * @param the the description of the "object" we want name
      * @return the response of the user
      */
     private String askName(String detail) {
@@ -581,11 +555,50 @@ public class TanaguruCLI implements CommandLineRunner {
     private void showScenarios(Long projectId) {
     	String projectsAvailable = "Available scenarios : \n";
 		for(Scenario scenario : scenarioRepository.findAllByProject_IdAndIsDeletedIsFalse(projectId)) {
-			projectsAvailable += "Resource ID : "+scenario.getId() +" | Resource name : " + scenario.getName()+ "\n";
+			projectsAvailable += "Scenario ID : "+scenario.getId() +" | Scenario name : " + scenario.getName()+ "\n";
 		}
 		System.out.println(projectsAvailable);
     }
     
+    /**
+     * Return a project selected by the user with its id
+     * @return
+     */
+    private Optional<Project> selectProject(){
+    	Optional<Project> project = Optional.empty();
+    	long projectId = askLongId("project");
+		if(!projectRepository.findById(projectId).isEmpty()) {
+			project = projectRepository.findById(projectId);
+		}
+		while(project.isEmpty()) {
+			projectId = askLongId("project");
+			if(!projectRepository.findById(projectId).isEmpty()) {
+    			project = projectRepository.findById(projectId);
+    		}
+		}
+		return project;
+    }
+    
+    
+    /**
+     * Return the id of the hierarchy selected by the user
+     * @return
+     */
+    private long selectTestHierarchyId() {
+    	long hierarchyId = 1;
+    	ArrayList<Long> allIdHierarchy = new ArrayList<>();
+    	System.out.println("\nPlease select a repository : ");
+    	Collection<TestHierarchy> testsHierarchy = testHierarchyRepository.findAllByParentIsNullAndIsDeletedIsFalse();
+    	for(TestHierarchy testH : testsHierarchy) {
+    		System.out.println("ID : "+testH.getId()+ " | Name : "+testH.getName());
+    		allIdHierarchy.add(testH.getId());
+    	}
+    	hierarchyId = askLongId("repository");
+    	while(!allIdHierarchy.contains(hierarchyId)) {
+    		hierarchyId = askLongId("repository");
+    	}
+    	return hierarchyId;
+    }
     
     /**
      * Filled the hashmap of audit parameters with the args from the user command line
