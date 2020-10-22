@@ -23,8 +23,9 @@ pipeline {
     stage('Build docker image') {
       when {
         anyOf{
-          branch 'develop';
-          branch 'master';
+          branch 'develop'
+          branch 'master'
+          branch 'rcharre-cicd'
         }
       }
       steps {
@@ -178,14 +179,28 @@ pipeline {
     }
 
     stage('Push image to registry') {
+        environment {
+            REGISTRY_USER = "admin"
+            REGISTRY_PASS = "9x^VTugHEfQ1e7"
+            REGISTRY_HOST = "registry.tanaguru.com"
+        }
         when {
-            branch 'master'
+            branch 'CICD'
         }
         steps {
             unstash 'version'
 
             sh '''
               REST_VERSION=$(cat version.txt)
+
+              docker login \
+              --username="$REGISTRY_USER" \
+              --password="$REGISTRY_PASS" "$REGISTRY_HOST"
+              docker tag tanaguru2020-webapp:${REST_VERSION} registry.tanaguru.com/tanaguru2020-webapp:${REST_VERSION}
+              docker push registry.tanaguru.com/tanaguru2020-webapp:${REST_VERSION}
+
+              docker tag tanaguru2020-webapp:${WEBAPP_VERSION} registry.tanaguru.com/tanaguru2020-webapp:latest
+              docker push registry.tanaguru.com/tanaguru2020-webapp:latest
             '''
         }
     }
