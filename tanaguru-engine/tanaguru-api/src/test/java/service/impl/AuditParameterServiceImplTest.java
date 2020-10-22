@@ -224,6 +224,16 @@ public class AuditParameterServiceImplTest {
     }
 
     @Test
+    public void checkParameterValueIsValid_PageurlsValidUniqueIP() {
+        assertTrue(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.PAGE_URLS, "http://10.200.192.33/", null));
+    }
+
+    @Test
+    public void checkParameterValueIsValid_PageurlsValidUniqueIntra() {
+        assertTrue(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.PAGE_URLS, "http://git-scm.test.intra/", null));
+    }
+
+    @Test
     public void checkParameterValueIsValid_PageurlsInvalidUnique() {
         assertFalse(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.PAGE_URLS, "tanaguru.com", null));
     }
@@ -234,14 +244,11 @@ public class AuditParameterServiceImplTest {
     }
 
     @Test
-    public void checkParameterValueIsValid_PageurlsInvalidMultiple2() {
-        assertFalse(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.PAGE_URLS, "http://longdesc.fr,tanaguru.com", null));
-    }
-
-    @Test
     public void checkParameterValueIsValid_webdriverResolutionsValid() {
         assertTrue(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.WEBDRIVER_RESOLUTIONS, "1920", null));
     }
+
+
 
     @Test
     public void checkParameterValueIsValid_webdriverResolutionsValid2() {
