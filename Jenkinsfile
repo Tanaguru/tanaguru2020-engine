@@ -185,7 +185,7 @@ pipeline {
             REGISTRY_HOST = "registry.tanaguru.com"
         }
         when {
-            branch 'CICD'
+            branch 'rcharre-cicd'
         }
         steps {
             unstash 'version'
