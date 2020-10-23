@@ -204,5 +204,19 @@ pipeline {
             }
         }
     }
+
+    post {
+        failed {
+            slackSend channel: '#jenkins',
+                color: 'danger',
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nMore info at: ${env.BUILD_URL}"
+        }
+
+        success, unstable {
+            slackSend channel: '#jenkins',
+                color: 'good',
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nMore info at: ${env.BUILD_URL}"
+        }
+    }
 }
 
