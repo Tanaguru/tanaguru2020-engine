@@ -54,6 +54,10 @@ public class User implements Serializable {
     @Column(nullable = false)
     @NotNull
     private boolean isEnabled = false;
+    
+    @Column(nullable = false)
+    @NotNull
+    private boolean accountNonLocked = true;
 
     @NotNull
     @Valid
@@ -140,5 +144,13 @@ public class User implements Serializable {
 
     public void setContractAppUsers(Collection<ContractAppUser> contractAppUsers) {
         this.contractAppUsers = contractAppUsers;
+    }
+    
+    public void setAccountNonLocked(boolean accountNonLocked) {
+    	this.accountNonLocked = accountNonLocked;
+    }
+    
+    public boolean isAccountNonLocked() {
+    	return accountNonLocked;
     }
 }

@@ -7,7 +7,6 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -72,8 +71,6 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                     .orElseThrow(IllegalStateException::new));
             return userRepository.save(newUser);
         });
-
-
     }
 
     /**
@@ -93,14 +90,14 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Unable to find the user"));
-
+        
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.isEnabled(),
                 true,
                 true,
-                true,
+                user.isAccountNonLocked(),
                 user.getAppRole().getAuthorities().stream()
                         .map(appAuthority ->
                                 new SimpleGrantedAuthority(appAuthority.getName())
@@ -162,6 +159,6 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                 .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + auditId));
 
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
-
     }
+    
 }

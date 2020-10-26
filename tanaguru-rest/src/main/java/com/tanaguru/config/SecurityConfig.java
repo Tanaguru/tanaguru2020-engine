@@ -1,17 +1,23 @@
 package com.tanaguru.config;
 
+import com.tanaguru.handler.LimitLoginAuthenticationProvider;
 import com.tanaguru.security.*;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
@@ -23,21 +29,26 @@ import javax.inject.Inject;
         prePostEnabled = true,
         securedEnabled = true,
         jsr250Enabled = true)
+@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TanaguruUserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Http401UnauthorizedEntryPoint authenticationEntryPoint;
     private final JwtRequestFilter jwtRequestFilter;
-
+	private final LimitLoginAuthenticationProvider limitLoginAuthenticationProvider;
+	
     @Autowired
     public SecurityConfig(
             TanaguruUserDetailsService userDetailsService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            Http401UnauthorizedEntryPoint authenticationEntryPoint, JwtRequestFilter jwtRequestFilter) {
+            Http401UnauthorizedEntryPoint authenticationEntryPoint, 
+            JwtRequestFilter jwtRequestFilter,
+            LimitLoginAuthenticationProvider limitLoginAuthenticationProvider) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.jwtRequestFilter = jwtRequestFilter;
+        this.limitLoginAuthenticationProvider = limitLoginAuthenticationProvider;
     }
 
     @Bean
@@ -76,8 +87,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Inject
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder);
+    	//auth.authenticationProvider(limitLoginAuthenticationProvider);
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
+    
 }

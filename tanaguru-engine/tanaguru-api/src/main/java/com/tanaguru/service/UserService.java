@@ -1,6 +1,9 @@
 package com.tanaguru.service;
 
+import java.util.Optional;
+
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.entity.membership.user.UserAttempts;
 
 public interface UserService {
 
@@ -43,4 +46,23 @@ public interface UserService {
      * @return True if the @see User has the authority
      */
     boolean hasAuthority(User user, String authority);
+    
+    /**
+     * Update the number of fail attempts of the user
+     * @param username
+     */
+    void updateFailAttempts(String username);
+    
+    /**
+     * Reset the number of fail attempts of the user
+     * @param username
+     */
+    void resetFailAttempts(String username);
+    
+    /**
+     * Get the attempts of the user
+     * @param username
+     * @return userAttempts
+     */
+    Optional<UserAttempts> getUserAttempts(String username);
 }
