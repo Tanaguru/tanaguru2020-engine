@@ -11,6 +11,7 @@ import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.ProjectService;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -206,8 +207,7 @@ public class ProjectController {
             throw new ForbiddenException("Project limit for contract " + contract.getId() + " is " + contract.getProjectLimit());
         }
 
-        UrlValidator urlValidator = new UrlValidator();
-        if(!urlValidator.isValid(project.getDomain())){
+        if(!UrlHelper.isValid(project.getDomain())){
             throw new InvalidEntityException("Domain " + project.getDomain() + " is invalid");
         }
 
