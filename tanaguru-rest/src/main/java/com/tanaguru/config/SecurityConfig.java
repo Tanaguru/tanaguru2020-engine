@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -85,10 +87,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    @Inject
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-    	//auth.authenticationProvider(limitLoginAuthenticationProvider);
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    	auth.authenticationProvider(myAuthProvider());
+    }
+    
+    @Bean
+    public LimitLoginAuthenticationProvider myAuthProvider() throws Exception{
+    	LimitLoginAuthenticationProvider provider = new LimitLoginAuthenticationProvider();
+    	provider.setPasswordEncoder(this.bCryptPasswordEncoder);
+    	provider.setUserDetailsService(this.userDetailsService);
+    	return provider;
     }
     
 }

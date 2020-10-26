@@ -5,6 +5,7 @@ import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.domain.exception.InvalidEntityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -66,6 +67,13 @@ public class TanaguruControllerAdvice {
     @ExceptionHandler(InvalidEntityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorDTO invalidEntityError(InvalidEntityException ex) {
+        return new ErrorDTO(ex.getMessage());
+    }
+    
+    @ResponseBody
+    @ExceptionHandler(LockedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ErrorDTO userBlocked(InvalidEntityException ex) {
         return new ErrorDTO(ex.getMessage());
     }
 }

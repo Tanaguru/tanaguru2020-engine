@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     private final AppRoleService appRoleService;
     private final UserAttemptsRepository userAttemptsRepository;
     
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 3;
 
     public UserServiceImpl(UserRepository userRepository, 
     		ContractRepository contractRepository, 
@@ -108,15 +108,18 @@ public class UserServiceImpl implements UserService {
     			//update attempts +1
     			int attempts = userAttempts.get().getAttempts()+1;
     			userAttempts.get().setAttempts(attempts);
+    			userAttempts.get().setLastModified(new Date());
+    			userAttemptsRepository.save(userAttempts.get());
     		}
-    		if (userAttempts.get().getAttempts() + 1 >= MAX_ATTEMPTS) {
+    		if (userAttempts.get().getAttempts() >= MAX_ATTEMPTS) {
     			//locked user
     			Optional<User> user = userRepository.findByUsername(username);
     			if(!user.isEmpty()) {
     				user.get().setAccountNonLocked(false);
+    				userRepository.save(user.get());
     			}
     			//throw exception
-    			throw new LockedException("User Account is locked!");
+    			//throw new LockedException("User Account is locked!");
     		}
     	}
     }
