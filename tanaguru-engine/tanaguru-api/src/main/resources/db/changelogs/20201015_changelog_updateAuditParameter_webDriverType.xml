@@ -21,7 +21,7 @@
     <changeSet id="populateaudit_parameter_webdriverType_value" author="lpedrau">
         <sql>
             INSERT INTO audit_parameter_value (audit_parameter_id, value, is_default) VALUES
-            ((SELECT id FROM audit_parameter WHERE code = 'WEBDRIVER_BROWSER'), 'chrome', true);
+            ((SELECT id FROM audit_parameter WHERE code = 'WEBDRIVER_BROWSER'), 'firefox', true);
         </sql>
         <rollback>
             <sql>

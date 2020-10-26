@@ -42,6 +42,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final AuditReferenceRepository auditReferenceRepository;
 
     private final String coreScript;
+    private static final String CHROME = "chrome";
+    private static final String FIREFOX = "firefox";
 
     @Autowired
     public AuditRunnerFactoryImpl(
@@ -79,14 +81,14 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
         BrowserName browserName = null;
         switch(webdriverBrowser) {
-        	case "chrome":
+        	case CHROME:
         		browserName = BrowserName.CHROME;
         		break;
-        	case "firefox":
+        	case FIREFOX:
         		browserName = BrowserName.FIREFOX;
         		break;
         	default:
-        		browserName = BrowserName.CHROME;    
+        		browserName = BrowserName.FIREFOX;    
         }
 
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());

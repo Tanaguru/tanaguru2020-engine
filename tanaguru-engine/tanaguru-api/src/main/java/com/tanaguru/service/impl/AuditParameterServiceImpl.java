@@ -73,7 +73,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
     private final ResourceRepository resourceRepository;
    
     @Value("${auditrunner.active}")
-    private String browserActive;
+    private String[] browsersActive;
   
     @Autowired
     public AuditParameterServiceImpl(
@@ -239,8 +239,8 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                 
                 case WEBDRIVER_BROWSER:
                     String browser = value;
-                    ArrayList<String> browsersActive = new ArrayList(Arrays.asList(browserActive.split(",")));;
-                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsersActive.contains(browser);
+                    ArrayList<String> browsers = new ArrayList(Arrays.asList(browsersActive));;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsers.contains(browser);
                     break;
 
                 case CRAWLER_MAX_DOCUMENT:
