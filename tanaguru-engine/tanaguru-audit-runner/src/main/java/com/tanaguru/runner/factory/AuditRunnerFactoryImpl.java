@@ -76,13 +76,17 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String basicAuthUrl = parameterStringMap.get(EAuditParameter.BASICAUTH_URL).getValue();
         String basicAuthLogin = parameterStringMap.get(EAuditParameter.BASICAUTH_LOGIN).getValue();
         String basicAuthPassword = parameterStringMap.get(EAuditParameter.BASICAUTH_PASSWORD).getValue();
-        
         String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
-        BrowserName browserName = BrowserName.CHROME;
-        if(webdriverBrowser.equals("chrome")) {
-        	browserName = BrowserName.CHROME;
-        }else if(webdriverBrowser.equals("firefox")){
-        	browserName = BrowserName.FIREFOX;
+        BrowserName browserName = null;
+        switch(webdriverBrowser) {
+        	case "chrome":
+        		browserName = BrowserName.CHROME;
+        		break;
+        	case "firefox":
+        		browserName = BrowserName.FIREFOX;
+        		break;
+        	default:
+        		browserName = BrowserName.CHROME;    
         }
 
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());

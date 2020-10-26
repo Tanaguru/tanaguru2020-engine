@@ -239,7 +239,8 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                 
                 case WEBDRIVER_BROWSER:
                     String browser = value;
-                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browser.toLowerCase().equals(browserActive.toLowerCase());
+                    ArrayList<String> browsersActive = new ArrayList(Arrays.asList(browserActive.split(",")));;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsersActive.contains(browser);
                     break;
 
                 case CRAWLER_MAX_DOCUMENT:
