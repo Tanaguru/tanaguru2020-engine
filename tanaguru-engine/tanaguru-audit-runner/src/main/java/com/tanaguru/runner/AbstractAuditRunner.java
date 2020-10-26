@@ -122,7 +122,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     protected abstract void runImpl();
 
 
-    public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {   //passage parametre webdriver
+    public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {
         int firstHash = url.indexOf('#');
         int lastSlash = url.lastIndexOf('/');
 
@@ -131,7 +131,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             url = url.substring(0, firstHash);
         }
 
-        boolean alreadyVisited = visitedUrl.contains(url);    //gérer les pages visités en fct du webdriver : Map<WebDriver, url associée>
+        boolean alreadyVisited = visitedUrl.contains(url);
 
         if (alreadyVisited) {
             if (auditIfAlreadyVisited) {
