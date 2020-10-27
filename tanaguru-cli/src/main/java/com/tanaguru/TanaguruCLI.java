@@ -629,7 +629,9 @@ public class TanaguruCLI implements CommandLineRunner {
                 StringBuilder builder = new StringBuilder();
                 for(String url : urlsArgs) {
                     builder.append(url);
-                    builder.append(";");
+                    if(urlsArgs.length > 1){
+                        builder.append(";");
+                    }
                 }
                 auditParameters.put(EAuditParameter.PAGE_URLS, builder.toString());
             }		 		
@@ -639,7 +641,9 @@ public class TanaguruCLI implements CommandLineRunner {
                 StringBuilder builder = new StringBuilder();
                 for(String url : seedsArgs) {
                     builder.append(url);
-                    builder.append(";");
+                    if(seedsArgs.length > 1){
+                        builder.append(";");
+                    }
                 }
                 auditParameters.put(EAuditParameter.SITE_SEEDS, builder.toString());
             }
