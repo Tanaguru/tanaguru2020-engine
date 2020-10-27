@@ -1,9 +1,10 @@
 package com.tanaguru.service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
+import com.tanaguru.domain.entity.membership.user.Attempt;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.entity.membership.user.UserAttempts;
 
 public interface UserService {
 
@@ -51,7 +52,7 @@ public interface UserService {
      * Update the number of fail attempts of the user
      * @param username
      */
-    void updateFailAttempts(String username);
+    void updateFailAttempts(String username, String ip);
     
     /**
      * Reset the number of fail attempts of the user
@@ -64,5 +65,5 @@ public interface UserService {
      * @param username
      * @return userAttempts
      */
-    Optional<UserAttempts> getUserAttempts(String username);
+    ArrayList<Attempt> getAttempts(String username);
 }

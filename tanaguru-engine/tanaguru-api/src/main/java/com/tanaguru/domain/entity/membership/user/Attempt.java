@@ -15,51 +15,27 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @author lpedrau
  */
-@Entity
-@Table(name = "user_attempts")
-public class UserAttempts implements Serializable {
+public class Attempt implements Serializable {
 	
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-	
-	@Column(nullable = false, unique = true)
-    @Size(min = 4, max = 30)
-    @NotBlank
-    private String username;
-	
-	@Column(nullable = false)
-    @NotNull
-    private int attempts;
-
-    @Temporal(TemporalType.TIMESTAMP)
+    private int number;
+    
     private Date lastModified;
-	
-	public long getId() {
-		return id;
-	}
-	
-	public void setId(long id) {
-        this.id = id;
-    }
-	
-	public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    
+    private String ip;
+    
+    private Date blockedUntil;
+    
+    public int getNumber() {
+    	return number;
     }
     
-    public int getAttempts() {
-    	return attempts;
-    }
-    
-    public void setAttempts(int attempts) {
-    	this.attempts = attempts;
+    public void setNumber(int number) {
+    	this.number = number;
     }
     
     public Date getLastModified() {
@@ -68,5 +44,21 @@ public class UserAttempts implements Serializable {
     
     public void setLastModified(Date lastModified) {
     	this.lastModified = lastModified;
+    }
+    
+    public String getIp() {
+        return ip;
+    }
+    
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+    
+    public Date getBlockedUntil() {
+        return blockedUntil;
+    }
+    
+    public void setBlockedUntil(Date blockedUntil) {
+        this.blockedUntil = blockedUntil;
     }
 }

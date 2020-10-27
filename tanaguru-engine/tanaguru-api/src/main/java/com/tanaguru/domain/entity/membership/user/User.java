@@ -74,6 +74,11 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Collection<ContractAppUser> contractAppUsers;
 
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    @JsonIgnore
+    private Collection<Attempt> attempts = new ArrayList<>();
+    
     public long getId() {
         return id;
     }
@@ -152,5 +157,13 @@ public class User implements Serializable {
     
     public boolean isAccountNonLocked() {
     	return accountNonLocked;
+    }
+    
+    public Collection<Attempt> getAttempts(){
+        return attempts;
+    }
+    
+    public void setAttempts(Collection<Attempt> attempts) {
+        this.attempts = attempts;
     }
 }
