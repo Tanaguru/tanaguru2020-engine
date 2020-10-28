@@ -13,6 +13,8 @@ import com.tanaguru.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserService {
     private static final int FIRST_STEP_ATTEMPTS = 3;
     private static final int SECOND_STEP_ATTEMPTS = 5;
     private static final int MAX_ATTEMPTS = 7;
-    private static final int FIRST_ATTEMPT_TIME = 300000; //5min 
+    private static final int FIRST_ATTEMPT_TIME = 300000; //5min
     private static final int SECOND_ATTEMPT_TIME = 43200000;  //12h
     private static final String ADMIN_MAIL = "support@tanaguru.com";
     private static final String ATTEMPTS_MAIL_SUBJECT = "Blocage d'un compte utilisateur";
@@ -142,6 +144,7 @@ public class UserServiceImpl implements UserService {
                 //locked user definitely
                 blockAccount(user, attempts,0);
                 //send mail to super admin with list of attempts
+                DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
                 StringBuilder builder = new StringBuilder();
                 builder.append("Multiples tentatives de connexions sur le compte : "+user.get().getEmail());
                 builder.append("\nNom d'utilisateur : "+user.get().getUsername());
@@ -149,9 +152,9 @@ public class UserServiceImpl implements UserService {
                 for(Attempt attempt : attempts) {
                     builder.append("\n\nTentative numéro "+attempt.getNumber());
                     builder.append(" | IP : "+attempt.getIp());
-                    builder.append(" | Dernier accès :"+attempt.getLastModified());
+                    builder.append(" | Dernier accès :"+longDateFormat.format(attempt.getLastModified()));
                     if( attempt.getBlockedUntil() != null ){
-                        builder.append(" | Bloqué jusqu'à : "+attempt.getBlockedUntil());
+                        builder.append(" | Bloqué jusqu'à : "+longDateFormat.format(attempt.getBlockedUntil()));
                     }
                 }
                 mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT, builder.toString());

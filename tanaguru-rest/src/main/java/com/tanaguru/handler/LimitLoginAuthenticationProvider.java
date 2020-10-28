@@ -3,6 +3,8 @@ package com.tanaguru.handler;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -16,7 +18,9 @@ import com.tanaguru.service.UserService;
 
 @Component
 public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider {
-
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(LimitLoginAuthenticationProvider.class);  
+    
     @Autowired
     UserService userService;
 
@@ -50,6 +54,7 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
                     }else {
                         Date lastAttempts = attempts.get(attempts.size()-1).getLastModified();
                         error = "User account is locked - Username : "+ authentication.getName() + " - Last attempts : " + lastAttempts + " - Blocked until : "+blockedUntil;
+                        LOGGER.info(error);
                         throw new LockedException(error);
                     }
                 }else {
