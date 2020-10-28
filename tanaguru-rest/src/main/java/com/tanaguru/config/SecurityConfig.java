@@ -30,20 +30,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Http401UnauthorizedEntryPoint authenticationEntryPoint;
     private final JwtRequestFilter jwtRequestFilter;
-	private final LimitLoginAuthenticationProvider limitLoginAuthenticationProvider;
 	
     @Autowired
     public SecurityConfig(
             TanaguruUserDetailsService userDetailsService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
             Http401UnauthorizedEntryPoint authenticationEntryPoint, 
-            JwtRequestFilter jwtRequestFilter,
-            LimitLoginAuthenticationProvider limitLoginAuthenticationProvider) {
+            JwtRequestFilter jwtRequestFilter) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.jwtRequestFilter = jwtRequestFilter;
-        this.limitLoginAuthenticationProvider = limitLoginAuthenticationProvider;
     }
 
     @Bean

@@ -23,7 +23,6 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     @Autowired
     private HttpServletRequest request;
 
-
     @Override
     public Authentication authenticate(Authentication authentication)throws AuthenticationException {
         String ipAddress = request.getRemoteAddr();
@@ -38,18 +37,29 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
             throw e;
 
         } catch (LockedException e){
-            //user locked
+            //user locked       
             String error = "";
+            Date now = new Date();
             ArrayList<Attempt> attempts = userService.getAttempts(authentication.getName());
-            if(!attempts.isEmpty()){
-                Date lastAttempts = attempts.get(attempts.size()-1).getLastModified();
+            if(!attempts.isEmpty()) {
                 Date blockedUntil = attempts.get(attempts.size()-1).getBlockedUntil();
-                error = "User account is locked - Username : "+ authentication.getName() + " - Last attempts : " + lastAttempts + " - Blocked until : "+blockedUntil;
-            }else{
-                error = e.getMessage();
+                if(blockedUntil != null){
+                    if(now.after(blockedUntil)) { //verification time if the user can be unlock and authentication test again
+                        userService.unlock(authentication.getName());
+                        return authenticate(authentication);
+                    }else {
+                        Date lastAttempts = attempts.get(attempts.size()-1).getLastModified();
+                        error = "User account is locked - Username : "+ authentication.getName() + " - Last attempts : " + lastAttempts + " - Blocked until : "+blockedUntil;
+                        throw new LockedException(error);
+                    }
+                }else {
+                    error = "User account is locked - Username : "+ authentication.getName();
+                    throw new LockedException(error);
+                }
+            }else {
+                error = "User account is locked - Username : "+ authentication.getName();
+                throw new LockedException(error);
             }
-            System.out.println(error);
-            throw new LockedException(error);
         }
     }
 
@@ -58,5 +68,4 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     public void setUserDetailsService(UserDetailsService userDetailsService) {
         super.setUserDetailsService(userDetailsService);
     }
-
 }

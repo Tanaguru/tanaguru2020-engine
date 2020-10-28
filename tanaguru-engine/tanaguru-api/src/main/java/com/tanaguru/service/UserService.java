@@ -66,4 +66,10 @@ public interface UserService {
      * @return userAttempts
      */
     ArrayList<Attempt> getAttempts(String username);
+    
+    /**
+     * Set AccountNonLocked to true for the user
+     * @param username
+     */
+    void unlock(String username);
 }
