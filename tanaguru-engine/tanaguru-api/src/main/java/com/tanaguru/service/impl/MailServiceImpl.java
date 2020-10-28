@@ -18,7 +18,7 @@ public class MailServiceImpl implements MailService {
 
     @Value("${mail.from}")
     private String from;
-    
+
     private final JavaMailSender javaMailSender;
 
     @Autowired

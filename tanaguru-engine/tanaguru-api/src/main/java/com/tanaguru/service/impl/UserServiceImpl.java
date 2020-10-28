@@ -41,7 +41,8 @@ public class UserServiceImpl implements UserService {
     private static final int FIRST_ATTEMPT_TIME = 300000; //5min
     private static final int SECOND_ATTEMPT_TIME = 43200000;  //12h
     private static final String ADMIN_MAIL = "support@tanaguru.com";
-    private static final String ATTEMPTS_MAIL_SUBJECT = "Blocage d'un compte utilisateur";
+    private static final String ATTEMPTS_MAIL_SUBJECT_ADMIN = "Blocage d'un compte utilisateur";
+    private static final String ATTEMPTS_MAIL_SUBJECT_USER = "Blocage de votre compte utilisateur";
 
     public UserServiceImpl(UserRepository userRepository, 
             ContractRepository contractRepository, 
@@ -105,7 +106,7 @@ public class UserServiceImpl implements UserService {
      * @param username
      * @param ip
      */
-    public void updateFailAttempts(String username, String ip) {
+    public void updateFailAttempts(String username, String ip, boolean sendAdminMail) {
         ArrayList<Attempt> attempts = getAttempts(username);
         Optional<User> user = userRepository.findByUsername(username);
         if (attempts.isEmpty()) {
@@ -157,7 +158,10 @@ public class UserServiceImpl implements UserService {
                         builder.append(" | Bloqué jusqu'à : "+longDateFormat.format(attempt.getBlockedUntil()));
                     }
                 }
-                mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT, builder.toString());
+                if(sendAdminMail) {
+                    mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                }
+                mailService.sendSimpleMessage(user.get().getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
                 break;
 
             default: //Do nothing

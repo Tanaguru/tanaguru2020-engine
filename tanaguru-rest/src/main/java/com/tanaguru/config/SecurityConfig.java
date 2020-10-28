@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Http401UnauthorizedEntryPoint authenticationEntryPoint;
     private final JwtRequestFilter jwtRequestFilter;
-	
+
     @Autowired
     public SecurityConfig(
             TanaguruUserDetailsService userDetailsService,
@@ -53,20 +53,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/logout").permitAll()
-                    .antMatchers("/users/forgot-password/**").permitAll()
-                    .antMatchers("/v2/api-docs",
-                            "/configuration/ui",
-                            "/swagger-resources/**",
-                            "/configuration/security",
-                            "/swagger-ui.html",
-                            "/webjars/**").permitAll()
-                .and().exceptionHandling().
-                    authenticationEntryPoint(authenticationEntryPoint)
-                .and().sessionManagement()
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .csrf().disable()
+        .authorizeRequests()
+        .antMatchers("/logout").permitAll()
+        .antMatchers("/users/forgot-password/**").permitAll()
+        .antMatchers("/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**").permitAll()
+        .and().exceptionHandling().
+        authenticationEntryPoint(authenticationEntryPoint)
+        .and().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
@@ -79,15 +79,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    	auth.authenticationProvider(myAuthProvider());
+        auth.authenticationProvider(myAuthProvider());
     }
-    
+
     @Bean
     public LimitLoginAuthenticationProvider myAuthProvider() throws Exception{
-    	LimitLoginAuthenticationProvider provider = new LimitLoginAuthenticationProvider();
-    	provider.setPasswordEncoder(this.bCryptPasswordEncoder);
-    	provider.setUserDetailsService(this.userDetailsService);
-    	return provider;
+        LimitLoginAuthenticationProvider provider = new LimitLoginAuthenticationProvider();
+        provider.setPasswordEncoder(this.bCryptPasswordEncoder);
+        provider.setUserDetailsService(this.userDetailsService);
+        return provider;
     }
-    
+
 }

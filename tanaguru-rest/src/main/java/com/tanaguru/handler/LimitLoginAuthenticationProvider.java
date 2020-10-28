@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,9 +19,12 @@ import com.tanaguru.service.UserService;
 
 @Component
 public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LimitLoginAuthenticationProvider.class);  
-    
+
+    @Value("${admin.mail.whenblocked}")
+    private boolean sendAdminMail;
+
     @Autowired
     UserService userService;
 
@@ -37,7 +41,7 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
 
         } catch (BadCredentialsException e) {
             //invalid login, update user attempts
-            userService.updateFailAttempts(authentication.getName(),ipAddress);
+            userService.updateFailAttempts(authentication.getName(),ipAddress, sendAdminMail);
             throw e;
 
         } catch (LockedException e){

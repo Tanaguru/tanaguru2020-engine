@@ -47,26 +47,28 @@ public interface UserService {
      * @return True if the @see User has the authority
      */
     boolean hasAuthority(User user, String authority);
-    
+
     /**
      * Update the number of fail attempts of the user
      * @param username
+     * @param ip
+     * @param sendAdminMail
      */
-    void updateFailAttempts(String username, String ip);
-    
+    void updateFailAttempts(String username, String ip, boolean sendAdminMail);
+
     /**
      * Reset the number of fail attempts of the user
      * @param username
      */
     void resetFailAttempts(String username);
-    
+
     /**
      * Get the attempts of the user
      * @param username
      * @return userAttempts
      */
     ArrayList<Attempt> getAttempts(String username);
-    
+
     /**
      * Set AccountNonLocked to true for the user
      * @param username
