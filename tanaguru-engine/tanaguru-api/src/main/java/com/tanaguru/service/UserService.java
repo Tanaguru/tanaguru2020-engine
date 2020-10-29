@@ -63,13 +63,6 @@ public interface UserService {
     void resetFailAttempts(String username);
 
     /**
-     * Get the attempts of the user
-     * @param username
-     * @return userAttempts
-     */
-    ArrayList<Attempt> getAttempts(String username);
-
-    /**
      * Set AccountNonLocked to true for the user
      * @param username
      */

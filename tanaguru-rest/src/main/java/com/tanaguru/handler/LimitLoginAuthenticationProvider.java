@@ -2,6 +2,8 @@ package com.tanaguru.handler;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import com.tanaguru.domain.entity.membership.user.Attempt;
+import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.UserService;
 
 @Component
@@ -27,6 +31,9 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     private HttpServletRequest request;
@@ -48,7 +55,11 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
             //user locked       
             String error = "";
             Date now = new Date();
-            ArrayList<Attempt> attempts = userService.getAttempts(authentication.getName());
+            Optional<User> user = userRepository.findByUsername(authentication.getName());
+            ArrayList<Attempt> attempts = new ArrayList<Attempt>();
+            if(!user.isEmpty()) {
+                attempts = new ArrayList<Attempt>(user.get().getAttempts());
+            }
             if(!attempts.isEmpty()) {
                 Date blockedUntil = attempts.get(attempts.size()-1).getBlockedUntil();
                 if(blockedUntil != null){
