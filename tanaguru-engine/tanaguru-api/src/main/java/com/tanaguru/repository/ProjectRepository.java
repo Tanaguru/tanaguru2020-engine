@@ -17,10 +17,4 @@ import java.util.Collection;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     Collection<Project> findAllByContract(Contract contract);
     
-    @Query("SELECT a FROM Resource a WHERE a.project = ?1")
-    Collection<Resource> getResourcesFromProject(Project project);
-    
-    @Query("SELECT a FROM Scenario a WHERE a.project = ?1")
-    Collection<Scenario> getScenarioFromProject(Project project);
-    
 }

@@ -291,7 +291,7 @@ public class TanaguruCLI implements CommandLineRunner {
                 resource.setName(askName("resource"));
                 resource.setContent(fileContent);
                 resource.setProject(project.get());
-                Collection<Resource> resources = projectRepository.getResourcesFromProject(project.get());
+                Collection<Resource> resources = resourceRepository.findAllByProjectAndIsDeletedIsFalse(project.get());
                 resources.add(resource);
                 project.get().setResources(resources);
                 projectRepository.save(project.get());
@@ -371,7 +371,7 @@ public class TanaguruCLI implements CommandLineRunner {
                 scenario.setName(askName("scenario"));
                 scenario.setContent(scenarioContent);
                 scenario.setProject(project.get());
-                Collection<Scenario> scenarios = projectRepository.getScenarioFromProject(project.get());
+                Collection<Scenario> scenarios = scenarioRepository.findAllByProjectAndIsDeletedIsFalse(project.get());
                 scenarios.add(scenario);
                 project.get().setScenarios(scenarios);
                 projectRepository.save(project.get());
