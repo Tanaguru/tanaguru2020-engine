@@ -1,0 +1,20 @@
+AUDIT_NOT_FOUND			#Cannot find audit
+CONTRACT_NOT_FOUND		#Cannot find contract
+PROJECT_NOT_FOUND		#Cannot find project
+USER_NOT_FOUND			#Cannot find user
+ACCESS_DENIED			#Access Denied
+AUTHENTICATION_FAILED	#Authentication failed
+NO_MAIN_REFERENCE		#Main reference is not in the reference list
+NO_USABLE_REFERENCE		#Cannot find usable reference for id
+CONTRACT_DATE_PASSED	#Contract end date is passed
+AUDIT_PARAMETERS_NOT_FOUND			#Cannot find audit parameters
+AUDIT_SCHEDULER_NOT_FOUND			#Cannot find audit scheduler
+CURRENT_USER_NO_ACCESS_SCHEDULER	#Current user cannot access audit scheduler
+CANNOT_MODIFY_AUDIT_ASSOCIATED_SCHEDULER 		#Cannot modify audit scheduler associated audit
+CANNOT_ACCESS_SCHEDULER				#Cannot access audit scheduler
+USER_NOT_FOUND_FOR_CONTRACT 		#Cannot find user {content1} for contract {content2}
+CANNOT_CREATE_MULTIPLE_USER_CONTRACT			#Cannot create multiple contract by user
+CANNOT_PROMOTE_YOURSELF				#Cannot promote yourself
+PROJECT_CANNOT_PROMOTE_USER			#This project role cannot be used to promote a user
+CANNOT_PROMOTE_CONTRACT_OWNER		#Cannot promote contract owner
+USER_NOT_FOUND_FOR_PROJECT			#Cannot find user {content1} for project {content2}

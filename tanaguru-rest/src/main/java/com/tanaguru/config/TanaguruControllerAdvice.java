@@ -1,8 +1,10 @@
 package com.tanaguru.config;
 
 import com.tanaguru.domain.dto.ErrorDTO;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
+import com.tanaguru.custom.exception.CustomForbiddenException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,51 +23,51 @@ import java.util.NoSuchElementException;
 public class TanaguruControllerAdvice {
 
     @ResponseBody
-    @ExceptionHandler(EntityNotFoundException.class)
+    @ExceptionHandler(CustomEntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    ErrorDTO entityNotFoundHandler(EntityNotFoundException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO customEntityNotFoundHandler(CustomEntityNotFoundException ex) {
+        return new ErrorDTO(ex.getMessage(),ex.getContent());
     }
 
     @ResponseBody
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ErrorDTO noSuchElementExceptionHandler(NoSuchElementException ex) {
-        return new ErrorDTO(ex.getMessage());
+        return new ErrorDTO(ex.getMessage(),"truc");
     }
 
     @ResponseBody
-    @ExceptionHandler(ForbiddenException.class)
+    @ExceptionHandler(CustomForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    ErrorDTO entityForbidden(ForbiddenException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO entityForbidden(CustomForbiddenException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
 
     @ResponseBody
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     ErrorDTO badCredential(BadCredentialsException ex) {
-        return new ErrorDTO(ex.getMessage());
+        return new ErrorDTO(ex.getMessage(),"truc");
     }
 
     @ResponseBody
     @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     ErrorDTO entityForbidden(HttpClientErrorException.Unauthorized ex) {
-        return new ErrorDTO(ex.getMessage());
+        return new ErrorDTO(ex.getMessage(),"truc");
     }
 
     @ResponseBody
     @ExceptionHandler(InternalError.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ErrorDTO internalError(InternalError ex) {
-        return new ErrorDTO(ex.getMessage());
+        return new ErrorDTO(ex.getMessage(),"truc");
     }
 
     @ResponseBody
-    @ExceptionHandler(InvalidEntityException.class)
+    @ExceptionHandler(CustomInvalidEntityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ErrorDTO invalidEntityError(InvalidEntityException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO invalidEntityError(CustomInvalidEntityException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
 }

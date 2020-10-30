@@ -1,5 +1,8 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
+import com.tanaguru.custom.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.AuditCommandDTO;
@@ -8,8 +11,7 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
@@ -80,7 +82,7 @@ public class AuditController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         return auditRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
     }
 
     /**
@@ -107,7 +109,7 @@ public class AuditController {
     public @ResponseBody
     Collection<Audit> getAuditsByProject(@PathVariable long id) {
         return auditService.findAllByProject(projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + id)));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id)));
     }
 
     @ApiOperation(
@@ -128,7 +130,7 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProject(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project for id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
         Optional<Act> actOptional = actRepository.findFirstByProjectOrderByDateDesc(project);
         return actOptional.map(Act::getAudit).orElse(null);
     }
@@ -151,7 +153,7 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProjectAndAuditType(@PathVariable long id, @PathVariable EAuditType type) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project for id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
         Optional<Act> actOptional = actRepository.findFirstByProjectAndAudit_TypeOrderByDateDesc(project, type);
         return actOptional.map(Act::getAudit).orElse(null);
     }
@@ -207,21 +209,21 @@ public class AuditController {
     public @ResponseBody
     Audit startAudit(@RequestBody @Valid AuditCommandDTO auditCommand) {
         if(!auditCommand.getReferences().contains(auditCommand.getMainReference())){
-            throw new InvalidEntityException("Main reference is not in the reference list");
+            throw new CustomInvalidEntityException(CustomError.NO_MAIN_REFERENCE);
         }
 
         Project project = projectRepository.findById(auditCommand.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + auditCommand.getProjectId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, auditCommand.getProjectId()));
 
         if(new Date().after(project.getContract().getDateEnd())){
-            throw new ForbiddenException("Contract end date is passed");
+            throw new CustomForbiddenException(CustomError.CONTRACT_DATE_PASSED);
         }
 
         TestHierarchy main = null;
         ArrayList<TestHierarchy> references = new ArrayList<>();
         for(Long referenceId : auditCommand.getReferences()){
             TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(referenceId)
-                    .orElseThrow(() -> new InvalidEntityException("Cannot find usable reference for id " + referenceId));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.NO_USABLE_REFERENCE, referenceId));
             if(testHierarchy.getId() == auditCommand.getMainReference()){
                 main = testHierarchy;
             }
@@ -261,6 +263,6 @@ public class AuditController {
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         auditService.deleteAudit(auditRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new));
+                .orElseThrow(CustomEntityNotFoundException::new));
     }
 }

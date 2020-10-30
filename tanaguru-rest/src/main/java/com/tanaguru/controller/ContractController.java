@@ -1,5 +1,8 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
+import com.tanaguru.custom.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.ContractAuthorityName;
 import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.dto.ContractDTO;
@@ -7,8 +10,7 @@ import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.contract.ContractAuthority;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -86,7 +88,7 @@ public class ContractController {
     public @ResponseBody
     Collection<Contract> findAllByUser(@PathVariable long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find user " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
         Collection<Contract> userContracts = contractService.findByUser(user);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
             userContracts = userContracts.stream().filter(contract ->
@@ -179,7 +181,7 @@ public class ContractController {
     public @ResponseBody
     Contract findById(@PathVariable long id) {
         return contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
     }
 
     /**
@@ -200,12 +202,12 @@ public class ContractController {
     public @ResponseBody
     Collection<String> findAuthoritiesByContractId(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
 
         User currentUser = tanaguruUserDetailsService.getCurrentUser();
 
         Collection<String> contractAuthorities = contractUserRepository.findByContractAndUser(contract, currentUser)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find user " + currentUser.getId() + " for contract " + contract.getId()))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, currentUser.getId() + "," + contract.getId()))
                 .getContractRole().getAuthorities().stream()
                     .map((ContractAuthority::getName))
                 .collect(Collectors.toList());
@@ -236,12 +238,12 @@ public class ContractController {
     public @ResponseBody
     Contract createContract(@RequestBody @Valid ContractDTO contract) {
         User owner = userRepository.findById(contract.getOwnerId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find user " + contract.getOwnerId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contract.getOwnerId()));
 
         //TODO REMOVE LIMITATION
         Collection<Contract> owned = contractService.findByOwner(owner);
         if(owned.size()>0){
-            throw new InvalidEntityException("Cannot create multiple contract by user");
+            throw new CustomInvalidEntityException(CustomError.CANNOT_CREATE_MULTIPLE_USER_CONTRACT);
         }else{
             return contractService.createContract(
                     owner,
@@ -271,10 +273,10 @@ public class ContractController {
     public @ResponseBody
     Contract modifyContract(@RequestBody @Valid ContractDTO contractDto, @PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
 
         User owner = userRepository.findById(contractDto.getOwnerId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find user " + contractDto.getOwnerId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId()));
 
         return contractService.modifyContract(
                 contract,
@@ -306,7 +308,7 @@ public class ContractController {
     void deleteContract(@PathVariable long id) {
         contractService.deleteContract(
           contractRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Cannot find contract with id " + id))
+            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id))
         );
     }
 
@@ -334,9 +336,9 @@ public class ContractController {
     public ContractAppUser addMember(@PathVariable long contractId, @PathVariable long userId){
         return contractService.addMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find contract with id " + contractId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId)));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
     }
 
     /**
@@ -362,9 +364,9 @@ public class ContractController {
     public void removeMember(@PathVariable long contractId, @PathVariable long userId){
         contractService.removeMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find contract with id " + contractId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
         );
     }
 
@@ -386,26 +388,26 @@ public class ContractController {
     public ContractAppUser promoteMember(@PathVariable long contractId, @PathVariable long userId, @PathVariable EContractRole contractRole){
         User current = tanaguruUserDetailsService.getCurrentUser();
         if(current.getId() == userId){
-            throw new ForbiddenException("Cannot promote yourself");
+            throw new CustomForbiddenException(CustomError.CANNOT_PROMOTE_YOURSELF);
         }
 
         if(contractService.getContractRole(contractRole).isHidden()){
-            throw new InvalidEntityException("This project role cannot be used to promote a user");
+            throw new CustomInvalidEntityException(CustomError.PROJECT_CANNOT_PROMOTE_USER);
         }
 
         Contract contract =  contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract with id " + contractId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId));
 
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
         if(owner.getUser().getId() == userId){
-            throw new InvalidEntityException("Cannot promote contract owner");
+            throw new CustomInvalidEntityException(CustomError.CANNOT_PROMOTE_CONTRACT_OWNER);
         }
 
         ContractAppUser target = contractUserRepository.findByContractAndUser(
                 contract,
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId))
-        ).orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId + " in project " + contractId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + " , " + contractId));
 
         target.setContractRole(contractService.getContractRole(contractRole));
         return contractUserRepository.save(target);

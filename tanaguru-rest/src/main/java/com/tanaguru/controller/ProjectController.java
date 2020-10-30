@@ -1,5 +1,6 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.dto.ProjectDTO;
@@ -100,7 +101,7 @@ public class ProjectController {
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllWithAuthoritiesByContract(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + id));
+                .orElseThrow(() -> new EntityNotFoundException(CustomError.AUDIT_NOT_FOUND)); //"Cannot find contract " + id
 
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
@@ -157,7 +158,7 @@ public class ProjectController {
     public @ResponseBody
     Project findById(@PathVariable long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + id));
+                .orElseThrow(() -> new EntityNotFoundException(CustomError.AUDIT_NOT_FOUND)); //"Cannot find project " + id
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
@@ -64,7 +66,7 @@ public class AuditParameterController {
     public @ResponseBody
     AuditParameter getAuditParameters(@PathVariable long id) {
         return auditParameterRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_PARAMETERS_NOT_FOUND, id));
     }
 
     @ApiOperation(
@@ -85,7 +87,7 @@ public class AuditParameterController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         return audit.getParametersAsMap().values();
     }

@@ -1,10 +1,12 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
+import com.tanaguru.custom.exception.CustomForbiddenException;
 import com.tanaguru.domain.dto.AuditSchedulerDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditScheduler;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.AuditSchedulerRepository;
 import com.tanaguru.service.AuditSchedulerService;
@@ -43,9 +45,9 @@ public class AuditSchedulerController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         AuditScheduler auditScheduler = auditSchedulerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit scheduler " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND, id));
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
-            throw new ForbiddenException("Current user cannot access audit scheduler " + id);
+            throw new CustomForbiddenException(CustomError.CURRENT_USER_NO_ACCESS_SCHEDULER, id);
         }
 
         return auditScheduler;
@@ -57,7 +59,7 @@ public class AuditSchedulerController {
     public @ResponseBody
     AuditScheduler createAuditScheduler(@RequestBody @Valid AuditSchedulerDTO auditSchedulerDTO) {
         Audit audit = auditRepository.findById(auditSchedulerDTO.getAuditId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + auditSchedulerDTO.getAuditId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditSchedulerDTO.getAuditId()));
         return auditSchedulerService.createAuditScheduler(audit, auditSchedulerDTO.getTimer());
     }
 
@@ -65,17 +67,17 @@ public class AuditSchedulerController {
     public @ResponseBody
     AuditScheduler modifyAuditScheduler(@RequestBody @Valid AuditSchedulerDTO auditSchedulerDTO) {
         AuditScheduler auditScheduler = auditSchedulerRepository.findById(auditSchedulerDTO.getAuditSchedulerId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit scheduler " + auditSchedulerDTO.getAuditSchedulerId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND, auditSchedulerDTO.getAuditSchedulerId()));
 
         if(auditSchedulerDTO.getAuditId() != auditScheduler.getAudit().getId()){
-            throw new InvalidEntityException("Cannot modify audit scheduler associated audit");
+            throw new CustomInvalidEntityException(CustomError.CANNOT_MODIFY_AUDIT_ASSOCIATED_SCHEDULER);
         }
 
         if(! auditSchedulerService.userCanScheduleOnAudit(
                 tanaguruUserDetailsService.getCurrentUser(),
                 auditScheduler.getAudit()
         )){
-            throw new ForbiddenException("Cannot access audit scheduler " + auditScheduler.getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_SCHEDULER, auditScheduler.getId());
         }
 
         return auditSchedulerService.modifyAuditScheduler(auditScheduler, auditSchedulerDTO.getTimer(), auditScheduler.getLastExecution());
@@ -85,12 +87,12 @@ public class AuditSchedulerController {
     public @ResponseBody
     void deleteAuditScheduler(@PathVariable long id) {
         AuditScheduler auditScheduler = auditSchedulerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit scheduler " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND, id));
         if(! auditSchedulerService.userCanScheduleOnAudit(
                 tanaguruUserDetailsService.getCurrentUser(),
                 auditScheduler.getAudit()
         )){
-            throw new ForbiddenException("Cannot access audit scheduler " + auditScheduler.getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_SCHEDULER, auditScheduler.getId());
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.constant.CustomError;
+import com.tanaguru.custom.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
 import com.tanaguru.repository.AuditLogRepository;
@@ -14,9 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityNotFoundException;
-import java.util.Collection;
 
 /**
  * @author rcharre
@@ -58,7 +57,7 @@ public class AuditLogController {
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
         return auditLogRepository.findAllByAudit(audit, PageRequest.of(page, size, Sort.by("date")));
     }
 }
