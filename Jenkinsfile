@@ -38,22 +38,10 @@ pipeline {
                 unstash 'tanaguru2020-rest'
                 unstash 'version'
                 sh '''
-                wget http://download-origin.cdn.mozilla.net/pub/firefox/releases/69.0/linux-x86_64/en-US/firefox-69.0.tar.bz2
-                mv firefox-69.0.tar.bz2 tanaguru2020-rest/image/
-                '''
-
-                sh '''
-                wget https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
-                mv geckodriver-v0.21.0-linux64.tar.gz tanaguru2020-rest/image/
-                '''
-
-                sh '''
                 REST_VERSION=$(cat version.txt)
                 mv tanaguru-rest/target/tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 docker build -t tanaguru2020-rest:${REST_VERSION} \
                     --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz \
-                    --build-arg FIREFOX_ARCHIVE_PATH=firefox-69.0.tar.bz2 \
-                    --build-arg GECKODRIVER_ARCHIVE_PATH=geckodriver-v0.21.0-linux64.tar.gz \
                     ./tanaguru2020-rest/image/
                 '''
             }

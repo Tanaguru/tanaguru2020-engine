@@ -80,14 +80,11 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     	switch (browserName) {
         case CHROME:
         	ChromeOptions chromeOptions = new ChromeOptions();
-
-        	chromeOptions.setBinary(chromeBinaryPath);
-        	chromeOptions.addArguments("--headless");
         	setChromePreferences(chromeOptions);
         	remoteWebDriver = new ChromeDriver(chromeOptions);
         	remoteWebDriver.manage().deleteAllCookies();
         	
-        	result = Optional.ofNullable(remoteWebDriver);
+        	result = Optional.of(remoteWebDriver);
             break;
 
         case FIREFOX:
@@ -100,7 +97,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
             remoteWebDriver = new FirefoxDriver(firefoxOptions);
             remoteWebDriver.manage().deleteAllCookies();
 
-            result = Optional.ofNullable(remoteWebDriver);
+            result = Optional.of(remoteWebDriver);
             break;
 
         default:
@@ -121,6 +118,10 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     
     private void setChromePreferences(ChromeOptions options) {
     	options.addArguments("--disable-application-cache");
+        options.setBinary(chromeBinaryPath);
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--whitelisted-ips");
     	options.addArguments("--no-default-browser-check");
         options.addArguments("--safebrowsing-disable-auto-update");
         options.addArguments("--disable-component-update");
