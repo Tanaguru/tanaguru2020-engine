@@ -33,7 +33,7 @@ public class AppRoleServiceImpl implements AppRoleService {
     public void initRoleMap() {
         for (EAppRole role : EAppRole.values()) {
             AppRole appRole = appRoleRepository.findByName(role)
-                    .orElseThrow(() -> new CustomIllegalStateException(CustomError.APP_ROLE_NOT_FOUND, role.toString()));
+                    .orElseThrow(() -> new CustomIllegalStateException(CustomError.APP_ROLE_NOT_FOUND, new String[] { role.toString() } ));
             appRoleMap.put(role, appRole);
 
             appAuthorityByAppRoleMap.put(

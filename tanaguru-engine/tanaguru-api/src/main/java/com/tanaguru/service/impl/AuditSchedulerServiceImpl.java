@@ -57,12 +57,12 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
 
     public AuditScheduler createAuditScheduler(Audit audit, int timer){
         if(timer < MIN_TIMER){
-            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, timer);
+            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, new String[] { String.valueOf(timer) } );
         }
 
         Optional<AuditScheduler> auditSchedulerOpt = auditSchedulerRepository.findByAudit(audit);
         if(auditSchedulerOpt.isPresent()){
-            throw new CustomInvalidEntityException(CustomError.SCHEDULER_ALREADY_EXISTS_FOR_AUDIT, audit.getId());
+            throw new CustomInvalidEntityException(CustomError.SCHEDULER_ALREADY_EXISTS_FOR_AUDIT, new String[] { String.valueOf(audit.getId()) } );
         }
 
         AuditScheduler auditScheduler = new AuditScheduler();
@@ -76,7 +76,7 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
 
     public AuditScheduler modifyAuditScheduler(AuditScheduler auditScheduler, int timer, Date lastExecution){
         if(auditScheduler.getScheduler() < MIN_TIMER){
-            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, auditScheduler.getScheduler());
+            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, new String[] { String.valueOf(auditScheduler.getScheduler()) });
         }
 
         auditScheduler.setScheduler(timer);

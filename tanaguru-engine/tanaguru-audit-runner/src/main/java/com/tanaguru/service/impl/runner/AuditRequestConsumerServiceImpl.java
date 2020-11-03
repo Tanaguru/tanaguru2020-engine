@@ -86,7 +86,7 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                         new OffsetAndMetadata(consumerRecord.offset() + 1));
 
                 Audit audit = auditRepository.findById(auditRequest.getIdAudit())
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditRequest.getIdAudit()));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { auditRequest.getIdAudit() } ));
 
                 runAudit(audit);
                 auditRequestConsumer.commitSync(partitionOffsetAndMetadataMap);

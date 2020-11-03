@@ -27,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.Collection;
 
@@ -64,6 +63,7 @@ public class ProjectController {
     @ApiOperation(
             value = "Get All projects current user is member of for a given Contract id",
             notes = "User must must have SHOW_CONTRACT authority on contract"
+                    + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -78,7 +78,7 @@ public class ProjectController {
     @GetMapping(value = "/member-of/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllByContractAndCurrentUserIsMemberOf(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
         return projectService.findAllByContractAndUser(
                 contract,
                 tanaguruUserDetailsService.getCurrentUser()
@@ -88,6 +88,7 @@ public class ProjectController {
     @ApiOperation(
             value = "Get All projects current user has authority on for a given Contract id",
             notes = "User must must have SHOW_CONTRACT authority on contract"
+                    + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -102,7 +103,7 @@ public class ProjectController {
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllWithAuthoritiesByContract(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
 
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
@@ -116,7 +117,8 @@ public class ProjectController {
      * @return Get one @see Project
      */
     @ApiOperation(
-            value = "Get Project for a given Audit id"
+            value = "Get Project for a given Audit id",
+            notes = "If audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -132,7 +134,7 @@ public class ProjectController {
                           @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
 
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
 
         return projectService.findByAudit(audit)
                 .orElse(null);
@@ -144,6 +146,7 @@ public class ProjectController {
     @ApiOperation(
             value = "Get Project by id",
             notes = "User must have SHOW_PROJECT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -159,14 +162,15 @@ public class ProjectController {
     public @ResponseBody
     Project findById(@PathVariable long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
     }
 
     /**
      * @return Get current @see ProjectAuthority names for a given @see Project
      */
     @ApiOperation(
-            value = "Get current User authorities on project"
+            value = "Get current User authorities on project",
+            notes = "If project not found, exception raise : PROJECT_NOT_FOUND with project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -178,7 +182,7 @@ public class ProjectController {
     public @ResponseBody
     Collection<String> findAuthoritiesByProjectId(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
 
         return projectService.getUserAuthoritiesOnProject(tanaguruUserDetailsService.getCurrentUser(), project);
     }
@@ -186,6 +190,9 @@ public class ProjectController {
     @ApiOperation(
             value = "Create a Project",
             notes = "User must have CREATE_PROJECT authority on Contract"
+                    + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nIf project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number"
+                    + "\nIf the project domain is invalid, exception raise : INVALID_DOMAIN with project domain"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -203,14 +210,14 @@ public class ProjectController {
         User user = tanaguruUserDetailsService.getCurrentUser();
 
         Contract contract = contractRepository.findById(project.getContractId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, project.getContractId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { project.getContractId() } ));
 
         if(contract.getProjectLimit() > 0 && contract.getProjects().size() >= contract.getProjectLimit()) {
-            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId() + "," + contract.getProjectLimit());
+            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, new long[] { contract.getId(),contract.getProjectLimit() } );
         }
 
         if(!UrlHelper.isValid(project.getDomain())){
-            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
+            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, new String[] { project.getDomain() } );
         }
 
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
@@ -230,6 +237,7 @@ public class ProjectController {
     @ApiOperation(
             value = "Delete a Project",
             notes = "User must have DELETE_PROJECT authority on Contract"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -245,7 +253,7 @@ public class ProjectController {
     public void deleteProject(@PathVariable long id) {
         projectService.deleteProject(
                 projectRepository.findById(id)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id))
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ))
         );
     }
 
@@ -257,6 +265,8 @@ public class ProjectController {
     @ApiOperation(
             value = "Add a member to a Project",
             notes = "User must have INVITE_MEMBER authority on Project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -272,9 +282,9 @@ public class ProjectController {
     public ProjectAppUser addMember(@PathVariable long projectId, @PathVariable long userId){
         return projectService.addMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } )));
     }
 
     /**
@@ -285,6 +295,8 @@ public class ProjectController {
     @ApiOperation(
             value = "Remove a member of a Project",
             notes = "User must have REMOVE_MEMBER authority on Project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -300,15 +312,20 @@ public class ProjectController {
     public void removeMember(@PathVariable long projectId, @PathVariable long userId){
         projectService.removeMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
         );
     }
 
     @ApiOperation(
             value = "Promote a member of a Project",
             notes = "User must have PROMOTE_MEMBER authority on Project"
+                    + "\nIf user try to promote himself, exception raise : CANNOT_PROMOTE_YOURSELF"
+                    + "\nIf project cannot promote user, exception raise :  PROJECT_CANNOT_PROMOTE_USER"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id"
+                    + "\nIf user is not found, for the project, exception raise : USER_NOT_FOUND_FOR_PROJECT with user id and project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -333,10 +350,10 @@ public class ProjectController {
 
         ProjectAppUser target = projectUserRepository.findByProjectAndContractAppUser_User(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + "," + projectId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new long[] { userId, projectId  }));
 
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);

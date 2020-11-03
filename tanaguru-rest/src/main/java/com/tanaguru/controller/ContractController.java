@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -76,6 +75,7 @@ public class ContractController {
     @ApiOperation(
             value = "Get Contracts for a given User",
             notes = "User must have SHOW_USER authority"
+                    + "\nIf user not found exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -88,7 +88,7 @@ public class ContractController {
     public @ResponseBody
     Collection<Contract> findAllByUser(@PathVariable long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } ));
         Collection<Contract> userContracts = contractService.findByUser(user);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
             userContracts = userContracts.stream().filter(contract ->
@@ -166,6 +166,7 @@ public class ContractController {
     @ApiOperation(
             value = "Get contracts by id",
             notes = "User must have SHOW_CONTRACT authority"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -181,7 +182,7 @@ public class ContractController {
     public @ResponseBody
     Contract findById(@PathVariable long id) {
         return contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
     }
 
     /**
@@ -190,6 +191,8 @@ public class ContractController {
     @ApiOperation(
             value = "Get contracts by user",
             notes = "User must logged in"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nOr if user is not found for a contract, exception raise : USER_NOT_FOUND_FOR_CONTRACT with user id and contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -202,12 +205,12 @@ public class ContractController {
     public @ResponseBody
     Collection<String> findAuthoritiesByContractId(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
 
         User currentUser = tanaguruUserDetailsService.getCurrentUser();
 
         Collection<String> contractAuthorities = contractUserRepository.findByContractAndUser(contract, currentUser)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, currentUser.getId() + "," + contract.getId()))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, new long[] { currentUser.getId(),contract.getId() } ))
                 .getContractRole().getAuthorities().stream()
                     .map((ContractAuthority::getName))
                 .collect(Collectors.toList());
@@ -226,6 +229,8 @@ public class ContractController {
     @ApiOperation(
             value = "Create a contract for user",
             notes = "User must have CREATE_CONTRACT authority"
+                    + "\nIf user not found exception raise : USER_NOT_FOUND with user id"
+                    + "\nOr if a user try to create multiple contract, exception raise : CANNOT_CREATE_MULTIPLE_USER_CONTRACT"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -238,7 +243,7 @@ public class ContractController {
     public @ResponseBody
     Contract createContract(@RequestBody @Valid ContractDTO contract) {
         User owner = userRepository.findById(contract.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contract.getOwnerId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { contract.getOwnerId() }));
 
         //TODO REMOVE LIMITATION
         Collection<Contract> owned = contractService.findByOwner(owner);
@@ -261,6 +266,8 @@ public class ContractController {
     @ApiOperation(
             value = "Modify a contract",
             notes = "User must have MODIFY_CONTRACT authority"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nOr if user not found exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -273,10 +280,10 @@ public class ContractController {
     public @ResponseBody
     Contract modifyContract(@RequestBody @Valid ContractDTO contractDto, @PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
 
         User owner = userRepository.findById(contractDto.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { contractDto.getOwnerId() } ));
 
         return contractService.modifyContract(
                 contract,
@@ -294,7 +301,8 @@ public class ContractController {
      */
     @ApiOperation(
             value = "Delete a contract",
-            notes = "User must have DELETE_CONTRACT authority"
+            notes = "User must have DELETE_CONTRACT authorit"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -308,7 +316,7 @@ public class ContractController {
     void deleteContract(@PathVariable long id) {
         contractService.deleteContract(
           contractRepository.findById(id)
-            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id))
+            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id }))
         );
     }
 
@@ -321,6 +329,8 @@ public class ContractController {
     @ApiOperation(
             value = "Add a member to a contract",
             notes = "User must have INVITE_MEMBER authority on contract"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nOr if user not found exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -336,9 +346,9 @@ public class ContractController {
     public ContractAppUser addMember(@PathVariable long contractId, @PathVariable long userId){
         return contractService.addMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } )));
     }
 
     /**
@@ -349,6 +359,8 @@ public class ContractController {
     @ApiOperation(
             value = "Remove a member of a contract",
             notes = "User must have REMOVE_MEMBER authority on contract"
+                    + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nOr if user not found exception raise : USER_NOT_FOUND with user id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -364,15 +376,21 @@ public class ContractController {
     public void removeMember(@PathVariable long contractId, @PathVariable long userId){
         contractService.removeMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
         );
     }
 
     @ApiOperation(
             value = "Promote a member of a contract",
             notes = "User must have PROMOTE_MEMBER authority on contract"
+                    + "\nIf user try to promote himself, exception raise : CANNOT_PROMOTE_YOURSELF"
+                    + "\nOr if this project role cannot be used to promote a user, exception raise : PROJECT_CANNOT_PROMOTE_USER"
+                    + "\nOr if contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nOr if user cannot promote contract owner, exception raise : CANNOT_PROMOTE_CONTRACT_OWNER"
+                    + "\nOr if user not found, exception raise : USER_NOT_FOUND with user id"
+                    + "\nOr if user is not found for project, exception raise : USER_NOT_FOUND_FOR_PROJECT with user id and project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -396,7 +414,7 @@ public class ContractController {
         }
 
         Contract contract =  contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } ));
 
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
         if(owner.getUser().getId() == userId){
@@ -406,8 +424,8 @@ public class ContractController {
         ContractAppUser target = contractUserRepository.findByContractAndUser(
                 contract,
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + "," + contractId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new long[] { userId , contractId } ));
 
         target.setContractRole(contractService.getContractRole(contractRole));
         return contractUserRepository.save(target);

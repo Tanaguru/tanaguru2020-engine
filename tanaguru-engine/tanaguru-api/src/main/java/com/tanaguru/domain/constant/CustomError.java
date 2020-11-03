@@ -57,14 +57,13 @@ public class CustomError {
     public final static String PROJECT_ROLE_NOT_FOUND = "PROJECT_ROLE_NOT_FOUND";
     
     public final static String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
+    
     public final static String SCENARIO_NOT_FOUND = "SCENARIO_NOT_FOUND";
-    
     public final static String SCHEDULER_ALREADY_EXISTS_FOR_AUDIT = "SCHEDULER_ALREADY_EXISTS_FOR_AUDIT";
-    public final static String TANAGURU_TEST_NOT_FOUND = "TANAGURU_TEST_NOT_FOUND";
     
+    public final static String TANAGURU_TEST_NOT_FOUND = "TANAGURU_TEST_NOT_FOUND";
     public final static String TEST_HIERARCHY_NOT_FOUND = "TEST_HIERARCHY_NOT_FOUND";
     public final static String TEST_HIERARCHY_RESULT_NOT_FOUND = "TEST_HIERARCHY_RESULT_NOT_FOUND";
-    
     public final static String TEST_RESULT_NOT_FOUND = "TEST_RESULT_NOT_FOUND";
     public final static String TIMER_VALUE_TOO_SHORT = "TIMER_VALUE_TOO_SHORT";
     

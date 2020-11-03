@@ -2,13 +2,13 @@ package com.tanaguru.domain.dto;
 
 public class ErrorDTO {
     private String error;
-    private String content;
+    private String[] content;
 
     public ErrorDTO(String error) {
         this.error = error;
     }
     
-    public ErrorDTO(String error, String content) {
+    public ErrorDTO(String error, String[] content) {
         this.error = error;
         this.content = content;
     }
@@ -21,11 +21,11 @@ public class ErrorDTO {
         this.error = error;
     }
     
-    public String getContent() {
+    public String[] getContent() {
         return content;
     }
     
-    public void setContent(String content) {
+    public void setContent(String[] content) {
         this.content = content;
     }
 }

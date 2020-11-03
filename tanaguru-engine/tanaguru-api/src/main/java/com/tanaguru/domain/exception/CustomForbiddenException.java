@@ -2,7 +2,7 @@ package com.tanaguru.domain.exception;
 
 public class CustomForbiddenException extends RuntimeException {
     
-    private String content;
+    private String[] content;
     
     public CustomForbiddenException() {
         super();
@@ -12,18 +12,20 @@ public class CustomForbiddenException extends RuntimeException {
         super(message);
     }
     
-    public CustomForbiddenException(String message, String content) {
+    public CustomForbiddenException(String message, String[] content) {
         super(message);
         this.content = content;
     }
     
-    public CustomForbiddenException(String message, long content) {
-        super(message);
-        this.content = String.valueOf(content);
-        
+    public CustomForbiddenException(String error, long[] content) {
+        super(error);
+        this.content = new String[content.length];
+        for(int i=0; i< content.length; i++) {
+            this.content[i] = String.valueOf(content[i]);
+        }
     }
     
-    public String getContent() {
+    public String[] getContent() {
         return content;
     }
 }

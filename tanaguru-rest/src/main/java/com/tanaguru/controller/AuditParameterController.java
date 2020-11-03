@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
 
 /**
@@ -56,6 +55,7 @@ public class AuditParameterController {
      */
     @ApiOperation(
             value = "Get parameter by id",
+            notes = "If audit parameters not found, exception raise : AUDIT_PARAMETERS_NOT_FOUND with audit parameters id",
             response = AuditParameter.class
     )
     @ApiResponses(value = {
@@ -66,12 +66,13 @@ public class AuditParameterController {
     public @ResponseBody
     AuditParameter getAuditParameters(@PathVariable long id) {
         return auditParameterRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_PARAMETERS_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_PARAMETERS_NOT_FOUND, new long[] { id } ));
     }
 
     @ApiOperation(
             value = "Get parameters for a given Audit id",
             notes = "User must have SHOW_AUDIT authority on audit's project or a valid sharecode"
+                    + "\n If audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -87,7 +88,7 @@ public class AuditParameterController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
 
         return audit.getParametersAsMap().values();
     }

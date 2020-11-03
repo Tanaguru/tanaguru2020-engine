@@ -1,9 +1,11 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.dto.TanaguruTestDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import io.swagger.annotations.ApiOperation;
@@ -12,7 +14,6 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,8 @@ public class TanaguruTestController {
      * @return The @see TanaguruTest
      */
     @ApiOperation(
-            value = "Get TanaguruTest for a given id")
+            value = "Get TanaguruTest for a given id",
+            notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "TanaguruTest not found")
@@ -47,7 +49,7 @@ public class TanaguruTestController {
             @PathVariable long id) {
         return new TanaguruTestDTO(
                 tanaguruTestRepository.findById(id)
-                    .orElseThrow(EntityNotFoundException::new));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } )));
     }
 
     /**
@@ -56,7 +58,8 @@ public class TanaguruTestController {
      * @return The collection of @see TanaguruTest
      */
     @ApiOperation(
-            value = "Get all TanaguruTest for a given referernce id")
+            value = "Get all TanaguruTest for a given referernce id",
+            notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "Reference not found")
@@ -66,7 +69,7 @@ public class TanaguruTestController {
     Collection<TanaguruTestDTO> getByReferenceId(
             @PathVariable long id) {
         TestHierarchy reference = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } ));
 
         return tanaguruTestRepository.findAllByTestHierarchies_ReferenceAndIsDeletedIsFalse(reference)
                 .stream()
@@ -80,7 +83,8 @@ public class TanaguruTestController {
      * @return The collection of @see TanaguruTest
      */
     @ApiOperation(
-            value = "Get all TanaguruTest for a given TestHierarchy id")
+            value = "Get all TanaguruTest for a given TestHierarchy id",
+            notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "TestHierarchy not found")
@@ -90,7 +94,7 @@ public class TanaguruTestController {
     Collection<TanaguruTestDTO> getByTestHierarchyId(
             @PathVariable long id) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } ));
 
         return tanaguruTestRepository.findAllByTestHierarchiesContainsAndIsDeletedIsFalse(testHierarchy)
                 .stream()

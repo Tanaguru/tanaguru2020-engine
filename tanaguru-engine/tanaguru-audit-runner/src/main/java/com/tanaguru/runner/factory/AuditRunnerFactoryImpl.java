@@ -3,10 +3,12 @@ package com.tanaguru.runner.factory;
 import com.tanaguru.config.PropertyConfig;
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.factory.TanaguruCrawlerControllerFactory;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.entity.audit.*;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.driver.factory.TanaguruDriverFactory;
 import com.tanaguru.helper.AESEncrypt;
 import com.tanaguru.repository.AuditReferenceRepository;
@@ -21,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -129,7 +130,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             case SCENARIO:
                 long scenarioId = Long.parseLong(parameterStringMap.get(EAuditParameter.SCENARIO_ID).getValue());
                 Scenario scenario = scenarioRepository.findById(scenarioId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find scenario with id " + scenarioId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { scenarioId } ));
 
                 result = createSeleneseRunner(
                         tanaguruTests,
@@ -145,7 +146,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             case UPLOAD:
                 long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
                 Resource resource = resourceRepository.findById(resourceId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find resource with id " + resourceId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, new long[] { resourceId } ));
                 result = createFileRunner(
                         tanaguruTests,
                         audit,

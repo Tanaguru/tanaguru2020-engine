@@ -17,12 +17,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.openqa.selenium.InvalidArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Comparator;
@@ -56,7 +54,8 @@ public class TestHierarchyController {
      * @return The @see TestHierarchy
      */
     @ApiOperation(
-            value = "Get TestHierarchy for a given id")
+            value = "Get TestHierarchy for a given id",
+            notes = "If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "TestHierarchy not found")
@@ -66,7 +65,7 @@ public class TestHierarchyController {
     TestHierarchyDTO getById(
             @PathVariable long id) {
         return new TestHierarchyDTO(testHierarchyRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,id)));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { id } )));
     }
 
     /**
@@ -109,7 +108,8 @@ public class TestHierarchyController {
      * @return The collection of @see TestHierarchy
      */
     @ApiOperation(
-            value = "Get all TestHierarchy children of a given TestHierarchy id")
+            value = "Get all TestHierarchy children of a given TestHierarchy id",
+            notes = "If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "TestHierarchy not found")
@@ -119,7 +119,7 @@ public class TestHierarchyController {
     Collection<TestHierarchyDTO> getByParentId(
             @PathVariable long id) {
         return testHierarchyRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,id))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { id } ))
                 .getChildren().stream()
                 .sorted(Comparator.comparingInt(TestHierarchy::getRank))
                 .map(TestHierarchyDTO::new)
@@ -127,7 +127,9 @@ public class TestHierarchyController {
     }
 
     @ApiOperation(
-            value = "Get all TestHierarchy for a given TanaguruTest id and TestHierarchy id")
+            value = "Get all TestHierarchy for a given TanaguruTest id and TestHierarchy id",
+            notes = "If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id"
+                    + "\nIf tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "TanaguruTest or TestHierarchy not found")
@@ -138,10 +140,10 @@ public class TestHierarchyController {
             @PathVariable long testId,
             @PathVariable long referenceId) {
         TestHierarchy reference = testHierarchyRepository.findById(referenceId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,referenceId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { referenceId } ));
 
         TanaguruTest test = tanaguruTestRepository.findById(testId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, testId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { testId } ));
 
         return testHierarchyRepository.findByReferenceAndTanaguruTestsContains(reference, test)
                 .stream().map(TestHierarchyDTO::new).collect(Collectors.toList());
@@ -154,7 +156,9 @@ public class TestHierarchyController {
      */
     @ApiOperation(
             value = "Get all references for a given audit id",
-            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode")
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
+                    + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -167,10 +171,10 @@ public class TestHierarchyController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
-            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, new long[] {audit.getId() } );
         }
 
         return audit.getAuditReferences().stream().map(
@@ -184,7 +188,9 @@ public class TestHierarchyController {
      */
     @ApiOperation(
             value = "Create a TestHierarchy",
-            notes = "User must have CREATE_REFERENCE authority")
+            notes = "User must have CREATE_REFERENCE authority"
+                    + "\nIf try to create multiples references, exception raise : CANNOT_CREATE_MULTIPLE_REFERENCES with test hierarchy code"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -196,7 +202,7 @@ public class TestHierarchyController {
     public @ResponseBody
     TestHierarchyDTO createTestHierarchy(@RequestBody @Valid TestHierarchyDTO testHierarchyDTO) {
         if(testHierarchyDTO.getParentId() != null && testHierarchyRepository.findByCodeAndParentIsNull(testHierarchyDTO.getCode()).isPresent()){
-            throw new CustomInvalidArgumentException(CustomError.CANNOT_CREATE_MULTIPLE_REFERENCES, testHierarchyDTO.getCode());
+            throw new CustomInvalidArgumentException(CustomError.CANNOT_CREATE_MULTIPLE_REFERENCES, new String[] { testHierarchyDTO.getCode() } );
         }
 
         TestHierarchy testHierarchy = new TestHierarchy();
@@ -209,14 +215,14 @@ public class TestHierarchyController {
                 testHierarchyDTO.getReferenceId() == null ?
                         null :
                         testHierarchyRepository.findById(testHierarchyDTO.getReferenceId())
-                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyDTO.getReferenceId()))
+                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { testHierarchyDTO.getReferenceId() } ))
         );
 
         testHierarchy.setParent(
                 testHierarchyDTO.getParentId() == null ?
                         null :
                         testHierarchyRepository.findById(testHierarchyDTO.getParentId())
-                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyDTO.getParentId()))
+                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { testHierarchyDTO.getParentId() } ))
                 );
 
         return new TestHierarchyDTO(testHierarchyRepository.save(testHierarchy));
@@ -227,7 +233,8 @@ public class TestHierarchyController {
      */
     @ApiOperation(
             value = "Delete a TestHierarchy and children",
-            notes = "User must have DELETE_REFERENCE authority")
+            notes = "User must have DELETE_REFERENCE authority"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -240,7 +247,7 @@ public class TestHierarchyController {
     public @ResponseBody
     void deleteReference(@PathVariable long id) {
         TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { id } ));
 
         testHierarchyService.deleteReference(testHierarchy);
     }
@@ -251,7 +258,9 @@ public class TestHierarchyController {
      */
     @ApiOperation(
             value = "Add a TanaguruTest to a given TestHierarchy",
-            notes = "User must have CREATE_REFERENCE authority")
+            notes = "User must have CREATE_REFERENCE authority"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id"
+                    + "\nIf tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -264,10 +273,10 @@ public class TestHierarchyController {
     public @ResponseBody
     void addTestToTestHierarchy(@PathVariable long testHierarchyId, @PathVariable long testId) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { testHierarchyId } ));
 
         TanaguruTest tanaguruTest = tanaguruTestRepository.findById(testId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, testId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { testId } ));
 
         Collection<TanaguruTest> tanaguruTests = testHierarchy.getTanaguruTests();
         tanaguruTests.add(tanaguruTest);
@@ -280,7 +289,8 @@ public class TestHierarchyController {
      */
     @ApiOperation(
             value = "Add a TanaguruTest list to a given TestHierarchy",
-            notes = "User must have CREATE_REFERENCE authority")
+            notes = "User must have CREATE_REFERENCE authority"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -293,7 +303,7 @@ public class TestHierarchyController {
     public @ResponseBody
     void addTestListToTestHierarchy(@PathVariable long testHierarchyId, @RequestBody Collection<Long> tanaguruTestIds) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { testHierarchyId } ));
 
         Collection<TanaguruTest> tanaguruTests = tanaguruTestRepository.findAllById(tanaguruTestIds);
 

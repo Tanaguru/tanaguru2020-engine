@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -66,7 +65,8 @@ public class AuditController {
      */
     @ApiOperation(
             value = "Get an Audit for a given id",
-            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id",
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -82,7 +82,7 @@ public class AuditController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         return auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
     }
 
     /**
@@ -94,6 +94,7 @@ public class AuditController {
     @ApiOperation(
             value = "Get all audits for a given Project id",
             notes = "User must have SHOW_AUDIT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -109,12 +110,13 @@ public class AuditController {
     public @ResponseBody
     Collection<Audit> getAuditsByProject(@PathVariable long id) {
         return auditService.findAllByProject(projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id)));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } )));
     }
 
     @ApiOperation(
             value = "Get last Audit by project id",
-            notes = "User must have SHOW_AUDIT authority on project",
+            notes = "User must have SHOW_AUDIT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id",
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -130,14 +132,15 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProject(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
         Optional<Act> actOptional = actRepository.findFirstByProjectOrderByDateDesc(project);
         return actOptional.map(Act::getAudit).orElse(null);
     }
 
     @ApiOperation(
             value = "Get last Audit by project id and audit type",
-            notes = "User must have SHOW_AUDIT authority on project",
+            notes = "User must have SHOW_AUDIT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id",
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -153,7 +156,7 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProjectAndAuditType(@PathVariable long id, @PathVariable EAuditType type) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
         Optional<Act> actOptional = actRepository.findFirstByProjectAndAudit_TypeOrderByDateDesc(project, type);
         return actOptional.map(Act::getAudit).orElse(null);
     }
@@ -193,7 +196,9 @@ public class AuditController {
      */
     @ApiOperation(
             value = "Start an audit",
-            notes = "User must have START_AUDIT authority on project",
+            notes = "User must have START_AUDIT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nOr if reference test hierarchy not found, exception raise : NO_USABLE_REFERENCE with reference id",
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -213,7 +218,7 @@ public class AuditController {
         }
 
         Project project = projectRepository.findById(auditCommand.getProjectId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, auditCommand.getProjectId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { auditCommand.getProjectId() } ));
 
         if(new Date().after(project.getContract().getDateEnd())){
             throw new CustomForbiddenException(CustomError.CONTRACT_DATE_PASSED);
@@ -223,7 +228,7 @@ public class AuditController {
         ArrayList<TestHierarchy> references = new ArrayList<>();
         for(Long referenceId : auditCommand.getReferences()){
             TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(referenceId)
-                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.NO_USABLE_REFERENCE, referenceId));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.NO_USABLE_REFERENCE, new long[] { referenceId } ));
             if(testHierarchy.getId() == auditCommand.getMainReference()){
                 main = testHierarchy;
             }
@@ -250,6 +255,7 @@ public class AuditController {
     @ApiOperation(
             value = "Delete an audit by id",
             notes = "User must have DELETE_AUDIT authority on project"
+                    + "\nIf audit not found, exception raise: AUDIT_NOT_FOUND with audit id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -263,6 +269,6 @@ public class AuditController {
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         auditService.deleteAudit(auditRepository.findById(id)
-                .orElseThrow(CustomEntityNotFoundException::new));
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, new long[] { id } )));
     }
 }

@@ -34,7 +34,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -109,7 +108,8 @@ public class UserController {
      */
     @ApiOperation(
             value = "Get a User by id",
-            notes = "User must have SHOW_USER authority or be the current User")
+            notes = "User must have SHOW_USER authority or be the current User"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -122,7 +122,7 @@ public class UserController {
     public @ResponseBody
     User getUser(@PathVariable long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } ));
     }
 
     /**
@@ -150,7 +150,8 @@ public class UserController {
      */
     @ApiOperation(
             value = "Get User for a given username",
-            notes = "User must have SHOW_USER authority")
+            notes = "User must have SHOW_USER authority"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with username")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -162,7 +163,7 @@ public class UserController {
     public @ResponseBody
     User getUser(@PathVariable String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new String[] {username}));
     }
 
     /**
@@ -173,7 +174,10 @@ public class UserController {
      */
     @ApiOperation(
             value = "Create a User",
-            notes = "User must have CREATE_USER authority")
+            notes = "User must have CREATE_USER authority"
+                    + "\nIf username already exists, exception raise : USERNAME_ALREADY_EXISTS"
+                    + "\nIf email already exists, exception raise : EMAIL_ALREADY_EXISTS"
+                    + "\nIf invalid password, exception raise : INVALID_PASSWORD")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -212,7 +216,9 @@ public class UserController {
      */
     @ApiOperation(
             value = "Modify a User",
-            notes = "User must have MODIFY_USER authority")
+            notes = "User must have MODIFY_USER authority"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id"
+                    + "\nIf App role not found, exception raise : APP_ROLE_NOT_FOUND with app role")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -224,7 +230,7 @@ public class UserController {
     public @ResponseBody
     User modifyUser(@RequestBody @Valid UserDTO user) {
         User from = userRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { user.getId() } ));
 
         User to = new User();
         to.setUsername(user.getUsername());
@@ -236,7 +242,7 @@ public class UserController {
                 userDetailsService.getCurrentUser().getId() != from.getId() &&
                 userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)){
             to.setAppRole(appRoleService.getAppRole(user.getAppRole())
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString())));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, new String[] { user.getAppRole().toString() } )));
         }
 
         return userService.modifyUser(from, to);
@@ -276,7 +282,9 @@ public class UserController {
      */
     @ApiOperation(
             value = "Delete current User",
-            notes = "User must have DELETE_USER authority")
+            notes = "User must have DELETE_USER authority"
+                    + "\nIf cannot delete current user, exception raise : CANNOT_DELETE_CURRENT_USER"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -292,7 +300,7 @@ public class UserController {
         }
 
         userService.deleteUser(userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id)));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } )));
     }
 
     /**
@@ -340,7 +348,8 @@ public class UserController {
     }
 
     @ApiOperation(
-            value = "Send a reset password email to the given email address")
+            value = "Send a reset password email to the given email address",
+            notes = "If error sending mail, exception raise : ERROR_SENDING_MAIL")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 500, message = "Error while sending email")
@@ -377,7 +386,8 @@ public class UserController {
      */
     @ApiOperation(
             value = "Change a User password",
-            notes = "User must have MODIFY_USER authority or must be current User")
+            notes = "User must have MODIFY_USER authority or must be current User"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -388,7 +398,7 @@ public class UserController {
     public @ResponseBody
     User changePassword(@RequestBody ChangePasswordCommandDTO changePasswordCommandDTO) {
         User user = userRepository.findById(changePasswordCommandDTO.getUserId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, changePasswordCommandDTO.getUserId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { changePasswordCommandDTO.getUserId() } ));
 
         User current = userDetailsService.getCurrentUser();
         Calendar c = Calendar.getInstance();
@@ -406,7 +416,7 @@ public class UserController {
                 ){
             return userDetailsService.changeUserPassword(user, changePasswordCommandDTO.getPassword());
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, changePasswordCommandDTO.getUserId());
+            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, new long[] { changePasswordCommandDTO.getUserId() } );
         }
     }
 }

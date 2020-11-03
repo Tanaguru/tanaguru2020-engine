@@ -40,6 +40,7 @@ public class AuditLogController {
     @ApiOperation(
             value = "Get paginable AuditLog for a given Audit id",
             notes = "User must have SHOW_AUDIT authority on audit's project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -57,7 +58,7 @@ public class AuditLogController {
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
         return auditLogRepository.findAllByAudit(audit, PageRequest.of(page, size, Sort.by("date")));
     }
 }

@@ -19,7 +19,6 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.Base64;
 import java.util.Collection;
@@ -51,6 +50,8 @@ public class ScenarioController {
     @ApiOperation(
             value = "Get Scenario for a given id",
             notes = "User must have SHOW_PROJECT authority on Project"
+                    + "\nIf scenario not found, exception raise : SCENARIO_NOT_FOUND with scenario id"
+                    + "\nIf user cannot access the scenario, exception raise : USER_CANNOT_ACCESS_SCENARIO with scenario id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -63,7 +64,7 @@ public class ScenarioController {
     public @ResponseBody
     Scenario getScenario(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { id } ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -72,7 +73,7 @@ public class ScenarioController {
                 true)){
             return scenario;
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_SCENARIO, id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_SCENARIO, new long[] { id } );
         }
     }
 
@@ -107,6 +108,8 @@ public class ScenarioController {
     @ApiOperation(
             value = "Create Scenario for a given project id",
             notes = "User must have ADD_SCENARIO authority on Project"
+                    + "\nIf project not found exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nIf invalid scenario content, exception raise : INVALID_SCENARIO_CONTENT"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -122,7 +125,7 @@ public class ScenarioController {
     public @ResponseBody
     Scenario createScenario(@RequestBody @Valid ScenarioDTO scenarioDTO) {
         Project project = projectRepository.findById(scenarioDTO.getProjectId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, scenarioDTO.getProjectId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { scenarioDTO.getProjectId() } ));
 
         String content = new String(Base64.getDecoder().decode(scenarioDTO.getContent()));
 
@@ -143,6 +146,8 @@ public class ScenarioController {
     @ApiOperation(
             value = "Delete Scenario for a given id",
             notes = "User must have DELETE_SCENARIO authority on Project"
+                    + "\nIf scenario not found, exception raise : SCENARIO_NOT_FOUND with scenario id"
+                    + "\nIf user cannot delete the scenario, exception raise : USER_CANNOT_DELETE_SCENARIO with scenario id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -154,7 +159,7 @@ public class ScenarioController {
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND,id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { id } ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -164,7 +169,7 @@ public class ScenarioController {
             scenario.setDeleted(true);
             scenarioRepository.save(scenario);
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_SCENARIO, id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_SCENARIO, new long[] { id } );
         }
     }
 }

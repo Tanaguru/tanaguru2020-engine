@@ -114,7 +114,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
             auditParameterDefaultValueMap.put(
                     auditParameter.getCode(),
                     auditParameterValueRepository.findFirstByIsDefaultAndAuditParameter(true, auditParameter)
-                            .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_PARAMETER_NO_DEFAULT_VALUE , auditParameter.getCode().toString()))
+                            .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_PARAMETER_NO_DEFAULT_VALUE , new String[] { auditParameter.getCode().toString() }))
             );
         }
     }
@@ -180,7 +180,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
 
                 definiteParameters.put(parameter, existingParameterValueOpt);
             } else {
-                throw new CustomInvalidEntityException(CustomError.INVALID_VALUE_PARAMETER, parameter.getCode() + "," + value);
+                throw new CustomInvalidEntityException(CustomError.INVALID_VALUE_PARAMETER, new String[] { parameter.getCode().toString(), value } );
             }
         }
 

@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
 
 /**
@@ -41,6 +40,8 @@ public class PageController {
     @ApiOperation(
             value = "Get Page for a given id",
             notes = "User must have SHOW_AUDIT authority on page's project or a valid sharecode"
+                    + "\nIf page not found, exception raise : PAGE_NOT_FOUND with page id"
+                    + "\nIf user cannot access page content, exception raise : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE with page id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -53,12 +54,12 @@ public class PageController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { id } ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return page;
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, new long[] { id } );
         }
     }
 
@@ -72,6 +73,7 @@ public class PageController {
     @ApiOperation(
             value = "Get all Page for a given Audit id",
             notes = "User must have SHOW_AUDIT authority on audit's project or a valid sharecode"
+                    + "\nIf user cannot access pages for the audit, exception raise : CANNOT_ACCESS_PAGES_FOR_AUDIT with audit id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -86,7 +88,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id);
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, new long[] { id } );
         }
     }
 
@@ -100,6 +102,7 @@ public class PageController {
     @ApiOperation(
             value = "Get paginated Page for a given Audit id",
             notes = "User must have SHOW_AUDIT authority on audit's project or a valid sharecode"
+                    + "\nIf user cannot access pages for the audit, exception raise : CANNOT_ACCESS_PAGES_FOR_AUDIT"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -116,7 +119,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id, PageRequest.of(page, size));
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, new long[] { id } );
         }
     }
 }

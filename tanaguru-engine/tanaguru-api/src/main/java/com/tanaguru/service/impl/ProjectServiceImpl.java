@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,7 +75,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         for (EProjectRole projectRole : EProjectRole.values()) {
             projectRoleMap.put(projectRole, projectRoleRepository.findByName(projectRole)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_ROLE_NOT_FOUND, projectRole.toString())));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_ROLE_NOT_FOUND, new String[] { projectRole.toString() } )));
         }
     }
 
@@ -147,7 +146,7 @@ public class ProjectServiceImpl implements ProjectService {
                         getRoleAuthorities(EProjectRole.PROJECT_MANAGER) :
 
         projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, user.getId() + "," + project.getId()))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new String[] { String.valueOf(user.getId()) , String.valueOf(project.getId()) } ))
                 .getProjectRole().getAuthorities().stream()
                 .map((ProjectAuthority::getName))
                 .collect(Collectors.toList());
@@ -180,7 +179,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectAppUser addMember(Project project, User user){
         if(!projectUserRepository.findByProjectAndContractAppUser_User(project, user).isPresent()){
             ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(project.getContract(), user)
-                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, + user.getId() + "," + project.getContract().getId()));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, new String[] { String.valueOf(user.getId()) , String.valueOf(project.getContract().getId()) } ));
             ProjectAppUser projectAppUser = new ProjectAppUser();
             projectAppUser.setContractAppUser(contractAppUser);
             projectAppUser.setProject(project);
@@ -193,7 +192,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void removeMember(Project project, User user){
         ProjectAppUser projectAppUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new String[] { String.valueOf(user.getId()) , String.valueOf(project.getId()) } ));
         projectUserRepository.delete(projectAppUser);
     }
 
