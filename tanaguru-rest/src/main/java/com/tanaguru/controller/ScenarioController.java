@@ -1,11 +1,13 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.dto.ScenarioDTO;
 import com.tanaguru.domain.entity.audit.Scenario;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.ScenarioRepository;
 import com.tanaguru.service.ProjectService;
@@ -61,7 +63,7 @@ public class ScenarioController {
     public @ResponseBody
     Scenario getScenario(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, id));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -70,7 +72,7 @@ public class ScenarioController {
                 true)){
             return scenario;
         }else{
-            throw new ForbiddenException("Current user has no access to scenario " + id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_SCENARIO, id);
         }
     }
 
@@ -120,12 +122,12 @@ public class ScenarioController {
     public @ResponseBody
     Scenario createScenario(@RequestBody @Valid ScenarioDTO scenarioDTO) {
         Project project = projectRepository.findById(scenarioDTO.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + scenarioDTO.getProjectId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, scenarioDTO.getProjectId()));
 
         String content = new String(Base64.getDecoder().decode(scenarioDTO.getContent()));
 
         if(! scenarioService.checkScenarioIsValid(content)){
-            throw new InvalidEntityException("Scenario content is invalid");
+            throw new CustomInvalidEntityException(CustomError.INVALID_SCENARIO_CONTENT);
         }
 
         Scenario scenario = new Scenario();
@@ -152,7 +154,7 @@ public class ScenarioController {
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND,id));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -162,7 +164,7 @@ public class ScenarioController {
             scenario.setDeleted(true);
             scenarioRepository.save(scenario);
         }else{
-            throw new ForbiddenException("User has no authority to delete the scenario " + id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_SCENARIO, id);
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.PageContentRepository;
@@ -16,8 +18,6 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityNotFoundException;
 
 /**
  * @author rcharre
@@ -61,12 +61,12 @@ public class PageContentController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return page.getPageContent();
         }else{
-            throw new ForbiddenException("Cannot access page content for page " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, id);
         }
     }
 
@@ -85,11 +85,11 @@ public class PageContentController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
         if(tanaguruUserDetailsService.currentUserCanShowAudit(audit.getId(), shareCode)){
             return pageContentRepository.findFirstByPage_Audit(audit).orElse(null);
         }else{
-            throw new ForbiddenException("Cannot access page content for audit " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT, id);
         }
     }
 
@@ -109,7 +109,7 @@ public class PageContentController {
     void deleteScreenshotByAudit(
             @PathVariable long id) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         for(PageContent pageContent : pageContentRepository.findAllByPage_Audit(audit)){
             pageContent.setScreenshot(null);

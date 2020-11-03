@@ -1,10 +1,12 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.dto.StatusResultDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
@@ -64,20 +66,20 @@ public class StatusResultController {
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
 
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot fine Page with id " + pageId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, pageId));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit(), sharecode)){
-            throw  new ForbiddenException("Current user cannot access to page result " + pageId);
+            throw  new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, pageId);
         }
 
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot fine test hierarchy with id " + testHierarchyId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
 
 
         return new StatusResultDTO(statusResultRepository.findByReferenceAndPage(
                 testHierarchy,
                 page
-        ).orElseThrow(() -> new EntityNotFoundException("Cannot fine TestHierarchyResult for paget " + pageId + " and test hierarchy " + testHierarchyId)));
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE, pageId + "," + testHierarchyId)));
     }
 
 
@@ -96,18 +98,18 @@ public class StatusResultController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find page with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit(), sharecode)){
-            throw new ForbiddenException("Cannot show audit " + page.getAudit().getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, page.getAudit().getId());
         }
 
         return new StatusResultDTO(statusResultRepository.findByReferenceAndPage(
                 auditReferenceRepository.findByAuditAndIsMainIsTrue(page.getAudit())
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find main reference for audit " + page.getAudit().getId()))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, page.getAudit().getId()))
                         .getTestHierarchy(),
                 page
-                ).orElseThrow(() -> new EntityNotFoundException("Cannot find main hierarchy result for given page")));
+                ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE)));
     }
 
     @ApiOperation(
@@ -125,15 +127,15 @@ public class StatusResultController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
-            throw new ForbiddenException("Cannot show audit " + audit.getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId());
         }
 
         return statusResultRepository.findAllByReferenceAndPage_Audit(
                 auditReferenceRepository.findByAuditAndIsMainIsTrue(audit)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find main reference for audit " + audit.getId()))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, audit.getId()))
                         .getTestHierarchy(),
                 audit)
                 .stream().map(StatusResultDTO::new)

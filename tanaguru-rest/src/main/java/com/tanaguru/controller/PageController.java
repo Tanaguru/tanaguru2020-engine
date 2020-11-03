@@ -1,7 +1,9 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
@@ -51,12 +53,12 @@ public class PageController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return page;
         }else{
-            throw new ForbiddenException("Cannot access page " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, id);
         }
     }
 
@@ -84,7 +86,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id);
         }else{
-            throw new ForbiddenException("Cannot access pages for audit " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id);
         }
     }
 
@@ -114,7 +116,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id, PageRequest.of(page, size));
         }else{
-            throw new ForbiddenException("Cannot access pages for audit " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id);
         }
     }
 }

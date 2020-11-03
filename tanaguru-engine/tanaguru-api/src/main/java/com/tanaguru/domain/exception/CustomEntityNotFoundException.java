@@ -1,4 +1,4 @@
-package com.tanaguru.custom.exception;
+package com.tanaguru.domain.exception;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -23,6 +23,7 @@ public class CustomEntityNotFoundException extends EntityNotFoundException{
     public CustomEntityNotFoundException(String error, long content) {
         super(error);
         this.content = String.valueOf(content);
+       
     }
     
     public String getContent() {

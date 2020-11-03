@@ -1,8 +1,8 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.constant.CustomError;
-import com.tanaguru.custom.exception.CustomEntityNotFoundException;
-import com.tanaguru.custom.exception.CustomForbiddenException;
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.ContractAuthorityName;
 import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.dto.ContractDTO;
@@ -407,7 +407,7 @@ public class ContractController {
                 contract,
                 userRepository.findById(userId)
                         .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + " , " + contractId));
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + "," + contractId));
 
         target.setContractRole(contractService.getContractRole(contractRole));
         return contractUserRepository.save(target);

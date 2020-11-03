@@ -1,8 +1,8 @@
 package com.tanaguru.service.impl;
 
-import com.tanaguru.constant.CustomError;
-import com.tanaguru.custom.exception.CustomEntityNotFoundException;
-import com.tanaguru.custom.exception.CustomIllegalStateException;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomIllegalStateException;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;

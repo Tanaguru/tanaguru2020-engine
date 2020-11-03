@@ -1,10 +1,12 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.dto.ResourceDTO;
 import com.tanaguru.domain.entity.audit.Resource;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.ResourceRepository;
 import com.tanaguru.service.ProjectService;
@@ -66,7 +68,7 @@ public class ResourceController {
                 true)){
             return resource;
         }else{
-            throw new ForbiddenException("Current user has no access to resource " + id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_RESOURCE, id);
         }
     }
 
@@ -116,7 +118,7 @@ public class ResourceController {
     public @ResponseBody
     Resource createResource(@RequestBody @Valid ResourceDTO resourceDTO) {
         Project project = projectRepository.findById(resourceDTO.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + resourceDTO.getProjectId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, resourceDTO.getProjectId()));
 
         Resource resource = new Resource();
         resource.setContent(
@@ -144,7 +146,7 @@ public class ResourceController {
     public @ResponseBody
     void deleteResource(@PathVariable long id) {
         Resource resource = resourceRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND,id));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -155,7 +157,7 @@ public class ResourceController {
             resource.setDeleted(true);
             resourceRepository.save(resource);
         }else{
-            throw new ForbiddenException("User has no authority to delete the resource " + id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_RESOURCE, id);
         }
     }
 }

@@ -20,6 +20,7 @@ public class CustomInvalidEntityException extends RuntimeException {
     public CustomInvalidEntityException(String message, long content) {
         super(message);
         this.content = String.valueOf(content);
+        
     }
     
     public String getContent() {

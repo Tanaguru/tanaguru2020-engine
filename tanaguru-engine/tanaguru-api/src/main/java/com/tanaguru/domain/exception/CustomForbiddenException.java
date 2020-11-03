@@ -1,4 +1,4 @@
-package com.tanaguru.custom.exception;
+package com.tanaguru.domain.exception;
 
 public class CustomForbiddenException extends RuntimeException {
     
@@ -20,6 +20,7 @@ public class CustomForbiddenException extends RuntimeException {
     public CustomForbiddenException(String message, long content) {
         super(message);
         this.content = String.valueOf(content);
+        
     }
     
     public String getContent() {

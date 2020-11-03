@@ -1,7 +1,7 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.constant.CustomError;
-import com.tanaguru.custom.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
 import com.tanaguru.repository.AuditLogRepository;

@@ -1,7 +1,9 @@
 package com.tanaguru.service.impl.runner;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.dto.AuditRequest;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
 import com.tanaguru.service.AuditService;
@@ -20,7 +22,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.util.HashMap;
@@ -85,7 +86,7 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                         new OffsetAndMetadata(consumerRecord.offset() + 1));
 
                 Audit audit = auditRepository.findById(auditRequest.getIdAudit())
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + auditRequest.getIdAudit()));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditRequest.getIdAudit()));
 
                 runAudit(audit);
                 auditRequestConsumer.commitSync(partitionOffsetAndMetadataMap);

@@ -1,4 +1,4 @@
-package com.tanaguru.custom.exception;
+package com.tanaguru.domain.exception;
 
 public class CustomIllegalStateException extends IllegalStateException{
 
@@ -16,6 +16,7 @@ public class CustomIllegalStateException extends IllegalStateException{
     public CustomIllegalStateException(String error, long content) {
         super(error);
         this.content = String.valueOf(content);
+        
     }
     
     public String getContent() {

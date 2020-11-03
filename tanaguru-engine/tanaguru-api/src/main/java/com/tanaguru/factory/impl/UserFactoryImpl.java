@@ -1,7 +1,9 @@
 package com.tanaguru.factory.impl;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.AppRoleService;
@@ -10,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Date;
 
 @Component
@@ -34,7 +35,7 @@ public class UserFactoryImpl implements UserFactory {
         user.setEnabled(isEnabled);
         user.setDateCreation(new Date());
         user.setAppRole(appRoleService.getAppRole(role)
-                .orElseThrow(() -> new EntityNotFoundException("Could not find role " + role.name())));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, role.name() )));
 
         user = userRepository.save(user);
         LOGGER.info("[User {}] Create with username {} and role {}", user.getId(), username, role);

@@ -1,8 +1,8 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.constant.CustomError;
-import com.tanaguru.custom.exception.CustomEntityNotFoundException;
-import com.tanaguru.custom.exception.CustomForbiddenException;
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.dto.AuditSchedulerDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditScheduler;

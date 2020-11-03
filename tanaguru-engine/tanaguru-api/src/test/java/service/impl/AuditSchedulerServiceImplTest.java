@@ -2,7 +2,7 @@ package service.impl;
 
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditScheduler;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.AuditSchedulerRepository;
 import com.tanaguru.service.impl.AuditSchedulerServiceImpl;
 import org.junit.Assert;
@@ -48,12 +48,12 @@ public class AuditSchedulerServiceImplTest {
         Assert.assertEquals(2, auditSchedulerService.getSchedulersMap().size());
     }
 
-    @Test(expected = InvalidEntityException.class)
+    @Test(expected = CustomInvalidEntityException.class)
     public void createAuditSchedulerTest_InvalidTime(){
         auditSchedulerService.createAuditScheduler(new Audit(), 0);
     }
 
-    @Test(expected = InvalidEntityException.class)
+    @Test(expected = CustomInvalidEntityException.class)
     public void createAuditSchedulerTest_AuditAlreadyHasSchedule(){
         Mockito.when(auditSchedulerRepository.findByAudit(any(Audit.class))).thenReturn(Optional.of(new AuditScheduler()));
         auditSchedulerService.createAuditScheduler(new Audit(), 86400);
@@ -69,7 +69,7 @@ public class AuditSchedulerServiceImplTest {
         Assert.assertFalse(auditSchedulerService.getSchedulersMap().isEmpty());
     }
 
-    @Test(expected = InvalidEntityException.class)
+    @Test(expected = CustomInvalidEntityException.class)
     public void modifyAuditSchedulerTest_InvalidTime(){
         AuditScheduler auditScheduler = new AuditScheduler();
         auditScheduler.setScheduler(0);

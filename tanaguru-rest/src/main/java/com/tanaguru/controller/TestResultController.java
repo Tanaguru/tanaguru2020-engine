@@ -1,10 +1,12 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
@@ -63,12 +65,12 @@ public class TestResultController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return testResultRepository.findAllByPage(page);
         }else{
-            throw new ForbiddenException("Cannot access page results for page " + id);
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, id);
         }
     }
 
@@ -94,10 +96,10 @@ public class TestResultController {
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
 
         TestHierarchyResult testHierarchyResult = testHierarchyResultRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find TestHierarchy result with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_RESULT_NOT_FOUND, id));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(testHierarchyResult.getPage().getAudit().getId(), shareCode)){
-            throw new ForbiddenException("Cannot access results for audit " + testHierarchyResult.getPage().getAudit().getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, testHierarchyResult.getPage().getAudit().getId());
         }
 
         return testHierarchyResult.getTestResults();
@@ -120,13 +122,13 @@ public class TestResultController {
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
 
         TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find TestHierarchy with id " + referenceId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId));
 
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, pageId));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
-            throw new ForbiddenException("Cannot access results for audit " + page.getAudit().getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, page.getAudit().getId());
         }
 
         return testResultRepository.findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(page, testHierarchy);

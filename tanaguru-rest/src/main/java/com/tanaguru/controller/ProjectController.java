@@ -1,6 +1,8 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.constant.CustomError;
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.dto.ProjectDTO;
@@ -10,8 +12,7 @@ import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.ProjectService;
@@ -77,7 +78,7 @@ public class ProjectController {
     @GetMapping(value = "/member-of/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllByContractAndCurrentUserIsMemberOf(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
         return projectService.findAllByContractAndUser(
                 contract,
                 tanaguruUserDetailsService.getCurrentUser()
@@ -101,7 +102,7 @@ public class ProjectController {
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllWithAuthoritiesByContract(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CustomError.AUDIT_NOT_FOUND)); //"Cannot find contract " + id
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
 
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
@@ -131,7 +132,7 @@ public class ProjectController {
                           @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
 
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         return projectService.findByAudit(audit)
                 .orElse(null);
@@ -158,7 +159,7 @@ public class ProjectController {
     public @ResponseBody
     Project findById(@PathVariable long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CustomError.AUDIT_NOT_FOUND)); //"Cannot find project " + id
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
     }
 
     /**
@@ -177,7 +178,7 @@ public class ProjectController {
     public @ResponseBody
     Collection<String> findAuthoritiesByProjectId(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
 
         return projectService.getUserAuthoritiesOnProject(tanaguruUserDetailsService.getCurrentUser(), project);
     }
@@ -202,14 +203,14 @@ public class ProjectController {
         User user = tanaguruUserDetailsService.getCurrentUser();
 
         Contract contract = contractRepository.findById(project.getContractId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + project.getContractId()));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, project.getContractId()));
 
         if(contract.getProjectLimit() > 0 && contract.getProjects().size() >= contract.getProjectLimit()) {
-            throw new ForbiddenException("Project limit for contract " + contract.getId() + " is " + contract.getProjectLimit());
+            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId() + "," + contract.getProjectLimit());
         }
 
         if(!UrlHelper.isValid(project.getDomain())){
-            throw new InvalidEntityException("Domain " + project.getDomain() + " is invalid");
+            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
         }
 
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
@@ -244,7 +245,7 @@ public class ProjectController {
     public void deleteProject(@PathVariable long id) {
         projectService.deleteProject(
                 projectRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Cannot find project with id " + id))
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id))
         );
     }
 
@@ -271,9 +272,9 @@ public class ProjectController {
     public ProjectAppUser addMember(@PathVariable long projectId, @PathVariable long userId){
         return projectService.addMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find project with id " + projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId)));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
     }
 
     /**
@@ -299,9 +300,9 @@ public class ProjectController {
     public void removeMember(@PathVariable long projectId, @PathVariable long userId){
         projectService.removeMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find project with id " + projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
         );
     }
 
@@ -323,19 +324,19 @@ public class ProjectController {
     public ProjectAppUser promoteMember(@PathVariable long projectId, @PathVariable long userId, @PathVariable EProjectRole projectRole){
         User current = tanaguruUserDetailsService.getCurrentUser();
         if(current.getId() == userId){
-            throw new ForbiddenException("Cannot promote yourself");
+            throw new CustomForbiddenException(CustomError.CANNOT_PROMOTE_YOURSELF);
         }
 
         if(projectService.getProjectRole(projectRole).isHidden()){
-            throw new InvalidEntityException("This project role cannot be used to promote a user");
+            throw new CustomInvalidEntityException(CustomError.PROJECT_CANNOT_PROMOTE_USER);
         }
 
         ProjectAppUser target = projectUserRepository.findByProjectAndContractAppUser_User(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find project with id " + projectId)),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId))
-        ).orElseThrow(() -> new EntityNotFoundException("Cannot find user with id " + userId + " in project " + projectId));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId + "," + projectId));
 
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);

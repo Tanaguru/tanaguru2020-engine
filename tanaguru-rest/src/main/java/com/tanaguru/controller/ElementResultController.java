@@ -1,8 +1,10 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.ElementResultRepository;
 import com.tanaguru.repository.TestResultRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -61,12 +63,12 @@ public class ElementResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         TestResult testResult = testResultRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_RESULT_NOT_FOUND, id));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(testResult.getPage().getAudit().getId(), shareCode)){
             return elementResultRepository.findAllByTestResult(testResult, PageRequest.of(page, size, Sort.by("id")));
         }else{
-            throw new ForbiddenException("Cannot access element results for test result " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST, id);
         }
     }
 }

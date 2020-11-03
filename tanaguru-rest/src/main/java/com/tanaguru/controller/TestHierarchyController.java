@@ -1,10 +1,13 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.domain.dto.TestHierarchyDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
@@ -63,7 +66,7 @@ public class TestHierarchyController {
     TestHierarchyDTO getById(
             @PathVariable long id) {
         return new TestHierarchyDTO(testHierarchyRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,id)));
     }
 
     /**
@@ -116,7 +119,7 @@ public class TestHierarchyController {
     Collection<TestHierarchyDTO> getByParentId(
             @PathVariable long id) {
         return testHierarchyRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,id))
                 .getChildren().stream()
                 .sorted(Comparator.comparingInt(TestHierarchy::getRank))
                 .map(TestHierarchyDTO::new)
@@ -135,10 +138,10 @@ public class TestHierarchyController {
             @PathVariable long testId,
             @PathVariable long referenceId) {
         TestHierarchy reference = testHierarchyRepository.findById(referenceId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND,referenceId));
 
         TanaguruTest test = tanaguruTestRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find Tanaguru test with id " + testId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, testId));
 
         return testHierarchyRepository.findByReferenceAndTanaguruTestsContains(reference, test)
                 .stream().map(TestHierarchyDTO::new).collect(Collectors.toList());
@@ -164,10 +167,10 @@ public class TestHierarchyController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
-            throw new ForbiddenException("Cannot show audit " + audit.getId());
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId());
         }
 
         return audit.getAuditReferences().stream().map(
@@ -193,7 +196,7 @@ public class TestHierarchyController {
     public @ResponseBody
     TestHierarchyDTO createTestHierarchy(@RequestBody @Valid TestHierarchyDTO testHierarchyDTO) {
         if(testHierarchyDTO.getParentId() != null && testHierarchyRepository.findByCodeAndParentIsNull(testHierarchyDTO.getCode()).isPresent()){
-            throw new InvalidArgumentException("Cannot create multiple references with same code " + testHierarchyDTO.getCode());
+            throw new CustomInvalidArgumentException(CustomError.CANNOT_CREATE_MULTIPLE_REFERENCES, testHierarchyDTO.getCode());
         }
 
         TestHierarchy testHierarchy = new TestHierarchy();
@@ -206,14 +209,14 @@ public class TestHierarchyController {
                 testHierarchyDTO.getReferenceId() == null ?
                         null :
                         testHierarchyRepository.findById(testHierarchyDTO.getReferenceId())
-                                .orElseThrow(() -> new InvalidArgumentException("Cannot find test Hierarchy with id " + testHierarchyDTO.getReferenceId()))
+                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyDTO.getReferenceId()))
         );
 
         testHierarchy.setParent(
                 testHierarchyDTO.getParentId() == null ?
                         null :
                         testHierarchyRepository.findById(testHierarchyDTO.getParentId())
-                                .orElseThrow(() -> new InvalidArgumentException("Cannot find test Hierarchy with id " + testHierarchyDTO.getParentId()))
+                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyDTO.getParentId()))
                 );
 
         return new TestHierarchyDTO(testHierarchyRepository.save(testHierarchy));
@@ -237,7 +240,7 @@ public class TestHierarchyController {
     public @ResponseBody
     void deleteReference(@PathVariable long id) {
         TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find reference with id " + id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id));
 
         testHierarchyService.deleteReference(testHierarchy);
     }
@@ -261,10 +264,10 @@ public class TestHierarchyController {
     public @ResponseBody
     void addTestToTestHierarchy(@PathVariable long testHierarchyId, @PathVariable long testId) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find testHierarchy with id " + testHierarchyId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
 
         TanaguruTest tanaguruTest = tanaguruTestRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find test with id " + testId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, testId));
 
         Collection<TanaguruTest> tanaguruTests = testHierarchy.getTanaguruTests();
         tanaguruTests.add(tanaguruTest);
@@ -290,7 +293,7 @@ public class TestHierarchyController {
     public @ResponseBody
     void addTestListToTestHierarchy(@PathVariable long testHierarchyId, @RequestBody Collection<Long> tanaguruTestIds) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find testHierarchy with id " + testHierarchyId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
 
         Collection<TanaguruTest> tanaguruTests = tanaguruTestRepository.findAllById(tanaguruTestIds);
 
