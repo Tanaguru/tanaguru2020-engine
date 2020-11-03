@@ -6,6 +6,7 @@ public class ErrorDTO {
 
     public ErrorDTO(String error) {
         this.error = error;
+        this.content = null;
     }
     
     public ErrorDTO(String error, String[] content) {
