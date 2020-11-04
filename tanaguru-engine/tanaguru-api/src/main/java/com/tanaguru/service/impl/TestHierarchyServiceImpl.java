@@ -132,9 +132,10 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
 
     public void deleteReference(TestHierarchy reference) {
         if (auditReferenceRepository.existsByTestHierarchy(reference)) {
-            testHierarchyRepository.delete(reference);
-        } else {
             tagDeletedWithChild(reference);
+
+        } else {
+            testHierarchyRepository.delete(reference);
         }
     }
 
