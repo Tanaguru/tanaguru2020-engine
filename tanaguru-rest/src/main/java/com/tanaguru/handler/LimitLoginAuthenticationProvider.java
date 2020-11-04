@@ -41,21 +41,25 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     @Override
     public Authentication authenticate(Authentication authentication)throws AuthenticationException {
         String ipAddress = request.getRemoteAddr();
+        Optional<User> user = userRepository.findByUsername(authentication.getName());
         try {
             Authentication auth = super.authenticate(authentication);
-            userService.resetFailAttempts(authentication.getName()); //sucess login, reset user attempts
+            if(!user.isEmpty()) {
+                userService.resetFailAttempts(user.get()); //sucess login, reset user attempts
+            }
             return auth;		
 
         } catch (BadCredentialsException e) {
             //invalid login, update user attempts
-            userService.updateFailAttempts(authentication.getName(),ipAddress, sendAdminMail);
+            if(!user.isEmpty()) {
+                userService.updateFailAttempts(user.get(),ipAddress, sendAdminMail);
+            }
             throw e;
 
         } catch (LockedException e){
             //user locked       
             String error = "";
             Date now = new Date();
-            Optional<User> user = userRepository.findByUsername(authentication.getName());
             ArrayList<Attempt> attempts = new ArrayList<Attempt>();
             if(!user.isEmpty()) {
                 attempts = new ArrayList<Attempt>(user.get().getAttempts());
@@ -64,7 +68,7 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
                 Date blockedUntil = attempts.get(attempts.size()-1).getBlockedUntil();
                 if(blockedUntil != null){
                     if(now.after(blockedUntil)) { //verification time if the user can be unlock and authentication test again
-                        userService.unlock(authentication.getName());
+                        userService.unlock(user.get());
                         return authenticate(authentication);
                     }else {
                         Date lastAttempts = attempts.get(attempts.size()-1).getLastModified();

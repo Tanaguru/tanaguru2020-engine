@@ -54,17 +54,17 @@ public interface UserService {
      * @param ip
      * @param sendAdminMail
      */
-    void updateFailAttempts(String username, String ip, boolean sendAdminMail);
+    void updateFailAttempts(User user, String ip, boolean sendAdminMail);
 
     /**
      * Reset the number of fail attempts of the user
      * @param username
      */
-    void resetFailAttempts(String username);
+    void resetFailAttempts(User user);
 
     /**
      * Set AccountNonLocked to true for the user
      * @param username
      */
-    void unlock(String username);
+    void unlock(User user);
 }

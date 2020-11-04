@@ -107,72 +107,66 @@ public class UserServiceImpl implements UserService {
      * @param username
      * @param ip
      */
-    public void updateFailAttempts(String username, String ip, boolean sendAdminMail) {
-        Optional<User> user = userRepository.findByUsername(username);
+    public void updateFailAttempts(User user, String ip, boolean sendAdminMail) {
         ArrayList<Attempt> attempts = new ArrayList<Attempt>();
-        if (!user.isEmpty()){
-            attempts = new ArrayList<Attempt>(user.get().getAttempts());
-        }
+        attempts = new ArrayList<Attempt>(user.getAttempts());
         if (attempts.isEmpty()) {
-            if (!user.isEmpty()) {
-                Attempt attempt = new Attempt();
-                attempt.setNumber(1);
-                attempt.setIp(ip);
-                attempt.setLastModified(new Date());
-                attempts.add(attempt);
-                user.get().setAttempts(attempts);
-                userRepository.save(user.get());
-            }
+            Attempt attempt = new Attempt();
+            attempt.setNumber(1);
+            attempt.setIp(ip);
+            attempt.setLastModified(new Date());
+            attempts.add(attempt);
+            user.setAttempts(attempts);
+            userRepository.save(user);     
         } else {
-            if (!user.isEmpty()) {
-                //update attempts +1
-                Attempt lastAttempt = attempts.get(attempts.size()-1);
-                Attempt currentAttempt = new Attempt();
-                currentAttempt.setNumber(lastAttempt.getNumber()+1);
-                currentAttempt.setIp(ip);
-                currentAttempt.setLastModified(new Date());
-                attempts.add(currentAttempt);
-                user.get().setAttempts(attempts);
-                userRepository.save(user.get());
+            //update attempts +1
+            Attempt lastAttempt = attempts.get(attempts.size()-1);
+            Attempt currentAttempt = new Attempt();
+            currentAttempt.setNumber(lastAttempt.getNumber()+1);
+            currentAttempt.setIp(ip);
+            currentAttempt.setLastModified(new Date());
+            attempts.add(currentAttempt);
+            user.setAttempts(attempts);
+            userRepository.save(user);
 
-                switch(attempts.get(attempts.size()-1).getNumber()) {
+            switch(attempts.get(attempts.size()-1).getNumber()) {
 
-                case FIRST_STEP_ATTEMPTS: 
-                    blockAccount(user.get(), attempts,FIRST_ATTEMPT_TIME);
-                    break;
+            case FIRST_STEP_ATTEMPTS: 
+                blockAccount(user, attempts,FIRST_ATTEMPT_TIME);
+                break;
 
-                case SECOND_STEP_ATTEMPTS:
-                    blockAccount(user.get(), attempts,SECOND_ATTEMPT_TIME);
-                    break;
+            case SECOND_STEP_ATTEMPTS:
+                blockAccount(user, attempts,SECOND_ATTEMPT_TIME);
+                break;
 
-                case MAX_ATTEMPTS:
-                    //locked user definitely
-                    blockAccount(user.get(), attempts,0);
-                    //send mail to super admin with list of attempts
-                    DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Multiples tentatives de connexions sur le compte : "+user.get().getEmail());
-                    builder.append("\nNom d'utilisateur : "+user.get().getUsername());
-                    builder.append("\nID utilisateur : "+user.get().getId());
-                    for(Attempt attempt : attempts) {
-                        builder.append("\n\nTentative numéro "+attempt.getNumber());
-                        builder.append(" | IP : "+attempt.getIp());
-                        builder.append(" | Dernier accès : "+longDateFormat.format(attempt.getLastModified()));
-                        if( attempt.getBlockedUntil() != null ){
-                            builder.append(" | Bloqué jusqu'à : "+longDateFormat.format(attempt.getBlockedUntil()));
-                        }
+            case MAX_ATTEMPTS:
+                //locked user definitely
+                blockAccount(user, attempts,0);
+                //send mail to super admin with list of attempts
+                DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
+                StringBuilder builder = new StringBuilder();
+                builder.append("Multiples tentatives de connexions sur le compte : "+user.getEmail());
+                builder.append("\nNom d'utilisateur : "+user.getUsername());
+                builder.append("\nID utilisateur : "+user.getId());
+                for(Attempt attempt : attempts) {
+                    builder.append("\n\nTentative numéro "+attempt.getNumber());
+                    builder.append(" | IP : "+attempt.getIp());
+                    builder.append(" | Dernier accès : "+longDateFormat.format(attempt.getLastModified()));
+                    if( attempt.getBlockedUntil() != null ){
+                        builder.append(" | Bloqué jusqu'à : "+longDateFormat.format(attempt.getBlockedUntil()));
                     }
-                    if(sendAdminMail) {
-                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
-                    }
-                    mailService.sendSimpleMessage(user.get().getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
-                    break;
-
-                default: //Do nothing
                 }
+                if(sendAdminMail) {
+                    mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                }
+                mailService.sendSimpleMessage(user.getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
+                break;
+
+            default: //Do nothing
             }
         }
     }
+
 
     /**
      * Block the account of the user during duration time set
@@ -192,24 +186,18 @@ public class UserServiceImpl implements UserService {
      * Reset the attempts of the user
      * @param username
      */
-    public void resetFailAttempts(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(!user.isEmpty()) {
-            user.get().setAttempts(new ArrayList<Attempt>());
-            userRepository.save(user.get());
-        }
+    public void resetFailAttempts(User user) {
+        user.setAttempts(new ArrayList<Attempt>());
+        userRepository.save(user);    
     }
 
     /**
      * Set accountNonLocked to true for the user
      * @param username
      */
-    public void unlock(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(!user.isEmpty()) {
-            user.get().setAccountNonLocked(true);
-            userRepository.save(user.get());
-        }
+    public void unlock(User user) {
+        user.setAccountNonLocked(true);
+        userRepository.save(user);
     }
 
     /**
