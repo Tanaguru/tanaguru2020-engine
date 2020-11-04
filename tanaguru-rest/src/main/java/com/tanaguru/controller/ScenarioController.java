@@ -55,16 +55,17 @@ public class ScenarioController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Scenario not found")
+            @ApiResponse(code = 404, message = "Scenario not found : SCENARIO_NOT_FOUND error"
+                    + "\nUser cannot access scenario : USER_CANNOT_ACCESS_SCENARIO error")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping("/{id}")
     public @ResponseBody
     Scenario getScenario(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, id ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -73,7 +74,7 @@ public class ScenarioController {
                 true)){
             return scenario;
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_SCENARIO, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_SCENARIO, id );
         }
     }
 
@@ -87,7 +88,7 @@ public class ScenarioController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Project not found")
     })
@@ -113,9 +114,10 @@ public class ScenarioController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nInvalid scenario content : INVALID_SCENARIO_CONTENT error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -125,7 +127,7 @@ public class ScenarioController {
     public @ResponseBody
     Scenario createScenario(@RequestBody @Valid ScenarioDTO scenarioDTO) {
         Project project = projectRepository.findById(scenarioDTO.getProjectId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { scenarioDTO.getProjectId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, scenarioDTO.getProjectId() ));
 
         String content = new String(Base64.getDecoder().decode(scenarioDTO.getContent()));
 
@@ -151,15 +153,16 @@ public class ScenarioController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Resource not found")
+            @ApiResponse(code = 404, message = "Scenario not found : SCENARIO_NOT_FOUND error"
+                    + "\nUser cannot delete scenario : USER_CANNOT_DELETE_SCENARIO error")
     })
     @DeleteMapping("/{id}")
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         Scenario scenario = scenarioRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, id ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -169,7 +172,7 @@ public class ScenarioController {
             scenario.setDeleted(true);
             scenarioRepository.save(scenario);
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_SCENARIO, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_SCENARIO, id );
         }
     }
 }

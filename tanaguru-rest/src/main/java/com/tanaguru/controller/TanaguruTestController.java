@@ -41,7 +41,7 @@ public class TanaguruTestController {
             notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 404, message = "TanaguruTest not found")
+            @ApiResponse(code = 404, message = "TanaguruTest not found : TANAGURU_TEST_NOT_FOUND error")
     })
     @GetMapping("/{id}")
     public @ResponseBody
@@ -49,7 +49,7 @@ public class TanaguruTestController {
             @PathVariable long id) {
         return new TanaguruTestDTO(
                 tanaguruTestRepository.findById(id)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, id )));
     }
 
     /**
@@ -58,18 +58,18 @@ public class TanaguruTestController {
      * @return The collection of @see TanaguruTest
      */
     @ApiOperation(
-            value = "Get all TanaguruTest for a given referernce id",
-            notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
+            value = "Get all TanaguruTest for a given reference id",
+            notes = "If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 404, message = "Reference not found")
+            @ApiResponse(code = 404, message = "Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
     })
     @GetMapping("/by-reference/{id}")
     public @ResponseBody
     Collection<TanaguruTestDTO> getByReferenceId(
             @PathVariable long id) {
         TestHierarchy reference = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id ));
 
         return tanaguruTestRepository.findAllByTestHierarchies_ReferenceAndIsDeletedIsFalse(reference)
                 .stream()
@@ -84,17 +84,17 @@ public class TanaguruTestController {
      */
     @ApiOperation(
             value = "Get all TanaguruTest for a given TestHierarchy id",
-            notes = "If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id")
+            notes = "If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 404, message = "TestHierarchy not found")
+            @ApiResponse(code = 404, message = "Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
     })
     @GetMapping("/by-test-hierarchy/{id}")
     public @ResponseBody
     Collection<TanaguruTestDTO> getByTestHierarchyId(
             @PathVariable long id) {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TANAGURU_TEST_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id ));
 
         return tanaguruTestRepository.findAllByTestHierarchiesContainsAndIsDeletedIsFalse(testHierarchy)
                 .stream()
@@ -111,7 +111,7 @@ public class TanaguruTestController {
             notes = "User must have CREATE_TEST authority")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
     @PreAuthorize(

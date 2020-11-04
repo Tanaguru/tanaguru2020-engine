@@ -130,7 +130,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             case SCENARIO:
                 long scenarioId = Long.parseLong(parameterStringMap.get(EAuditParameter.SCENARIO_ID).getValue());
                 Scenario scenario = scenarioRepository.findById(scenarioId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, new long[] { scenarioId } ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, scenarioId ));
 
                 result = createSeleneseRunner(
                         tanaguruTests,
@@ -146,7 +146,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             case UPLOAD:
                 long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
                 Resource resource = resourceRepository.findById(resourceId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, new long[] { resourceId } ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, resourceId ));
                 result = createFileRunner(
                         tanaguruTests,
                         audit,

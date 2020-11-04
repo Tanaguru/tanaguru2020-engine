@@ -94,7 +94,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(CustomError.USER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException(CustomError.USER_NOT_FOUND.toString()));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -117,23 +117,23 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             return null;
         }else{
             return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new String[] { username } ));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username  ));
         }
     }
 
     public boolean currentUserHasAuthorityOnContract(String authority, long contractId) {
         return getCurrentUser() != null && contractService.hasAuthority(getCurrentUser(), authority, contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } )) , true);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )) , true);
     }
 
     public boolean currentUserHasAuthorityOnProject(String authority, long projectId) {
         return getCurrentUser() != null && projectService.hasAuthority(getCurrentUser(), authority, projectRepository.findById(projectId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )), true);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )), true);
     }
 
     public boolean currentUserCanShowAudit(long auditId, String shareCode){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { auditId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId));
         return currentUserCanShowAudit(audit, shareCode);
     }
 
@@ -150,7 +150,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
 
     public boolean currentUserCanDeleteAudit(long auditId){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { auditId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
         boolean result = false;
         Optional<Act> actOptional = actRepository.findByAudit(audit);
         if(actOptional.isPresent()){
@@ -161,7 +161,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
 
     public boolean currentUserCanScheduleOnAudit(long auditId){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { auditId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
 
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
 

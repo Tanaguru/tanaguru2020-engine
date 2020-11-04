@@ -2,6 +2,8 @@ package com.tanaguru.domain.exception;
 
 import javax.persistence.EntityNotFoundException;
 
+import com.tanaguru.domain.constant.CustomError;
+
 public class CustomEntityNotFoundException extends EntityNotFoundException{
     
     private static final long serialVersionUID = 1L;
@@ -11,17 +13,17 @@ public class CustomEntityNotFoundException extends EntityNotFoundException{
         super();
     }
     
-    public CustomEntityNotFoundException(String error) {
-        super(error);
+    public CustomEntityNotFoundException(CustomError error) {
+        super(error.toString());
     }
     
-    public CustomEntityNotFoundException(String error, String[] content) {
-        super(error);
+    public CustomEntityNotFoundException(CustomError error, String... content) {
+        super(error.toString());
         this.content = content;
     }
     
-    public CustomEntityNotFoundException(String error, long[] content) {
-        super(error);
+    public CustomEntityNotFoundException(CustomError error, long... content) {
+        super(error.toString());
         this.content = new String[content.length];
         for(int i=0; i< content.length; i++) {
             this.content[i] = String.valueOf(content[i]);

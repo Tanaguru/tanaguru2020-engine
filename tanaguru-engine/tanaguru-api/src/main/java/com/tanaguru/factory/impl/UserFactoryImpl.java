@@ -35,7 +35,7 @@ public class UserFactoryImpl implements UserFactory {
         user.setEnabled(isEnabled);
         user.setDateCreation(new Date());
         user.setAppRole(appRoleService.getAppRole(role)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, new String[] { role.name() } )));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, role.name() )));
 
         user = userRepository.save(user);
         LOGGER.info("[User {}] Create with username {} and role {}", user.getId(), username, role);

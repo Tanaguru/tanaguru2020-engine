@@ -57,9 +57,12 @@ public class StatusResultController {
                     + "\nIf cannot find test hierarchy for page, exception raise : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE with page id and test hierarchy id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Page, testHierarchy or statusResult not found")
+            @ApiResponse(code = 404, message = "Page not found : PAGE_NOT_FOUND error"
+                    + "\nUser cannot access page result : USER_CANNOT_ACCESS_PAGE_RESULT error"
+                    + "\nTest hierarchy not found : TEST_HIERARCHY_NOT_FOUND error"
+                    + "\nCannot find test hierarchy for page : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE error")
     })
     @GetMapping("/by-page-and-test-hierarchy/{pageId}/{testHierarchyId}/{sharecode}")
     public @ResponseBody
@@ -69,20 +72,20 @@ public class StatusResultController {
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
 
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { pageId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, pageId ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit(), sharecode)){
-            throw  new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, new long[] { pageId } );
+            throw  new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, pageId );
         }
 
         TestHierarchy testHierarchy = testHierarchyRepository.findById(testHierarchyId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { testHierarchyId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId ));
 
 
         return new StatusResultDTO(statusResultRepository.findByReferenceAndPage(
                 testHierarchy,
                 page
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE, new long[] { pageId , testHierarchyId } )));
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE, pageId , testHierarchyId )));
     }
 
 
@@ -95,9 +98,12 @@ public class StatusResultController {
                     + "\nIf cannot find main hierarchy result for given page, exception raise : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Page or StatusResult not found")
+            @ApiResponse(code = 404, message = "Page not found : PAGE_NOT_FOUND error"
+                    + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
+                    + "\nCannot find main reference for audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error"
+                    + "\nCannot find main hierarchy result for given page : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE error")
     })
     @GetMapping("/main-result-by-page/{id}/{sharecode}")
     public @ResponseBody
@@ -105,15 +111,15 @@ public class StatusResultController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit(), sharecode)){
-            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, new long[] { page.getAudit().getId() } );
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, page.getAudit().getId() );
         }
 
         return new StatusResultDTO(statusResultRepository.findByReferenceAndPage(
                 auditReferenceRepository.findByAuditAndIsMainIsTrue(page.getAudit())
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, new long[] { page.getAudit().getId() } ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, page.getAudit().getId() ))
                         .getTestHierarchy(),
                 page
                 ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE)));
@@ -126,9 +132,11 @@ public class StatusResultController {
                     + "\nIf cannot find main reference for audit, exception raise : CANNOT_FIND_MAIN_REFERENCE_AUDIT with audit id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit or StatusResult not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error"
+                    + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
+                    + "\nCannot find main reference for audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error")
     })
     @GetMapping("/main-result-by-audit/{id}/{sharecode}")
     public @ResponseBody
@@ -136,15 +144,15 @@ public class StatusResultController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
-            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, new long[] { audit.getId() } );
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId() );
         }
 
         return statusResultRepository.findAllByReferenceAndPage_Audit(
                 auditReferenceRepository.findByAuditAndIsMainIsTrue(audit)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, new long[] { audit.getId() } ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_MAIN_REFERENCE_AUDIT, audit.getId() ))
                         .getTestHierarchy(),
                 audit)
                 .stream().map(StatusResultDTO::new)

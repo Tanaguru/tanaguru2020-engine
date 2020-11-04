@@ -91,7 +91,7 @@ public class ContractServiceImpl implements ContractService {
 
         for (EContractRole contractRole : EContractRole.values()) {
             contractRoleMap.put(contractRole, contractRoleRepository.findByName(contractRole)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_CONTRACT_ROLE, new String[] { contractRole.toString() } )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_CONTRACT_ROLE, contractRole.toString() )));
         }
     }
 
@@ -166,7 +166,7 @@ public class ContractServiceImpl implements ContractService {
         //Change owner
         if(contractOwner.getId() != owner.getId()){
             ContractAppUser newOwner = contractUserRepository.findByContractAndUser(contract, owner)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, new String[] { String.valueOf(owner.getId()) } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId()) ));
 
             newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
             contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
@@ -197,7 +197,7 @@ public class ContractServiceImpl implements ContractService {
 
     public void removeMember(Contract contract, User user){
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, new String[] { String.valueOf(user.getId()) } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(user.getId()) ));
         contractUserRepository.delete(contractAppUser);
     }
 }

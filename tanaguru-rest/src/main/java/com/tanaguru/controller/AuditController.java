@@ -21,9 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author rcharre
@@ -70,9 +68,9 @@ public class AuditController {
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
@@ -82,7 +80,7 @@ public class AuditController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         return auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
     }
 
     /**
@@ -98,9 +96,9 @@ public class AuditController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -110,7 +108,7 @@ public class AuditController {
     public @ResponseBody
     Collection<Audit> getAuditsByProject(@PathVariable long id) {
         return auditService.findAllByProject(projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } )));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id )));
     }
 
     @ApiOperation(
@@ -120,9 +118,9 @@ public class AuditController {
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -132,7 +130,7 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProject(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
         Optional<Act> actOptional = actRepository.findFirstByProjectOrderByDateDesc(project);
         return actOptional.map(Act::getAudit).orElse(null);
     }
@@ -144,9 +142,9 @@ public class AuditController {
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -156,7 +154,7 @@ public class AuditController {
     public @ResponseBody
     Audit getLastAuditByProjectAndAuditType(@PathVariable long id, @PathVariable EAuditType type) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
         Optional<Act> actOptional = actRepository.findFirstByProjectAndAudit_TypeOrderByDateDesc(project, type);
         return actOptional.map(Act::getAudit).orElse(null);
     }
@@ -197,14 +195,19 @@ public class AuditController {
     @ApiOperation(
             value = "Start an audit",
             notes = "User must have START_AUDIT authority on project"
+                    + "\nIf audit command doesn't contains main reference, exception raise : NO_MAIN_REFERENCE"
                     + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+                    + "\nIf contract date passed, exception raise : CONTRACT_DATE_PASSED"
                     + "\nOr if reference test hierarchy not found, exception raise : NO_USABLE_REFERENCE with reference id",
             response = Audit.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nNo main reference : NO_MAIN_REFERENCE error"
+                    + "\nContract date passed : CONTRACT_DATE_PASSED error"
+                    + "\nTest hierarchy reference not found : NO_USABLE_REFERENCE error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -218,7 +221,7 @@ public class AuditController {
         }
 
         Project project = projectRepository.findById(auditCommand.getProjectId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { auditCommand.getProjectId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, auditCommand.getProjectId() ));
 
         if(new Date().after(project.getContract().getDateEnd())){
             throw new CustomForbiddenException(CustomError.CONTRACT_DATE_PASSED);
@@ -228,7 +231,7 @@ public class AuditController {
         ArrayList<TestHierarchy> references = new ArrayList<>();
         for(Long referenceId : auditCommand.getReferences()){
             TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(referenceId)
-                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.NO_USABLE_REFERENCE, new long[] { referenceId } ));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.NO_USABLE_REFERENCE, referenceId ));
             if(testHierarchy.getId() == auditCommand.getMainReference()){
                 main = testHierarchy;
             }
@@ -259,9 +262,9 @@ public class AuditController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanDeleteAudit(#id)")
@@ -269,6 +272,6 @@ public class AuditController {
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
         auditService.deleteAudit(auditRepository.findById(id)
-                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, new long[] { id } )));
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id )));
     }
 }

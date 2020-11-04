@@ -1,5 +1,7 @@
 package com.tanaguru.domain.exception;
 
+import com.tanaguru.domain.constant.CustomError;
+
 public class CustomIllegalStateException extends IllegalStateException{
 
     private String[] content;
@@ -8,13 +10,17 @@ public class CustomIllegalStateException extends IllegalStateException{
         super();
     }
     
-    public CustomIllegalStateException(String error, String[] content) {
-        super(error);
+    public CustomIllegalStateException(CustomError error) {
+        super(error.toString());
+    }
+    
+    public CustomIllegalStateException(CustomError error, String... content) {
+        super(error.toString());
         this.content = content;
     }
     
-    public CustomIllegalStateException(String error, long[] content) {
-        super(error);
+    public CustomIllegalStateException(CustomError error, long... content) {
+        super(error.toString());
         this.content = new String[content.length];
         for(int i=0; i< content.length; i++) {
             this.content[i] = String.valueOf(content[i]);

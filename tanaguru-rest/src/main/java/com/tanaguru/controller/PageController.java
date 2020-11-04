@@ -46,7 +46,8 @@ public class PageController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Page not found : PAGE_NOT_FOUND error"
+                    + "\nCannot access page content for page : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE error")
     })
     @GetMapping("/{id}/{shareCode}")
     public @ResponseBody
@@ -54,12 +55,12 @@ public class PageController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return page;
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, id );
         }
     }
 
@@ -78,7 +79,7 @@ public class PageController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Cannot access pages for audit : CANNOT_ACCESS_PAGES_FOR_AUDIT error")
     })
     @GetMapping("/by-audit/{id}/{shareCode}")
     public @ResponseBody
@@ -88,7 +89,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id);
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }
     }
 
@@ -107,7 +108,7 @@ public class PageController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Cannot access pages for audit : CANNOT_ACCESS_PAGES_FOR_AUDIT error")
     })
     @GetMapping("/by-audit-paginated/{id}/{shareCode}")
     public @ResponseBody
@@ -119,7 +120,7 @@ public class PageController {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             return pageRepository.findAllByAudit_Id(id, PageRequest.of(page, size));
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }
     }
 }

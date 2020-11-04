@@ -56,7 +56,7 @@ public class ContractController {
             notes = "User must be logged in"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized")
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -79,16 +79,16 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND errpr")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/by-user/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Collection<Contract> findAllByUser(@PathVariable long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
         Collection<Contract> userContracts = contractService.findByUser(user);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
             userContracts = userContracts.stream().filter(contract ->
@@ -111,7 +111,7 @@ public class ContractController {
             notes = "User must be logged in"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized")
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -129,7 +129,7 @@ public class ContractController {
             notes = "User must be logged in"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized")
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/owned", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -147,7 +147,7 @@ public class ContractController {
             notes = "User must be logged in"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized")
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/member-of", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -170,9 +170,9 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -182,7 +182,7 @@ public class ContractController {
     public @ResponseBody
     Contract findById(@PathVariable long id) {
         return contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
     }
 
     /**
@@ -192,25 +192,26 @@ public class ContractController {
             value = "Get contracts by user",
             notes = "User must logged in"
                     + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
-                    + "\nOr if user is not found for a contract, exception raise : USER_NOT_FOUND_FOR_CONTRACT with user id and contract id"
+                    + "\nOr if user is not found for the contract, exception raise : USER_NOT_FOUND_FOR_CONTRACT with user id and contract id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nUser not found for the contract : USER_NOT_FOUND_FOR_CONTRACT error")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/{id}/authorities", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Collection<String> findAuthoritiesByContractId(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
 
         User currentUser = tanaguruUserDetailsService.getCurrentUser();
 
         Collection<String> contractAuthorities = contractUserRepository.findByContractAndUser(contract, currentUser)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, new long[] { currentUser.getId(),contract.getId() } ))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, currentUser.getId(),contract.getId() ))
                 .getContractRole().getAuthorities().stream()
                     .map((ContractAuthority::getName))
                 .collect(Collectors.toList());
@@ -234,16 +235,17 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error"
+                    + "\nCannot create multiple user contract : CANNOT_CREATE_MULTIPLE_USER_CONTRACT error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_CONTRACT)")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Contract createContract(@RequestBody @Valid ContractDTO contract) {
         User owner = userRepository.findById(contract.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { contract.getOwnerId() }));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contract.getOwnerId() ));
 
         //TODO REMOVE LIMITATION
         Collection<Contract> owned = contractService.findByOwner(owner);
@@ -271,19 +273,20 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).MODIFY_CONTRACT)")
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Contract modifyContract(@RequestBody @Valid ContractDTO contractDto, @PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
 
         User owner = userRepository.findById(contractDto.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { contractDto.getOwnerId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId() ));
 
         return contractService.modifyContract(
                 contract,
@@ -306,9 +309,9 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).DELETE_CONTRACT)")
     @DeleteMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -316,7 +319,7 @@ public class ContractController {
     void deleteContract(@PathVariable long id) {
         contractService.deleteContract(
           contractRepository.findById(id)
-            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id }))
+            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ))
         );
     }
 
@@ -334,9 +337,10 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found or User not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -346,9 +350,9 @@ public class ContractController {
     public ContractAppUser addMember(@PathVariable long contractId, @PathVariable long userId){
         return contractService.addMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } )));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId )));
     }
 
     /**
@@ -364,9 +368,10 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found or User not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -376,9 +381,9 @@ public class ContractController {
     public void removeMember(@PathVariable long contractId, @PathVariable long userId){
         contractService.removeMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
         );
     }
 
@@ -394,9 +399,14 @@ public class ContractController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found or User not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nUser try to promote himself : CANNOT_PROMOTE_YOURSELF error"
+                    + "\nProject role cannot be used to promote a user : PROJECT_CANNOT_PROMOTE_USER error"
+                    + "\nCannot promote contract owner : CANNOT_PROMOTE_CONTRACT_OWNER error"
+                    + "\nUser not found : USER_NOT_FOUND error"
+                    + "\nUser not found for project : USER_NOT_FOUND_FOR_PROJECT error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -414,7 +424,7 @@ public class ContractController {
         }
 
         Contract contract =  contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { contractId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId ));
 
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
         if(owner.getUser().getId() == userId){
@@ -424,8 +434,8 @@ public class ContractController {
         ContractAppUser target = contractUserRepository.findByContractAndUser(
                 contract,
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new long[] { userId , contractId } ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId , contractId ));
 
         target.setContractRole(contractService.getContractRole(contractRole));
         return contractUserRepository.save(target);

@@ -55,7 +55,8 @@ public class PageContentController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Page not found")
+            @ApiResponse(code = 404, message = "Page not found : PAGE_NOT_FOUND error"
+                    + "\nCannot access page content : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE error")
     })
     @GetMapping("/by-page/{id}/{shareCode}")
     public @ResponseBody
@@ -63,12 +64,12 @@ public class PageContentController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return page.getPageContent();
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE, id );
         }
     }
 
@@ -81,7 +82,8 @@ public class PageContentController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error"
+                    + "\nCannot access page content for audit : CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT error")
     })
     @GetMapping("/first-by-audit/{id}/{shareCode}")
     public @ResponseBody
@@ -89,11 +91,11 @@ public class PageContentController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
         if(tanaguruUserDetailsService.currentUserCanShowAudit(audit.getId(), shareCode)){
             return pageContentRepository.findFirstByPage_Audit(audit).orElse(null);
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT, id );
         }
     }
 
@@ -105,7 +107,7 @@ public class PageContentController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanDeleteAudit(#id)")
@@ -114,7 +116,7 @@ public class PageContentController {
     void deleteScreenshotByAudit(
             @PathVariable long id) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
 
         for(PageContent pageContent : pageContentRepository.findAllByPage_Audit(audit)){
             pageContent.setScreenshot(null);

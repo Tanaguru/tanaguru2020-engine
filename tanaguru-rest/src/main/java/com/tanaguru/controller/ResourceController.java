@@ -52,16 +52,17 @@ public class ResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Resource not found")
+            @ApiResponse(code = 404, message = "Resource not found : RESOURCE_NOT_FOUND error"
+                    + "\nUser cannot access resource : USER_CANNOT_ACCESS_RESOURCE error")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping("/{id}")
     public @ResponseBody
     Resource getResource(@PathVariable long id) {
         Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.RESOURCE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.RESOURCE_NOT_FOUND, id ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -70,7 +71,7 @@ public class ResourceController {
                 true)){
             return resource;
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_RESOURCE, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_RESOURCE, id );
         }
     }
 
@@ -84,7 +85,7 @@ public class ResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Project not found")
     })
@@ -109,9 +110,9 @@ public class ResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -121,7 +122,7 @@ public class ResourceController {
     public @ResponseBody
     Resource createResource(@RequestBody @Valid ResourceDTO resourceDTO) {
         Project project = projectRepository.findById(resourceDTO.getProjectId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { resourceDTO.getProjectId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, resourceDTO.getProjectId() ));
 
         Resource resource = new Resource();
         resource.setContent(
@@ -143,15 +144,16 @@ public class ResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Resource not found")
+            @ApiResponse(code = 404, message = "Resource not found : RESOURCE_NOT_FOUND error"
+                    + "\nUser cannot delete resource : USER_CANNOT_DELETE_RESOURCE error")
     })
     @DeleteMapping("/{id}")
     public @ResponseBody
     void deleteResource(@PathVariable long id) {
         Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, id ));
 
         if(projectService.hasAuthority(
                 tanaguruUserDetailsService.getCurrentUser(),
@@ -162,7 +164,7 @@ public class ResourceController {
             resource.setDeleted(true);
             resourceRepository.save(resource);
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_RESOURCE, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_DELETE_RESOURCE, id );
         }
     }
 }

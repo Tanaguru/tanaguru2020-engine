@@ -56,9 +56,10 @@ public class TestResultController {
                     + "\nIf user cannot access result page, exception raise : USER_CANNOT_ACCESS_PAGE_RESULT with page id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Test not found")
+            @ApiResponse(code = 404, message = "Page not found : PAGE_NOT_FOUND error"
+                    + "\nUser cannot access page result : USER_CANNOT_ACCESS_PAGE_RESULT error")
     })
     @GetMapping("/by-page/{id}/{shareCode}")
     public @ResponseBody
@@ -66,12 +67,12 @@ public class TestResultController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
             return testResultRepository.findAllByPage(page);
         }else{
-            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, new long[] { id } );
+            throw new CustomForbiddenException(CustomError.USER_CANNOT_ACCESS_PAGE_RESULT, id );
         }
     }
 
@@ -88,9 +89,10 @@ public class TestResultController {
                     + "\nIf cannot access result audit, exception raise : CANNOT_ACCESS_RESULT_AUDIT with audit id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "TestHierarchyResult not found")
+            @ApiResponse(code = 404, message = "Test hierarchy result not found : TEST_HIERARCHY_RESULT_NOT_FOUND error"
+                    + "\nCannot access result audit : CANNOT_ACCESS_RESULT_AUDIT error")
     })
     @GetMapping("/by-test-hierarchy-result/{id}/{shareCode}")
     public @ResponseBody
@@ -99,10 +101,10 @@ public class TestResultController {
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
 
         TestHierarchyResult testHierarchyResult = testHierarchyResultRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_RESULT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_RESULT_NOT_FOUND, id ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(testHierarchyResult.getPage().getAudit().getId(), shareCode)){
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, new long[] { testHierarchyResult.getPage().getAudit().getId() } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, testHierarchyResult.getPage().getAudit().getId() );
         }
 
         return testHierarchyResult.getTestResults();
@@ -116,9 +118,11 @@ public class TestResultController {
                     + "\nIf cannot access result audit, exception raise : CANNOT_ACCESS_RESULT_AUDIT with audit id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "reference or Page not found")
+            @ApiResponse(code = 404, message = "Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error"
+                    + "\nPage not found : PAGE_NOT_FOUND error"
+                    + "\nCannot access result audit : CANNOT_ACCESS_RESULT_AUDIT error")
     })
     @GetMapping("/by-reference-and-page/{referenceId}/{pageId}/{shareCode}")
     public @ResponseBody
@@ -128,13 +132,13 @@ public class TestResultController {
             @PathVariable(required = false) @ApiParam(required = false)String shareCode) {
 
         TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, new long[] { referenceId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
 
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, new long[] { pageId } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, pageId ));
 
         if(!tanaguruUserDetailsService.currentUserCanShowAudit(page.getAudit().getId(), shareCode)){
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, new long[] { page.getAudit().getId() } );
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, page.getAudit().getId() );
         }
 
         return testResultRepository.findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(page, testHierarchy);

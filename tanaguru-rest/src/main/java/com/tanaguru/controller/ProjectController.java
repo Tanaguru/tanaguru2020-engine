@@ -67,9 +67,9 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -78,7 +78,7 @@ public class ProjectController {
     @GetMapping(value = "/member-of/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllByContractAndCurrentUserIsMemberOf(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
         return projectService.findAllByContractAndUser(
                 contract,
                 tanaguruUserDetailsService.getCurrentUser()
@@ -92,9 +92,9 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -103,7 +103,7 @@ public class ProjectController {
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllWithAuthoritiesByContract(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
 
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
@@ -122,9 +122,9 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
@@ -134,7 +134,7 @@ public class ProjectController {
                           @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
 
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
 
         return projectService.findByAudit(audit)
                 .orElse(null);
@@ -150,9 +150,9 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -162,7 +162,7 @@ public class ProjectController {
     public @ResponseBody
     Project findById(@PathVariable long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
     }
 
     /**
@@ -174,15 +174,15 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @GetMapping(value = "/{id}/authorities", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Collection<String> findAuthoritiesByProjectId(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
 
         return projectService.getUserAuthoritiesOnProject(tanaguruUserDetailsService.getCurrentUser(), project);
     }
@@ -196,9 +196,11 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Contract not found")
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nProject limit for contract : PROJECT_LIMIT_FOR_CONTRACT error"
+                    + "\nInvalid domain : INVALID_DOMAIN error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
@@ -210,14 +212,14 @@ public class ProjectController {
         User user = tanaguruUserDetailsService.getCurrentUser();
 
         Contract contract = contractRepository.findById(project.getContractId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, new long[] { project.getContractId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, project.getContractId() ));
 
         if(contract.getProjectLimit() > 0 && contract.getProjects().size() >= contract.getProjectLimit()) {
-            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, new long[] { contract.getId(),contract.getProjectLimit() } );
+            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId(), contract.getProjectLimit()  );
         }
 
         if(!UrlHelper.isValid(project.getDomain())){
-            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, new String[] { project.getDomain() } );
+            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain() );
         }
 
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
@@ -241,9 +243,9 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -253,7 +255,7 @@ public class ProjectController {
     public void deleteProject(@PathVariable long id) {
         projectService.deleteProject(
                 projectRepository.findById(id)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { id } ))
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ))
         );
     }
 
@@ -270,9 +272,10 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project or User not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -282,9 +285,9 @@ public class ProjectController {
     public ProjectAppUser addMember(@PathVariable long projectId, @PathVariable long userId){
         return projectService.addMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } )));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId )));
     }
 
     /**
@@ -300,9 +303,10 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Project or User not found")
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -312,9 +316,9 @@ public class ProjectController {
     public void removeMember(@PathVariable long projectId, @PathVariable long userId){
         projectService.removeMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
         );
     }
 
@@ -329,9 +333,13 @@ public class ProjectController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or try to self promote"),
-            @ApiResponse(code = 404, message = "Project, ProjectRole or User not found")
+            @ApiResponse(code = 404, message = "Cannot promote yourself : CANNOT_PROMOTE_YOURSELF error"
+                    + "\nProject cannot promote user ; PROJECT_CANNOT_PROMOTE_USER error"
+                    + "\nProject not found : PROJECT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error"
+                    + "\nUser not found for the project : USER_NOT_FOUND_FOR_PROJECT error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
@@ -350,10 +358,10 @@ public class ProjectController {
 
         ProjectAppUser target = projectUserRepository.findByProjectAndContractAppUser_User(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, new long[] { projectId } )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { userId } ))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, new long[] { userId, projectId  }));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId, projectId ));
 
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);

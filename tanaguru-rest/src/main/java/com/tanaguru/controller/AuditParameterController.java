@@ -60,13 +60,13 @@ public class AuditParameterController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 404, message = "Parameter not found")
+            @ApiResponse(code = 404, message = "Parameter not found : AUDIT_PARAMETERS_NOT_FOUND error")
     })
     @GetMapping("/{id}")
     public @ResponseBody
     AuditParameter getAuditParameters(@PathVariable long id) {
         return auditParameterRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_PARAMETERS_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_PARAMETERS_NOT_FOUND, id ));
     }
 
     @ApiOperation(
@@ -76,9 +76,9 @@ public class AuditParameterController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
@@ -88,7 +88,7 @@ public class AuditParameterController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
 
         return audit.getParametersAsMap().values();
     }

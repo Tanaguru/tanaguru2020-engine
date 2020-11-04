@@ -18,9 +18,10 @@ import com.tanaguru.repository.ProjectUserRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.MailService;
-import com.tanaguru.service.MessageService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.UserService;
+import com.tanaguru.service.impl.MessageService;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -33,10 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.util.*;
 
 /**
@@ -54,6 +52,7 @@ public class UserController {
     private final ContractUserRepository contractUserRepository;
     private final ProjectUserRepository projectUserRepository;
     private final MailService mailService;
+    private final MessageService messageService;
 
     @Value("${webapp.url}")
     private String webappUrl;
@@ -61,8 +60,6 @@ public class UserController {
     @Value("${password.tokenValidity}")
     private int passwordTokenValidity;
     
-    @Inject
-    private MessageService messageService;
 
     @Autowired
     public UserController(
@@ -72,7 +69,10 @@ public class UserController {
             UserFactory userFactory,
             AppRoleService appRoleService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            ContractUserRepository contractUserRepository, ProjectUserRepository projectUserRepository, MailService mailService) {
+            ContractUserRepository contractUserRepository, 
+            ProjectUserRepository projectUserRepository, 
+            MailService mailService,
+            MessageService messageService) {
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.userService = userService;
@@ -82,6 +82,7 @@ public class UserController {
         this.contractUserRepository = contractUserRepository;
         this.projectUserRepository = projectUserRepository;
         this.mailService = mailService;
+        this.messageService = messageService;
     }
 
     /**
@@ -92,7 +93,7 @@ public class UserController {
             notes = "User must have SHOW_USER authority")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
@@ -112,9 +113,9 @@ public class UserController {
                     + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER) || " +
             "(@tanaguruUserDetailsServiceImpl.getCurrentUser() != null && @tanaguruUserDetailsServiceImpl.getCurrentUser().getId() == #id)")
@@ -122,7 +123,7 @@ public class UserController {
     public @ResponseBody
     User getUser(@PathVariable long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
     }
 
     /**
@@ -132,7 +133,7 @@ public class UserController {
             value = "Get currentu User")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
@@ -154,16 +155,16 @@ public class UserController {
                     + "\nIf user not found, exception raise : USER_NOT_FOUND with username")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/by-name/{username}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     User getUser(@PathVariable String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new String[] {username}));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username ));
     }
 
     /**
@@ -180,8 +181,11 @@ public class UserController {
                     + "\nIf invalid password, exception raise : INVALID_PASSWORD")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 403, message = "Forbidden for current session")
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Username already exists : USERNAME_ALREADY_EXISTS error"
+                    + "\nEmail already exists : EMAIL_ALREADY_EXISTS error"
+                    + "\nInvalid password : INALID_PASSWORD error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_USER)")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -221,16 +225,17 @@ public class UserController {
                     + "\nIf App role not found, exception raise : APP_ROLE_NOT_FOUND with app role")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error"
+                    + "\nApp role not found : APP_ROLE_NOT_FOUND error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).MODIFY_USER)")
     @PutMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     User modifyUser(@RequestBody @Valid UserDTO user) {
         User from = userRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { user.getId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId() ));
 
         User to = new User();
         to.setUsername(user.getUsername());
@@ -242,7 +247,7 @@ public class UserController {
                 userDetailsService.getCurrentUser().getId() != from.getId() &&
                 userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)){
             to.setAppRole(appRoleService.getAppRole(user.getAppRole())
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, new String[] { user.getAppRole().toString() } )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString() )));
         }
 
         return userService.modifyUser(from, to);
@@ -258,7 +263,7 @@ public class UserController {
             value = "Modify current User")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "User not found")
     })
@@ -287,9 +292,10 @@ public class UserController {
                     + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or try to self delete"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error"
+                    + "\nCannot delete current user : CANNOT_DELETE_CURRENT_USER error")
     })
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).DELETE_USER)")
     @DeleteMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -300,7 +306,7 @@ public class UserController {
         }
 
         userService.deleteUser(userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { id } )));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id )));
     }
 
     /**
@@ -311,7 +317,7 @@ public class UserController {
             notes = "User must have SHOW_CONTRACT authority on Contract")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Contract not found")
     })
@@ -333,7 +339,7 @@ public class UserController {
             notes = "User must have SHOW_PROJECT authority on Project")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Project not found")
     })
@@ -352,7 +358,7 @@ public class UserController {
             notes = "If error sending mail, exception raise : ERROR_SENDING_MAIL")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 500, message = "Error while sending email")
+            @ApiResponse(code = 500, message = "Error while sending email : ERROR_SENDING_EMAIL error")
     })
     @PutMapping(value = "/forgot-password", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
@@ -373,7 +379,7 @@ public class UserController {
             try{
                 mailService.sendSimpleMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent") + webappUrl + "reset-password/" + user.getId() + '/' + token );
             }catch (MailException e){
-                throw  new InternalError(CustomError.ERROR_SENDING_EMAIL);
+                throw  new InternalError(CustomError.ERROR_SENDING_EMAIL.toString());
             }
 
         }
@@ -390,15 +396,16 @@ public class UserController {
                     + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error"
+                    + "\nCannot modify user password : CANNOT_MODIFY_USER_PASSWORD error")
     })
     @PutMapping(value = "/change-password", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     User changePassword(@RequestBody ChangePasswordCommandDTO changePasswordCommandDTO) {
         User user = userRepository.findById(changePasswordCommandDTO.getUserId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, new long[] { changePasswordCommandDTO.getUserId() } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, changePasswordCommandDTO.getUserId() ));
 
         User current = userDetailsService.getCurrentUser();
         Calendar c = Calendar.getInstance();
@@ -416,7 +423,7 @@ public class UserController {
                 ){
             return userDetailsService.changeUserPassword(user, changePasswordCommandDTO.getPassword());
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, new long[] { changePasswordCommandDTO.getUserId() } );
+            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, changePasswordCommandDTO.getUserId() );
         }
     }
 }

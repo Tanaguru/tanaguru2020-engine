@@ -44,9 +44,9 @@ public class AuditLogController {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "Audit not found")
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
@@ -58,7 +58,7 @@ public class AuditLogController {
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
         return auditLogRepository.findAllByAudit(audit, PageRequest.of(page, size, Sort.by("date")));
     }
 }

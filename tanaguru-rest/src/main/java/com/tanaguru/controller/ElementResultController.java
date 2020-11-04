@@ -50,7 +50,8 @@ public class ElementResultController {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "TestResult not found")
+            @ApiResponse(code = 404, message = "TestResult not found : TEST_RESULT_NOT_FOUND error"
+                    + "\nCannot access element results for test : CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST error")
     })
     @GetMapping("/by-test-result/{id}/{shareCode}")
     public @ResponseBody
@@ -60,12 +61,12 @@ public class ElementResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         TestResult testResult = testResultRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_RESULT_NOT_FOUND, new long[] { id } ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_RESULT_NOT_FOUND, id ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(testResult.getPage().getAudit().getId(), shareCode)){
             return elementResultRepository.findAllByTestResult(testResult, PageRequest.of(page, size, Sort.by("id")));
         }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST, new long[] { id });
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST, id );
         }
     }
 }
