@@ -74,7 +74,7 @@ public class TanaguruControllerAdvice {
     @ResponseBody
     @ExceptionHandler(LockedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    ErrorDTO userBlocked(InvalidEntityException ex) {
+    ErrorDTO userBlocked(LockedException ex) {
         return new ErrorDTO(ex.getMessage());
     }
 }
