@@ -1,5 +1,8 @@
 package com.tanaguru.service.impl;
 
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomIllegalStateException;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
@@ -18,7 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -68,7 +70,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             newUser.setEnabled(true);
             newUser.setPassword(bCryptPasswordEncoder.encode("admin"));
             newUser.setAppRole(appRoleRepository.findByName(EAppRole.SUPER_ADMIN)
-                    .orElseThrow(IllegalStateException::new));
+                    .orElseThrow(() -> new CustomIllegalStateException()));
             return userRepository.save(newUser);
         });
     }
@@ -89,8 +91,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Unable to find the user"));
-        
+                .orElseThrow(() -> new UsernameNotFoundException(CustomError.USER_NOT_FOUND.toString()));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -112,23 +113,23 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             return null;
         }else{
             return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new EntityNotFoundException("Could not find user : " + username));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username  ));
         }
     }
 
     public boolean currentUserHasAuthorityOnContract(String authority, long contractId) {
         return getCurrentUser() != null && contractService.hasAuthority(getCurrentUser(), authority, contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find contract " + contractId)), true);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )) , true);
     }
 
     public boolean currentUserHasAuthorityOnProject(String authority, long projectId) {
         return getCurrentUser() != null && projectService.hasAuthority(getCurrentUser(), authority, projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find project " + projectId)), true);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )), true);
     }
 
     public boolean currentUserCanShowAudit(long auditId, String shareCode){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + auditId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId));
         return currentUserCanShowAudit(audit, shareCode);
     }
 
@@ -145,7 +146,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
 
     public boolean currentUserCanDeleteAudit(long auditId){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + auditId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
         boolean result = false;
         Optional<Act> actOptional = actRepository.findByAudit(audit);
         if(actOptional.isPresent()){
@@ -156,7 +157,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
 
     public boolean currentUserCanScheduleOnAudit(long auditId){
         Audit audit = auditRepository.findById(auditId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find audit " + auditId));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
 
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
     }

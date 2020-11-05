@@ -1,6 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.config.PropertyConfig;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
@@ -8,8 +9,9 @@ import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.helper.AESEncrypt;
+import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditParameterService;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -17,6 +19,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -69,9 +72,10 @@ public class AuditParameterServiceImpl implements AuditParameterService {
     private final AuditParameterRepository auditParameterRepository;
     private final ScenarioRepository scenarioRepository;
     private final ResourceRepository resourceRepository;
-
-    private UrlValidator urlValidator;
-
+   
+    @Value("${auditrunner.active}")
+    private String[] browsersActive;
+  
     @Autowired
     public AuditParameterServiceImpl(
             AuditParameterFamilyRepository auditParameterFamilyRepository,
@@ -83,8 +87,6 @@ public class AuditParameterServiceImpl implements AuditParameterService {
         this.auditParameterRepository = auditParameterRepository;
         this.scenarioRepository = scenarioRepository;
         this.resourceRepository = resourceRepository;
-
-        urlValidator = new UrlValidator();
     }
 
     @PostConstruct
@@ -116,7 +118,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
             auditParameterDefaultValueMap.put(
                     auditParameter.getCode(),
                     auditParameterValueRepository.findFirstByIsDefaultAndAuditParameter(true, auditParameter)
-                            .orElseThrow(() -> new InvalidEntityException("Audit parameter " + auditParameter.getCode() + "has not default value"))
+                            .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_PARAMETER_NO_DEFAULT_VALUE , auditParameter.getCode().toString() ))
             );
         }
     }
@@ -182,7 +184,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
 
                 definiteParameters.put(parameter, existingParameterValueOpt);
             } else {
-                throw new InvalidEntityException("Invalid value for parameter " + parameter.getCode() + " : " + value);
+                throw new CustomInvalidEntityException(CustomError.INVALID_VALUE_PARAMETER, parameter.getCode().toString(), value );
             }
         }
 
@@ -208,14 +210,14 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                     result = scenarioRepository.findById(scenarioId).isPresent();
                     break;
                 case BASICAUTH_URL:
-                    result = value.isEmpty() || urlValidator.isValid(value);
+                    result = value.isEmpty() || UrlHelper.isValid(value);
                     break;
                 case SITE_SEEDS:
                 case PAGE_URLS:
                     String[] urls = value.split(";");
                     if(urls.length > 0) {
                         result = Arrays.stream(urls).allMatch((url) ->{
-                            boolean match = urlValidator.isValid(url);
+                            boolean match = UrlHelper.isValid(url);
                             if(project != null &&!project.getContract().isRestrictDomain() && project.getDomain() != null && !project.getDomain().isEmpty()){
                                 WebURL sourceDomain = new WebURL();
                                 sourceDomain.setURL(project.getDomain());
@@ -234,7 +236,13 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                         int webdriverWidth = Integer.parseInt(resolution);
                         return webdriverWidth <= MAX_WEBDRIVER_WIDTH && webdriverWidth > 0;
                     });
-                break;
+                    break;
+                
+                case WEBDRIVER_BROWSER:
+                    String browser = value;
+                    ArrayList<String> browsers = new ArrayList(Arrays.asList(browsersActive));;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsers.contains(browser);
+                    break;
 
                 case CRAWLER_MAX_DOCUMENT:
                     long crawlerMaxDocument = Long.parseLong(value);

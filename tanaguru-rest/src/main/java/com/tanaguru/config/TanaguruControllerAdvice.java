@@ -1,8 +1,10 @@
 package com.tanaguru.config;
 
 import com.tanaguru.domain.dto.ErrorDTO;
-import com.tanaguru.domain.exception.ForbiddenException;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.NoSuchElementException;
 
 /**
@@ -22,10 +23,10 @@ import java.util.NoSuchElementException;
 public class TanaguruControllerAdvice {
 
     @ResponseBody
-    @ExceptionHandler(EntityNotFoundException.class)
+    @ExceptionHandler(CustomEntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    ErrorDTO entityNotFoundHandler(EntityNotFoundException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO customEntityNotFoundHandler(CustomEntityNotFoundException ex) {
+        return new ErrorDTO(ex.getMessage(),ex.getContent());
     }
 
     @ResponseBody
@@ -36,10 +37,10 @@ public class TanaguruControllerAdvice {
     }
 
     @ResponseBody
-    @ExceptionHandler(ForbiddenException.class)
+    @ExceptionHandler(CustomForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    ErrorDTO entityForbidden(ForbiddenException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO entityForbidden(CustomForbiddenException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
 
     @ResponseBody
@@ -64,10 +65,10 @@ public class TanaguruControllerAdvice {
     }
 
     @ResponseBody
-    @ExceptionHandler(InvalidEntityException.class)
+    @ExceptionHandler(CustomInvalidEntityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ErrorDTO invalidEntityError(InvalidEntityException ex) {
-        return new ErrorDTO(ex.getMessage());
+    ErrorDTO customInvalidEntityError(CustomInvalidEntityException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
     
     @ResponseBody

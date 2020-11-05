@@ -11,4 +11,5 @@ import java.util.Collection;
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Collection<Resource> findAllByProjectAndIsDeletedIsFalse(Project project);
     Collection<Resource> findAllByProject_IdAndIsDeletedIsFalse(long projectId);
+    Collection<Resource> findByIsDeletedIsFalse();
 }

@@ -25,7 +25,7 @@
     <include file="db/changelogs/20200826_changelog_updatePageNameAndColumnType.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20200827_changelog_updateAuditLog_date.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20200904_changelog_updateAuditParameters_enableScreenshot.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20201015_changelog_updateAuditParameter_webDriverType.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20201023_changelog_updateUsers_accountNonLocked.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20201027_changelog_updateUsers_attemptsColumn.xml" relativeToChangelogFile="false"/>
-
 </databaseChangeLog>
