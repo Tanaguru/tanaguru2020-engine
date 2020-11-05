@@ -3,3 +3,6 @@
 - Rest API
 - 4 types of audit
 - User, contract and project management
+
+## 1.0.2
+- Endpoint healthcheck , new key in common properties : management.endpoint.health.show-details, in order to show details or not
