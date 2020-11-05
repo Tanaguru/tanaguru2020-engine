@@ -29,8 +29,9 @@ pipeline {
         stage('Build docker image') {
             when {
                 anyOf{
-                branch 'develop'
-                branch 'master'
+                    branch 'develop'
+                    branch 'master'
+                    branch 'fix-docker-firefox'
                 }
             }
             steps {
@@ -42,6 +43,7 @@ pipeline {
                 mv tanaguru-rest/target/tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 docker build -t tanaguru2020-rest:${REST_VERSION} \
                     --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz \
+                    --build-arg FIREFOX_VERSION=esr-latest \
                     ./tanaguru2020-rest/image/
                 '''
             }
@@ -49,7 +51,10 @@ pipeline {
 
         stage('Deploy dev') {
             when {
-                branch 'develop'
+                anyOf{
+                    branch 'develop'
+                    branch 'fix-docker-firefox'
+                }
             }
             steps {
                 unstash 'version'
