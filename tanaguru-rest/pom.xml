@@ -108,7 +108,8 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
-                        </goals>
+                			<goal>build-info</goal>
+            			</goals>
                     </execution>
                 </executions>
             </plugin>
