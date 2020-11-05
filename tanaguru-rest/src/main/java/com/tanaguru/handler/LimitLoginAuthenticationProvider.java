@@ -3,7 +3,6 @@ package com.tanaguru.handler;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +28,16 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     @Value("${admin.mail.whenblocked}")
     private boolean sendAdminMail;
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final HttpServletRequest request;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    private HttpServletRequest request;
+    public LimitLoginAuthenticationProvider(UserService userService, UserRepository userRepository, HttpServletRequest request) {
+        this.userService = userService;
+        this.userRepository = userRepository;
+        this.request = request;
+    }
 
     @Override
     public Authentication authenticate(Authentication authentication)throws AuthenticationException {
@@ -44,16 +45,13 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
         Optional<User> user = userRepository.findByUsername(authentication.getName());
         try {
             Authentication auth = super.authenticate(authentication);
-            if(!user.isEmpty()) {
-                userService.resetFailAttempts(user.get()); //sucess login, reset user attempts
-            }
+            //sucess login, reset user attempts
+            user.ifPresent(value -> userService.resetFailAttempts(value));
             return auth;		
 
         } catch (BadCredentialsException e) {
             //invalid login, update user attempts
-            if(!user.isEmpty()) {
-                userService.updateFailAttempts(user.get(),ipAddress, sendAdminMail);
-            }
+            user.ifPresent(value -> userService.updateFailAttempts(value, ipAddress, sendAdminMail));
             throw e;
 
         } catch (LockedException e){
@@ -61,7 +59,7 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
             String error = "";
             Date now = new Date();
             ArrayList<Attempt> attempts = new ArrayList<Attempt>();
-            if(!user.isEmpty()) {
+            if(user.isPresent()) {
                 attempts = new ArrayList<Attempt>(user.get().getAttempts());
             }
             if(!attempts.isEmpty()) {

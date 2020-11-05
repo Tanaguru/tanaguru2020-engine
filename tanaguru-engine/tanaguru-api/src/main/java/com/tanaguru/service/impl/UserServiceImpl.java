@@ -18,10 +18,9 @@ import org.springframework.stereotype.Service;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import javax.transaction.Transactional;
+
 
 /**
  * @author rcharre
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Update the fails attempts of the user
-     * @param username
+     * @param user
      * @param ip
      */
     public void updateFailAttempts(User user, String ip, boolean sendAdminMail) {
@@ -146,15 +145,18 @@ public class UserServiceImpl implements UserService {
                 //send mail to super admin with list of attempts
                 DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
                 StringBuilder builder = new StringBuilder();
-                builder.append("Multiples tentatives de connexions sur le compte : "+user.getEmail());
-                builder.append("\nNom d'utilisateur : "+user.getUsername());
-                builder.append("\nID utilisateur : "+user.getId());
+                builder.append("Multiples tentatives de connexions sur le compte : ")
+                        .append(user.getEmail()).append("\nNom d'utilisateur : ")
+                        .append(user.getUsername()).append("\nID utilisateur : ")
+                        .append(user.getId());
                 for(Attempt attempt : attempts) {
-                    builder.append("\n\nTentative numéro "+attempt.getNumber());
-                    builder.append(" | IP : "+attempt.getIp());
-                    builder.append(" | Dernier accès : "+longDateFormat.format(attempt.getLastModified()));
+                    builder.append("\n\nTentative numÃ©ro ")
+                            .append(attempt.getNumber()).append(" | IP : ")
+                            .append(attempt.getIp()).append(" | Dernier accÃ©s : ")
+                            .append(longDateFormat.format(attempt.getLastModified()));
                     if( attempt.getBlockedUntil() != null ){
-                        builder.append(" | Bloqué jusqu'à : "+longDateFormat.format(attempt.getBlockedUntil()));
+                        builder.append(" | BloquÃ© jusqu'Ã  : ")
+                                .append(longDateFormat.format(attempt.getBlockedUntil()));
                     }
                 }
                 if(sendAdminMail) {
@@ -185,7 +187,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Reset the attempts of the user
-     * @param username
+     * @param user
      */
     public void resetFailAttempts(User user) {
         user.setAttempts(new ArrayList<Attempt>());
@@ -194,7 +196,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Set accountNonLocked to true for the user
-     * @param username
+     * @param user
      */
     public void unlock(User user) {
         user.setAccountNonLocked(true);
