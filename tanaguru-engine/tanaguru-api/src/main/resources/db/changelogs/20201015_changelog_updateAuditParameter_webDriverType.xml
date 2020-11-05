@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+	
+    
+    <changeSet id="populateaudit_parameter_webdriverType" author="lpedrau">
+        <sql>
+            INSERT INTO audit_parameter (code, audit_parameter_family_id) VALUES
+            ('WEBDRIVER_BROWSER', (SELECT id FROM audit_parameter_family WHERE code = 'WEBDRIVER'));
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM audit_parameter WHERE code = 'WEBDRIVER_BROWSER';
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populateaudit_parameter_webdriverType_value" author="lpedrau">
+        <sql>
+            INSERT INTO audit_parameter_value (audit_parameter_id, value, is_default) VALUES
+            ((SELECT id FROM audit_parameter WHERE code = 'WEBDRIVER_BROWSER'), 'firefox', true);
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM audit_parameter_value WHERE audit_parameter_id = (SELECT id FROM audit_parameter WHERE code = 'WEBDRIVER_BROWSER');
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

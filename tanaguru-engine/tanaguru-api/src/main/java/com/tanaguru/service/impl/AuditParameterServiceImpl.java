@@ -19,6 +19,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -71,7 +72,10 @@ public class AuditParameterServiceImpl implements AuditParameterService {
     private final AuditParameterRepository auditParameterRepository;
     private final ScenarioRepository scenarioRepository;
     private final ResourceRepository resourceRepository;
-
+   
+    @Value("${auditrunner.active}")
+    private String[] browsersActive;
+  
     @Autowired
     public AuditParameterServiceImpl(
             AuditParameterFamilyRepository auditParameterFamilyRepository,
@@ -232,7 +236,13 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                         int webdriverWidth = Integer.parseInt(resolution);
                         return webdriverWidth <= MAX_WEBDRIVER_WIDTH && webdriverWidth > 0;
                     });
-                break;
+                    break;
+                
+                case WEBDRIVER_BROWSER:
+                    String browser = value;
+                    ArrayList<String> browsers = new ArrayList(Arrays.asList(browsersActive));;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsers.contains(browser);
+                    break;
 
                 case CRAWLER_MAX_DOCUMENT:
                     long crawlerMaxDocument = Long.parseLong(value);

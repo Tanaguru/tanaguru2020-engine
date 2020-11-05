@@ -4,6 +4,7 @@ import com.tanaguru.config.PropertyConfig;
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.factory.TanaguruCrawlerControllerFactory;
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.BrowserName;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.entity.audit.*;
@@ -42,6 +43,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final AuditReferenceRepository auditReferenceRepository;
 
     private final String coreScript;
+    private static final String CHROME = "chrome";
+    private static final String FIREFOX = "firefox";
 
     @Autowired
     public AuditRunnerFactoryImpl(
@@ -76,6 +79,18 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String basicAuthUrl = parameterStringMap.get(EAuditParameter.BASICAUTH_URL).getValue();
         String basicAuthLogin = parameterStringMap.get(EAuditParameter.BASICAUTH_LOGIN).getValue();
         String basicAuthPassword = parameterStringMap.get(EAuditParameter.BASICAUTH_PASSWORD).getValue();
+        String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
+        BrowserName browserName = null;
+        switch(webdriverBrowser) {
+        	case CHROME:
+        		browserName = BrowserName.CHROME;
+        		break;
+        	case FIREFOX:
+        		browserName = BrowserName.FIREFOX;
+        		break;
+        	default:
+        		browserName = BrowserName.FIREFOX;    
+        }
 
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());
 
@@ -108,7 +123,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthUrl,
                         basicAuthLogin,
                         basicAuthPassword,
-                        enableScreenShot);
+                        enableScreenShot,
+                        browserName);
                 break;
 
             case SITE:
@@ -124,7 +140,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthUrl,
                         basicAuthLogin,
                         basicAuthPassword,
-                        enableScreenShot);
+                        enableScreenShot,
+                        browserName);
                 break;
 
             case SCENARIO:
@@ -141,7 +158,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthUrl,
                         basicAuthLogin,
                         basicAuthPassword,
-                        enableScreenShot);
+                        enableScreenShot,
+                        browserName);
                 break;
             case UPLOAD:
                 long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
@@ -156,7 +174,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthUrl,
                         basicAuthLogin,
                         basicAuthPassword,
-                        enableScreenShot);
+                        enableScreenShot,
+                        browserName);
                 break;
             default:
                 auditService.log(audit, EAuditLogLevel.ERROR, audit.getType() + " audit type not handled");
@@ -174,9 +193,10 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            BrowserName browserName) {
         Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create();
+        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
         if (tanaguruDriver.isPresent()) {
             result = Optional.of(new AuditRunnerPage(
@@ -208,9 +228,10 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            BrowserName browserName) {
         Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create();
+        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
         if (tanaguruDriver.isPresent()) {
             result = Optional.of(new AuditRunnerSelenese(
@@ -242,10 +263,11 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            BrowserName browserName) {
         Optional<AuditRunner> result = Optional.empty();
         Map<EAuditParameter, AuditParameterValue> auditParameterValueMap = audit.getParametersAsMap();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create();
+        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
         Optional<TanaguruCrawlerController> tanaguruCrawlerController = tanaguruCrawlerControllerFactory.create(
                 seeds,
                 Long.parseLong(auditParameterValueMap.get(EAuditParameter.CRAWLER_MAX_DURATION).getValue()),
@@ -289,9 +311,10 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            BrowserName browserName) {
         Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create();
+        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
         if (tanaguruDriver.isPresent()) {
             result = Optional.of(new AuditRunnerFile(
