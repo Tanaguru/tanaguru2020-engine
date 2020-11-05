@@ -10,7 +10,6 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -74,8 +73,6 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                     .orElseThrow(() -> new CustomIllegalStateException()));
             return userRepository.save(newUser);
         });
-
-
     }
 
     /**
@@ -95,14 +92,13 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(CustomError.USER_NOT_FOUND.toString()));
-
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.isEnabled(),
                 true,
                 true,
-                true,
+                user.isAccountNonLocked(),
                 user.getAppRole().getAuthorities().stream()
                         .map(appAuthority ->
                                 new SimpleGrantedAuthority(appAuthority.getName())
@@ -164,6 +160,6 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
 
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
-
     }
+    
 }

@@ -1,5 +1,6 @@
 package com.tanaguru.config;
 
+import com.tanaguru.handler.LimitLoginAuthenticationProvider;
 import com.tanaguru.security.*;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,13 +18,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
-import javax.inject.Inject;
 
 @Configuration
 @EnableGlobalMethodSecurity(
         prePostEnabled = true,
         securedEnabled = true,
         jsr250Enabled = true)
+@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TanaguruUserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -33,7 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public SecurityConfig(
             TanaguruUserDetailsService userDetailsService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            Http401UnauthorizedEntryPoint authenticationEntryPoint, JwtRequestFilter jwtRequestFilter) {
+            Http401UnauthorizedEntryPoint authenticationEntryPoint, 
+            JwtRequestFilter jwtRequestFilter) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -50,20 +53,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/logout").permitAll()
-                    .antMatchers("/users/forgot-password/**").permitAll()
-                    .antMatchers("/v2/api-docs",
-                            "/configuration/ui",
-                            "/swagger-resources/**",
-                            "/configuration/security",
-                            "/swagger-ui.html",
-                            "/webjars/**").permitAll()
-                .and().exceptionHandling().
-                    authenticationEntryPoint(authenticationEntryPoint)
-                .and().sessionManagement()
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .csrf().disable()
+        .authorizeRequests()
+        .antMatchers("/logout").permitAll()
+        .antMatchers("/users/forgot-password/**").permitAll()
+        .antMatchers("/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**").permitAll()
+        .and().exceptionHandling().
+        authenticationEntryPoint(authenticationEntryPoint)
+        .and().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
@@ -74,10 +77,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    @Inject
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder);
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(myAuthProvider());
     }
+
+    @Bean
+    public LimitLoginAuthenticationProvider myAuthProvider() throws Exception{
+        LimitLoginAuthenticationProvider provider = new LimitLoginAuthenticationProvider();
+        provider.setPasswordEncoder(this.bCryptPasswordEncoder);
+        provider.setUserDetailsService(this.userDetailsService);
+        return provider;
+    }
+
 }

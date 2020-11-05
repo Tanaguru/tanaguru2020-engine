@@ -54,6 +54,10 @@ public class User implements Serializable {
     @Column(nullable = false)
     @NotNull
     private boolean isEnabled = false;
+    
+    @Column(nullable = false)
+    @NotNull
+    private boolean accountNonLocked = true;
 
     @NotNull
     @Valid
@@ -70,6 +74,11 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Collection<ContractAppUser> contractAppUsers;
 
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    @JsonIgnore
+    private Collection<Attempt> attempts = new ArrayList<>();
+    
     public long getId() {
         return id;
     }
@@ -140,5 +149,21 @@ public class User implements Serializable {
 
     public void setContractAppUsers(Collection<ContractAppUser> contractAppUsers) {
         this.contractAppUsers = contractAppUsers;
+    }
+    
+    public void setAccountNonLocked(boolean accountNonLocked) {
+    	this.accountNonLocked = accountNonLocked;
+    }
+    
+    public boolean isAccountNonLocked() {
+    	return accountNonLocked;
+    }
+    
+    public Collection<Attempt> getAttempts(){
+        return attempts;
+    }
+    
+    public void setAttempts(Collection<Attempt> attempts) {
+        this.attempts = attempts;
     }
 }
