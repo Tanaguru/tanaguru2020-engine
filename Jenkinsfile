@@ -43,7 +43,7 @@ pipeline {
                 mv tanaguru-rest/target/tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 docker build -t tanaguru2020-rest:${REST_VERSION} \
                     --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz \
-                    --build-arg FIREFOX_VERSION=esr-latest \
+                    --build-arg FIREFOX_VERSION=69.0 \
                     --build-arg GECKODRIVER_VERSION=0.21.0 \
                     ./tanaguru2020-rest/image/
                 '''
