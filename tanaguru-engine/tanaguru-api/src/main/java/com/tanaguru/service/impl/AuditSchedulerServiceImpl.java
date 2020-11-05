@@ -1,12 +1,13 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.AppAuthorityName;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditScheduler;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.ActRepository;
 import com.tanaguru.repository.AuditSchedulerRepository;
 import com.tanaguru.service.AppRoleService;
@@ -56,12 +57,12 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
 
     public AuditScheduler createAuditScheduler(Audit audit, int timer){
         if(timer < MIN_TIMER){
-            throw new InvalidEntityException("Timer value " + timer + " is too short");
+            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, String.valueOf(timer) );
         }
 
         Optional<AuditScheduler> auditSchedulerOpt = auditSchedulerRepository.findByAudit(audit);
         if(auditSchedulerOpt.isPresent()){
-            throw new InvalidEntityException("A scheduler already exists for audit " + audit.getId());
+            throw new CustomInvalidEntityException(CustomError.SCHEDULER_ALREADY_EXISTS_FOR_AUDIT, String.valueOf(audit.getId()) );
         }
 
         AuditScheduler auditScheduler = new AuditScheduler();
@@ -75,7 +76,7 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
 
     public AuditScheduler modifyAuditScheduler(AuditScheduler auditScheduler, int timer, Date lastExecution){
         if(auditScheduler.getScheduler() < MIN_TIMER){
-            throw new InvalidEntityException("Timer value " + auditScheduler.getScheduler() + " is too short");
+            throw new CustomInvalidEntityException(CustomError.TIMER_VALUE_TOO_SHORT, String.valueOf(auditScheduler.getScheduler()) );
         }
 
         auditScheduler.setScheduler(timer);

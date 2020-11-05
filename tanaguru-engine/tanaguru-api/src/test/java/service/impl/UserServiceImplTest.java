@@ -1,7 +1,7 @@
 package service.impl;
 
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.impl.UserServiceImpl;
 import org.junit.Assert;
@@ -47,7 +47,7 @@ public class UserServiceImplTest {
     }
 
 
-    @Test(expected = InvalidEntityException.class)
+    @Test(expected = CustomInvalidEntityException.class)
     public void modifyUser_invalidUsernameExists() {
         User from = new User();
         User to = new User();
@@ -59,7 +59,7 @@ public class UserServiceImplTest {
         userService.modifyUser(from, to);
     }
 
-    @Test(expected = InvalidEntityException.class)
+    @Test(expected = CustomInvalidEntityException.class)
     public void modifyUser_invalidEmailExists() {
         User from = new User();
         User to = new User();

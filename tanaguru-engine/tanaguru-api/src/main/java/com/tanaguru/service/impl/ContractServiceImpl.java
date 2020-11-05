@@ -1,5 +1,6 @@
 package com.tanaguru.service.impl;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.entity.membership.contract.Contract;
@@ -9,6 +10,7 @@ import com.tanaguru.domain.entity.membership.contract.ContractRole;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractRoleRepository;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,7 +91,7 @@ public class ContractServiceImpl implements ContractService {
 
         for (EContractRole contractRole : EContractRole.values()) {
             contractRoleMap.put(contractRole, contractRoleRepository.findByName(contractRole)
-                    .orElseThrow(() -> new EntityNotFoundException("Cannot find contract role with name " + contractRole)));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_CONTRACT_ROLE, contractRole.toString() )));
         }
     }
 
@@ -165,7 +166,7 @@ public class ContractServiceImpl implements ContractService {
         //Change owner
         if(contractOwner.getId() != owner.getId()){
             ContractAppUser newOwner = contractUserRepository.findByContractAndUser(contract, owner)
-                .orElseThrow(() -> new EntityNotFoundException("User " + owner.getId() + " is not a current member of the contract"));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId()) ));
 
             newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
             contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
@@ -196,7 +197,7 @@ public class ContractServiceImpl implements ContractService {
 
     public void removeMember(Contract contract, User user){
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(user.getId()) ));
         contractUserRepository.delete(contractAppUser);
     }
 }

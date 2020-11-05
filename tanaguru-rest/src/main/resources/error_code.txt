@@ -1,0 +1,61 @@
+ACCESS_DENIED								#Access Denied
+APP_ROLE_NOT_FOUND							#Cannot find app role
+AUDIT_NOT_FOUND								#Cannot find audit
+AUDIT_PARAMETER_NO_DEFAULT_VALUE			#Audit parameter has not default value
+AUDIT_PARAMETERS_NOT_FOUND					#Cannot find audit parameters
+AUDIT_SCHEDULER_NOT_FOUND					#Cannot find audit scheduler
+AUTHENTICATION_FAILED						#Authentication failed
+CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST		#Cannot access element results for test result
+CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT		#Cannot access page content for audit
+CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE			#Cannot access page content for page
+CANNOT_ACCESS_PAGES_FOR_AUDIT				#Cannot access pages for audit
+CANNOT_ACCESS_RESULT_AUDIT					#Cannot access results for audit
+CANNOT_ACCESS_SCHEDULER						#Cannot access audit scheduler
+CANNOT_CREATE_MULTIPLE_REFERENCES			#Cannot create multiple references with same code
+CANNOT_CREATE_MULTIPLE_USER_CONTRACT		#Cannot create multiple contract by user
+CANNOT_DELETE_CURRENT_USER					#Deleting current user is forbidden
+CANNOT_FIND_CONTRACT_ROLE					#Cannot find contract role
+CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE	#Cannot find main hierarchy result for given page
+CANNOT_FIND_MAIN_REFERENCE_AUDIT			#Cannot find main reference for audit
+CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE			#Cannot find TestHierarchyResult for page {content1} and test hierarchy {content2}
+CANNOT_MODIFY_AUDIT_ASSOCIATED_SCHEDULER 	#Cannot modify audit scheduler associated audit
+CANNOT_MODIFY_USER_PASSWORD					#You cannot modify password of user
+CANNOT_PROMOTE_CONTRACT_OWNER				#Cannot promote contract owner
+CANNOT_PROMOTE_YOURSELF						#Cannot promote yourself
+CANNOT_SHOW_AUDIT							#Cannot show audit
+CONTRACT_DATE_PASSED						#Contract end date is passed
+CONTRACT_NOT_FOUND							#Cannot find contract
+CURRENT_USER_NO_ACCESS_SCHEDULER			#Current user cannot access audit scheduler
+EMAIL_ALREADY_EXISTS						#Email already exists
+ERROR_SENDING_EMAIL							#Error while sending email
+INVALID_DOMAIN								#Domain is invalid
+INVALID_PASSWORD							#Invalid password
+INVALID_SCENARIO_CONTENT					#Scenario content is invalid
+INVALID_VALUE_PARAMETER						#Invalid value for parameter {content1} : {content2}
+NO_MAIN_REFERENCE							#Main reference is not in the reference list
+NO_USABLE_REFERENCE							#Cannot find usable reference for id
+PAGE_NOT_FOUND								#Cannot find page
+PROJECT_CANNOT_PROMOTE_USER					#This project role cannot be used to promote a user
+PROJECT_LIMIT_FOR_CONTRACT					#Project limit for contract {content1} is {content2}
+PROJECT_NOT_FOUND							#Cannot find project
+PROJECT_ROLE_NOT_FOUND						#Cannot find project role
+RESOURCE_NOT_FOUND							#Cannot find resource
+SCENARIO_NOT_FOUND							#Cannot find scenario
+SCHEDULER_ALREADY_EXISTS_FOR_AUDIT			#A scheduler already exists for audit
+TANAGURU_TEST_NOT_FOUND						#Cannot find Tanaguru test with id
+TEST_HIERARCHY_NOT_FOUND					#Cannot find test hierarchy
+TEST_HIERARCHY_RESULT_NOT_FOUND				#Cannot find TestHierarchy result
+TEST_RESULT_NOT_FOUND						#Cannot find test result
+TIMER_VALUE_TOO_SHORT						#Timer value is too short
+USER_CANNOT_ACCESS_PAGE_RESULT				#Current user cannot access to page result
+USER_CANNOT_ACCESS_RESOURCE					#Current user has no access to resource
+USER_CANNOT_ACCESS_SCENARIO					#Current user has no access to scenario
+USER_CANNOT_DELETE_RESOURCE					#User has no authority to delete the resource
+USER_CANNOT_DELETE_SCENARIO					#User has no authority to delete the scenario
+USER_NOT_CURRENT_MEMBER_CONTRACT			#User is not a current member of the contract
+USER_NOT_FOUND								#Cannot find user
+USER_NOT_FOUND_FOR_CONTRACT 				#Cannot find user {content1} for contract {content2}
+USER_NOT_FOUND_FOR_PROJECT					#Cannot find user {content1} for project {content2}
+USERNAME_ALREADY_EXISTS						#Username already exists
+
+

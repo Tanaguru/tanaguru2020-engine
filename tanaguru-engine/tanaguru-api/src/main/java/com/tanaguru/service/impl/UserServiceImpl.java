@@ -1,8 +1,9 @@
 package com.tanaguru.service.impl;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.UserRepository;
@@ -44,14 +45,14 @@ public class UserServiceImpl implements UserService {
 
     public User modifyUser(User from, User to) {
         if (!from.getUsername().equals(to.getUsername()) &&  checkUsernameIsUsed(to.getUsername())) {
-            throw new InvalidEntityException("Username already exists");
+            throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
         } else {
             LOGGER.info("[User {}] set username to {}", from.getId(), to.getUsername());
             from.setUsername(to.getUsername());
         }
 
         if (!from.getEmail().equals(to.getEmail()) && checkEmailIsUsed(to.getEmail())) {
-            throw new InvalidEntityException("Email already exists");
+            throw new CustomInvalidEntityException(CustomError.EMAIL_ALREADY_EXISTS);
         } else {
             LOGGER.info("[User {}] set email to {}", from.getId(), to.getEmail());
             from.setEmail(to.getEmail());
