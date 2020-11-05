@@ -1,5 +1,9 @@
 package com.tanaguru.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.AuditCommandDTO;
@@ -15,11 +19,21 @@ import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,6 +97,59 @@ public class AuditController {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
+    
+    /**
+     * @param id The id of the @see Audit
+     * @param shareCode the share code of the @see Audit
+     * @return @see Audit
+     */
+    @ApiOperation(
+            value = "Get a json file with the audit",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found")
+    })
+    @GetMapping(value="export/{id}/{shareCode}", produces = "application/json")
+    public ResponseEntity<InputStreamResource> exportAudit(
+            @PathVariable long id,
+            @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
+        
+        Audit audit =  auditRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        
+        ObjectMapper mapper = new ObjectMapper();   
+        byte[] buf = null;
+        try {
+            buf = mapper.writeValueAsBytes(audit);
+        } catch (JsonProcessingException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            buf = mapper.writeValueAsBytes(audit);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        HttpHeaders header = new HttpHeaders();
+        header.add("Content-Disposition", "attachment; filename=\"audit.json\"");
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+        
+        return ResponseEntity
+                .ok()
+                .headers(header)
+                .contentLength(buf.length)
+                .contentType(
+                        MediaType.parseMediaType("application/json"))
+                .body(new InputStreamResource(new ByteArrayInputStream(buf)));
+        
+    }
+    
     /**
      * Get all @see Audit for a given project id
      *
