@@ -29,6 +29,12 @@
             <artifactId>spring-boot-starter-security</artifactId>
             <version>${springboot-version}</version>
         </dependency>
+		
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20180130</version>
+		</dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
