@@ -173,6 +173,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                 firefoxProfile.setPreference("network.proxy.no_proxies_on", proxyExclusionUrls);
             }
 
+            firefoxProfile.setPreference("network.proxy.type", 1);
             firefoxProfile.setPreference("network.proxy.http", proxyHost);
             firefoxProfile.setPreference("network.proxy.http_port", proxyPort);
             firefoxProfile.setPreference("network.proxy.ssl", proxyHost);
