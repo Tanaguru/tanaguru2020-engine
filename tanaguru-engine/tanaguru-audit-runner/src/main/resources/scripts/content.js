@@ -1,3 +1,4 @@
+// content script
 /* Extension du DOM. */
 var ariaroles = {
 	'alert': { type: ['live region', 'standalone ui widget'] },
@@ -562,351 +563,8 @@ Element.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) { re
 HTMLElement.prototype.isARIARoleAllowedOnMe = function (role) { return this.availableARIASemantics.indexOf('[role="' + role + '"]') > -1; };
 HTMLElement.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) { return ''; };
 
-/* Gestion des tests. */
-function getXPath(element) {
-	var position = 0;
-	if (element.parentNode && element.parentNode.nodeType == 1) {
-		var children = element.parentNode.children;
-		for (var i = 0; i < children.length; i++) {
-			if (children[i].tagName.toLowerCase() == element.tagName.toLowerCase()) {
-				position++;
-			}
-			if (children[i] == element) {
-				break;
-			}
-		}
-	}
-	return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') ? '[@class="' + element.getAttribute('class') + '"]' : '');
-}
+/* ARIA */
 
-function addBooleanResult(name, data) {
-	/*
-		addBooleanResult(browser.i18n.getMessage("msgHeadings"), {
-			name: { 'passed': 'Intitulé si C', 'failed': 'Intitulé si NC' },
-			data: document.querySelectorAll('h1').length > 1
-		});
-	*/
-}
-
-function initTanaguru() {
-	if (!window.tanaguru) {
-		window.tanaguru = {};
-		window.tanaguru.tags = new Array();
-		window.tanaguru.tests = new Array();
-	}
-}
-
-function addResultSet(name, data) {
-	initTanaguru();
-	/*
-	*** OLD VERSION ***
-	if (data.type == 'failed') {
-		var datacount = data.data.length;
-	}
-	else {
-		var datacount = 0; // 'passed', 'cantTell', 'inapplicable', 'untested'
-	}
-	if (window.tanaguru.tests[name]) {
-		window.tanaguru.tests[name].datacount += datacount;
-	}
-	else {
-		window.tanaguru.tests[name] = {
-			data: [],
-			datacount: datacount
-		}
-	}
-	//if (data.data.length > 0) {
-		window.tanaguru.tests[name].data.push(data);
-	//}
-	*/
-	/* Nouvelle version */
-	window.tanaguru.tests.push(data);
-}
-
-function loadTanaguruTests() {
-	initTanaguru();
-	var tags = [];
-	for (var tag in window.tanaguru.tags) {
-		tags.push(window.tanaguru.tags[tag]);
-	}
-	tags = tags.sort(function (a, b) {
-		return a.name.localeCompare(b.name);
-	});
-	var result = { tags: tags, tests: window.tanaguru.tests };
-	window.tanaguru = undefined;
-	return result;
-}
-
-function manageOutput(element) {
-	var status = element.status ? element.status : 'cantTell';
-	element.status = undefined;
-	var accessibleName = element.accessibleName;
-	var implicitARIASemantic = element.implicitARIASemantic;
-	var explicitARIASemantic = element.explicitARIASemantic;
-	var canBeReachedUsingKeyboardWith = element.canBeReachedUsingKeyboardWith;
-	var isNotVisibleDueTo = element.isNotVisibleDueTo;
-	var isNotExposedDueTo = element.isNotExposedDueTo;
-	var fakeelement = element.cloneNode(true);
-	var e = document.createElement(fakeelement.tagName.toLowerCase());
-	if (e.outerHTML.indexOf("/") != -1) {
-		if (fakeelement.innerHTML.length > 512) {
-			fakeelement.innerHTML = '[...]';
-		}
-	}
-	return { status: status, outer: fakeelement.outerHTML, cssSelector: getUniqueSelector(element), xpath: getXPath(element), role: { implicit: implicitARIASemantic, explicit: explicitARIASemantic }, accessibleName: accessibleName, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isNotVisibleDueTo: isNotVisibleDueTo, isNotExposedDueTo: isNotExposedDueTo };
-}
-
-function createTanaguruTag(tag, status) {
-	if (!window.tanaguru.tags[tag]) {
-		window.tanaguru.tags[tag] = { id: tag, name: 'tag' + tag.charAt(0).toUpperCase() + tag.slice(1), status: status, nbfailures: 0 };
-	}
-}
-
-const specialCharRegex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-function getUniqueSelector(elSrc) {
-	if (!(elSrc instanceof Element)) return;
-	let sSel,
-		aAttr = ['name', 'value', 'title', 'placeholder', 'data-*'],
-		aSel = [],
-		getSelector = function(el) {
-			if (el.id && !specialCharRegex.test(el.id) ) {
-				aSel.unshift('#' + el.id);
-				return true;
-			}
-			aSel.unshift(sSel = el.nodeName.toLowerCase());
-			if (el.className &&
-				typeof el.className === 'string' &&
-				!specialCharRegex.test(el.className)) {
-				aSel[0] = sSel += '.' + el.className.trim().replace(/ +/g, '.');
-				if (uniqueQuery()) return true;
-			}
-			for (let i=0; i<aAttr.length; ++i) {
-				if (aAttr[i]==='data-*') {
-					let aDataAttr = [].filter.call(el.attributes, function(attr) {
-						return attr.name.indexOf('data-')===0;
-					});
-					for (let j=0; j<aDataAttr.length; ++j) {
-						aSel[0] = sSel += '[' + aDataAttr[j].name + '="' + aDataAttr[j].value + '"]';
-						if (uniqueQuery()) return true;
-					}
-				} else if (el[aAttr[i]]) {
-					aSel[0] = sSel += '[' + aAttr[i] + '="' + el[aAttr[i]] + '"]';
-					if (uniqueQuery()) return true;
-				}
-			}
-
-			let elChild = el,
-				sChild,
-				n = 1;
-			while (elChild = elChild.previousElementSibling) {
-				if (elChild.nodeName===el.nodeName) ++n;
-			}
-			aSel[0] = sSel += ':nth-of-type(' + n + ')';
-			if (uniqueQuery()) return true;
-
-			elChild = el;
-			n = 1;
-			while (elChild = elChild.previousElementSibling) ++n;
-			aSel[0] = sSel = sSel.replace(/:nth-of-type\(\d+\)/, n>1 ? ':nth-child(' + n + ')' : ':first-child');
-			if (uniqueQuery()) return true;
-			return false;
-		},
-		uniqueQuery = function() {
-			return document.querySelectorAll(aSel.join('>')||null).length===1;
-		};
-	while (elSrc.parentNode) {
-		if (getSelector(elSrc)) return aSel.join(' > ');
-		elSrc = elSrc.parentNode;
-	}
-}
-
-function createTanaguruTest(test) {
-	if (test.hasOwnProperty('status') && test.status == 'untested') { // Non testés mais référencés.
-		// Initialisation des tags.
-		initTanaguru();
-		if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
-			for (var i = 0; i < test.tags.length; i++) {
-				createTanaguruTag(test.tags[i], test.status);
-			}
-		}
-		else {
-			createTanaguruTag('others', test.status);
-		}
-		// Chargement du résultat.
-		var result = {
-			name: test.name,
-			type: test.status,
-			data: [],
-			tags: []
-		};
-		if (test.hasOwnProperty('id')) {
-			result.id = test.id;
-		}
-		if (test.hasOwnProperty('lang')) {
-			result.lang = test.lang;
-		}
-		if (test.hasOwnProperty('description')) {
-			result.description = test.description;
-		}
-		if (test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(test.status)) {
-			result.explanation = test.explanations[test.status];
-		}
-		result.tags = test.hasOwnProperty('tags') ? test.tags : ['others'];
-		if (test.hasOwnProperty('ressources')) {
-			result.ressources = test.ressources;
-		}
-		addResultSet("Nouvelle syntaxe d'écriture des tests", result);
-		// Intégrer chaque résultat dans window.tanaguru.tests.
-	}
-	else if (test.hasOwnProperty('query') && test.query.constructor == String) {
-		// Sélection des éléments.
-		var elements = document.querySelectorAll(test.query);
-		if (elements) {
-			// Statut du test par défaut.
-			var status = 'cantTell';
-			// Initialisation des tags.
-			initTanaguru();
-			if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
-				for (var i = 0; i < test.tags.length; i++) {
-					createTanaguruTag(test.tags[i], status);
-				}
-			}
-			else {
-				createTanaguruTag('others', status);
-			}
-			// Gestion du compteur d'éléments testés (avant filtre).
-			var counter = null;
-			if (test.hasOwnProperty('counter') && test.counter == 'beforefilter') {
-				counter = elements.length;
-			}
-			// Filtre additionnel sur la sélection d'éléments.
-			if (test.hasOwnProperty('filter')) {
-				if (test.filter.constructor == Function) {
-					elements = Array.from(elements);
-					elements = elements.filter((e)=> {
-						return test.filter(e, HTML)
-					});
-				}
-				else {
-					// Erreur : valeur de la propriété filter.
-				}
-			}
-			// Gestion du compteur d'éléments testés (après filtre).
-			if (test.hasOwnProperty('counter') && test.counter == 'afterfilter') {
-				counter = elements.length;
-			}
-			// Calcul du statut du test.
-			if (test.hasOwnProperty('expectedNbElements')) {
-				if (Number.isInteger(test.expectedNbElements)) {
-					status = elements.length == test.expectedNbElements ? 'passed' : 'failed';
-					for (var i = 0; i < elements.length; i++) {
-						elements[i].status = status;
-					}
-				}
-				else if (test.expectedNbElements.constructor == Object && (test.expectedNbElements.hasOwnProperty('min') || test.expectedNbElements.hasOwnProperty('max'))) {
-					var min = test.expectedNbElements.hasOwnProperty('min') && Number.isInteger(test.expectedNbElements.min) ? test.expectedNbElements.min : 0;
-					var max = test.expectedNbElements.hasOwnProperty('max') && Number.isInteger(test.expectedNbElements.max) ? test.expectedNbElements.max : null;
-					status = elements.length >= min && (max == null || elements.length <= max) ? 'passed' : 'failed';
-					for (var i = 0; i < elements.length; i++) {
-						elements[i].status = status;
-					}
-				}
-				else {
-					// Erreur : valeur de la propriété expectedNbElements.
-				}
-			}
-			else {
-				if (elements.length == 0) {
-					status = 'inapplicable'; // Voir si le statut "Non applicable" n'est possible que dans le cas d'un nombre d'éléments à vérifier.
-				}
-			}
-			var statuspriority = {
-				failed: 4,
-				passed: 3,
-				cantTell: 2,
-				inapplicable: 1,
-				untested: 0
-			};
-			// Traitement par collection.
-			var failedincollection = null;
-			if (test.hasOwnProperty('analyzeElements')) {
-				if (test.analyzeElements.constructor == Function) {
-					test.analyzeElements(elements, HTML);
-					// On modifie le statut du test selon les statuts d'items.
-					for (var e = 0; e < elements.length; e++) {
-						if (elements[e].status == 'failed') {
-							failedincollection = failedincollection == null ? 0 : failedincollection;
-							failedincollection += 1;
-						}
-						if (statuspriority[status] < statuspriority[elements[e].status]) {
-							status = elements[e].status;
-						}
-					}
-				}
-			}
-			// Mises à jour des tags (statut du tag et nombre de résultats en erreur).
-			if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
-				for (var i = 0; i < test.tags.length; i++) {
-					if (statuspriority[window.tanaguru.tags[test.tags[i]].status] < statuspriority[status]) {
-						window.tanaguru.tags[test.tags[i]].status = status;
-					}
-					if (status == 'failed') {
-						window.tanaguru.tags[test.tags[i]].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
-					}
-				}
-			}
-			else {
-				if (statuspriority[window.tanaguru.tags['others'].status] < statuspriority[status]) {
-					window.tanaguru.tags['others'].status = status;
-				}
-				if (status == 'failed') {
-					window.tanaguru.tags['others'].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
-				}
-			}
-			// Chargement du résultat.
-			var outputelements = [];
-			for (var i = 0; i < elements.length; i++) {
-				outputelements.push(manageOutput(elements[i]));
-			}
-			var result = {
-				name: test.name,
-				type: status,
-				data: outputelements,
-				tags: []
-			};
-			if (test.hasOwnProperty('id')) {
-				result.id = test.id;
-			}
-			if (test.hasOwnProperty('lang')) {
-				result.lang = test.lang;
-			}
-			if (test.hasOwnProperty('description')) {
-				result.description = test.description;
-			}
-			if (test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(status)) {
-				result.explanation = test.explanations[status];
-			}
-			if (test.hasOwnProperty('mark')) {
-				result.mark = test.mark;
-			}
-			result.tags = test.hasOwnProperty('tags') ? test.tags : ['others'];
-			if (test.hasOwnProperty('ressources')) {
-				result.ressources = test.ressources;
-			}
-			if (counter) {
-				result.counter = counter;
-			}
-			if (failedincollection) {
-				result.failedincollection = failedincollection;
-			}
-			addResultSet("Nouvelle syntaxe d'écriture des tests", result);
-			// Intégrer chaque résultat dans window.tanaguru.tests.
-		}
-		else {
-			// Erreur : valeur de la propriété query.
-		}
-	}
-}
 /*
     Accessible Name and Description Computation 1.1
     W3C Recommendation 18 December 2018
@@ -919,7 +577,8 @@ function createTanaguruTest(test) {
     * Multiple-Selection Listboxes.
     Current Imperfect Implementations :
     * Replaced Elements (+ CSS Content).
-    * Control Embedded in Label.
+    * Control Embedded in Label (+ Checkboxes & Radios Embedded in Label).
+    * Checkbox & Radio in Native Textboxes...
     * SVG (multiple titles & use elements).
     * Output (in native "textboxes").
     * Native Password Controls (i.e. (Incorrectly) Used as Custom Checkbox Controls).
@@ -1279,6 +938,682 @@ if (!('hasAccessibleName' in HTMLElement.prototype)) HTMLElement.prototype.hasAc
 var getAccessibleNameImplementation = function () {};
 if (!('getAccessibleNameImplementation' in SVGElement.prototype)) SVGElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
 if (!('getAccessibleNameImplementation' in HTMLElement.prototype)) HTMLElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
+
+/* Gestion des tests. */
+function getXPath(element) {
+	var position = 0;
+	if (element.parentNode && element.parentNode.nodeType == 1) {
+		var children = element.parentNode.children;
+		for (var i = 0; i < children.length; i++) {
+			if (children[i].tagName.toLowerCase() == element.tagName.toLowerCase()) {
+				position++;
+			}
+			if (children[i] == element) {
+				break;
+			}
+		}
+	}
+	return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') ? '[@class="' + element.getAttribute('class') + '"]' : '');
+}
+
+function addBooleanResult(name, data) {
+	/*
+		addBooleanResult(browser.i18n.getMessage("msgHeadings"), {
+			name: { 'passed': 'Intitulé si C', 'failed': 'Intitulé si NC' },
+			data: document.querySelectorAll('h1').length > 1
+		});
+	*/
+}
+
+function initTanaguru() {
+	if (!window.tanaguru) {
+		window.tanaguru = {};
+		window.tanaguru.tags = new Array();
+		window.tanaguru.tests = new Array();
+	}
+}
+
+function addResultSet(name, data) {
+	initTanaguru();
+	/*
+	*** OLD VERSION ***
+	if (data.type == 'failed') {
+		var datacount = data.data.length;
+	}
+	else {
+		var datacount = 0; // 'passed', 'cantTell', 'inapplicable', 'untested'
+	}
+	if (window.tanaguru.tests[name]) {
+		window.tanaguru.tests[name].datacount += datacount;
+	}
+	else {
+		window.tanaguru.tests[name] = {
+			data: [],
+			datacount: datacount
+		}
+	}
+	//if (data.data.length > 0) {
+		window.tanaguru.tests[name].data.push(data);
+	//}
+	*/
+	/* Nouvelle version */
+	window.tanaguru.tests.push(data);
+}
+
+function loadTanaguruTests() {
+	initTanaguru();
+	var tags = [];
+	for (var tag in window.tanaguru.tags) {
+		tags.push(window.tanaguru.tags[tag]);
+	}
+	tags = tags.sort(function (a, b) {
+		return a.name.localeCompare(b.name);
+	});
+	var result = { tags: tags, tests: window.tanaguru.tests };
+	window.tanaguru = undefined;
+	return result;
+}
+
+function manageOutput(element) {
+	var status = element.status ? element.status : 'cantTell';
+	element.status = undefined;
+	var accessibleName = element.accessibleName;
+	var implicitARIASemantic = element.implicitARIASemantic;
+	var explicitARIASemantic = element.explicitARIASemantic;
+	var canBeReachedUsingKeyboardWith = element.canBeReachedUsingKeyboardWith;
+	var isNotVisibleDueTo = element.isNotVisibleDueTo;
+	var isNotExposedDueTo = element.isNotExposedDueTo;
+	var fakeelement = element.cloneNode(true);
+	var e = document.createElement(fakeelement.tagName.toLowerCase());
+	if (e.outerHTML.indexOf("/") != -1) {
+		if (fakeelement.innerHTML.length > 512) {
+			fakeelement.innerHTML = '[...]';
+		}
+	}
+	return { status: status, outer: fakeelement.outerHTML, cssSelector: getUniqueSelector(element), xpath: getXPath(element), role: { implicit: implicitARIASemantic, explicit: explicitARIASemantic }, accessibleName: accessibleName, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isNotVisibleDueTo: isNotVisibleDueTo, isNotExposedDueTo: isNotExposedDueTo };
+}
+
+function createTanaguruTag(tag, status) {
+	if (!window.tanaguru.tags[tag]) {
+		window.tanaguru.tags[tag] = { id: tag, name: 'tag' + tag.charAt(0).toUpperCase() + tag.slice(1), status: status, nbfailures: 0 };
+	}
+}
+
+const specialCharRegex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+function getUniqueSelector(elSrc) {
+	if (!(elSrc instanceof Element)) return;
+	let sSel,
+		aAttr = ['name', 'value', 'title', 'placeholder', 'data-*'],
+		aSel = [],
+		getSelector = function(el) {
+			if (el.id && !specialCharRegex.test(el.id) ) {
+				aSel.unshift('#' + el.id);
+				return true;
+			}
+			aSel.unshift(sSel = el.nodeName.toLowerCase());
+			if (el.className &&
+				typeof el.className === 'string' &&
+				!specialCharRegex.test(el.className)) {
+				aSel[0] = sSel += '.' + el.className.trim().replace(/ +/g, '.');
+				if (uniqueQuery()) return true;
+			}
+			for (let i=0; i<aAttr.length; ++i) {
+				if (aAttr[i]==='data-*') {
+					let aDataAttr = [].filter.call(el.attributes, function(attr) {
+						return attr.name.indexOf('data-')===0;
+					});
+					for (let j=0; j<aDataAttr.length; ++j) {
+						aSel[0] = sSel += '[' + aDataAttr[j].name + '="' + aDataAttr[j].value + '"]';
+						if (uniqueQuery()) return true;
+					}
+				} else if (el[aAttr[i]]) {
+					aSel[0] = sSel += '[' + aAttr[i] + '="' + el[aAttr[i]] + '"]';
+					if (uniqueQuery()) return true;
+				}
+			}
+
+			let elChild = el,
+				sChild,
+				n = 1;
+			while (elChild = elChild.previousElementSibling) {
+				if (elChild.nodeName===el.nodeName) ++n;
+			}
+			aSel[0] = sSel += ':nth-of-type(' + n + ')';
+			if (uniqueQuery()) return true;
+
+			elChild = el;
+			n = 1;
+			while (elChild = elChild.previousElementSibling) ++n;
+			aSel[0] = sSel = sSel.replace(/:nth-of-type\(\d+\)/, n>1 ? ':nth-child(' + n + ')' : ':first-child');
+			if (uniqueQuery()) return true;
+			return false;
+		},
+		uniqueQuery = function() {
+			return document.querySelectorAll(aSel.join('>')||null).length===1;
+		};
+	while (elSrc.parentNode) {
+		if (getSelector(elSrc)) return aSel.join(' > ');
+		elSrc = elSrc.parentNode;
+	}
+}
+
+function createTanaguruTest(test) {
+	if (test.hasOwnProperty('status') && test.status == 'untested') { // Non testés mais référencés.
+		// Initialisation des tags.
+		initTanaguru();
+		if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
+			for (var i = 0; i < test.tags.length; i++) {
+				createTanaguruTag(test.tags[i], test.status);
+			}
+		}
+		else {
+			createTanaguruTag('others', test.status);
+		}
+		// Chargement du résultat.
+		var result = {
+			name: test.name,
+			type: test.status,
+			data: [],
+			tags: []
+		};
+		if (test.hasOwnProperty('id')) {
+			result.id = test.id;
+		}
+		if (test.hasOwnProperty('lang')) {
+			result.lang = test.lang;
+		}
+		if (test.hasOwnProperty('description')) {
+			result.description = test.description;
+		}
+		if (test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(test.status)) {
+			result.explanation = test.explanations[test.status];
+		}
+		result.tags = test.hasOwnProperty('tags') ? test.tags : ['others'];
+		if (test.hasOwnProperty('ressources')) {
+			result.ressources = test.ressources;
+		}
+		addResultSet("Nouvelle syntaxe d'écriture des tests", result);
+		// Intégrer chaque résultat dans window.tanaguru.tests.
+	}
+	else if (test.hasOwnProperty('query') && test.query.constructor == String) {
+		// Sélection des éléments.
+		var elements = document.querySelectorAll(test.query);
+		if (elements) {
+			// Statut du test par défaut.
+			var status = 'cantTell';
+			// Initialisation des tags.
+			initTanaguru();
+			if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
+				for (var i = 0; i < test.tags.length; i++) {
+					createTanaguruTag(test.tags[i], status);
+				}
+			}
+			else {
+				createTanaguruTag('others', status);
+			}
+			// Gestion du compteur d'éléments testés (avant filtre).
+			var counter = null;
+			if (test.hasOwnProperty('counter') && test.counter == 'beforefilter') {
+				counter = elements.length;
+			}
+			// Filtre additionnel sur la sélection d'éléments.
+			if (test.hasOwnProperty('filter')) {
+				if (test.filter.constructor == Function) {
+					elements = Array.from(elements);
+					elements = elements.filter((e)=> {
+						return test.filter(e, HTML)
+					});
+				}
+				else {
+					// Erreur : valeur de la propriété filter.
+				}
+			}
+			// Gestion du compteur d'éléments testés (après filtre).
+			if (test.hasOwnProperty('counter') && test.counter == 'afterfilter') {
+				counter = elements.length;
+			}
+			// Calcul du statut du test.
+			if (test.hasOwnProperty('expectedNbElements')) {
+				if (Number.isInteger(test.expectedNbElements)) {
+					status = elements.length == test.expectedNbElements ? 'passed' : 'failed';
+					for (var i = 0; i < elements.length; i++) {
+						elements[i].status = status;
+					}
+				}
+				else if (test.expectedNbElements.constructor == Object && (test.expectedNbElements.hasOwnProperty('min') || test.expectedNbElements.hasOwnProperty('max'))) {
+					var min = test.expectedNbElements.hasOwnProperty('min') && Number.isInteger(test.expectedNbElements.min) ? test.expectedNbElements.min : 0;
+					var max = test.expectedNbElements.hasOwnProperty('max') && Number.isInteger(test.expectedNbElements.max) ? test.expectedNbElements.max : null;
+					status = elements.length >= min && (max == null || elements.length <= max) ? 'passed' : 'failed';
+					for (var i = 0; i < elements.length; i++) {
+						elements[i].status = status;
+					}
+				}
+				else {
+					// Erreur : valeur de la propriété expectedNbElements.
+				}
+			}
+			else {
+				if (elements.length == 0) {
+					status = 'inapplicable'; // Voir si le statut "Non applicable" n'est possible que dans le cas d'un nombre d'éléments à vérifier.
+				}
+			}
+			var statuspriority = {
+				failed: 4,
+				passed: 3,
+				cantTell: 2,
+				inapplicable: 1,
+				untested: 0
+			};
+			// Traitement par collection.
+			var failedincollection = null;
+			if (test.hasOwnProperty('analyzeElements')) {
+				if (test.analyzeElements.constructor == Function) {
+					test.analyzeElements(elements, HTML);
+					// On modifie le statut du test selon les statuts d'items.
+					for (var e = 0; e < elements.length; e++) {
+						if (elements[e].status == 'failed') {
+							failedincollection = failedincollection == null ? 0 : failedincollection;
+							failedincollection += 1;
+						}
+						if (statuspriority[status] < statuspriority[elements[e].status]) {
+							status = elements[e].status;
+						}
+					}
+				}
+			}
+			// Mises à jour des tags (statut du tag et nombre de résultats en erreur).
+			if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
+				for (var i = 0; i < test.tags.length; i++) {
+					if (statuspriority[window.tanaguru.tags[test.tags[i]].status] < statuspriority[status]) {
+						window.tanaguru.tags[test.tags[i]].status = status;
+					}
+					if (status == 'failed') {
+						window.tanaguru.tags[test.tags[i]].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
+					}
+				}
+			}
+			else {
+				if (statuspriority[window.tanaguru.tags['others'].status] < statuspriority[status]) {
+					window.tanaguru.tags['others'].status = status;
+				}
+				if (status == 'failed') {
+					window.tanaguru.tags['others'].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
+				}
+			}
+			// Chargement du résultat.
+			var outputelements = [];
+			for (var i = 0; i < elements.length; i++) {
+				outputelements.push(manageOutput(elements[i]));
+			}
+			var result = {
+				name: test.name,
+				type: status,
+				data: outputelements,
+				tags: []
+			};
+			if (test.hasOwnProperty('id')) {
+				result.id = test.id;
+			}
+			if (test.hasOwnProperty('lang')) {
+				result.lang = test.lang;
+			}
+			if (test.hasOwnProperty('description')) {
+				result.description = test.description;
+			}
+			if (test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(status)) {
+				result.explanation = test.explanations[status];
+			}
+			if (test.hasOwnProperty('mark')) {
+				result.mark = test.mark;
+			}
+			result.tags = test.hasOwnProperty('tags') ? test.tags : ['others'];
+			if (test.hasOwnProperty('ressources')) {
+				result.ressources = test.ressources;
+			}
+			if (counter) {
+				result.counter = counter;
+			}
+			if (failedincollection) {
+				result.failedincollection = failedincollection;
+			}
+			addResultSet("Nouvelle syntaxe d'écriture des tests", result);
+			// Intégrer chaque résultat dans window.tanaguru.tests.
+		}
+		else {
+			// Erreur : valeur de la propriété query.
+		}
+	}
+}
+
+// Type à prévoir ? Conseil, obligation...
+// Ajouter description.
+
+// TODO: début HTML.
+
+/*
+	HTML 5.3
+	W3C Working Draft, 18 October 2018
+    https://www.w3.org/TR/html53/
+
+    ARIA in HTML
+    W3C Working Draft 20 May 2020
+    https://www.w3.org/TR/html-aria/
+
+    Note, file updated with :
+    - ARIA 1.2, new roles :
+    * paragraph (p);
+    * blockquote (blockquote);
+    * caption (figcaption);
+    * generic (div and span);
+    * emphasis (em);
+    * strong (strong);
+    * term (dfn);
+    * time (time);
+    * code (code);
+    * subscript (sub);
+    * superscript (sup);
+    * insertion (ins);
+    * deletion (del);
+    * caption (caption).
+    - ARIA 1.2, current associations :
+    * term is not associated with dt (removed here);
+    * definition is not associated with dd (removed here);
+    * link is not associated with area[href] (ignored here - href not involved in HTML spec);
+    * grid is associated with table (ignored here);
+    * gridcell is associated with td (ignored here);
+    * columnheader is associated with th[scope="col"] (added here);
+    * rowheader is associated with th[scope="row"] (added here).
+    - ARIA in HTML :
+    * spinbutton is not associated with input[type="text|search"] (removed here).
+    * textarea is associated with textbox & no mention of aria-multiline (aria-multiline ignored here too).
+    * button is associated with summary (added here).
+    * area is associated with link (added here).
+*/
+
+var htmlData = {
+	version: 5.3,
+	status: 'Working Draft (WD)',
+	date: 20181018,
+	url: 'https://www.w3.org/TR/html53/',
+	elementsCategorization: {
+		'the document element': { id: 'the-root-element', url: 'https://www.w3.org/TR/html53/semantics.html' },
+		'document metadata': { id: 'document-metadata', url: 'https://www.w3.org/TR/html53/document-metadata.html' },
+		'sections': { id: 'sections', url: 'https://www.w3.org/TR/html53/sections.html' },
+		'grouping content': { id:'grouping-content', url: 'https://www.w3.org/TR/html53/grouping-content.html' },
+		'text-level semantics': { id: 'textlevel-semantics', url: 'https://www.w3.org/TR/html53/textlevel-semantics.html' },
+		'edits': { id: 'edits', url: 'https://www.w3.org/TR/html53/edits.html' },
+		'embedded content': { id: 'semantics-embedded-content', url: 'https://www.w3.org/TR/html53/semantics-embedded-content.html' },
+		'tabular data': { id: 'tabular-data', url: 'https://www.w3.org/TR/html53/tabular-data.html' },
+		'forms': { id: 'sec-forms', url: 'https://www.w3.org/TR/html53/sec-forms.html' },
+		'interactive elements': { id: 'interactive-elements', url: 'https://www.w3.org/TR/html53/interactive-elements.html' },
+		'scripting': { id: 'semantics-scripting', url: 'https://www.w3.org/TR/html53/semantics-scripting.html' }
+	},
+	elements: {
+		'html': { id: 'the-html-element', category: 'the document element', DOMInterface: 'HTMLHtmlElement' },
+		'head': { id: 'the-head-element', category: 'document metadata', DOMInterface: 'HTMLHeadElement' },
+		'title': { id: 'the-title-element', category: 'document metadata', DOMInterface: 'HTMLTitleElement' },
+		'base': { id: 'the-base-element', category: 'document metadata', DOMInterface: 'HTMLBaseElement' },
+		'link': { id: 'the-link-element', category: 'document metadata', implicitAriaRole: 'link', DOMInterface: 'HTMLLinkElement' },
+		'meta': { id: 'the-meta-element', category: 'document metadata', DOMInterface: 'HTMLMetaElement' },
+		'style': { id: 'the-style-element', category: 'document metadata', DOMInterface: 'HTMLStyleElement' },
+		'body': { id: 'the-body-element', category: 'sections', implicitAriaRole: 'document', DOMInterface: 'HTMLBodyElement' },
+		'article': { id: 'the-article-element', category: 'sections', implicitAriaRole: 'article', DOMInterface: 'HTMLElement' },
+		'section': { id: 'the-section-element', category: 'sections', implicitAriaRole: 'region', DOMInterface: 'HTMLElement' },
+		'nav': { id: 'the-nav-element', category: 'sections', implicitAriaRole: 'navigation', DOMInterface: 'HTMLElement' },
+		'aside': { id: 'the-aside-element', category: 'sections', implicitAriaRole: 'complementary', DOMInterface: 'HTMLElement' },
+		'h1': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'h2': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'h3': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'h4': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'h5': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'h6': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+		'header': { id: 'the-header-element', category: 'sections', implicitAriaRole: 'banner', DOMInterface: 'HTMLElement' },
+		'footer': { id: 'the-footer-element', category: 'sections', implicitAriaRole: 'contentinfo', DOMInterface: 'HTMLElement' },
+		'p': { id: 'the-p-element', category: 'grouping content', implicitAriaRole: 'paragraph', DOMInterface: 'HTMLParagraphElement' },
+		'address': { id: 'the-address-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+		'hr': { id: 'the-hr-element', category: 'grouping content', implicitAriaRole: 'separator', DOMInterface: 'HTMLHRElement' },
+		'pre': { id: 'the-pre-element', category: 'grouping content', DOMInterface: 'HTMLPreElement' },
+		'blockquote': { id: 'the-blockquote-element', category: 'grouping content', implicitAriaRole: 'blockquote', DOMInterface: 'HTMLQuoteElement' },
+		'ol': { id: 'the-ol-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLOListElement' },
+		'ul': { id: 'the-ul-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLUListElement' },
+		'li': { id: 'the-li-element', category: 'grouping content', implicitAriaRole: 'listitem', DOMInterface: 'HTMLLIElement' },
+		'dl': { id: 'the-dl-element', category: 'grouping content', DOMInterface: 'HTMLDListElement' },
+		'dt': { id: 'the-dt-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+		'dd': { id: 'the-dd-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+		'figure': { id: 'the-figure-element', category: 'grouping content', implicitAriaRole: 'figure', DOMInterface: 'HTMLElement' },
+		'figcaption': { id: 'the-figcaption-element', category: 'grouping content', implicitAriaRole: 'caption', DOMInterface: 'HTMLElement' },
+		'main': { id: 'the-main-element', category: 'grouping content', implicitAriaRole: 'main', DOMInterface: 'HTMLElement' },
+		'div': { id: 'the-div-element', category: 'grouping content', implicitAriaRole: 'generic', DOMInterface: 'HTMLDivElement' },
+		'a': { id: 'the-a-element', category: 'text-level semantics', focusable: 'a[href]', implicitAriaRole: { '[href]': 'link' }, DOMInterface: 'HTMLAnchorElement' },
+		'em': { id: 'the-em-element', category: 'text-level semantics', implicitAriaRole: 'emphasis', DOMInterface: 'HTMLElement' },
+		'strong': { id: 'the-strong-element', category: 'text-level semantics', implicitAriaRole: 'strong', DOMInterface: 'HTMLElement' },
+		'small': { id: 'the-small-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		's': { id: 'the-s-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'cite': { id: 'the-cite-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'q': { id: 'the-q-element', category: 'text-level semantics', DOMInterface: 'HTMLQuoteElement' },
+		'dfn': { id: 'the-dfn-element', category: 'text-level semantics', implicitAriaRole: 'term', DOMInterface: 'HTMLElement' },
+		'abbr': { id: 'the-abbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'ruby': { id: 'the-ruby-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'rb': { id: 'the-rb-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'rt': { id: 'the-rt-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'rtc': { id: 'the-rtc-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'rp': { id: 'the-rp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'data': { id: 'the-data-element', category: 'text-level semantics', DOMInterface: 'HTMLDataElement' },
+		'time': { id: 'the-time-element', category: 'text-level semantics', implicitAriaRole: 'time', DOMInterface: 'HTMLTimeElement' },
+		'code': { id: 'the-code-element', category: 'text-level semantics', implicitAriaRole: 'code', DOMInterface: 'HTMLElement' },
+		'var': { id: 'the-var-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'samp': { id: 'the-samp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'kbd': { id: 'the-kbd-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'sub': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'subscript', DOMInterface: 'HTMLElement' },
+		'sup': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'superscript', DOMInterface: 'HTMLElement' },
+		'i': { id: 'the-i-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'b': { id: 'the-b-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'u': { id: 'the-u-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'mark': { id: 'the-mark-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'bdi': { id: 'the-bdi-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'bdo': { id: 'the-bdo-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'span': { id: 'the-span-element', category: 'text-level semantics', implicitAriaRole: 'generic', DOMInterface: 'HTMLSpanElement' },
+		'br': { id: 'the-br-element', category: 'text-level semantics', DOMInterface: 'HTMLBRElement' },
+		'wbr': { id: 'the-wbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+		'ins': { id: 'the-ins-element', category: 'edits', implicitAriaRole: 'insertion', DOMInterface: 'HTMLModElement' },
+		'del': { id: 'the-del-element', category: 'edits', implicitAriaRole: 'deletion', DOMInterface: 'HTMLModElement' },
+		'picture': { id: 'the-picture-element', category: 'embedded content', DOMInterface: 'HTMLPictureElement' },
+		'source': { id: 'the-source-element', category: 'embedded content', DOMInterface: 'HTMLSourceElement' },
+		'img': { id: 'the-img-element', category: 'embedded content', implicitAriaRole: { '[alt=""]': ['none', 'presentation'], '[alt]:not([alt=""])': 'img' }, DOMInterface: 'HTMLImageElement' },
+		'iframe': { id: 'the-iframe-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLIFrameElement' },
+		'embed': { id: 'the-embed-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLEmbedElement' },
+		'object': { id: 'the-object-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLObjectElement' },
+		'param': { id: 'the-param-element', category: 'embedded content', DOMInterface: 'HTMLParamElement' },
+		'video': { id: 'the-video-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLVideoElement' },
+		'audio': { id: 'the-audio-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLAudioElement' },
+		'track': { id: 'the-track-element', category: 'embedded content', DOMInterface: 'HTMLTrackElement' },
+		'map': { id: 'the-map-element', category: 'embedded content', DOMInterface: 'HTMLMapElement' },
+		'area': { id: 'the-area-element', category: 'embedded content', focusable: 'area[href]', implicitAriaRole: { 'href': 'link' }, DOMInterface: 'HTMLAreaElement' },
+		'table': { id: 'the-table-element', category: 'tabular data', implicitAriaRole: 'table', DOMInterface: 'HTMLTableElement' },
+		'caption': { id: 'the-caption-element', category: 'tabular data', implicitAriaRole: 'caption', DOMInterface: 'HTMLTableCaptionElement' },
+		'colgroup': { id: 'the-colgroup-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
+		'col': { id: 'the-col-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
+		'tbody': { id: 'the-tbody-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+		'thead': { id: 'the-thead-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+		'tfoot': { id: 'the-tfoot-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+		'tr': { id: 'the-tr-element', category: 'tabular data', implicitAriaRole: 'row', DOMInterface: 'HTMLTableRowElement' },
+		'td': { id: 'the-td-element', category: 'tabular data', implicitAriaRole: 'cell', DOMInterface: 'HTMLTableDataCellElement' },
+		'th': { id: 'the-th-element', category: 'tabular data', implicitAriaRole: { '[scope="col"]': 'columnheader', '[scope="row"]': 'rowheader', 'th:not([scope])': ['columnheader', 'rowheader'] }, DOMInterface: 'HTMLTableHeaderCellElement' },
+		'form': { id: 'the-form-element', category: 'forms', implicitAriaRole: 'form', DOMInterface: 'HTMLFormElement' },
+		'label': { id: 'the-label-element', category: 'forms', DOMInterface: 'HTMLLabelElement' },
+		'input': { id: 'the-input-element', category: 'forms', focusable: 'input:not([disabled])', implicitAriaRole: {
+				'input:not([type]):not([list])': 'textbox',
+				'[type="text"]:not([list])': 'textbox',
+				'input[list]:not([type])': 'combobox',
+				'[type="text"][list]': 'combobox',
+				'[type="search"]:not([list])': 'searchbox',
+				'[type="search"][list]': 'combobox',
+				'[type="tel"]:not([list])': 'textbox',
+				'[type="tel"][list]': 'combobox',
+				'[type="url"]:not([list])': 'textbox',
+				'[type="url"][list]': 'combobox',
+				'[type="email"]:not([list])': 'textbox',
+				'[type="email"][list]': 'combobox',
+				'[type="number"]': 'spinbutton',
+				'[type="range"]': 'slider',
+				'[type="checkbox"]': 'checkbox',
+				'[type="radio"]': 'radio',
+				'[type="submit"]': 'button',
+				'[type="image"]': 'button',
+				'[type="reset"]': 'button',
+				'[type="button"]': 'button'
+			}, DOMInterface: 'HTMLInputElement' },
+		'button': { id: 'the-button-element', category: 'forms', focusable: 'button:not([disabled])', implicitAriaRole: 'button', DOMInterface: 'HTMLButtonElement' },
+		'select': { id: 'the-select-element', category: 'forms', focusable: 'select:not([disabled])', implicitAriaRole: {
+				'select:not([multiple]):not([size])': 'combobox',
+				'select[multiple]': 'listbox',
+				'select[size]:not([multiple])': { type: 'integer', attribute: 'size', greaterthan: 1, role: ['combobox', 'listbox'] }
+			}, DOMInterface: 'HTMLSelectElement' },
+		'datalist': { id: 'the-datalist-element', category: 'forms', implicitAriaRole: 'listbox', DOMInterface: 'HTMLDataListElement' },
+		'optgroup': { id: 'the-optgroup-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLOptGroupElement' },
+		'option': { id: 'the-option-element', category: 'forms', implicitAriaRole: 'option', DOMInterface: 'HTMLOptionElement' },
+		'textarea': { id: 'the-textarea-element', category: 'forms', focusable: 'textarea:not([disabled])', implicitAriaRole: 'textbox', DOMInterface: 'HTMLTextAreaElement' },
+		'output': { id: 'the-output-element', category: 'forms', implicitAriaRole: 'status', DOMInterface: 'HTMLOutputElement' },
+		'progress': { id: 'the-progress-element', category: 'forms', implicitAriaRole: 'progressbar', DOMInterface: 'HTMLProgressElement' },
+		'meter': { id: 'the-meter-element', category: 'forms', DOMInterface: 'HTMLMeterElement' },
+		'fieldset': { id: 'the-fieldset-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLFieldSetElement' },
+		'legend': { id: 'the-legend-element', category: 'forms', DOMInterface: 'HTMLLegendElement' },
+		'details': { id: 'the-details-element', category: 'interactive elements', implicitAriaRole: 'group', DOMInterface: 'HTMLDetailsElement' },
+		'summary': { id: 'the-summary-element', category: 'interactive elements', implicitAriaRole: 'button', DOMInterface: 'HTMLElement' },
+		'dialog': { id: 'the-dialog-element', category: 'interactive elements', implicitAriaRole: 'dialog', DOMInterface: 'HTMLDialogElement' },
+		'script': { id: 'the-script-element', category: 'scripting', DOMInterface: 'HTMLScriptElement' },
+		'noscript': { id: 'the-noscript-element', category: 'scripting', DOMInterface: 'HTMLElement' },
+		'template': { id: 'the-template-element', category: 'scripting', DOMInterface: 'HTMLTemplateElement' },
+		'canvas': { id: 'the-canvas-element', category: 'scripting', DOMInterface: 'HTMLCanvasElement' }
+	}
+};
+
+var HTML = {
+	getFocusableElementsSelector: function () {
+		var elements = [];
+		for (var element in htmlData.elements) {
+			if (htmlData.elements[element].hasOwnProperty('focusable')) {
+				var focusable = htmlData.elements[element].focusable;
+				elements.push((focusable.constructor == String ? focusable : element) + ':not([tabindex="-1"])');
+			}
+		}
+		elements.push('[contenteditable="true"]', '[tabindex="0"]');
+		return elements.join(', ');
+	}
+};
+
+var getImplicitAriaRole = function () {
+	if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
+		var elementData = htmlData.elements[this.tagName.toLowerCase()];
+		if (elementData.hasOwnProperty('implicitAriaRole')) {
+			var result = null;
+			var implicitAriaRole = elementData.implicitAriaRole;
+			switch (implicitAriaRole.constructor) {
+				case String:
+					result = implicitAriaRole;
+					break;
+				case Object:
+					for (var selector in implicitAriaRole) {
+						if (this.matches(selector)) {
+							if (implicitAriaRole[selector].constructor == Object) {
+								if (implicitAriaRole[selector].type == 'integer' && implicitAriaRole[selector].hasOwnProperty('greaterthan')) {
+									var attributeValue = this.getAttribute(implicitAriaRole[selector].attribute);
+									if (/^(0|[1-9]\d*)$/.test(attributeValue)) {
+										result = parseInt(attributeValue) > implicitAriaRole[selector].greaterthan;
+										result = implicitAriaRole[selector].role[result ? 1 : 0];
+									}
+									else {
+										result = implicitAriaRole[selector].role[0];
+									}
+								}
+							}
+							else {
+								result = implicitAriaRole[selector];
+							}
+							break;
+						}
+					}
+					break;
+			}
+			return result;
+		}
+		else {
+			return null;
+		}
+	}
+	else {
+		return undefined;
+	}
+};
+if (!('getImplicitAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
+if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
+
+// TODO: fin HTML.
+
+// TODO: début Language.
+
+/*
+    IANA Language Subtag Registry
+    https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+    Note : only the 30 main languages in the world.
+*/
+var languages = {
+	fileDate: '2020-05-12',
+	data: {
+		'en': { description: 'English', added:'2005-10-16', suppressScript: 'Latn' },
+		'cmn': { description: 'Mandarin Chinese', added:'2009-07-29', macrolanguage: 'zh' },
+		'hi': { description: 'Hindi', added:'2005-10-16', suppressScript: 'Deva' },
+		'es': { description: ['Spanish', 'Castilian'], added:'2005-10-16', suppressScript: 'Latn' },
+		'fr': { description: 'French', added:'2005-10-16', suppressScript: 'Latn' },
+		'ar': { description: 'Arabic', added:'2005-10-16', suppressScript: 'Arab', scope: 'macrolanguage' },
+		'bn': { description: ['Bengali', 'Bangla'], added:'2005-10-16', suppressScript: 'Beng' },
+		'ru': { description: 'Russian', added:'2005-10-16', suppressScript: 'Cyrl' },
+		'pt': { description: 'Portuguese', added:'2005-10-16', suppressScript: 'Latn' },
+		'id': { description: 'Indonesian', added:'2005-10-16', suppressScript: 'Latn', macrolanguage: 'ms' },
+		'ur': { description: 'Urdu', added:'2005-10-16', suppressScript: 'Arab' },
+		'de': { description: 'German', added:'2005-10-16', suppressScript: 'Latn' },
+		'ja': { description: 'Japanese', added:'2005-10-16', suppressScript: 'Jpan' },
+		'sw': { description: 'Swahili (macrolanguage)', added:'2005-10-16', suppressScript: 'Latn', scope: 'macrolanguage' },
+		'mr': { description: 'Marathi', added:'2005-10-16', suppressScript: 'Deva' },
+		'te': { description: 'Telugu', added:'2005-10-16', suppressScript: 'Telu' },
+		'tr': { description: 'Turkish', added:'2005-10-16', suppressScript: 'Latn' },
+		'yue': { description: ['Yue Chinese', 'Cantonese'], added:'2009-07-29', macrolanguage: 'zh' },
+		'ta': { description: 'Tamil', added:'2005-10-16', suppressScript: 'Taml' },
+		'pa': { description: ['Panjabi', 'Punjabi'], added:'2005-10-16', suppressScript: 'Guru' },
+		'wuu': { description: 'Wu Chinese', added:'2009-07-29', macrolanguage: 'zh' },
+		'ko': { description: 'Korean', added:'2005-10-16', suppressScript: 'Kore' },
+		'vi': { description: 'Vietnamese', added:'2005-10-16', suppressScript: 'Latn' },
+		'ha': { description: 'Hausa', added:'2005-10-16' },
+		'jv': { description: 'Javanese', added:'2005-10-16' },
+		'arz': { description: 'Egyptian Arabic', added:'2009-07-29', preferredValue: 'arz', prefix: 'ar', macrolanguage: 'ar' },
+		'it': { description: 'Italian', added:'2005-10-16', suppressScript: 'Latn' },
+		'th': { description: 'Thai', added:'2005-10-16', suppressScript: 'Thai' },
+		'gu': { description: 'Gujarati', added:'2005-10-16', suppressScript: 'Gujr' },
+		'kn': { description: 'Kannada', added:'2005-10-16', suppressScript: 'Knda' }
+	}
+};
+
+// hasValidLanguageCode.
+var hasValidLanguageCode = function () {
+	var r = /^[a-z]{2,}(-[a-z]{2,})?$/i;
+	if (r.test(this.lang)) {
+		var computedlang = this.lang;
+		if (this.lang.includes('-')) {
+			computedlang = this.lang.split('-');
+			computedlang = computedlang[0];
+		}
+		return languages.data.hasOwnProperty(computedlang);
+	}
+	else {
+		return false;
+	}
+};
+if (!('hasValidLanguageCode' in SVGElement.prototype)) SVGElement.prototype.hasValidLanguageCode = hasValidLanguageCode;
+if (!('hasValidLanguageCode' in HTMLElement.prototype)) HTMLElement.prototype.hasValidLanguageCode = hasValidLanguageCode;
+
+// TODO: fin Language.
+
+// TODO: début ARIA.
 
 /*
 	Accessible Rich Internet Applications (WAI-ARIA) 1.2
@@ -2854,6 +3189,9 @@ var ARIA = {
 				return undefined;
 			}
 		};
+		this.getComputedValue = function (value) {
+			// empty or unspecified : return default value.
+		};
 		if (arguments.length == 2 && arguments[1].constructor == Object) {
 			if (arguments[1].hasOwnProperty('getData')) {
 				if (this.isValid()) {
@@ -2862,6 +3200,23 @@ var ARIA = {
 				}
 			}
 		}
+	},
+	getAllStatesProperties: function (format) {
+		var statesData = ariaData.states;
+		var propertiesData = ariaData.properties;
+		var statesProperties = null;
+		switch (format) {
+			case 'js':
+				statesProperties = [];
+				for (var state in statesData) {
+					statesProperties.push(state);
+				}
+				for (var property in propertiesData) {
+					statesProperties.push(property);
+				}
+				break;
+		}
+		return statesProperties;
 	}
 };
 
@@ -2879,11 +3234,31 @@ var getComputedAriaRole = function () {
 						break;
 					}
 				}
-				return computedRole != null ? computedRole : this.getImplicitAriaRole();
+				if (computedRole) {
+					if (computedRole == 'presentation' || computedRole == 'none') {
+						if (this.matches(HTML.getFocusableElementsSelector())) {
+							return this.getImplicitAriaRole();
+						}
+					}
+					return computedRole;
+				}
+				else {
+					return this.getImplicitAriaRole();
+				}
 			}
 			else {
 				role = new ARIA.Role(role);
-				return role.isValid() ? role.role : this.getImplicitAriaRole();
+				if (role.isValid()) {
+					if (role.role == 'presentation' || role.role == 'none') {
+						if (this.matches(HTML.getFocusableElementsSelector())) {
+							return this.getImplicitAriaRole();
+						}
+					}
+					return role.role;
+				}
+				else {
+					return this.getImplicitAriaRole();
+				}
 			}
 		}
 		else {
@@ -2947,7 +3322,7 @@ var hasAriaAttributesWithInvalidValues = function () {
 	for (var i = 0; i < this.attributes.length; i++) {
 		var attribute = this.attributes[i];
 		var name = attribute.name;
-		if (name.match(/^aria-/)) {
+		if (name.match(/^aria-.*$/)) {
 			var sp = new ARIA.StateProperty(name);
 			var isValidValue = sp.isValidValue(attribute.value);
 			if (isValidValue) {
@@ -2993,15 +3368,35 @@ var hasAriaAttributesWithInvalidValues = function () {
 					else if (values.hasOwnProperty('attribute')) {
 						if (values.attribute == 'id') {
 							if (values.multiple) {
-								var notFoundElements = [];
-								var ids = attribute.value.split(' ');
-								for (var j = 0; j < ids.length; j++) {
-									if (!document.getElementById(ids[j])) {
-										notFoundElements.push(ids[j]);
+								var mode = 'strict';
+								if (arguments.length == 1 && arguments[0].constructor == Object) {
+									if (arguments[0].permissive) {
+										mode = 'permissive';
 									}
 								}
-								if (notFoundElements.length > 0) {
-									errors.push(ARIA.Errors.TokensIdValueElements.replace('{{attribute}}', attribute.name));
+								var ids = attribute.value.split(' ');
+								if (mode == 'strict') {
+									var notFoundElements = [];
+									for (var j = 0; j < ids.length; j++) {
+										if (!document.getElementById(ids[j])) {
+											notFoundElements.push(ids[j]);
+										}
+									}
+									if (notFoundElements.length > 0) {
+										errors.push(ARIA.Errors.TokensIdValueElements.replace('{{attribute}}', attribute.name));
+									}
+								}
+								else {
+									var foundElement = false;
+									for (var j = 0; j < ids.length; j++) {
+										if (document.getElementById(ids[j])) {
+											foundElement = true;
+											break;
+										}
+									}
+									if (!foundElement) {
+										errors.push(ARIA.Errors.TokensIdValueElements.replace('{{attribute}}', attribute.name));
+									}
 								}
 							}
 							else {
@@ -3047,6 +3442,102 @@ var hasProhibitedAriaAttributes = function () {
 };
 if (!('hasProhibitedAriaAttributes' in HTMLElement.prototype)) HTMLElement.prototype.hasProhibitedAriaAttributes = hasProhibitedAriaAttributes;
 if (!('hasProhibitedAriaAttributes' in SVGElement.prototype)) SVGElement.prototype.hasProhibitedAriaAttributes = hasProhibitedAriaAttributes;
+
+// TODO: fin ARIA.
+
+// TODO: début DOM Extension.
+
+var isNotExposedDueTo = function () {
+	var result = [];
+	if (this.getAttribute('aria-hidden') == 'true') {
+		result.push('aria:hidden');
+	}
+	else {
+		var ariahiddenfound = false;
+		var pt = this.parentNode;
+		while (pt && pt.nodeType == 1) {
+			if (pt.getAttribute('aria-hidden') == 'true') {
+				ariahiddenfound = true;
+				break;
+			}
+			pt = pt.parentNode;
+		}
+		if (ariahiddenfound) {
+			result.push('parent-aria:hidden');
+		}
+	}
+	if (!this.matches('area')) {
+		if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
+			result.push('css:display');
+		}
+		if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
+			result.push('css:visibility');
+		}
+	}
+	else {
+		var pt = this.parentNode;
+		if (pt && pt.matches('map')) {
+			var ptexposition = pt.isNotExposedDueTo;
+			if (pt.hasAttribute('name')) {
+				var img = document.querySelector('img[usemap="#' + pt.getAttribute('name') + '"]');
+				if (img) {
+					if (img.isNotExposedDueTo.length > 0) {
+						result.push('html:imagenotexposed');
+					}
+				}
+				else {
+					result.push('parent-html:noimage');
+				}
+			}
+			else {
+				result.push('parent-html:noname');
+			}
+		}
+		else {
+			result.push('parent-html:unknown');
+		}
+	}
+	var visible = this.isNotVisibleDueTo;
+	if (visible.indexOf('css:display') > -1 || visible.indexOf('css:visibility') > -1) {
+		result.push('css:other');
+	}
+	return result;
+};
+
+if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
+//if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
+if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
+
+var isNotVisibleDueTo = function () {
+	var result = [];
+	if (!(!!(this.offsetWidth || this.offsetHeight || this.getClientRects().length))) {
+		result.push('css:other');
+	}
+	if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
+		result.push('css:display');
+	}
+	else {
+		var parent = this.parentNode;
+		while (parent && parent.nodeType == 1) {
+			if (window.getComputedStyle(parent, null).getPropertyValue('display') == 'none') {
+				result.push('css:display');
+				break;
+			}
+			parent = parent.parentNode;
+		}
+	}
+	if (window.getComputedStyle(this, null).getPropertyValue('opacity') == '0') {
+		result.push('css:opacity');
+	}
+	if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
+		result.push('css:visibility');
+	}
+	return result;
+};
+
+if (!HTMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
+//if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
+if (!SVGElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
 
 if (!SVGElement.prototype.hasOwnProperty('canBeReachedUsingKeyboardWith')) {
 	Object.defineProperty(SVGElement.prototype, 'canBeReachedUsingKeyboardWith', {
@@ -3101,382 +3592,21 @@ if (!HTMLElement.prototype.hasOwnProperty('canBeReachedUsingKeyboardWith')) {
 	});
 }
 
-/*
-	HTML 5.3
-	W3C Working Draft, 18 October 2018
-    https://www.w3.org/TR/html53/
+// TODO: fin DOM Extension.
 
-    ARIA in HTML
-    W3C Working Draft 20 May 2020
-    https://www.w3.org/TR/html-aria/
-
-    Note, file updated with :
-    - ARIA 1.2, new roles :
-    * paragraph (p);
-    * blockquote (blockquote);
-    * caption (figcaption);
-    * generic (div and span);
-    * emphasis (em);
-    * strong (strong);
-    * term (dfn);
-    * time (time);
-    * code (code);
-    * subscript (sub);
-    * superscript (sup);
-    * insertion (ins);
-    * deletion (del);
-    * caption (caption).
-    - ARIA 1.2, current associations :
-    * term is not associated with dt (removed here);
-    * definition is not associated with dd (removed here);
-    * link is not associated with area[href] (ignored here - href not involved in HTML spec);
-    * grid is associated with table (ignored here);
-    * gridcell is associated with td (ignored here);
-    * columnheader is associated with th[scope="col"] (added here);
-    * rowheader is associated with th[scope="row"] (added here).
-    - ARIA in HTML :
-    * spinbutton is not associated with input[type="text|search"] (removed here).
-    * textarea is associated with textbox & no mention of aria-multiline (aria-multiline ignored here too).
-    * button is associated with summary (added here).
-    * area is associated with link (added here).
-*/
-
-var htmlData = {
-	version: 5.3,
-	status: 'Working Draft (WD)',
-	date: 20181018,
-	url: 'https://www.w3.org/TR/html53/',
-	elementsCategorization: {
-		'the document element': { id: 'the-root-element', url: 'https://www.w3.org/TR/html53/semantics.html' },
-		'document metadata': { id: 'document-metadata', url: 'https://www.w3.org/TR/html53/document-metadata.html' },
-		'sections': { id: 'sections', url: 'https://www.w3.org/TR/html53/sections.html' },
-		'grouping content': { id:'grouping-content', url: 'https://www.w3.org/TR/html53/grouping-content.html' },
-		'text-level semantics': { id: 'textlevel-semantics', url: 'https://www.w3.org/TR/html53/textlevel-semantics.html' },
-		'edits': { id: 'edits', url: 'https://www.w3.org/TR/html53/edits.html' },
-		'embedded content': { id: 'semantics-embedded-content', url: 'https://www.w3.org/TR/html53/semantics-embedded-content.html' },
-		'tabular data': { id: 'tabular-data', url: 'https://www.w3.org/TR/html53/tabular-data.html' },
-		'forms': { id: 'sec-forms', url: 'https://www.w3.org/TR/html53/sec-forms.html' },
-		'interactive elements': { id: 'interactive-elements', url: 'https://www.w3.org/TR/html53/interactive-elements.html' },
-		'scripting': { id: 'semantics-scripting', url: 'https://www.w3.org/TR/html53/semantics-scripting.html' }
+var testsRessources = {
+	'act': {
+		lang: 'en',
+		name: 'ACT Rules Community Group',
+		description: 'The ACT Rules Community Group (previously known as Auto-WCAG), is an open forum set up to document and harmonize the interpretation of W3C accessibility standards, such as WCAG and WAI-ARIA, for testing purposes.',
+		mainUrl: 'https://act-rules.github.io/pages/about',
+		testUrl: 'https://act-rules.github.io/rules/{{id}}'
 	},
-	elements: {
-		'html': { id: 'the-html-element', category: 'the document element', DOMInterface: 'HTMLHtmlElement' },
-		'head': { id: 'the-head-element', category: 'document metadata', DOMInterface: 'HTMLHeadElement' },
-		'title': { id: 'the-title-element', category: 'document metadata', DOMInterface: 'HTMLTitleElement' },
-		'base': { id: 'the-base-element', category: 'document metadata', DOMInterface: 'HTMLBaseElement' },
-		'link': { id: 'the-link-element', category: 'document metadata', implicitAriaRole: 'link', DOMInterface: 'HTMLLinkElement' },
-		'meta': { id: 'the-meta-element', category: 'document metadata', DOMInterface: 'HTMLMetaElement' },
-		'style': { id: 'the-style-element', category: 'document metadata', DOMInterface: 'HTMLStyleElement' },
-		'body': { id: 'the-body-element', category: 'sections', implicitAriaRole: 'document', DOMInterface: 'HTMLBodyElement' },
-		'article': { id: 'the-article-element', category: 'sections', implicitAriaRole: 'article', DOMInterface: 'HTMLElement' },
-		'section': { id: 'the-section-element', category: 'sections', implicitAriaRole: 'region', DOMInterface: 'HTMLElement' },
-		'nav': { id: 'the-nav-element', category: 'sections', implicitAriaRole: 'navigation', DOMInterface: 'HTMLElement' },
-		'aside': { id: 'the-aside-element', category: 'sections', implicitAriaRole: 'complementary', DOMInterface: 'HTMLElement' },
-		'h1': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'h2': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'h3': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'h4': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'h5': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'h6': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
-		'header': { id: 'the-header-element', category: 'sections', implicitAriaRole: 'banner', DOMInterface: 'HTMLElement' },
-		'footer': { id: 'the-footer-element', category: 'sections', implicitAriaRole: 'contentinfo', DOMInterface: 'HTMLElement' },
-		'p': { id: 'the-p-element', category: 'grouping content', implicitAriaRole: 'paragraph', DOMInterface: 'HTMLParagraphElement' },
-		'address': { id: 'the-address-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
-		'hr': { id: 'the-hr-element', category: 'grouping content', implicitAriaRole: 'separator', DOMInterface: 'HTMLHRElement' },
-		'pre': { id: 'the-pre-element', category: 'grouping content', DOMInterface: 'HTMLPreElement' },
-		'blockquote': { id: 'the-blockquote-element', category: 'grouping content', implicitAriaRole: 'blockquote', DOMInterface: 'HTMLQuoteElement' },
-		'ol': { id: 'the-ol-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLOListElement' },
-		'ul': { id: 'the-ul-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLUListElement' },
-		'li': { id: 'the-li-element', category: 'grouping content', implicitAriaRole: 'listitem', DOMInterface: 'HTMLLIElement' },
-		'dl': { id: 'the-dl-element', category: 'grouping content', DOMInterface: 'HTMLDListElement' },
-		'dt': { id: 'the-dt-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
-		'dd': { id: 'the-dd-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
-		'figure': { id: 'the-figure-element', category: 'grouping content', implicitAriaRole: 'figure', DOMInterface: 'HTMLElement' },
-		'figcaption': { id: 'the-figcaption-element', category: 'grouping content', implicitAriaRole: 'caption', DOMInterface: 'HTMLElement' },
-		'main': { id: 'the-main-element', category: 'grouping content', implicitAriaRole: 'main', DOMInterface: 'HTMLElement' },
-		'div': { id: 'the-div-element', category: 'grouping content', implicitAriaRole: 'generic', DOMInterface: 'HTMLDivElement' },
-		'a': { id: 'the-a-element', category: 'text-level semantics', focusable: 'a[href]', implicitAriaRole: { '[href]': 'link' }, DOMInterface: 'HTMLAnchorElement' },
-		'em': { id: 'the-em-element', category: 'text-level semantics', implicitAriaRole: 'emphasis', DOMInterface: 'HTMLElement' },
-		'strong': { id: 'the-strong-element', category: 'text-level semantics', implicitAriaRole: 'strong', DOMInterface: 'HTMLElement' },
-		'small': { id: 'the-small-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		's': { id: 'the-s-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'cite': { id: 'the-cite-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'q': { id: 'the-q-element', category: 'text-level semantics', DOMInterface: 'HTMLQuoteElement' },
-		'dfn': { id: 'the-dfn-element', category: 'text-level semantics', implicitAriaRole: 'term', DOMInterface: 'HTMLElement' },
-		'abbr': { id: 'the-abbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'ruby': { id: 'the-ruby-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'rb': { id: 'the-rb-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'rt': { id: 'the-rt-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'rtc': { id: 'the-rtc-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'rp': { id: 'the-rp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'data': { id: 'the-data-element', category: 'text-level semantics', DOMInterface: 'HTMLDataElement' },
-		'time': { id: 'the-time-element', category: 'text-level semantics', implicitAriaRole: 'time', DOMInterface: 'HTMLTimeElement' },
-		'code': { id: 'the-code-element', category: 'text-level semantics', implicitAriaRole: 'code', DOMInterface: 'HTMLElement' },
-		'var': { id: 'the-var-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'samp': { id: 'the-samp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'kbd': { id: 'the-kbd-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'sub': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'subscript', DOMInterface: 'HTMLElement' },
-		'sup': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'superscript', DOMInterface: 'HTMLElement' },
-		'i': { id: 'the-i-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'b': { id: 'the-b-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'u': { id: 'the-u-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'mark': { id: 'the-mark-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'bdi': { id: 'the-bdi-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'bdo': { id: 'the-bdo-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'span': { id: 'the-span-element', category: 'text-level semantics', implicitAriaRole: 'generic', DOMInterface: 'HTMLSpanElement' },
-		'br': { id: 'the-br-element', category: 'text-level semantics', DOMInterface: 'HTMLBRElement' },
-		'wbr': { id: 'the-wbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
-		'ins': { id: 'the-ins-element', category: 'edits', implicitAriaRole: 'insertion', DOMInterface: 'HTMLModElement' },
-		'del': { id: 'the-del-element', category: 'edits', implicitAriaRole: 'deletion', DOMInterface: 'HTMLModElement' },
-		'picture': { id: 'the-picture-element', category: 'embedded content', DOMInterface: 'HTMLPictureElement' },
-		'source': { id: 'the-source-element', category: 'embedded content', DOMInterface: 'HTMLSourceElement' },
-		'img': { id: 'the-img-element', category: 'embedded content', implicitAriaRole: { '[alt=""]': ['none', 'presentation'], '[alt]:not([alt=""])': 'img' }, DOMInterface: 'HTMLImageElement' },
-		'iframe': { id: 'the-iframe-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLIFrameElement' },
-		'embed': { id: 'the-embed-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLEmbedElement' },
-		'object': { id: 'the-object-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLObjectElement' },
-		'param': { id: 'the-param-element', category: 'embedded content', DOMInterface: 'HTMLParamElement' },
-		'video': { id: 'the-video-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLVideoElement' },
-		'audio': { id: 'the-audio-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLAudioElement' },
-		'track': { id: 'the-track-element', category: 'embedded content', DOMInterface: 'HTMLTrackElement' },
-		'map': { id: 'the-map-element', category: 'embedded content', DOMInterface: 'HTMLMapElement' },
-		'area': { id: 'the-area-element', category: 'embedded content', focusable: 'area[href]', implicitAriaRole: { 'href': 'link' }, DOMInterface: 'HTMLAreaElement' },
-		'table': { id: 'the-table-element', category: 'tabular data', implicitAriaRole: 'table', DOMInterface: 'HTMLTableElement' },
-		'caption': { id: 'the-caption-element', category: 'tabular data', implicitAriaRole: 'caption', DOMInterface: 'HTMLTableCaptionElement' },
-		'colgroup': { id: 'the-colgroup-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
-		'col': { id: 'the-col-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
-		'tbody': { id: 'the-tbody-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
-		'thead': { id: 'the-thead-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
-		'tfoot': { id: 'the-tfoot-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
-		'tr': { id: 'the-tr-element', category: 'tabular data', implicitAriaRole: 'row', DOMInterface: 'HTMLTableRowElement' },
-		'td': { id: 'the-td-element', category: 'tabular data', implicitAriaRole: 'cell', DOMInterface: 'HTMLTableDataCellElement' },
-		'th': { id: 'the-th-element', category: 'tabular data', implicitAriaRole: { '[scope="col"]': 'columnheader', '[scope="row"]': 'rowheader', 'th:not([scope])': ['columnheader', 'rowheader'] }, DOMInterface: 'HTMLTableHeaderCellElement' },
-		'form': { id: 'the-form-element', category: 'forms', implicitAriaRole: 'form', DOMInterface: 'HTMLFormElement' },
-		'label': { id: 'the-label-element', category: 'forms', DOMInterface: 'HTMLLabelElement' },
-		'input': { id: 'the-input-element', category: 'forms', focusable: 'input:not([disabled])', implicitAriaRole: {
-				'input:not([type]):not([list])': 'textbox',
-				'[type="text"]:not([list])': 'textbox',
-				'input[list]:not([type])': 'combobox',
-				'[type="text"][list]': 'combobox',
-				'[type="search"]:not([list])': 'searchbox',
-				'[type="search"][list]': 'combobox',
-				'[type="tel"]:not([list])': 'textbox',
-				'[type="tel"][list]': 'combobox',
-				'[type="url"]:not([list])': 'textbox',
-				'[type="url"][list]': 'combobox',
-				'[type="email"]:not([list])': 'textbox',
-				'[type="email"][list]': 'combobox',
-				'[type="number"]': 'spinbutton',
-				'[type="range"]': 'slider',
-				'[type="checkbox"]': 'checkbox',
-				'[type="radio"]': 'radio',
-				'[type="submit"]': 'button',
-				'[type="image"]': 'button',
-				'[type="reset"]': 'button',
-				'[type="button"]': 'button'
-			}, DOMInterface: 'HTMLInputElement' },
-		'button': { id: 'the-button-element', category: 'forms', focusable: 'button:not([disabled])', implicitAriaRole: 'button', DOMInterface: 'HTMLButtonElement' },
-		'select': { id: 'the-select-element', category: 'forms', focusable: 'select:not([disabled])', implicitAriaRole: {
-				'select:not([multiple]):not([size])': 'combobox',
-				'select[multiple]': 'listbox',
-				'select[size]:not([multiple])': { type: 'integer', attribute: 'size', greaterthan: 1, role: ['combobox', 'listbox'] }
-			}, DOMInterface: 'HTMLSelectElement' },
-		'datalist': { id: 'the-datalist-element', category: 'forms', implicitAriaRole: 'listbox', DOMInterface: 'HTMLDataListElement' },
-		'optgroup': { id: 'the-optgroup-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLOptGroupElement' },
-		'option': { id: 'the-option-element', category: 'forms', implicitAriaRole: 'option', DOMInterface: 'HTMLOptionElement' },
-		'textarea': { id: 'the-textarea-element', category: 'forms', focusable: 'textarea:not([disabled])', implicitAriaRole: 'textbox', DOMInterface: 'HTMLTextAreaElement' },
-		'output': { id: 'the-output-element', category: 'forms', implicitAriaRole: 'status', DOMInterface: 'HTMLOutputElement' },
-		'progress': { id: 'the-progress-element', category: 'forms', implicitAriaRole: 'progressbar', DOMInterface: 'HTMLProgressElement' },
-		'meter': { id: 'the-meter-element', category: 'forms', DOMInterface: 'HTMLMeterElement' },
-		'fieldset': { id: 'the-fieldset-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLFieldSetElement' },
-		'legend': { id: 'the-legend-element', category: 'forms', DOMInterface: 'HTMLLegendElement' },
-		'details': { id: 'the-details-element', category: 'interactive elements', implicitAriaRole: 'group', DOMInterface: 'HTMLDetailsElement' },
-		'summary': { id: 'the-summary-element', category: 'interactive elements', implicitAriaRole: 'button', DOMInterface: 'HTMLElement' },
-		'dialog': { id: 'the-dialog-element', category: 'interactive elements', implicitAriaRole: 'dialog', DOMInterface: 'HTMLDialogElement' },
-		'script': { id: 'the-script-element', category: 'scripting', DOMInterface: 'HTMLScriptElement' },
-		'noscript': { id: 'the-noscript-element', category: 'scripting', DOMInterface: 'HTMLElement' },
-		'template': { id: 'the-template-element', category: 'scripting', DOMInterface: 'HTMLTemplateElement' },
-		'canvas': { id: 'the-canvas-element', category: 'scripting', DOMInterface: 'HTMLCanvasElement' }
+	'wcag21': {
+		lang: 'en',
+		name: 'Web Content Accessibility Guidelines (WCAG) 2.1',
+		description: 'Web Content Accessibility Guidelines (WCAG) 2.1 covers a wide range of recommendations for making Web content more accessible. Following these guidelines will make content more accessible to a wider range of people with disabilities, including accommodations for blindness and low vision, deafness and hearing loss, limited movement, speech disabilities, photosensitivity, and combinations of these, and some accommodation for learning disabilities and cognitive limitations; but will not address every user need for people with these disabilities. These guidelines address accessibility of web content on desktops, laptops, tablets, and mobile devices. Following these guidelines will also often make Web content more usable to users in general.',
+		mainUrl: 'https://www.w3.org/TR/WCAG21/',
+		testUrl: 'https://www.w3.org/WAI/WCAG21/Techniques/{{technology}}/{{id}}'
 	}
 };
-
-const HTML = {
-	getFocusableElementsSelector: function () {
-		var elements = [];
-		for (var element in htmlData.elements) {
-			if (htmlData.elements[element].hasOwnProperty('focusable')) {
-				var focusable = htmlData.elements[element].focusable;
-				elements.push((focusable.constructor == String ? focusable : element) + ':not([tabindex="-1"])');
-			}
-		}
-		elements.push('[contenteditable="true"]', '[tabindex="0"]');
-		return elements.join(', ');
-	}
-};
-
-var getImplicitAriaRole = function () {
-	if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
-		var elementData = htmlData.elements[this.tagName.toLowerCase()];
-		if (elementData.hasOwnProperty('implicitAriaRole')) {
-			var result = null;
-			var implicitAriaRole = elementData.implicitAriaRole;
-			switch (implicitAriaRole.constructor) {
-				case String:
-					result = implicitAriaRole;
-					break;
-				case Object:
-					for (var selector in implicitAriaRole) {
-						if (this.matches(selector)) {
-							if (implicitAriaRole[selector].constructor == Object) {
-								if (implicitAriaRole[selector].type == 'integer' && implicitAriaRole[selector].hasOwnProperty('greaterthan')) {
-									var attributeValue = this.getAttribute(implicitAriaRole[selector].attribute);
-									if (/^(0|[1-9]\d*)$/.test(attributeValue)) {
-										result = parseInt(attributeValue) > implicitAriaRole[selector].greaterthan;
-										result = implicitAriaRole[selector].role[result ? 1 : 0];
-									}
-									else {
-										result = implicitAriaRole[selector].role[0];
-									}
-								}
-							}
-							else {
-								result = implicitAriaRole[selector];
-							}
-							break;
-						}
-					}
-					break;
-			}
-			return result;
-		}
-		else {
-			return null;
-		}
-	}
-	else {
-		return undefined;
-	}
-};
-if (!('getImplicitAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
-if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
-
-var isNotExposedDueTo = function () {
-	var result = [];
-	if (this.getAttribute('aria-hidden') == 'true') {
-		result.push('aria:hidden');
-	}
-	else {
-		var ariahiddenfound = false;
-		var pt = this.parentNode;
-		while (pt && pt.nodeType == 1) {
-			if (pt.getAttribute('aria-hidden') == 'true') {
-				ariahiddenfound = true;
-				break;
-			}
-			pt = pt.parentNode;
-		}
-		if (ariahiddenfound) {
-			result.push('parent-aria:hidden');
-		}
-	}
-	if (!this.matches('area')) {
-		if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
-			result.push('css:display');
-		}
-		if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
-			result.push('css:visibility');
-		}
-	}
-	else {
-		var pt = this.parentNode;
-		if (pt && pt.matches('map')) {
-			var ptexposition = pt.isNotExposedDueTo;
-			if (pt.hasAttribute('name')) {
-				var img = document.querySelector('img[usemap="#' + pt.getAttribute('name') + '"]');
-				if (img) {
-					if (img.isNotExposedDueTo.length > 0) {
-						result.push('html:imagenotexposed');
-					}
-				}
-				else {
-					result.push('parent-html:noimage');
-				}
-			}
-			else {
-				result.push('parent-html:noname');
-			}
-		}
-		else {
-			result.push('parent-html:unknown');
-		}
-	}
-	return result;
-};
-
-if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
-if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
-
-var isNotVisibleDueTo = function () {
-	var result = [];
-	if (!(!!(this.offsetWidth || this.offsetHeight || this.getClientRects().length))) {
-		result.push('css:other');
-	}
-	if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
-		result.push('css:display');
-	}
-	if (window.getComputedStyle(this, null).getPropertyValue('opacity') == '0') {
-		result.push('css:opacity');
-	}
-	if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
-		result.push('css:visibility');
-	}
-	return result;
-};
-
-if (!SVGElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
-if (!HTMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
-
-/*
-    IANA Language Subtag Registry
-    https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-    Note : only the 30 main languages in the world.
-*/
-var languages = {
-	fileDate: '2020-05-12',
-	data: {
-		'en': { description: 'English', added:'2005-10-16', suppressScript: 'Latn' },
-		'cmn': { description: 'Mandarin Chinese', added:'2009-07-29', macrolanguage: 'zh' },
-		'hi': { description: 'Hindi', added:'2005-10-16', suppressScript: 'Deva' },
-		'es': { description: ['Spanish', 'Castilian'], added:'2005-10-16', suppressScript: 'Latn' },
-		'fr': { description: 'French', added:'2005-10-16', suppressScript: 'Latn' },
-		'ar': { description: 'Arabic', added:'2005-10-16', suppressScript: 'Arab', scope: 'macrolanguage' },
-		'bn': { description: ['Bengali', 'Bangla'], added:'2005-10-16', suppressScript: 'Beng' },
-		'ru': { description: 'Russian', added:'2005-10-16', suppressScript: 'Cyrl' },
-		'pt': { description: 'Portuguese', added:'2005-10-16', suppressScript: 'Latn' },
-		'id': { description: 'Indonesian', added:'2005-10-16', suppressScript: 'Latn', macrolanguage: 'ms' },
-		'ur': { description: 'Urdu', added:'2005-10-16', suppressScript: 'Arab' },
-		'de': { description: 'German', added:'2005-10-16', suppressScript: 'Latn' },
-		'ja': { description: 'Japanese', added:'2005-10-16', suppressScript: 'Jpan' },
-		'sw': { description: 'Swahili (macrolanguage)', added:'2005-10-16', suppressScript: 'Latn', scope: 'macrolanguage' },
-		'mr': { description: 'Marathi', added:'2005-10-16', suppressScript: 'Deva' },
-		'te': { description: 'Telugu', added:'2005-10-16', suppressScript: 'Telu' },
-		'tr': { description: 'Turkish', added:'2005-10-16', suppressScript: 'Latn' },
-		'yue': { description: ['Yue Chinese', 'Cantonese'], added:'2009-07-29', macrolanguage: 'zh' },
-		'ta': { description: 'Tamil', added:'2005-10-16', suppressScript: 'Taml' },
-		'pa': { description: ['Panjabi', 'Punjabi'], added:'2005-10-16', suppressScript: 'Guru' },
-		'wuu': { description: 'Wu Chinese', added:'2009-07-29', macrolanguage: 'zh' },
-		'ko': { description: 'Korean', added:'2005-10-16', suppressScript: 'Kore' },
-		'vi': { description: 'Vietnamese', added:'2005-10-16', suppressScript: 'Latn' },
-		'ha': { description: 'Hausa', added:'2005-10-16' },
-		'jv': { description: 'Javanese', added:'2005-10-16' },
-		'arz': { description: 'Egyptian Arabic', added:'2009-07-29', preferredValue: 'arz', prefix: 'ar', macrolanguage: 'ar' },
-		'it': { description: 'Italian', added:'2005-10-16', suppressScript: 'Latn' },
-		'th': { description: 'Thai', added:'2005-10-16', suppressScript: 'Thai' },
-		'gu': { description: 'Gujarati', added:'2005-10-16', suppressScript: 'Gujr' },
-		'kn': { description: 'Kannada', added:'2005-10-16', suppressScript: 'Knda' }
-	}
-};
-
-// hasValidLanguageCode.
-var hasValidLanguageCode = function () { return languages.data.hasOwnProperty(this.lang); };
-if (!('hasValidLanguageCode' in SVGElement.prototype)) SVGElement.prototype.hasValidLanguageCode = hasValidLanguageCode;
-if (!('hasValidLanguageCode' in HTMLElement.prototype)) HTMLElement.prototype.hasValidLanguageCode = hasValidLanguageCode;
