@@ -197,7 +197,7 @@ pipeline {
                 --password="$REGISTRY_PASS" "$REGISTRY_HOST"
 
                 docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:beta
-                docker push registry.tanaguru.com/tanaguru2020-rest:betaa
+                docker push registry.tanaguru.com/tanaguru2020-rest:beta
                 '''
             }
         }
