@@ -124,6 +124,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--whitelisted-ips");
     	options.addArguments("--no-default-browser-check");
         options.addArguments("--safebrowsing-disable-auto-update");
+        options.addArguments("--user-agent=tanaguru");
         options.addArguments("--disable-component-update");
         options.addArguments("--ignore-certificate-errors");
         HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
@@ -138,6 +139,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         FirefoxProfile firefoxProfile = firefoxProfileFile.exists() ?
                 new FirefoxProfile(firefoxProfileFile) :
                 new FirefoxProfile();
+        firefoxProfile.setPreference("general.useragent.override", "tanaguru");
         firefoxProfile.setPreference("browser.startup.page", 0);
         firefoxProfile.setPreference("browser.cache.disk.capacity", 0);
         firefoxProfile.setPreference("browser.cache.disk.enable", false);
