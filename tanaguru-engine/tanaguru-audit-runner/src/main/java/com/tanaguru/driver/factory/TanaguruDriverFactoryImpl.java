@@ -50,6 +50,9 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     @Value("${auditrunner.firefox.profile}")
     private String firefoxProfilePath;
 
+    @Value("${auditrunner.chrome.profile}")
+    private String chromeProfilePath;
+
     @Value("${auditrunner.proxy.host}")
     private String proxyHost;
 
@@ -129,7 +132,13 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--ignore-certificate-errors");
         HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
         chromePrefs.put("profile.block_third_party_cookies", true);
+        chromePrefs.put("download.default_directory", "/dev/null");
         options.setExperimentalOption("prefs", chromePrefs);
+
+        File chromeProfileFile = new File(chromeProfilePath);
+        if(chromeProfileFile.exists()){
+            options.addArguments("--user-data-dir=" + chromeProfilePath);
+        }
         setUpChromeProxy(options);
     }
     
@@ -140,6 +149,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                 new FirefoxProfile(firefoxProfileFile) :
                 new FirefoxProfile();
         firefoxProfile.setPreference("general.useragent.override", "tanaguru");
+        firefoxProfile.setPreference("browser.download.dir", "/dev/null");
         firefoxProfile.setPreference("browser.startup.page", 0);
         firefoxProfile.setPreference("browser.cache.disk.capacity", 0);
         firefoxProfile.setPreference("browser.cache.disk.enable", false);
