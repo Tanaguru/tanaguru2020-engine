@@ -3,7 +3,9 @@ package com.tanaguru.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.AuditCommandDTO;
@@ -25,6 +27,7 @@ import com.tanaguru.domain.exception.InvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
+
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +36,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
 import javax.persistence.EntityNotFoundException;
+import org.springframework.core.io.Resource;
 import javax.validation.Valid;
 
-import java.io.ByteArrayInputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -64,7 +67,7 @@ public class AuditController {
     private final StatusResultRepository statusResultRepository;
     private final TestResultRepository testResultRepository;
     private final ElementResultRepository elementResultRepository;
-
+    
     @Autowired
     public AuditController(
             AuditRepository auditRepository,
@@ -125,12 +128,13 @@ public class AuditController {
 
 
     /**
+     * Get a json file with the audit information
      * @param id The id of the @see Audit
      * @param shareCode the share code of the @see Audit
      * @return @see Audit
      */
     @ApiOperation(
-            value = "Get a json file with the audit",
+            value = "Get a json file with the audit information",
             notes = "User must have SHOW_AUDIT authority on project or a valid sharecode")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -138,92 +142,23 @@ public class AuditController {
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
             @ApiResponse(code = 404, message = "Audit not found")
     })
-    @GetMapping(value="export/{id}/{shareCode}", produces = "application/json")
-    public ResponseEntity<InputStreamResource> exportAudit(
+    //@PreAuthorize(
+            //"@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
+    @GetMapping(value="/export/{id}/{sharecode}", produces = "application/json")
+    public ResponseEntity<Resource> exportAudit(
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
-
+        
         Audit audit = auditRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        JSONObject jsonFinalObject = new JSONObject();
-
-        if(audit.getType().equals(EAuditType.PAGE)) {
-            Collection<AuditLog> auditLogs =  auditLogRepository.findAllByAudit(audit);
-            Optional<Act> act = actRepository.findByAudit(audit);
-            Optional<AuditReference> auditReference = auditReferenceRepository.findByAuditAndIsMainIsTrue(audit);
-            Collection<AuditAuditParameterValue> auditAuditParameterValues = auditAuditParameterValueRepository.findAllByAudit(audit);
-            Optional<AuditScheduler> auditScheduler = auditSchedulerRepository.findByAudit(audit);
-            ObjectMapper mapper = new ObjectMapper();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            mapper.setDateFormat(df);
-    
-            try {
-                if(!auditLogs.isEmpty()) {
-                    JSONObject jsonAuditLogObject = new JSONObject();
-                    for(AuditLog log : auditLogs) {
-                        jsonAuditLogObject.append("auditLog", new JSONObject(mapper.writeValueAsString(log)));
-                    }
-                    jsonFinalObject.put("auditLog", jsonAuditLogObject.get("auditLog"));
-                }
-                if(!act.isEmpty()) {
-                    JSONObject jsonActObject = new JSONObject(mapper.writeValueAsString(act.get()));
-                    jsonFinalObject.put("act", jsonActObject);
-                }
-                if(!auditAuditParameterValues.isEmpty()) {
-                    JSONObject jsonAuditParameterObject = new JSONObject();
-                    for(AuditAuditParameterValue auditParameterValue : auditAuditParameterValues) {
-                        jsonAuditParameterObject.append("parameters", new JSONObject(mapper.writeValueAsString(auditParameterValue.getAuditParameterValue())));
-                    }
-                    jsonFinalObject.put("auditParameterValues", jsonAuditParameterObject.get("parameters"));
-                }
-                if(!auditScheduler.isEmpty()) {
-                    jsonFinalObject.put("auditScheduler", mapper.writeValueAsString(auditScheduler.get()));
-                }
-                if(!auditReference.isEmpty()) {
-                    JSONObject jsonAuditReferenceObject = new JSONObject();
-                    AuditReference ref = auditReference.get();
-                    jsonAuditReferenceObject.put("auditReferenceName", ref.getTestHierarchy().getName());
-                    jsonAuditReferenceObject.put("auditReferenceCode", ref.getTestHierarchy().getCode());
-                    jsonAuditReferenceObject.put("auditReferenceUrl", ref.getTestHierarchy().getUrls());    
-                    jsonFinalObject.put("auditReference", jsonAuditReferenceObject);
-    
-                    Collection<StatusResult> statusResults = statusResultRepository.findAllByReferenceAndPage_Audit(auditReference.get().getTestHierarchy(), audit);
-                    for(StatusResult statusResult : statusResults) {
-                        JSONObject jsonStatusResultsObject = new JSONObject();
-                        JSONObject jsonPageStatusResultsObject = new JSONObject(mapper.writeValueAsString(statusResult));
-    
-                        Collection<TestResult> testsResults = testResultRepository.findAllByPage(statusResult.getPage());
-                        for(TestResult testResult : testsResults) {
-                            TanaguruTest tanaguruTest = testResult.getTanaguruTest();                       
-                            JSONObject oneTestResult = new JSONObject(mapper.writeValueAsString(testResult));
-                            JSONArray elementResults = oneTestResult.getJSONArray("elementResults");
-                            List<Long> longs = elementResults.toList().stream()
-                                    .map(object -> Long.parseLong(String.valueOf(object)))
-                                    .collect(Collectors.toList());
-                            Collection<ElementResult> elements = elementResultRepository.findAllByIdIn(longs);
-                            oneTestResult.put("elementResults", new JSONArray(mapper.writeValueAsString(elements)));
-    
-                            oneTestResult.put("tanaguruTest", new JSONObject(mapper.writeValueAsString(tanaguruTest)));
-                            jsonPageStatusResultsObject.append("testResult", oneTestResult);
-                        }
-                        jsonStatusResultsObject.put("page_"+statusResult.getPage().getId(), jsonPageStatusResultsObject);
-                        jsonFinalObject.append("results", jsonStatusResultsObject);
-                    }
-                }
-    
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        }
+        JSONObject jsonFinalObject = exportAudit(audit);
         byte[] buf = jsonFinalObject.toString().getBytes();              
-        HttpHeaders header = setUpHeaders();   
+        HttpHeaders header = setUpHeaders(audit.getName());
         return ResponseEntity
                 .ok()
                 .headers(header)
                 .contentLength(buf.length)
-                .contentType(
-                        MediaType.parseMediaType("application/json"))
-                .body(new InputStreamResource(new ByteArrayInputStream(buf)));
-
+                .contentType(MediaType.parseMediaType("application/json"))
+                .body(new ByteArrayResource(buf));
     }
 
     /**
@@ -407,12 +342,164 @@ public class AuditController {
                 .orElseThrow(EntityNotFoundException::new));
     }
 
-    private HttpHeaders setUpHeaders() {
+    /**
+     * Set the headers settings
+     * @return httpheaders with the settings
+     */
+    private HttpHeaders setUpHeaders(String filename) {
         HttpHeaders header = new HttpHeaders();
-        header.add("Content-Disposition", "attachment; filename=\"audit.json\"");
+        header.add("Content-Disposition", "attachment; filename=\""+filename+"\"");
         header.add("Cache-Control", "no-cache, no-store, must-revalidate");
         header.add("Pragma", "no-cache");
         header.add("Expires", "0");
         return header;
     }
+    
+    /**
+     * Return information of the audit as a json object
+     * @param audit the audit to export
+     * @return json object of the audit
+     */
+    private JSONObject exportAudit(Audit audit) {
+        JSONObject jsonFinalObject = new JSONObject();
+        ObjectMapper mapper = new ObjectMapper();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        mapper.setDateFormat(df);
+        try {
+            addLogs(jsonFinalObject,audit, mapper);
+            addAct(jsonFinalObject,audit, mapper);
+            addScheduler(jsonFinalObject,audit, mapper);
+            addParametersValues(jsonFinalObject,audit, mapper);
+            addReferenceAndResults(jsonFinalObject,audit, mapper);    
+        } catch (JSONException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return jsonFinalObject;
+    }
+    
+    /**
+     * Add logs information of the audit to the json object
+     * @param jsonFinalObject the json object
+     * @param audit the audit
+     * @param mapper object mapper to json
+     * @throws JSONException
+     * @throws JsonProcessingException
+     */
+    private void addLogs(JSONObject jsonFinalObject, Audit audit, ObjectMapper mapper) throws JsonProcessingException {
+        Collection<AuditLog> auditLogs =  auditLogRepository.findAllByAudit(audit);
+        String auditLog = "auditLogs";
+        if(!auditLogs.isEmpty()) {
+            JSONObject jsonAuditLogsObject = new JSONObject();
+            for(AuditLog log : auditLogs) {
+                jsonAuditLogsObject.append(auditLog, new JSONObject(mapper.writeValueAsString(log)));   
+            }
+            jsonFinalObject.put(auditLog, jsonAuditLogsObject.get(auditLog));
+        }
+    }
+    
+    /**
+     * Add act information of the audit to the json object
+     * @param jsonFinalObject the json object
+     * @param audit the audit
+     * @param mapper object mapper to json
+     * @throws JSONException
+     * @throws JsonProcessingException
+     */
+    private void addAct(JSONObject jsonFinalObject, Audit audit, ObjectMapper mapper) throws JsonProcessingException {
+        Optional<Act> act = actRepository.findByAudit(audit);
+        if(!act.isEmpty()) {
+            JSONObject jsonActObject = new JSONObject(mapper.writeValueAsString(act.get()));
+            jsonFinalObject.put("act", jsonActObject);
+        }
+    }
+    
+    /**
+     * Add parameters information of the audit to the json object
+     * @param jsonFinalObject the json object
+     * @param audit the audit
+     * @param mapper object mapper to json
+     * @throws JSONException
+     * @throws JsonProcessingException
+     */
+    private void addParametersValues(JSONObject jsonFinalObject, Audit audit, ObjectMapper mapper) throws JsonProcessingException {
+        Collection<AuditAuditParameterValue> auditAuditParameterValues = auditAuditParameterValueRepository.findAllByAudit(audit);
+        if(!auditAuditParameterValues.isEmpty()) {
+            JSONObject jsonAuditParameterObject = new JSONObject();
+            for(AuditAuditParameterValue auditParameterValue : auditAuditParameterValues) {
+                jsonAuditParameterObject.append("parameters", new JSONObject(mapper.writeValueAsString(auditParameterValue.getAuditParameterValue())));
+            }
+            jsonFinalObject.put("auditParametersValues", jsonAuditParameterObject.get("parameters"));
+        }
+    }
+    
+    /**
+     * Add scheduler information of the audit to the json object
+     * @param jsonFinalObject the json object
+     * @param audit the audit
+     * @param mapper object mapper to json
+     * @throws JSONException
+     * @throws JsonProcessingException
+     */
+    private void addScheduler(JSONObject jsonFinalObject, Audit audit, ObjectMapper mapper) throws JsonProcessingException {
+        Optional<AuditScheduler> auditScheduler = auditSchedulerRepository.findByAudit(audit);
+        if(!auditScheduler.isEmpty()) {
+            jsonFinalObject.put("auditScheduler", mapper.writeValueAsString(auditScheduler.get()));
+        }
+    }
+    
+    /**
+     * Add reference and results information of the audit to the json object
+     * @param jsonFinalObject the json object
+     * @param audit the audit
+     * @param mapper object mapper to json
+     * @throws JSONException
+     * @throws JsonProcessingException
+     */
+    private void addReferenceAndResults(JSONObject jsonFinalObject, Audit audit, ObjectMapper mapper) throws JsonProcessingException {
+        Collection<AuditReference> auditReferences = auditReferenceRepository.findAllByAudit(audit);
+        for(AuditReference ref : auditReferences) {
+            JSONObject jsonAuditReferenceObject = new JSONObject();
+            jsonAuditReferenceObject.put("referenceTestHierarchyName", ref.getTestHierarchy().getName());
+            jsonAuditReferenceObject.put("referenceTestHierarchyCode", ref.getTestHierarchy().getCode());
+            jsonAuditReferenceObject.put("referenceTestHierarchyUrls", ref.getTestHierarchy().getUrls());
+            jsonAuditReferenceObject.put("referenceTestHierarchyIsMain", ref.isMain());
+
+            Collection<StatusResult> statusResults = statusResultRepository.findAllByReferenceAndPage_Audit(ref.getTestHierarchy(), audit);
+            for(StatusResult statusResult : statusResults) {
+                JSONObject jsonStatusResultsObject = new JSONObject();
+                JSONObject jsonPageStatusResultsObject = new JSONObject(mapper.writeValueAsString(statusResult));
+
+                Collection<TestResult> testsResults = testResultRepository.findAllByPage(statusResult.getPage());
+                for(TestResult testResult : testsResults) {
+                    TanaguruTest tanaguruTest = testResult.getTanaguruTest();                       
+                    JSONObject oneTestResult = new JSONObject(mapper.writeValueAsString(testResult));
+                    JSONArray elementResults = oneTestResult.getJSONArray("elementResults");
+                    List<Long> longs = elementResults.toList().stream()
+                            .map(object -> Long.parseLong(String.valueOf(object)))
+                            .collect(Collectors.toList());
+                    Collection<ElementResult> elements = elementResultRepository.findAllByIdIn(longs);
+                    oneTestResult.put("elementResults", new JSONArray(mapper.writeValueAsString(elements)));
+
+                    JSONObject tanaguruTestJson = new JSONObject();
+                    tanaguruTestJson.put("name", tanaguruTest.getName());
+                    tanaguruTestJson.put("description", tanaguruTest.getDescription());
+                    for(TestHierarchy th : tanaguruTest.getTestHierarchies()) {
+                        JSONObject testHierarchyInfos = new JSONObject();
+                        testHierarchyInfos.put("name", th.getName());
+                        testHierarchyInfos.put("code", th.getCode());
+                        testHierarchyInfos.put("id", th.getId());
+                        testHierarchyInfos.put("urls", th.getUrls());
+                        tanaguruTestJson.append("testHierarchy", testHierarchyInfos);
+                    }
+                    oneTestResult.put("tanaguruTest", tanaguruTestJson);
+                    jsonPageStatusResultsObject.append("testsResults", oneTestResult);
+                }
+                jsonStatusResultsObject.put("pageName", statusResult.getPage().getName());
+                jsonStatusResultsObject.put("pageId", statusResult.getPage().getId());
+                jsonStatusResultsObject.put("pageResults", jsonPageStatusResultsObject);
+                jsonAuditReferenceObject.append("auditResults", jsonStatusResultsObject);
+            }
+            jsonFinalObject.put("auditReference", jsonAuditReferenceObject);
+        }
+    }    
 }
