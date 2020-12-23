@@ -34,4 +34,7 @@ public interface TestHierarchyRepository extends JpaRepository<TestHierarchy, Lo
      * @return All non deleted @see TestHierarchy
      */
     Collection<TestHierarchy> findAllByParentIsNullAndIsDeletedIsFalse();
+    
+    Collection<TestHierarchy> findAllByReferenceId(Long reference_id);
+
 }
