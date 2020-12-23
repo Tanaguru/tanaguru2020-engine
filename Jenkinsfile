@@ -182,20 +182,22 @@ pipeline {
                 branch 'beta'
             }
             steps {
-                unstash 'version'
-                def TIMESTAMP =sh(
-                    script: "date +%Y-%m-%d",
-                    returnStdout: true
-                ).trim()
+                script{
+                    unstash 'version'
+                    def TIMESTAMP =sh(
+                        script: "date +%Y-%m-%d",
+                        returnStdout: true
+                    ).trim()
 
-                def REST_VERSION = sh(
-                    script: "cat version.txt",
-                    returnStdout: true
-                ).trim()
+                    def REST_VERSION = sh(
+                        script: "cat version.txt",
+                        returnStdout: true
+                    ).trim()
 
-                def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
-                docker.withRegistry('https://registry.tanaguru.com', 'registry') {
-                    image.push('beta-${TIMESTAMP}')
+                    def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
+                    docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                        image.push('beta-${TIMESTAMP}')
+                    }
                 }
             }
         }
