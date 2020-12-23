@@ -178,55 +178,47 @@ pipeline {
         }
 
         stage('Push beta image to registry') {
-            environment {
-                REGISTRY_USER = "admin"
-                REGISTRY_PASS = "9x^VTugHEfQ1e7"
-                REGISTRY_HOST = "registry.tanaguru.com"
-            }
             when {
                 branch 'beta'
             }
             steps {
                 unstash 'version'
+                def TIMESTAMP =sh(
+                    script: "date +%Y-%m-%d",
+                    returnStdout: true
+                ).trim()
 
-                sh '''
-                TIMESTAMP=$(date +"%Y-%m-%d")
-                REST_VERSION=$(cat version.txt)
+                def REST_VERSION = sh(
+                    script: "cat version.txt",
+                    returnStdout: true
+                ).trim()
 
-                docker login \
-                --username="$REGISTRY_USER" \
-                --password="$REGISTRY_PASS" "$REGISTRY_HOST"
-
-                docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:beta-$TIMESTAMP
-                docker push registry.tanaguru.com/tanaguru2020-rest:beta-$TIMESTAMP
-                '''
+                def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
+                docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                    image.push('beta-${TIMESTAMP}')
+                }
             }
         }
 
         stage('Push image to registry') {
-            environment {
-                REGISTRY_USER = "admin"
-                REGISTRY_PASS = "9x^VTugHEfQ1e7"
-                REGISTRY_HOST = "registry.tanaguru.com"
-            }
             when {
                 branch 'master'
             }
             steps {
                 unstash 'version'
+                script{
+                    script{
+                        def REST_VERSION = sh(
+                            script: "cat version.txt",
+                            returnStdout: true
+                        ).trim()
 
-                sh '''
-                REST_VERSION=$(cat version.txt)
-
-                docker login \
-                --username="$REGISTRY_USER" \
-                --password="$REGISTRY_PASS" "$REGISTRY_HOST"
-                docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
-                docker push registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
-
-                docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:latest
-                docker push registry.tanaguru.com/tanaguru2020-rest:latest
-                '''
+                        def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
+                        docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                            image.push()
+                        }
+                    }
+                }
             }
         }
     }
