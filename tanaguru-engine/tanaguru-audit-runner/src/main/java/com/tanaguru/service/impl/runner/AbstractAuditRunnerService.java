@@ -18,6 +18,7 @@ import java.util.*;
 
 import static com.tanaguru.domain.constant.EAuditStatus.DONE;
 import static com.tanaguru.domain.constant.EAuditStatus.RUNNING;
+import static com.tanaguru.domain.constant.EAuditStatus.ERROR;
 
 /**
  * @author rcharre
@@ -94,8 +95,12 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     @Override
     public final void onAuditEnd(AuditRunner auditRunner) {
         Audit audit = auditRunner.getAudit();
+        if(audit.getPages() == null || audit.getPages().isEmpty()) {
+            audit.setStatus(ERROR);
+        }else {
+            audit.setStatus(DONE);
+        }
         audit.setDateEnd(new Date());
-        audit.setStatus(DONE);
         audit = auditRepository.save(audit);
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
