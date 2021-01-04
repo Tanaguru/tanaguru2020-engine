@@ -97,6 +97,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         Audit audit = auditRunner.getAudit();
         if(audit.getPages() == null || audit.getPages().isEmpty()) {
             audit.setStatus(ERROR);
+            auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit failed because it does not contain pages");
         }else {
             audit.setStatus(DONE);
         }
