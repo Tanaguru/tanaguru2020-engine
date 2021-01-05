@@ -9,6 +9,8 @@ import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.service.TestHierarchyService;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,6 +147,21 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
             tagDeletedWithChild(child);
         }
         testHierarchyRepository.save(testHierarchy);
+    }
+
+    /**
+     * Return a json object with the information of the test hierarchy
+     * @param testHierarchy
+     * @return json object
+     */
+    @Override
+    public JSONObject toJson(TestHierarchy testHierarchy) {
+        JSONObject testHierarchyJsonObject = new JSONObject();
+        testHierarchyJsonObject.put("testHierarchyId", testHierarchy.getId());
+        testHierarchyJsonObject.put("testHierarchyName", testHierarchy.getName());
+        testHierarchyJsonObject.put("testHierarchyCode", testHierarchy.getCode());
+        testHierarchyJsonObject.put("testHierarchyUrl", testHierarchy.getUrls());
+        return testHierarchyJsonObject;
     }
 
 }

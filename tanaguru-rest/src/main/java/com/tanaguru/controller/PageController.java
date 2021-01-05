@@ -151,7 +151,7 @@ public class PageController {
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         Page page = pageRepository.findById(id)
                 .orElseThrow(EntityNotFoundException::new);
-        JSONObject jsonFinalObject = pageService.exportPage(page);
+        JSONObject jsonFinalObject = pageService.toJsonWithAuditInfo(page);
         byte[] buf = jsonFinalObject.toString().getBytes();              
         HttpHeaders header = setUpHeaders(page.getName());
         return ResponseEntity

@@ -19,9 +19,16 @@ public interface PageService {
     void deletePageByAudit(Audit audit);
     
     /**
-     * Return a json object with page information
-     * @param page the given @see Page
+     * Return a json object with the information of the page
+     * @param page The given @see Page
      * @return json object
      */
-    JSONObject exportPage(Page page);
+    JSONObject toJson(Page page);
+    
+    /**
+     * Return a json object with the information of the page and of the audit
+     * @param page The given @see Page
+     * @return json object
+     */
+    JSONObject toJsonWithAuditInfo(Page page);
 }

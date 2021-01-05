@@ -52,9 +52,9 @@ public interface AuditService {
     void deleteAuditByProject(Project project);
     
     /**
-     * Return a json object with audit information
+     * Return a json object with the information of the audit
      * @param audit the given @see Audit
      * @return json object
      */
-    JSONObject exportAudit(Audit audit);
+    JSONObject toJson(Audit audit);
 }

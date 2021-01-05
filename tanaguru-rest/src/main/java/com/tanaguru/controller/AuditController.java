@@ -113,7 +113,7 @@ public class AuditController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         Audit audit = auditRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        JSONObject jsonFinalObject = auditService.exportAudit(audit);
+        JSONObject jsonFinalObject = auditService.toJson(audit);
         byte[] buf = jsonFinalObject.toString().getBytes();              
         HttpHeaders header = setUpHeaders(audit.getName());
         return ResponseEntity
