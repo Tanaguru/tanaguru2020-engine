@@ -9,18 +9,12 @@
         <createTable tableName="webext_engine">
             <column name="id" type="bigint" autoIncrement="true"/>
             <column name="engine_version" type="varchar(30)"/>
-            <column name="test_hierarchy_id" type="bigint"/>
+            <column name="engine_content" type="varchar(255)"/>
         </createTable>
         <addPrimaryKey tableName="webext_engine" columnNames="id"/>
         <addNotNullConstraint tableName="webext_engine" columnName="engine_version"/>
-        <addNotNullConstraint tableName="webext_engine" columnName="test_hierarchy_id"/>
-
-        <addForeignKeyConstraint
-                baseTableName="webext_engine"
-                baseColumnNames="test_hierarchy_id"
-                constraintName="fk_webext_engine_test_hierarchy_id"
-                referencedTableName="test_hierarchy"
-                referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="webext_engine" columnNames="engine_version"/>  
+        <addNotNullConstraint tableName="webext_engine" columnName="engine_content"/>
 
         <rollback>
             <dropTable tableName="webext_engine"/>
