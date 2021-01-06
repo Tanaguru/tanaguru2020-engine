@@ -3,6 +3,7 @@ package com.tanaguru.runner;
 import com.google.gson.Gson;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.AuditReference;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
@@ -29,6 +30,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private Audit audit;
     private RemoteWebDriver tanaguruDriver;
     private String coreScript;
+    private String coreScriptVersion;
 
     private int currentRank = 1;
 
@@ -60,7 +62,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String coreScriptVersion) {
         this.audit = audit;
         this.tanaguruDriver = driver;
         this.coreScript = coreScript;
@@ -71,6 +74,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
+        this.coreScriptVersion = coreScriptVersion;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -82,7 +86,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
         LOGGER.info("[Audit {}] Start runner", audit.getId());
         for (AuditRunnerListener tanaguruDriverListener : listeners) {
-            tanaguruDriverListener.onAuditStart(this);
+            tanaguruDriverListener.onAuditStart(this, coreScript, coreScriptVersion);
         }
 
         try{

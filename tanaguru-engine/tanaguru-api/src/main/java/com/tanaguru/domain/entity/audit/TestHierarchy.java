@@ -60,6 +60,10 @@ public class TestHierarchy implements Serializable {
 
     @Column
     private boolean isDeleted = false;
+    
+    @ManyToOne
+    @JsonIgnore
+    private WebextEngine webextEngine;
 
     public long getId() {
         return id;
@@ -139,5 +143,13 @@ public class TestHierarchy implements Serializable {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+    
+    public WebextEngine getWebextEngine() {
+        return webextEngine;
+    }
+    
+    public void setWebextEngine(WebextEngine webextEngine) {
+        this.webextEngine = webextEngine;
     }
 }

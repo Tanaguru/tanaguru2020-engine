@@ -7,17 +7,17 @@
         
     <changeSet id="update_testhierarchy_engineversion" author="lpedrau">
         <addColumn tableName="test_hierarchy">
-            <column name="engine_version" type="varchar(30)"/>
+            <column name="webext_engine_id" type="bigint"/>
         </addColumn>
         <addForeignKeyConstraint
                 baseTableName="test_hierarchy"
-                baseColumnNames="engine_version"
+                baseColumnNames="webext_engine_id"
                 constraintName="fk_test_hierarchy_engine_version_webext_engine"
                 referencedTableName="webext_engine"
-                referencedColumnNames="engine_version"/>
+                referencedColumnNames="id"/>
                            
         <rollback>
-            <dropColumn tableName="test_hierarchy" columnName="engine_version"/>
+            <dropColumn tableName="test_hierarchy" columnName="webext_engine_id"/>
         </rollback>
     </changeSet>
             
