@@ -11,6 +11,7 @@ import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
+import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.TestHierarchyService;
 import io.swagger.annotations.ApiOperation;
@@ -37,15 +38,22 @@ public class TestHierarchyController {
     private final TanaguruUserDetailsService tanaguruUserDetailsService;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final TestHierarchyService testHierarchyService;
+    private final WebextEngineRepository webextEngineRepository;
 
     @Autowired
     public TestHierarchyController(
-            TestHierarchyRepository testHierarchyRepository, AuditRepository auditRepository, TanaguruUserDetailsService tanaguruUserDetailsService, TanaguruTestRepository tanaguruTestRepository, TestHierarchyService testHierarchyService) {
+            TestHierarchyRepository testHierarchyRepository, 
+            AuditRepository auditRepository, 
+            TanaguruUserDetailsService tanaguruUserDetailsService, 
+            TanaguruTestRepository tanaguruTestRepository, 
+            TestHierarchyService testHierarchyService,
+            WebextEngineRepository webextEngineRepository) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.auditRepository = auditRepository;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.testHierarchyService = testHierarchyService;
+        this.webextEngineRepository = webextEngineRepository;
     }
 
     /**
@@ -227,6 +235,16 @@ public class TestHierarchyController {
                         null :
                         testHierarchyRepository.findById(testHierarchyDTO.getParentId())
                                 .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyDTO.getParentId() ))
+                );
+        
+        //webext engine version
+        testHierarchy.setWebextEngine(
+                testHierarchyDTO.getWebextEngineId() == null ?
+                        null :
+                        webextEngineRepository.findById(testHierarchyDTO.getWebextEngineId())
+                                .orElseThrow(() -> new CustomInvalidArgumentException(CustomError.ENGINE_VERSION_NOT_FOUND_FOR_TEST_HIERARCHY, testHierarchyDTO.getWebextEngineId() ))
+                
+                
                 );
 
         return new TestHierarchyDTO(testHierarchyRepository.save(testHierarchy));

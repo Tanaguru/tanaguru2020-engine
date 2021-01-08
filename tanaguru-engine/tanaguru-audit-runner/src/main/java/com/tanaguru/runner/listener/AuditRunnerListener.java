@@ -15,7 +15,7 @@ public interface AuditRunnerListener {
      *
      * @param auditRunner The audit runner
      */
-    void onAuditStart(AuditRunner auditRunner, String coreScript, String coreScriptVersion);
+    void onAuditStart(AuditRunner auditRunner);
 
     /**
      * Event fired when audit get new page

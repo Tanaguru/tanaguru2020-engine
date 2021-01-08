@@ -16,6 +16,7 @@ import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.ResourceRepository;
 import com.tanaguru.repository.ScenarioRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
+import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.runner.*;
 import com.tanaguru.service.AuditService;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -41,7 +42,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ResourceRepository resourceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final AuditReferenceRepository auditReferenceRepository;
-
+    private final WebextEngineRepository webextEngineRepository;
+    
     private final String coreScript;
     private final String coreScriptVersion;
     
@@ -58,7 +60,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             TanaguruTestRepository tanaguruTestRepository,
             AuditReferenceRepository auditReferenceRepository,
             String coreScript,
-            String coreScriptVersion) {
+            String coreScriptVersion,
+            WebextEngineRepository webextEngineRepository) {
 
         this.tanaguruDriverFactory = tanaguruDriverFactory;
         this.tanaguruCrawlerControllerFactory = tanaguruCrawlerControllerFactory;
@@ -69,6 +72,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         this.auditReferenceRepository = auditReferenceRepository;
         this.coreScript = coreScript;
         this.coreScriptVersion = coreScriptVersion;
+        this.webextEngineRepository = webextEngineRepository;
     }
 
     @Override
@@ -210,14 +214,13 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     urls,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
                     enableScreenShot,
-                    coreScriptVersion)
+                    webextEngineRepository)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create page audit runner");
@@ -246,14 +249,13 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     scenario,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
                     enableScreenShot,
-                    coreScriptVersion)
+                    webextEngineRepository)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create scenario audit runner");
@@ -294,14 +296,13 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     tanaguruCrawlerController.get(),
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
                     enableScreenShot,
-                    coreScriptVersion)
+                    webextEngineRepository)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create site audit runner");
@@ -331,14 +332,13 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     content,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
                     enableScreenShot,
-                    coreScriptVersion)
+                    webextEngineRepository)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create file audit runner");

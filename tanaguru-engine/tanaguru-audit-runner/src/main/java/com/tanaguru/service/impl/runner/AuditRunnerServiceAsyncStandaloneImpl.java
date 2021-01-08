@@ -55,8 +55,7 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            AuditReferenceRepository auditReferenceRepository,
-            WebextEngineRepository webextEngineRepository) {
+            AuditReferenceRepository auditReferenceRepository) {
         super(pageRepository,
                 auditRepository,
                 auditService,
@@ -66,8 +65,7 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
                 resultAnalyzerService,
                 testHierarchyRepository,
                 elementResultRepository,
-                auditReferenceRepository,
-                webextEngineRepository);
+                auditReferenceRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 

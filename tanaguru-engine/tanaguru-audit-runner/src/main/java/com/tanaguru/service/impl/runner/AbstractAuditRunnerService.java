@@ -38,7 +38,6 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final TestHierarchyRepository testHierarchyRepository;
     protected final AuditReferenceRepository auditReferenceRepository;
     protected final ElementResultRepository elementResultRepository;
-    protected final WebextEngineRepository webextEngineRepository;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -50,8 +49,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            AuditReferenceRepository auditReferenceRepository,
-            WebextEngineRepository webextEngineRepository) {
+            AuditReferenceRepository auditReferenceRepository) {
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -62,7 +60,6 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.testHierarchyRepository = testHierarchyRepository;
         this.elementResultRepository = elementResultRepository;
         this.auditReferenceRepository = auditReferenceRepository;
-        this.webextEngineRepository = webextEngineRepository;
     }
 
     @Override
@@ -90,23 +87,11 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     }
 
     @Override
-    public final void onAuditStart(AuditRunner auditRunner,String coreScript, String coreScriptVersion) {
+    public final void onAuditStart(AuditRunner auditRunner) {
         Audit audit = auditRunner.getAudit();
         audit.setDateStart(new Date());
         audit.setStatus(RUNNING);
         audit = auditRepository.save(audit);
-        if( webextEngineRepository.findAllByEngineVersion(coreScriptVersion).isEmpty()) {
-            Collection<AuditReference> auditReferences = auditReferenceRepository.findAllByAudit(audit);
-            for(AuditReference auditReference : auditReferences) {
-                TestHierarchy th = auditReference.getTestHierarchy();
-                WebextEngine webextEngine = new WebextEngine();
-                webextEngine.setEngineVersion(coreScriptVersion);
-                webextEngine.setEngineContent(coreScript.getBytes());
-                webextEngineRepository.save(webextEngine);
-                th.setWebextEngine(webextEngine);
-                testHierarchyRepository.save(th);
-            }
-        }
         auditRunner.setAudit(audit);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit start");
         onAuditStartImpl(auditRunner);

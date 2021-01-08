@@ -1,11 +1,16 @@
 package com.tanaguru.runner;
 
 import com.google.gson.Gson;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditReference;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.WebextEngine;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.helper.ImageHelper;
+import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.openqa.selenium.*;
@@ -29,8 +34,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
     private Audit audit;
     private RemoteWebDriver tanaguruDriver;
-    private String coreScript;
-    private String coreScriptVersion;
 
     private int currentRank = 1;
 
@@ -39,7 +42,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private Collection<TanaguruTest> tanaguruTests;
     private Collection<Integer> resolutions;
 
-    private String testScript;
+    private ArrayList<String> testScripts;
 
     private String basicAuthUrl;
     private String basicAuthLogin;
@@ -51,22 +54,22 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private boolean stop = false;
 
     private long waitTime;
+    
+    private WebextEngineRepository webextEngineRepository;
 
     public AbstractAuditRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             RemoteWebDriver driver,
-            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            String coreScriptVersion) {
+            WebextEngineRepository webextEngineRepository) {
         this.audit = audit;
         this.tanaguruDriver = driver;
-        this.coreScript = coreScript;
         this.tanaguruTests = tanaguruTests;
         this.waitTime = waitTime;
         this.resolutions = resolutions;
@@ -74,7 +77,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
-        this.coreScriptVersion = coreScriptVersion;
+        this.webextEngineRepository = webextEngineRepository;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -82,11 +85,11 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     }
 
     public final void run() {
-        this.testScript = createFullScripts();
+        this.testScripts = createFullScripts();
 
         LOGGER.info("[Audit {}] Start runner", audit.getId());
         for (AuditRunnerListener tanaguruDriverListener : listeners) {
-            tanaguruDriverListener.onAuditStart(this, coreScript, coreScriptVersion);
+            tanaguruDriverListener.onAuditStart(this);
         }
 
         try{
@@ -167,10 +170,12 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
-                String result = (String) tanaguruDriver.executeScript(testScript);
-                String source = tanaguruDriver.getPageSource();
-                for (AuditRunnerListener tanaguruDriverListener : listeners) {
-                    tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
+                for(String testScript : testScripts) {
+                    String result = (String) tanaguruDriver.executeScript(testScript);
+                    String source = tanaguruDriver.getPageSource();
+                    for (AuditRunnerListener tanaguruDriverListener : listeners) {
+                        tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
+                    }
                 }
                 currentRank++;
             } catch (Exception e) {
@@ -209,45 +214,58 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 ImageHelper.compressImage(screenshotImage, SCREENSHOT_QUALITY_COMPRESSION, "jpg"));
     }
 
-    private String createFullScripts() {
+    private ArrayList<String> createFullScripts() {
         StringBuilder strb = new StringBuilder();
         Gson gson = new Gson();
         LOGGER.debug("[Audit {}] Generating script", audit.getId());
-        strb.append(coreScript);
-        strb.append("\n");
-        for (TanaguruTest tanaguruTest : this.tanaguruTests) {
-            strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
-            strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
-            strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
-            strb.append(",\ntags:").append(gson.toJson(tanaguruTest.getTags()));
-
-
-            if(tanaguruTest.getExpectedNbElements() != null){
-                strb.append(",\nexpectedNbElements:");
-                try {
-                    strb.append(
-                            Integer.parseInt(tanaguruTest.getExpectedNbElements()));
-                }catch (NumberFormatException nfe){
-                    strb.append(gson.toJson(tanaguruTest.getExpectedNbElements()));
+        Collection<AuditReference> auditReferences = this.audit.getAuditReferences();
+        ArrayList<String> testScripts = new ArrayList<String>();
+        for(AuditReference auditReference : auditReferences) {
+            TestHierarchy testHierarchy = auditReference.getTestHierarchy();
+            WebextEngine webextEngine = testHierarchy.getWebextEngine();
+            if(webextEngine != null) {
+                String coreScript = new String(webextEngine.getEngineContent());
+                strb.append(coreScript);
+                strb.append("\n");
+                for (TanaguruTest tanaguruTest : this.tanaguruTests) {
+                    strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
+                    strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
+                    strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
+                    strb.append(",\ntags:").append(gson.toJson(tanaguruTest.getTags()));
+    
+    
+                    if(tanaguruTest.getExpectedNbElements() != null){
+                        strb.append(",\nexpectedNbElements:");
+                        try {
+                            strb.append(
+                                    Integer.parseInt(tanaguruTest.getExpectedNbElements()));
+                        }catch (NumberFormatException nfe){
+                            strb.append(gson.toJson(tanaguruTest.getExpectedNbElements()));
+                        }
+                    }
+    
+                    if(tanaguruTest.getDescription() != null){
+                        strb.append(",\ndescription:\"").append(tanaguruTest.getDescription()).append("\"");
+                    }
+    
+                    if(tanaguruTest.getFilter() != null){
+                        strb.append(",\nfilter:").append("new Function('item', 'HTML', `return ").append(tanaguruTest.getFilter()).append("(item, HTML)`)");
+                    }
+    
+                    if(tanaguruTest.getAnalyzeElements() != null){
+                        strb.append(",\nanalyzeElements:").append("new Function('collection', 'HTML', `return ").append(tanaguruTest.getAnalyzeElements()).append("(collection, HTML)`)");
+                    }
+                    strb.append("});");
                 }
+                strb.append("\nreturn JSON.stringify(loadTanaguruTests());");
+                auditLog(EAuditLogLevel.INFO, "Tests script for audit created");
+                testScripts.add(strb.toString());
+                strb.delete(0, strb.length());
+            }else {
+                throw new CustomInvalidArgumentException(CustomError.ENGINE_VERSION_NOT_FOUND_FOR_TEST_HIERARCHY, testHierarchy.getId());
             }
-
-            if(tanaguruTest.getDescription() != null){
-                strb.append(",\ndescription:\"").append(tanaguruTest.getDescription()).append("\"");
-            }
-
-            if(tanaguruTest.getFilter() != null){
-                strb.append(",\nfilter:").append("new Function('item', 'HTML', `return ").append(tanaguruTest.getFilter()).append("(item, HTML)`)");
-            }
-
-            if(tanaguruTest.getAnalyzeElements() != null){
-                strb.append(",\nanalyzeElements:").append("new Function('collection', 'HTML', `return ").append(tanaguruTest.getAnalyzeElements()).append("(collection, HTML)`)");
-            }
-            strb.append("});");
-        }
-        strb.append("\nreturn JSON.stringify(loadTanaguruTests());");
-        auditLog(EAuditLogLevel.INFO, "Tests script for audit created");
-        return strb.toString();
+        } 
+        return testScripts;
     }
 
     public void addListener(AuditRunnerListener auditRunnerListener) {

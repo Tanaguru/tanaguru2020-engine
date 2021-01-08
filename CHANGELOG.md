@@ -6,3 +6,4 @@
 
 ## 1.0.2
 - Rest : New key "admin.mail.whenblocked" (Allow send an email to admin when user is blocked)
+- At launch we link the repositories present with the version of the webext engine used

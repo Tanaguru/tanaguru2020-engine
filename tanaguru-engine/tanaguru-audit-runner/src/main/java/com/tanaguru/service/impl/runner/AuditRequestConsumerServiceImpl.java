@@ -55,8 +55,7 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            AuditReferenceRepository auditReferenceRepository,
-            WebextEngineRepository webextEngineRepository) {
+            AuditReferenceRepository auditReferenceRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -68,8 +67,7 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 resultAnalyzerService,
                 testHierarchyRepository,
                 elementResultRepository,
-                auditReferenceRepository,
-                webextEngineRepository);
+                auditReferenceRepository);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 
