@@ -61,26 +61,26 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     @PostConstruct
     @Transactional
     public void insertBaseWebextEngine() throws IOException {
-        if(!webextEngineRepository.findByEngineVersion(coreScriptVersion).isPresent()) {
+        if(!webextEngineRepository.findByEngineVersion(Integer.valueOf(coreScriptVersion)).isPresent()) {
             WebextEngine webextEngine = new WebextEngine();
-            webextEngine.setEngineVersion(coreScriptVersion);
+            webextEngine.setEngineVersion(Integer.valueOf(coreScriptVersion));
             webextEngine.setEngineContent(coreScript.getBytes());
+            webextEngine.setEngineName("webext_engine");
             webextEngineRepository.save(webextEngine);
         }
-        insertBaseTestHierarchy(webextEngineRepository.findByEngineVersion(coreScriptVersion).get());
+        insertBaseTestHierarchy();
     }
     
-    private void insertBaseTestHierarchy(WebextEngine webextEngine) throws IOException {
+    private void insertBaseTestHierarchy() throws IOException {
         Gson gson = new Gson();
         JsonTestHierarchy wcag = gson.fromJson(
                 StreamUtils.copyToString(
                         wcagResource.getInputStream(),
                         Charset.defaultCharset()),
                 JsonTestHierarchy.class);
-
         if (!testHierarchyRepository.findByCodeAndParentIsNull(wcag.getCode()).isPresent()) {
             LOGGER.info("Create reference " + wcag.getCode());
-            TestHierarchy actRef = importTestHierarchy(wcag, null, webextEngine);
+            TestHierarchy actRef = importTestHierarchy(wcag, null, webextEngineRepository.findTopByOrderByEngineVersionDesc().get());
             String actJson = StreamUtils.copyToString(
                     actTestsPath.getInputStream(),
                     Charset.defaultCharset());

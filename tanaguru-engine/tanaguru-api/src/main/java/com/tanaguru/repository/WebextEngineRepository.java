@@ -16,6 +16,8 @@ import com.tanaguru.domain.entity.audit.WebextEngine;
 @Repository
 public interface WebextEngineRepository extends JpaRepository<WebextEngine, Long>  {
 
-    Optional<WebextEngine> findByEngineVersion(String engineVersion);
+    Optional<WebextEngine> findByEngineVersion(int engineVersion);
+    
+    Optional<WebextEngine> findTopByOrderByEngineVersionDesc();
     
 }

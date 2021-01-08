@@ -8,10 +8,12 @@
     <changeSet id="create_webext_engine" author="lpedrau">
         <createTable tableName="webext_engine">
             <column name="id" type="bigint" autoIncrement="true"/>
-            <column name="engineVersion" type="varchar(30)"/>
+            <column name="engineName" type="varchar(30)"/>
+            <column name="engineVersion" type="integer"/>
             <column name="engineContent" type="bytea"/>
         </createTable>
         <addPrimaryKey tableName="webext_engine" columnNames="id"/>
+        <addNotNullConstraint tableName="webext_engine" columnName="engineName"/>
         <addNotNullConstraint tableName="webext_engine" columnName="engineVersion"/>
         <addUniqueConstraint tableName="webext_engine" columnNames="engineVersion"/>  
         <addNotNullConstraint tableName="webext_engine" columnName="engineContent"/>

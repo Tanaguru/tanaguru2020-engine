@@ -20,8 +20,11 @@ public class WebextEngine implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     
+    @Column( name = "enginename" )
+    private String engineName;
+    
     @Column( name = "engineversion" )
-    private String engineVersion;
+    private int engineVersion;
     
     @Column( name = "enginecontent" )
     private byte[] engineContent;
@@ -34,11 +37,11 @@ public class WebextEngine implements Serializable {
         this.id = id;
     }
     
-    public String getEngineVersion() {
+    public int getEngineVersion() {
         return engineVersion;
     }
     
-    public void setEngineVersion(String engineVersion) {
+    public void setEngineVersion(int engineVersion) {
         this.engineVersion = engineVersion;
     }
     
@@ -48,5 +51,13 @@ public class WebextEngine implements Serializable {
     
     public void setEngineContent(byte[] engineContent) {
         this.engineContent = engineContent;
+    }
+    
+    public String getEngineName() {
+        return engineName;
+    }
+    
+    public void setEngineName(String engineName) {
+        this.engineName = engineName;
     }
 }

@@ -4,15 +4,17 @@ public class WebextEngineDTO {
 
     private long id;
     
-    private String engineVersion;
+    private String engineName;
+
+    private int engineVersion;
     
     private byte[] engineContent;
 
-    public String getEngineVersion() {
+    public int getEngineVersion() {
         return engineVersion;
     }
 
-    public void setEngineVersion(String engineVersion) {
+    public void setEngineVersion(int engineVersion) {
         this.engineVersion = engineVersion;
     }
 
@@ -30,5 +32,13 @@ public class WebextEngineDTO {
 
     public void setId(long id) {
         this.id = id;
+    }
+    
+    public String getEngineName() {
+        return engineName;
+    }
+    
+    public void setEngineName(String engineName) {
+        this.engineName = engineName;
     }
 }
