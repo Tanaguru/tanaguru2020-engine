@@ -29,8 +29,9 @@ pipeline {
         stage('Build docker image') {
             when {
                 anyOf{
-                branch 'develop'
-                branch 'master'
+                    branch 'develop'
+                    branch 'master'
+                    branch 'fix-docker-firefox'
                 }
             }
             steps {
@@ -42,6 +43,8 @@ pipeline {
                 mv tanaguru-rest/target/tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 docker build -t tanaguru2020-rest:${REST_VERSION} \
                     --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz \
+                    --build-arg FIREFOX_VERSION=83.0 \
+                    --build-arg GECKODRIVER_VERSION=0.21.0 \
                     ./tanaguru2020-rest/image/
                 '''
             }
@@ -49,7 +52,10 @@ pipeline {
 
         stage('Deploy dev') {
             when {
-                branch 'develop'
+                anyOf{
+                    branch 'develop'
+                    branch 'fix-docker-firefox'
+                }
             }
             steps {
                 unstash 'version'
@@ -171,30 +177,50 @@ pipeline {
             }
         }
 
-        stage('Push image to registry') {
-            environment {
-                REGISTRY_USER = "admin"
-                REGISTRY_PASS = "9x^VTugHEfQ1e7"
-                REGISTRY_HOST = "registry.tanaguru.com"
+        stage('Push beta image to registry') {
+            when {
+                branch 'beta'
             }
+            steps {
+                script{
+                    unstash 'version'
+                    def TIMESTAMP =sh(
+                        script: "date +%Y-%m-%d",
+                        returnStdout: true
+                    ).trim()
+
+                    def REST_VERSION = sh(
+                        script: "cat version.txt",
+                        returnStdout: true
+                    ).trim()
+
+                    def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
+                    docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                        image.push('beta-${TIMESTAMP}')
+                    }
+                }
+            }
+        }
+
+        stage('Push image to registry') {
             when {
                 branch 'master'
             }
             steps {
                 unstash 'version'
+                script{
+                    script{
+                        def REST_VERSION = sh(
+                            script: "cat version.txt",
+                            returnStdout: true
+                        ).trim()
 
-                sh '''
-                REST_VERSION=$(cat version.txt)
-
-                docker login \
-                --username="$REGISTRY_USER" \
-                --password="$REGISTRY_PASS" "$REGISTRY_HOST"
-                docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
-                docker push registry.tanaguru.com/tanaguru2020-rest:${REST_VERSION}
-
-                docker tag tanaguru2020-rest:${REST_VERSION} registry.tanaguru.com/tanaguru2020-rest:latest
-                docker push registry.tanaguru.com/tanaguru2020-rest:latest
-                '''
+                        def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
+                        docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                            image.push()
+                        }
+                    }
+                }
             }
         }
     }

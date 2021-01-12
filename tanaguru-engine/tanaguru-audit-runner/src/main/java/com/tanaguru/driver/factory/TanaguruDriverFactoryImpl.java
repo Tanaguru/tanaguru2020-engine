@@ -50,6 +50,9 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     @Value("${auditrunner.firefox.profile}")
     private String firefoxProfilePath;
 
+    @Value("${auditrunner.chrome.profile}")
+    private String chromeProfilePath;
+
     @Value("${auditrunner.proxy.host}")
     private String proxyHost;
 
@@ -124,11 +127,18 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--whitelisted-ips");
     	options.addArguments("--no-default-browser-check");
         options.addArguments("--safebrowsing-disable-auto-update");
+        options.addArguments("--user-agent=tanaguru");
         options.addArguments("--disable-component-update");
         options.addArguments("--ignore-certificate-errors");
         HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
         chromePrefs.put("profile.block_third_party_cookies", true);
+        chromePrefs.put("download.default_directory", "/dev/null");
         options.setExperimentalOption("prefs", chromePrefs);
+
+        File chromeProfileFile = new File(chromeProfilePath);
+        if(chromeProfileFile.exists()){
+            options.addArguments("--user-data-dir=" + chromeProfilePath);
+        }
         setUpChromeProxy(options);
     }
     
@@ -138,6 +148,8 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         FirefoxProfile firefoxProfile = firefoxProfileFile.exists() ?
                 new FirefoxProfile(firefoxProfileFile) :
                 new FirefoxProfile();
+        firefoxProfile.setPreference("general.useragent.override", "tanaguru");
+        firefoxProfile.setPreference("browser.download.dir", "/dev/null");
         firefoxProfile.setPreference("browser.startup.page", 0);
         firefoxProfile.setPreference("browser.cache.disk.capacity", 0);
         firefoxProfile.setPreference("browser.cache.disk.enable", false);
@@ -173,6 +185,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                 firefoxProfile.setPreference("network.proxy.no_proxies_on", proxyExclusionUrls);
             }
 
+            firefoxProfile.setPreference("network.proxy.type", 1);
             firefoxProfile.setPreference("network.proxy.http", proxyHost);
             firefoxProfile.setPreference("network.proxy.http_port", proxyPort);
             firefoxProfile.setPreference("network.proxy.ssl", proxyHost);
