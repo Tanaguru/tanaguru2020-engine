@@ -4,7 +4,6 @@ import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.PageService;
@@ -26,6 +25,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * @author rcharre
@@ -158,7 +159,7 @@ public class PageController {
             @PathVariable long id,
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
         JSONObject jsonFinalObject = pageService.toJsonWithAuditInfo(page);
         byte[] buf = jsonFinalObject.toString().getBytes();              
         HttpHeaders header = JsonHttpHeaderBuilder.setUpJsonHeaders(page.getName(), "json");
