@@ -1,8 +1,10 @@
 package com.tanaguru.controller;
 
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
-import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.repository.ElementResultRepository;
 import com.tanaguru.repository.TestResultRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -13,13 +15,8 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityNotFoundException;
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
 
 /**
  * @author rcharre
@@ -46,12 +43,15 @@ public class ElementResultController {
      * @return A page of @see ElementResult
      */
     @ApiOperation(
-            value = "Get all ElementResult for a given TestResult id"
+            value = "Get all ElementResult for a given TestResult id",
+            notes = "If test result not found, exception raise : TEST_RESULT_NOT_FOUND with test result id"
+                    + "\nOr if user can't access element results for test, exception raise : CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST with test result id"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
-            @ApiResponse(code = 404, message = "TestResult not found")
+            @ApiResponse(code = 404, message = "TestResult not found : TEST_RESULT_NOT_FOUND error"
+                    + "\nCannot access element results for test : CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST error")
     })
     @GetMapping("/by-test-result/{id}/{shareCode}")
     public @ResponseBody
@@ -61,12 +61,12 @@ public class ElementResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         TestResult testResult = testResultRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_RESULT_NOT_FOUND, id ));
 
         if(tanaguruUserDetailsService.currentUserCanShowAudit(testResult.getPage().getAudit().getId(), shareCode)){
             return elementResultRepository.findAllByTestResult(testResult, PageRequest.of(page, size, Sort.by("id")));
         }else{
-            throw new ForbiddenException("Cannot access element results for test result " + id);
+            throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST, id );
         }
     }
 }

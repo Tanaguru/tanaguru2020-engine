@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>tanaguru2020</artifactId>
 		<groupId>com.tanaguru</groupId>
-		<version>1.0.1</version>
+		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 
 	<packaging>jar</packaging>
@@ -53,13 +53,13 @@
 		<dependency>
 			<groupId>com.tanaguru</groupId>
 			<artifactId>tanaguru-api</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.tanaguru</groupId>
 			<artifactId>tanaguru-audit-runner</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -113,6 +113,7 @@
 					<execution>
 						<goals>
 							<goal>repackage</goal>
+              <goal>build-info</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -122,8 +123,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-version}</version>
 				<configuration>
-					<source>10</source>
-					<target>10</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 

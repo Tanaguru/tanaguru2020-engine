@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="updateusers_add_account_non_locked" author="lpedrau">
+        <addColumn tableName="app_user">
+            <column name="account_non_locked" type="boolean" defaultValueBoolean="true"/>
+        </addColumn>
+        <addNotNullConstraint tableName="app_user" columnName="account_non_locked" constraintName="notNull_user_account_non_locked"/>
+        <rollback>
+            <dropNotNullConstraint tableName="app_user" columnName="account_non_locked"/>
+            <dropColumn tableName="app_user" columnName="account_non_locked"/>
+        </rollback>
+    </changeSet>
+            
+</databaseChangeLog>

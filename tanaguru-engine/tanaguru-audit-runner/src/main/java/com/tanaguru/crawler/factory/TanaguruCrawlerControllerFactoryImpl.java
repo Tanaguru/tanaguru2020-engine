@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -38,6 +39,9 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
     @Value("${auditrunner.proxy.password}")
     private String proxyPassword;
 
+    @Value("${auditrunner.proxy.exclusionUrls}")
+    private String[] proxyExclusionUrls;
+
     private void prepareEnv() {
         File outDir = new File(outputDir);
         if (!outDir.exists() && !outDir.mkdirs()) {
@@ -60,7 +64,7 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
 
         this.prepareEnv();
         try {
-            CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword);
+            CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword, seeds);
             PageFetcher pageFetcher = new PageFetcher(crawlerConfig);
             RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
             RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
@@ -85,7 +89,7 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
         return Optional.ofNullable(crawlerController);
     }
 
-    private CrawlConfig getCrawlerConfig(int maxDepth, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword) throws Exception {
+    private CrawlConfig getCrawlerConfig(int maxDepth, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, Collection<String> seeds) throws Exception {
         CrawlConfig crawlerConfig = new CrawlConfig();
         String auditDir = String.valueOf(new Date().getTime());
         crawlerConfig.setCrawlStorageFolder(outputDir + auditDir);
@@ -100,13 +104,18 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
             );
         }
 
-        setupProxy(crawlerConfig);
+        setupProxy(crawlerConfig, seeds);
         crawlerConfig.validate();
         return crawlerConfig;
     }
 
-    private void setupProxy(CrawlConfig crawlConfig){
-        if (proxyPort != null && !proxyHost.isEmpty()) {
+    private void setupProxy(CrawlConfig crawlConfig, Collection<String> seeds){
+        boolean noProxy = Arrays.stream(proxyExclusionUrls)
+                .anyMatch((exclusionUrl) ->
+                    seeds.stream()
+                            .anyMatch((seed) -> seed.contains(exclusionUrl)));
+
+        if (!noProxy && proxyPort != null && !proxyHost.isEmpty()) {
             if (!proxyUsername.isEmpty() && !proxyPassword.isEmpty()) {
                 crawlConfig.setProxyPassword(proxyPassword);
                 crawlConfig.setProxyUsername(proxyUsername);

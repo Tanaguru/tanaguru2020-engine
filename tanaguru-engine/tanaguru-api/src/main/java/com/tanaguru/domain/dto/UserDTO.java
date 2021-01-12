@@ -20,6 +20,8 @@ public class UserDTO {
     private EAppRole appRole;
 
     private boolean isEnabled = false;
+    
+    private boolean accountNonLocked = true;
 
     public long getId() {
         return id;
@@ -67,5 +69,13 @@ public class UserDTO {
 
     public void setAppRole(EAppRole appRole) {
         this.appRole = appRole;
+    }
+    
+    public boolean isAccountNonLocked() {
+    	return accountNonLocked;
+    }
+    
+    public void setAccountNonLocked(boolean accountNonLocked) {
+    	this.accountNonLocked = accountNonLocked;
     }
 }
