@@ -1089,7 +1089,13 @@ function getUniqueSelector(elSrc) {
 			return false;
 		},
 		uniqueQuery = function() {
-			return document.querySelectorAll(aSel.join('>')||null).length===1;
+			elements = [];
+			try{
+				elements = document.querySelectorAll(aSel.join('>')||null);
+			}catch(error){
+				console.error(error);
+			}
+			return elements.length===1;
 		};
 	while (elSrc.parentNode) {
 		if (getSelector(elSrc)) return aSel.join(' > ');
