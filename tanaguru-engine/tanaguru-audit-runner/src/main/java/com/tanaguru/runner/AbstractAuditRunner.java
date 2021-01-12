@@ -12,6 +12,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,6 +30,9 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private Audit audit;
     private RemoteWebDriver tanaguruDriver;
     private String coreScript;
+    
+    @Value("${auditrunner.queryCss}")
+    private String queryCss;
 
     private int currentRank = 1;
 
@@ -165,6 +169,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             try {
                 String result = (String) tanaguruDriver.executeScript(testScript);
                 String source = tanaguruDriver.getPageSource();
+                WebElement element = tanaguruDriver.findElementByCssSelector(queryCss);
+                System.out.println("Vérification de la query css : "+queryCss+" est présent : "+element.toString());
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
                     tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
                 }
