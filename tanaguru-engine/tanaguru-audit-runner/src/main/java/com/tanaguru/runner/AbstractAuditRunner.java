@@ -18,7 +18,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Base64;
 
 public abstract class AbstractAuditRunner implements AuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuditRunner.class);
@@ -30,9 +33,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private Audit audit;
     private RemoteWebDriver tanaguruDriver;
     private String coreScript;
-    
-    @Value("${auditrunner.queryCss}")
-    private String queryCss;
+    private String cssQuery;
 
     private int currentRank = 1;
 
@@ -64,7 +65,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String cssQuery) {
         this.audit = audit;
         this.tanaguruDriver = driver;
         this.coreScript = coreScript;
@@ -75,6 +77,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
+        this.cssQuery = cssQuery;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -167,10 +170,18 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
+                if(cssQuery != null && !cssQuery.equals("")) {
+                    List<WebElement> elements = tanaguruDriver.findElementsByCssSelector(cssQuery);
+                    if(!elements.isEmpty()) {
+                        LOGGER.info("[Audit {}] Page loaded, nb elements found {} for the css query {}", audit.getId(), elements.size(), cssQuery);
+                        auditLog(EAuditLogLevel.INFO, "Page loaded, nb elements found " + elements.size()+" for the css query "+cssQuery);
+                    }else {
+                        LOGGER.info("[Audit {}] No element found for the css query {}", audit.getId(), cssQuery);
+                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery);
+                    }
+                }
                 String result = (String) tanaguruDriver.executeScript(testScript);
                 String source = tanaguruDriver.getPageSource();
-                WebElement element = tanaguruDriver.findElementByCssSelector(queryCss);
-                System.out.println("Vérification de la query css : "+queryCss+" est présent : "+element.toString());
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
                     tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
                 }

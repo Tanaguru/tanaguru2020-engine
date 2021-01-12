@@ -41,10 +41,11 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ResourceRepository resourceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final AuditReferenceRepository auditReferenceRepository;
-
+    
     private final String coreScript;
     private static final String CHROME = "chrome";
     private static final String FIREFOX = "firefox";
+    private String cssQuery;
 
     @Autowired
     public AuditRunnerFactoryImpl(
@@ -92,6 +93,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         		browserName = BrowserName.FIREFOX;    
         }
 
+        String cssQuery = parameterStringMap.get(EAuditParameter.CSS_QUERY).getValue();
+        
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());
 
         basicAuthLogin =
@@ -124,7 +127,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        browserName,
+                        cssQuery);
                 break;
 
             case SITE:
@@ -141,7 +145,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        browserName,
+                        cssQuery);
                 break;
 
             case SCENARIO:
@@ -159,7 +164,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        browserName,
+                        cssQuery);
                 break;
             case UPLOAD:
                 long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
@@ -175,7 +181,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        browserName,
+                        cssQuery);
                 break;
             default:
                 auditService.log(audit, EAuditLogLevel.ERROR, audit.getType() + " audit type not handled");
@@ -194,7 +201,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
+            BrowserName browserName,
+            String cssQuery) {
         Optional<AuditRunner> result = Optional.empty();
         Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
@@ -210,7 +218,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot)
+                    enableScreenShot,
+                    cssQuery)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create page audit runner");
@@ -229,7 +238,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
+            BrowserName browserName,
+            String cssQuery) {
         Optional<AuditRunner> result = Optional.empty();
         Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
@@ -245,7 +255,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot)
+                    enableScreenShot,
+                    cssQuery)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create scenario audit runner");
@@ -264,7 +275,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
+            BrowserName browserName,
+            String cssQuery) {
         Optional<AuditRunner> result = Optional.empty();
         Map<EAuditParameter, AuditParameterValue> auditParameterValueMap = audit.getParametersAsMap();
         Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
@@ -292,7 +304,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot)
+                    enableScreenShot,
+                    cssQuery)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create site audit runner");
@@ -312,7 +325,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
+            BrowserName browserName,
+            String cssQuery) {
         Optional<AuditRunner> result = Optional.empty();
         Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
 
@@ -328,7 +342,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot)
+                    enableScreenShot,
+                    cssQuery)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create file audit runner");
