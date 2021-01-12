@@ -37,8 +37,7 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot,
-            WebextEngineRepository webextEngineRepository) {
+            boolean enableScreenShot) {
         super(tanaguruTests,
                 audit,
                 driver,
@@ -47,8 +46,7 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot,
-                webextEngineRepository);
+                enableScreenShot);
         this.scenario = scenario;
     }
 

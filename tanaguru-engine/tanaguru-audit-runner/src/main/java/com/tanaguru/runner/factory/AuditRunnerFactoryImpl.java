@@ -42,10 +42,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ResourceRepository resourceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final AuditReferenceRepository auditReferenceRepository;
-    private final WebextEngineRepository webextEngineRepository;
-    
-    private final String coreScript;
-    private final String coreScriptVersion;
     
     private static final String CHROME = "chrome";
     private static final String FIREFOX = "firefox";
@@ -58,10 +54,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             ScenarioRepository scenarioRepository,
             ResourceRepository resourceRepository,
             TanaguruTestRepository tanaguruTestRepository,
-            AuditReferenceRepository auditReferenceRepository,
-            String coreScript,
-            String coreScriptVersion,
-            WebextEngineRepository webextEngineRepository) {
+            AuditReferenceRepository auditReferenceRepository) {
 
         this.tanaguruDriverFactory = tanaguruDriverFactory;
         this.tanaguruCrawlerControllerFactory = tanaguruCrawlerControllerFactory;
@@ -70,9 +63,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         this.resourceRepository = resourceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.auditReferenceRepository = auditReferenceRepository;
-        this.coreScript = coreScript;
-        this.coreScriptVersion = coreScriptVersion;
-        this.webextEngineRepository = webextEngineRepository;
     }
 
     @Override
@@ -219,8 +209,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot,
-                    webextEngineRepository)
+                    enableScreenShot)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create page audit runner");
@@ -254,8 +243,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot,
-                    webextEngineRepository)
+                    enableScreenShot)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create scenario audit runner");
@@ -301,8 +289,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot,
-                    webextEngineRepository)
+                    enableScreenShot)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create site audit runner");
@@ -337,8 +324,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     basicAuthUrl,
                     basicAuthLogin,
                     basicAuthPassword,
-                    enableScreenShot,
-                    webextEngineRepository)
+                    enableScreenShot)
             );
         } else {
             auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create file audit runner");

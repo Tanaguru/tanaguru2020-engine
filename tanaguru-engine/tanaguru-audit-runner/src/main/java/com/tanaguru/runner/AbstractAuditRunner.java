@@ -54,8 +54,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private boolean stop = false;
 
     private long waitTime;
-    
-    private WebextEngineRepository webextEngineRepository;
 
     public AbstractAuditRunner(
             Collection<TanaguruTest> tanaguruTests,
@@ -66,8 +64,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot,
-            WebextEngineRepository webextEngineRepository) {
+            boolean enableScreenShot) {
         this.audit = audit;
         this.tanaguruDriver = driver;
         this.tanaguruTests = tanaguruTests;
@@ -77,7 +74,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
-        this.webextEngineRepository = webextEngineRepository;
     }
 
     public WebDriver getTanaguruDriver() {

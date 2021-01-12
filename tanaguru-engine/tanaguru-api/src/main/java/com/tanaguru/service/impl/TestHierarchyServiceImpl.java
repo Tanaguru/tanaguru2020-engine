@@ -11,6 +11,8 @@ import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.service.TestHierarchyService;
+import com.tanaguru.service.WebextEngineService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +36,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     private final AuditReferenceRepository auditReferenceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final WebextEngineRepository webextEngineRepository;
-    private final String coreScript;
-    private final String coreScriptVersion;
+    private final WebextEngineService webextEngineService;
     
     @Value("references/wcag-definition.json")
     private ClassPathResource wcagResource;
@@ -48,29 +49,16 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
             AuditReferenceRepository auditReferenceRepository, 
             TanaguruTestRepository tanaguruTestRepository,
             WebextEngineRepository webextEngineRepository,
-            String coreScript,
-            String coreScriptVersion) {
+            WebextEngineService webextEngineService) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.auditReferenceRepository = auditReferenceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.webextEngineRepository = webextEngineRepository;
-        this.coreScript = coreScript;
-        this.coreScriptVersion = coreScriptVersion;
+        this.webextEngineService = webextEngineService;
     }
 
     @PostConstruct
     @Transactional
-    public void insertBaseWebextEngine() throws IOException {
-        if(!webextEngineRepository.findByEngineVersion(Integer.valueOf(coreScriptVersion)).isPresent()) {
-            WebextEngine webextEngine = new WebextEngine();
-            webextEngine.setEngineVersion(Integer.valueOf(coreScriptVersion));
-            webextEngine.setEngineContent(coreScript.getBytes());
-            webextEngine.setEngineName("webext_engine");
-            webextEngineRepository.save(webextEngine);
-        }
-        insertBaseTestHierarchy();
-    }
-    
     private void insertBaseTestHierarchy() throws IOException {
         Gson gson = new Gson();
         JsonTestHierarchy wcag = gson.fromJson(

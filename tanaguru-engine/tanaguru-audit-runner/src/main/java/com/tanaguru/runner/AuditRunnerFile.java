@@ -30,8 +30,7 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot,
-            WebextEngineRepository webextEngineRepository) {
+            boolean enableScreenShot) {
         super(
                 tanaguruTests,
                 audit,
@@ -41,8 +40,7 @@ public class AuditRunnerFile extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot,
-                webextEngineRepository);
+                enableScreenShot);
         this.fileContent = fileContent;
     }
 

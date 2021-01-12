@@ -25,9 +25,8 @@ public class AuditRunnerPage extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot,
-            WebextEngineRepository webextEngineRepository) {
-        super(tanaguruTests, audit, driver, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot, webextEngineRepository);
+            boolean enableScreenShot) {
+        super(tanaguruTests, audit, driver, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
         this.urls = urls;
     }
 
