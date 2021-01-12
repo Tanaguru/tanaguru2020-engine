@@ -13,6 +13,7 @@ import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.ForbiddenException;
 import com.tanaguru.domain.exception.InvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
+import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
 
@@ -115,7 +116,7 @@ public class AuditController {
         Audit audit = auditRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         JSONObject jsonFinalObject = auditService.toJson(audit);
         byte[] buf = jsonFinalObject.toString().getBytes();              
-        HttpHeaders header = setUpHeaders(audit.getName());
+        HttpHeaders header = JsonHttpHeaderBuilder.setUpJsonHeaders(audit.getName(),"json");
         return ResponseEntity
                 .ok()
                 .headers(header)
@@ -303,18 +304,5 @@ public class AuditController {
     void deleteAudit(@PathVariable long id) {
         auditService.deleteAudit(auditRepository.findById(id)
                 .orElseThrow(EntityNotFoundException::new));
-    }
-
-    /**
-     * Set the headers settings
-     * @return httpheaders with the settings
-     */
-    private HttpHeaders setUpHeaders(String filename) {
-        HttpHeaders header = new HttpHeaders();
-        header.add("Content-Disposition", "attachment; filename=\""+filename+".json\"");
-        header.add("Cache-Control", "no-store");
-        header.add("Pragma", "no-cache");
-        return header;
-    }
-     
+    }     
 }

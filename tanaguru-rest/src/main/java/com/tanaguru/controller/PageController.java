@@ -2,6 +2,7 @@ package com.tanaguru.controller;
 
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.ForbiddenException;
+import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.PageService;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -153,24 +154,12 @@ public class PageController {
                 .orElseThrow(EntityNotFoundException::new);
         JSONObject jsonFinalObject = pageService.toJsonWithAuditInfo(page);
         byte[] buf = jsonFinalObject.toString().getBytes();              
-        HttpHeaders header = setUpHeaders(page.getName());
+        HttpHeaders header = JsonHttpHeaderBuilder.setUpJsonHeaders(page.getName(), "json");
         return ResponseEntity
                 .ok()
                 .headers(header)
                 .contentLength(buf.length)
                 .contentType(MediaType.parseMediaType("application/json"))
                 .body(new ByteArrayResource(buf));
-    }
-    
-    /**
-     * Set the headers settings
-     * @return httpheaders with the settings
-     */
-    private HttpHeaders setUpHeaders(String filename) {
-        HttpHeaders header = new HttpHeaders();
-        header.add("Content-Disposition", "attachment; filename=\""+filename+".json\"");
-        header.add("Cache-Control", "no-store");
-        header.add("Pragma", "no-cache");
-        return header;
     }
 }
