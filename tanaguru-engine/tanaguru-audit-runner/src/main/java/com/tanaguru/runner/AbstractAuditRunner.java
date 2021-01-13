@@ -173,11 +173,11 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 if(cssQuery != null && !cssQuery.equals("")) {
                     List<WebElement> elements = tanaguruDriver.findElementsByCssSelector(cssQuery);
                     if(!elements.isEmpty()) {
-                        LOGGER.info("[Audit {}] Page loaded, nb elements found {} for the css query {}", audit.getId(), elements.size(), cssQuery);
-                        auditLog(EAuditLogLevel.INFO, "Page loaded, nb elements found " + elements.size()+" for the css query "+cssQuery);
+                        LOGGER.info("[Audit {}] Page loaded, {} elements found for the css query {} on page {}", audit.getId(), elements.size(), cssQuery, name);
+                        auditLog(EAuditLogLevel.INFO, "Page loaded, "+ elements.size()+" elements found for the css query "+cssQuery+" on page "+name);
                     }else {
-                        LOGGER.info("[Audit {}] No element found for the css query {}", audit.getId(), cssQuery);
-                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery);
+                        LOGGER.info("[Audit {}] No element found for the css query {} on page {}", audit.getId(), cssQuery, name);
+                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery+" on page "+name);
                     }
                 }
                 String result = (String) tanaguruDriver.executeScript(testScript);
