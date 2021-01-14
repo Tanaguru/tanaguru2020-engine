@@ -195,8 +195,8 @@ pipeline {
                     ).trim()
 
                     def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
-                    docker.withRegistry('https://registry.tanaguru.com', 'registry') {
-                        image.push('beta-${TIMESTAMP}')
+                    docker.withRegistry("https://registry.tanaguru.com", "registry") {
+                        image.push("beta-${TIMESTAMP}")
                     }
                 }
             }
@@ -216,7 +216,7 @@ pipeline {
                         ).trim()
 
                         def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
-                        docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                        docker.withRegistry("https://registry.tanaguru.com", "registry") {
                             image.push()
                         }
                     }
