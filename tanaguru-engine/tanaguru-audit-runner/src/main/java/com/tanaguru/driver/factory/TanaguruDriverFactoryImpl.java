@@ -164,8 +164,6 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         firefoxProfile.setPreference("browser.link.open_newwindow", 2);
         firefoxProfile.setPreference("Network.cookie.cookieBehavior", 1);
         firefoxProfile.setPreference("signon.autologin.proxy", true);
-
-        // to disable the update of search engines
         firefoxProfile.setPreference("browser.search.update", false);
         firefoxProfile.setAcceptUntrustedCertificates(true);
 
@@ -181,15 +179,22 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                 firefoxProfile.setPreference("network.proxy.password", proxyPassword);
             }
 
+            StringBuilder strb = new StringBuilder(proxyHost);
+            strb.append(":");
+            strb.append(proxyPort);
+
+            Proxy proxy = new Proxy();
+            proxy.setFtpProxy(strb.toString());
+            proxy.setHttpProxy(strb.toString());
+            proxy.setSslProxy(strb.toString());
+
             if(!proxyExclusionUrls.isEmpty()){
-                firefoxProfile.setPreference("network.proxy.no_proxies_on", proxyExclusionUrls);
+                proxy.setNoProxy(proxyExclusionUrls);
             }
 
-            firefoxProfile.setPreference("network.proxy.type", 1);
-            firefoxProfile.setPreference("network.proxy.http", proxyHost);
-            firefoxProfile.setPreference("network.proxy.http_port", proxyPort);
-            firefoxProfile.setPreference("network.proxy.ssl", proxyHost);
-            firefoxProfile.setPreference("network.proxy.ssl_port", proxyPort);
+            //SetProxyPreference has been deleted
+            firefoxProfile.setPreference("network.proxy.http", proxy.getHttpProxy());
+            firefoxProfile.setPreference("network.proxy.ssl", proxy.getSslProxy());
         }
     }
     
