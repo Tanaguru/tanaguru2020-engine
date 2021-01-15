@@ -4,17 +4,29 @@ import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Page;
+import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.PageRepository;
+import com.tanaguru.service.PageService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * @author rcharre
@@ -25,11 +37,13 @@ public class PageController {
 
     private final PageRepository pageRepository;
     private final TanaguruUserDetailsService tanaguruUserDetailsService;
+    private final PageService pageService;
 
     @Autowired
-    public PageController(PageRepository pageRepository, TanaguruUserDetailsService tanaguruUserDetailsService) {
+    public PageController(PageRepository pageRepository, TanaguruUserDetailsService tanaguruUserDetailsService, PageService pageService) {
         this.pageRepository = pageRepository;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
+        this.pageService = pageService;
     }
 
     /**
@@ -122,5 +136,38 @@ public class PageController {
         }else{
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }
+    }
+    
+    /**
+     * Get a json file with the page information
+     * @param id The id of the @see Page
+     * @param shareCode the share code of the @see Audit
+     */
+    @ApiOperation(
+            value = "Get a json file with the page information",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Page not found")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
+    @GetMapping(value="/export/{id}/{sharecode}", produces = "application/json")
+    public ResponseEntity<Resource> exportPage(
+            @PathVariable long id,
+            @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
+        Page page = pageRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PAGE_NOT_FOUND, id ));
+        JSONObject jsonFinalObject = pageService.toJsonWithAuditInfo(page);
+        byte[] buf = jsonFinalObject.toString().getBytes();              
+        HttpHeaders header = JsonHttpHeaderBuilder.setUpJsonHeaders(page.getName(), "json");
+        return ResponseEntity
+                .ok()
+                .headers(header)
+                .contentLength(buf.length)
+                .contentType(MediaType.parseMediaType("application/json"))
+                .body(new ByteArrayResource(buf));
     }
 }

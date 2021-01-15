@@ -7,3 +7,4 @@
 ## 1.0.2
 - Endpoint healthcheck , new key in common properties : management.endpoint.health.show-details, in order to show details or not
 - Rest : New key "admin.mail.whenblocked" (Allow send an email to admin when user is blocked)
+- JSON export of audits and pages
