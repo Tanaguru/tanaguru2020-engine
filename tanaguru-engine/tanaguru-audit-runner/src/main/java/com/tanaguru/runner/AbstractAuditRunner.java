@@ -171,14 +171,19 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
             try {
                 if(cssQuery != null && !cssQuery.equals("")) {
-                    List<WebElement> elements = tanaguruDriver.findElementsByCssSelector(cssQuery);
-                    if(!elements.isEmpty()) {
-                        LOGGER.info("[Audit {}] Page loaded, {} elements found for the css query {} on page {}", audit.getId(), elements.size(), cssQuery, name);
-                        auditLog(EAuditLogLevel.INFO, "Page loaded, "+ elements.size()+" elements found for the css query "+cssQuery+" on page "+name);
-                    }else {
-                        LOGGER.info("[Audit {}] No element found for the css query {} on page {}", audit.getId(), cssQuery, name);
-                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery+" on page "+name);
-                    }
+                	try {
+	                    List<WebElement> elements = tanaguruDriver.findElementsByCssSelector(cssQuery);
+	                    if(!elements.isEmpty()) {
+	                        LOGGER.info("[Audit {}] Page loaded, {} elements found for the css query {} on page {}", audit.getId(), elements.size(), cssQuery, name);
+	                        auditLog(EAuditLogLevel.INFO, "Page loaded, "+ elements.size()+" elements found for the css query "+cssQuery+" on page "+name);
+	                    }else {
+	                        LOGGER.info("[Audit {}] No element found for the css query {} on page {}", audit.getId(), cssQuery, name);
+	                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery+" on page "+name);
+	                    }
+                	}catch(Exception e) {
+                		LOGGER.info("[Audit {}] Css query incorrect : {}", audit.getId(), cssQuery);
+                		auditLog(EAuditLogLevel.INFO, "Css query incorrect : "+cssQuery);
+                	}
                 }
                 String result = (String) tanaguruDriver.executeScript(testScript);
                 String source = tanaguruDriver.getPageSource();
