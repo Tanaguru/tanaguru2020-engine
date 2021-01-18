@@ -4,6 +4,7 @@ import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
 import com.tanaguru.domain.entity.audit.AuditReference;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
@@ -11,15 +12,22 @@ import com.tanaguru.repository.ActRepository;
 import com.tanaguru.repository.AuditLogRepository;
 import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.AuditRepository;
+import com.tanaguru.service.AuditActService;
+import com.tanaguru.service.AuditLogService;
+import com.tanaguru.service.AuditParameterService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.PageService;
+import com.tanaguru.service.TestHierarchyResultService;
 import com.tanaguru.service.TestHierarchyService;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -32,21 +40,36 @@ import java.util.stream.Collectors;
 public class AuditServiceImpl implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceImpl.class);
 
-    private final AuditRepository auditRepository;
-    private final AuditLogRepository auditLogRepository;
     private final ActRepository actRepository;
-    private final PageService pageService;
+    private final AuditActService auditActService;
+    private final AuditLogRepository auditLogRepository;
+    private final AuditLogService auditLogService;
+    private final AuditParameterService auditParameterService;
     private final AuditReferenceRepository auditReferenceRepository;
+    private final AuditRepository auditRepository;
+    private final PageService pageService;
     private final TestHierarchyService testHierarchyService;
-
+    
     @Autowired
     public AuditServiceImpl(
-            AuditRepository auditRepository, AuditLogRepository auditLogRepository, ActRepository actRepository, PageService pageService, AuditReferenceRepository auditReferenceRepository, TestHierarchyService testHierarchyService) {
-        this.auditRepository = auditRepository;
-        this.auditLogRepository = auditLogRepository;
+            ActRepository actRepository,
+            AuditActService auditActService,
+            AuditLogRepository auditLogRepository,
+            AuditLogService auditLogService,
+            AuditParameterService auditParameterServiceImpl,
+            AuditReferenceRepository auditReferenceRepository,
+            AuditRepository auditRepository,
+            PageService pageService,
+            TestHierarchyResultService testHierarchyResultService,
+            TestHierarchyService testHierarchyService) {
         this.actRepository = actRepository;
-        this.pageService = pageService;
+        this.auditActService = auditActService;
+        this.auditLogRepository = auditLogRepository;
+        this.auditLogService = auditLogService;
+        this.auditParameterService = auditParameterServiceImpl;
         this.auditReferenceRepository = auditReferenceRepository;
+        this.auditRepository = auditRepository;
+        this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
     }
 
@@ -89,4 +112,22 @@ public class AuditServiceImpl implements AuditService {
             }
         }
     }
+    
+    /**
+     * Return a json object with the information of the audit
+     * @param audit the relevant audit
+     * @return json object
+     */
+    public JSONObject toJson(Audit audit) {
+        JSONObject jsonAuditObject = new JSONObject();
+        jsonAuditObject.put("auditLogs", auditLogService.toJson(audit).get("auditLogs"));
+        jsonAuditObject.put("act", auditActService.toJson(audit));
+        jsonAuditObject.put("auditParametersValues", auditParameterService.toJson(audit));
+        Collection<Page> pages = audit.getPages();
+        for(Page page : pages) {
+            jsonAuditObject.append("pages", pageService.toJson(page));
+        }
+        return jsonAuditObject;
+    }
+    
 }

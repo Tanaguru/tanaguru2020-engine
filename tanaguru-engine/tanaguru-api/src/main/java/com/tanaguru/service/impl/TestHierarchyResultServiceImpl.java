@@ -11,6 +11,8 @@ import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
 import com.tanaguru.service.TestHierarchyResultService;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -107,5 +109,32 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         }else{
             return TestStatusName.STATUS_NOT_TESTED;
         }
+    }
+
+    /**
+     * Return a json object with the information of the test hierarchy result
+     * @param testHierarchyResult
+     * @return json object
+     */
+    @Override
+    public JSONObject toJson(TestHierarchyResult testHierarchyResult) {
+        JSONObject results = new JSONObject();
+        results.put("nb_element_cant_tell", testHierarchyResult.getNbElementCantTell());
+        results.put("nb_cant_tell", testHierarchyResult.getNbCantTell());
+        results.put("nb_element_failed", testHierarchyResult.getNbElementFailed());
+        results.put("nb_element_passed", testHierarchyResult.getNbElementPassed());
+        results.put("nb_element_tested", testHierarchyResult.getNbElementTested());
+        results.put("nb_element_untested", testHierarchyResult.getNbElementUntested());
+        results.put("nb_failed", testHierarchyResult.getNbFailed());
+        results.put("nb_inapplicable", testHierarchyResult.getNbInapplicable());
+        results.put("nb_passed", testHierarchyResult.getNbPassed());
+        results.put("nb_test_cant_tell", testHierarchyResult.getNbTestCantTell());
+        results.put("nb_test_failed", testHierarchyResult.getNbTestFailed());
+        results.put("nb_test_inapplicable", testHierarchyResult.getNbTestInapplicable());
+        results.put("nb_test_passed", testHierarchyResult.getNbTestPassed());
+        results.put("nb_test_untested", testHierarchyResult.getNbTestUntested());
+        results.put("nb_untested", testHierarchyResult.getNbUntested());
+        results.put("status", testHierarchyResult.getStatus());
+        return results;
     }
 }

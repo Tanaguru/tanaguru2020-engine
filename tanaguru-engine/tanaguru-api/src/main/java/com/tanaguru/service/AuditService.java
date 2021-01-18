@@ -5,6 +5,8 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.project.Project;
 
 import java.util.Collection;
+import org.json.JSONObject;
+
 
 /**
  * @author rcharre
@@ -48,4 +50,11 @@ public interface AuditService {
      * @param project The given @see Project
      */
     void deleteAuditByProject(Project project);
+    
+    /**
+     * Return a json object with the information of the audit
+     * @param audit the given @see Audit
+     * @return json object
+     */
+    JSONObject toJson(Audit audit);
 }

@@ -195,6 +195,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
             //SetProxyPreference has been deleted
             firefoxProfile.setPreference("network.proxy.http", proxy.getHttpProxy());
             firefoxProfile.setPreference("network.proxy.ssl", proxy.getSslProxy());
+            firefoxProfile.setPreference("network.proxy.socks_remote_dns", true);
         }
     }
     
