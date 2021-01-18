@@ -218,7 +218,11 @@ public class ProjectController {
             throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId(), contract.getProjectLimit()  );
         }
 
-        if(!UrlHelper.isValid(project.getDomain())){
+        if((contract.isRestrictDomain() &&
+            !project.getDomain().isEmpty() &&
+            !UrlHelper.isValid(project.getDomain())) ||
+                    (!contract.isRestrictDomain() &&
+                    !UrlHelper.isValid(project.getDomain()))){
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain() );
         }
 

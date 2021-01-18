@@ -13,13 +13,22 @@ import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
+import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
+
 import io.swagger.annotations.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import org.json.JSONObject;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -37,7 +46,7 @@ public class AuditController {
     private final ProjectRepository projectRepository;
     private final ActRepository actRepository;
     private final TestHierarchyRepository testHierarchyRepository;
-
+    
     @Autowired
     public AuditController(
             AuditRepository auditRepository,
@@ -83,6 +92,40 @@ public class AuditController {
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
     }
 
+
+    /**
+     * Get a json file with the audit information
+     * @param id The id of the @see Audit
+     * @param shareCode the share code of the @see Audit
+     * @return resource json
+     */
+    @ApiOperation(
+            value = "Get a json file with the audit information",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
+    @GetMapping(value="/export/{id}/{sharecode}", produces = "application/json")
+    public ResponseEntity<Resource> exportAudit(
+            @PathVariable long id,
+            @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
+        Audit audit = auditRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        JSONObject jsonFinalObject = auditService.toJson(audit);
+        byte[] buf = jsonFinalObject.toString().getBytes();              
+        HttpHeaders header = JsonHttpHeaderBuilder.setUpJsonHeaders(audit.getName(),"json");
+        return ResponseEntity
+                .ok()
+                .headers(header)
+                .contentLength(buf.length)
+                .contentType(MediaType.parseMediaType("application/json"))
+                .body(new ByteArrayResource(buf));
+    }
+
     /**
      * Get all @see Audit for a given project id
      *
@@ -103,7 +146,7 @@ public class AuditController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
-                    "#id)")
+            "#id)")
     @GetMapping("/by-project/{id}")
     public @ResponseBody
     Collection<Audit> getAuditsByProject(@PathVariable long id) {
@@ -125,7 +168,7 @@ public class AuditController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
-                    "#id)")
+            "#id)")
     @GetMapping("/last-by-project/{id}")
     public @ResponseBody
     Audit getLastAuditByProject(@PathVariable long id) {
@@ -149,7 +192,7 @@ public class AuditController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
-                    "#id)")
+            "#id)")
     @GetMapping("/last-by-project/{id}/{type}")
     public @ResponseBody
     Audit getLastAuditByProjectAndAuditType(@PathVariable long id, @PathVariable EAuditType type) {
@@ -212,7 +255,7 @@ public class AuditController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).START_AUDIT, " +
-                    "#auditCommand.getProjectId())")
+            "#auditCommand.getProjectId())")
     @PostMapping("/start")
     public @ResponseBody
     Audit startAudit(@RequestBody @Valid AuditCommandDTO auditCommand) {
@@ -239,14 +282,14 @@ public class AuditController {
         }
 
         Audit audit = auditFactory.createAudit(
-            auditCommand.getName(),
-            auditCommand.getParameters(),
-            auditCommand.getType(),
-            true,
-            project,
-            new ArrayList<>(references),
-            main
-        );
+                auditCommand.getName(),
+                auditCommand.getParameters(),
+                auditCommand.getType(),
+                true,
+                project,
+                new ArrayList<>(references),
+                main
+                );
 
         auditRunnerService.runAudit(audit);
         return audit;

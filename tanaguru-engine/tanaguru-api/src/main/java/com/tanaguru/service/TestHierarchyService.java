@@ -1,5 +1,7 @@
 package com.tanaguru.service;
 
+import org.json.JSONObject;
+
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 
 public interface TestHierarchyService {
@@ -15,4 +17,11 @@ public interface TestHierarchyService {
      * @param reference The reference to delete
      */
     void deleteReference(TestHierarchy reference);
+    
+    /**
+     * Return a json object with the information of the test hierarchy
+     * @param testHierarchy The given @see TestHierarchy
+     * @return json object
+     */
+    JSONObject toJson(TestHierarchy testHierarchy);
 }

@@ -12,6 +12,13 @@
     <artifactId>tanaguru-helper</artifactId>
 
     <dependencies>
+    
+    	<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${springboot-version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
