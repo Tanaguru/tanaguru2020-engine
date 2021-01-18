@@ -9,6 +9,8 @@ import com.tanaguru.runner.factory.AuditRunnerFactory;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
+import com.tanaguru.service.impl.MessageService;
+
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -56,7 +58,9 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            MailService mailService) {
+            MailService mailService,
+            MessageService messageService,
+            ActRepository actRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -68,7 +72,9 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 resultAnalyzerService,
                 testHierarchyRepository,
                 elementResultRepository,
-                mailService);
+                mailService,
+                messageService,
+                actRepository);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 

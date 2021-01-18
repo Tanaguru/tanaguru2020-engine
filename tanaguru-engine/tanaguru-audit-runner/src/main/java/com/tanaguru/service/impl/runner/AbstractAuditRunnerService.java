@@ -1,9 +1,12 @@
 package com.tanaguru.service.impl.runner;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
+import com.tanaguru.domain.entity.membership.Act;
+import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.listener.AuditRunnerListener;
@@ -11,6 +14,7 @@ import com.tanaguru.service.AuditRunnerService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
+import com.tanaguru.service.impl.MessageService;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final TestHierarchyRepository testHierarchyRepository;
     protected final ElementResultRepository elementResultRepository;
     protected final MailService mailService;
+    protected final MessageService messageService;
+    protected final ActRepository actRepository;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -48,7 +54,9 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            MailService mailService) {
+            MailService mailService,
+            MessageService messageService,
+            ActRepository actRepository) {
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -59,6 +67,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.testHierarchyRepository = testHierarchyRepository;
         this.elementResultRepository = elementResultRepository;
         this.mailService = mailService;
+        this.messageService = messageService;
+        this.actRepository = actRepository;
     }
 
     @Override
@@ -99,7 +109,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     @Override
     public final void onAuditEnd(AuditRunner auditRunner) {
         Audit audit = auditRunner.getAudit();
-        if(audit.getPages() == null || audit.getPages().isEmpty()) {
+        Collection<Page> pages = pageRepository.findAllByAudit_Id(audit.getId());
+        if(pages.isEmpty()) {
             audit.setStatus(ERROR);
             auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Audit failed because it does not contain pages");
         }else {
@@ -110,7 +121,11 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
-        mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com", "TEST", "test d'envoie a la fin d'un audit ...");
+        if(audit.getType().equals(EAuditType.SITE) || audit.getType().equals(EAuditType.SCENARIO) || pages.size() >= 2) {
+        	auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent.");
+        	Act act = actRepository.findByAudit(audit).get();
+        	mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com", messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("p1",act.getProject().getDomain()));
+        }
     }
 
     @Override

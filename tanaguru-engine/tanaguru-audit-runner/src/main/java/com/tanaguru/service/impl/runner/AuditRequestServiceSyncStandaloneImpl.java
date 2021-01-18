@@ -12,6 +12,8 @@ import com.tanaguru.service.AuditRunnerService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
+import com.tanaguru.service.impl.MessageService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,9 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
-            MailService mailService) {
+            MailService mailService,
+            MessageService messageService,
+            ActRepository actRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -61,7 +65,9 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
                 resultAnalyzerService,
                 testHierarchyRepository,
                 elementResultRepository,
-                mailService);
+                mailService,
+                messageService,
+                actRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 
