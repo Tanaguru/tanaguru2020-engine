@@ -93,7 +93,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         		browserName = BrowserName.FIREFOX;    
         }
 
-        String cssQuery = parameterStringMap.get(EAuditParameter.CSS_QUERY).getValue();
+        String cssQuery = parameterStringMap.get(EAuditParameter.CSS_QUERY_ON_LOADED_PAGE).getValue();
         
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());
 

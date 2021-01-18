@@ -8,11 +8,11 @@
     <changeSet id="populateaudit_parameter_cssQuery" author="lpedrau">
         <sql>
             INSERT INTO audit_parameter (code, audit_parameter_family_id) VALUES
-            ('CSS_QUERY', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL'));
+            ('CSS_QUERY_ON_LOADED_PAGE', (SELECT id FROM audit_parameter_family WHERE code = 'GENERAL'));
         </sql>
         <rollback>
             <sql>
-                DELETE FROM audit_parameter WHERE code = 'CSS_QUERY';
+                DELETE FROM audit_parameter WHERE code = 'CSS_QUERY_ON_LOADED_PAGE';
             </sql>
         </rollback>
     </changeSet>
@@ -20,11 +20,11 @@
     <changeSet id="populateaudit_parameter_cssQuery_value" author="lpedrau">
         <sql>
             INSERT INTO audit_parameter_value (audit_parameter_id, value, is_default) VALUES
-            ((SELECT id FROM audit_parameter WHERE code = 'CSS_QUERY'), '', true);
+            ((SELECT id FROM audit_parameter WHERE code = 'CSS_QUERY_ON_LOADED_PAGE'), '', true);
         </sql>
         <rollback>
             <sql>
-                DELETE FROM audit_parameter_value WHERE audit_parameter_id = (SELECT id FROM audit_parameter WHERE code = 'CSS_QUERY');
+                DELETE FROM audit_parameter_value WHERE audit_parameter_id = (SELECT id FROM audit_parameter WHERE code = 'CSS_QUERY_ON_LOADED_PAGE');
             </sql>
         </rollback>
     </changeSet>

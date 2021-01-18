@@ -24,5 +24,5 @@ public enum EAuditParameter {
     WEBDRIVER_RESOLUTIONS,
     WEBDRIVER_BROWSER,
     
-    CSS_QUERY;
+    CSS_QUERY_ON_LOADED_PAGE;
 }
