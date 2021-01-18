@@ -8,6 +8,7 @@ import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
 import com.tanaguru.service.AuditService;
+import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
             TestHierarchyResultRepository testHierarchyResultRepository,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
-            ElementResultRepository elementResultRepository) {
+            ElementResultRepository elementResultRepository,
+            MailService mailService) {
         super(pageRepository,
                 auditRepository,
                 auditService,
@@ -63,7 +65,8 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
                 testHierarchyResultRepository,
                 resultAnalyzerService,
                 testHierarchyRepository,
-                elementResultRepository);
+                elementResultRepository,
+                mailService);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 

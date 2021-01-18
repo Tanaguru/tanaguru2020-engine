@@ -7,6 +7,7 @@ import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
 import com.tanaguru.service.AuditService;
+import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -54,7 +55,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             TestHierarchyResultRepository testHierarchyResultRepository,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
-            ElementResultRepository elementResultRepository) {
+            ElementResultRepository elementResultRepository,
+            MailService mailService) {
 
         super(pageRepository,
                 auditRepository,
@@ -65,7 +67,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 testHierarchyResultRepository,
                 resultAnalyzerService,
                 testHierarchyRepository,
-                elementResultRepository);
+                elementResultRepository,
+                mailService);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 

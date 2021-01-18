@@ -9,6 +9,7 @@ import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.service.AuditRunnerService;
 import com.tanaguru.service.AuditService;
+import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final ResultAnalyzerService resultAnalyzerService;
     protected final TestHierarchyRepository testHierarchyRepository;
     protected final ElementResultRepository elementResultRepository;
+    protected final MailService mailService;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -45,7 +47,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             TestHierarchyResultRepository testHierarchyResultRepository,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
-            ElementResultRepository elementResultRepository) {
+            ElementResultRepository elementResultRepository,
+            MailService mailService) {
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -55,6 +58,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.resultAnalyzerService = resultAnalyzerService;
         this.testHierarchyRepository = testHierarchyRepository;
         this.elementResultRepository = elementResultRepository;
+        this.mailService = mailService;
     }
 
     @Override
@@ -106,6 +110,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
+        mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com", "TEST", "test d'envoie a la fin d'un audit ...");
     }
 
     @Override
