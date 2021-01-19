@@ -125,22 +125,22 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
-        
+
         if(audit.getType().equals(EAuditType.SITE) || audit.getType().equals(EAuditType.SCENARIO) || pages.size() >= 2) {
-        	Act act = actRepository.findByAudit(audit).get();
-        	Collection<ContractAppUser> contractAppUsers = contractUserRepository.findAllByContract(act.getProject().getContract());
-        	String domain = act.getProject().getDomain();
-        	String url = "http://localhost:8080/#/audits/"+audit.getId();
-        	for(ContractAppUser contractAppUser : contractAppUsers) {
-        		User user = contractAppUser.getUser();
-        		boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
-            	if(emailSent) {
-            		auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
-            	}else {
-            		auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
-            	}
-        	}
-        	
+            Act act = actRepository.findByAudit(audit).get();
+            Collection<ContractAppUser> contractAppUsers = contractUserRepository.findAllByContract(act.getProject().getContract());
+            String domain = act.getProject().getDomain();
+            String url = "http://localhost:8080/#/audits/"+audit.getId();
+            for(ContractAppUser contractAppUser : contractAppUsers) {
+                User user = contractAppUser.getUser();
+                boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
+                if(emailSent) {
+                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+                }else {
+                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                }
+            }
+
         }
     }
 
