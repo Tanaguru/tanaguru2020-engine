@@ -122,9 +122,15 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
         if(audit.getType().equals(EAuditType.SITE) || audit.getType().equals(EAuditType.SCENARIO) || pages.size() >= 2) {
-        	auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent.");
         	Act act = actRepository.findByAudit(audit).get();
-        	mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com", messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("p1",act.getProject().getDomain()));
+        	String domain = act.getProject().getDomain();
+        	String url = "http://localhost:8080/#/audits/"+audit.getId();
+        	boolean emailSent = mailService.sendMimeMessage("lpedrau@oceaneconsulting.com", messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("p1",domain).replaceAll("url",url));
+        	if(emailSent) {
+        		auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+        	}else {
+        		auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+        	}
         }
     }
 

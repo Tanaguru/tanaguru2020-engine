@@ -10,9 +10,8 @@ public class MessageService {
  
     @Autowired
     private MessageSource messageSource;
- 
+    
     public String getMessage(String code) {
-    	//messageSource.setDefaultEncoding("UTF-8");
         return messageSource.getMessage(code, null, LocaleContextHolder.getLocale());
     }
 }
