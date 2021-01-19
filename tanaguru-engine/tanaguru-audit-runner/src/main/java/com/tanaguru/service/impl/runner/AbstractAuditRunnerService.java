@@ -6,7 +6,8 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
 import com.tanaguru.domain.entity.membership.Act;
-import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
+import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.listener.AuditRunnerListener;
@@ -43,6 +44,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final MailService mailService;
     protected final MessageService messageService;
     protected final ActRepository actRepository;
+    protected final ContractUserRepository contractUserRepository;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -56,7 +58,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             ElementResultRepository elementResultRepository,
             MailService mailService,
             MessageService messageService,
-            ActRepository actRepository) {
+            ActRepository actRepository,
+            ContractUserRepository contractUserRepository) {
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -69,6 +72,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.mailService = mailService;
         this.messageService = messageService;
         this.actRepository = actRepository;
+        this.contractUserRepository = contractUserRepository;
     }
 
     @Override
@@ -121,16 +125,22 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
+        
         if(audit.getType().equals(EAuditType.SITE) || audit.getType().equals(EAuditType.SCENARIO) || pages.size() >= 2) {
         	Act act = actRepository.findByAudit(audit).get();
+        	Collection<ContractAppUser> contractAppUsers = contractUserRepository.findAllByContract(act.getProject().getContract());
         	String domain = act.getProject().getDomain();
         	String url = "http://localhost:8080/#/audits/"+audit.getId();
-        	boolean emailSent = mailService.sendMimeMessage("lpedrau@oceaneconsulting.com", messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("p1",domain).replaceAll("url",url));
-        	if(emailSent) {
-        		auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
-        	}else {
-        		auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+        	for(ContractAppUser contractAppUser : contractAppUsers) {
+        		User user = contractAppUser.getUser();
+        		boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
+            	if(emailSent) {
+            		auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+            	}else {
+            		auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+            	}
         	}
+        	
         }
     }
 
