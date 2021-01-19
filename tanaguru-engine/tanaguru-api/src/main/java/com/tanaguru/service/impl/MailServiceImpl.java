@@ -41,25 +41,25 @@ public class MailServiceImpl implements MailService {
         javaMailSender.send(message);
         LOGGER.info("Send [{}] email to {}", subject, to);
     }
-    
+
     public boolean sendMimeMessage(String to, String subject, String text) {
-    	boolean emailSent = true;
-    	MimeMessage message = javaMailSender.createMimeMessage();
-    	MimeMessageHelper helper = new MimeMessageHelper(message,"UTF-8");
-    	try {
-			helper.setTo(to);
-			helper.setReplyTo(from);
-			helper.setFrom(from);
-			helper.setSubject(subject);
-			String body = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/></head><body><p>"+text+"</p></body></html>";
-			helper.setText(body, true); //true indicate html support with mime message
-			javaMailSender.send(message);
-			LOGGER.info("Send [{}] email to {}", subject, to);
-		} catch (MessagingException e) {
-			LOGGER.error("Send [{}] email to {} failed", subject, to);
-			emailSent=false;
-		}
-    	return emailSent;
-    	
+        boolean emailSent = true;
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,"UTF-8");
+        try {
+            helper.setTo(to);
+            helper.setReplyTo(from);
+            helper.setFrom(from);
+            helper.setSubject(subject);
+            String body = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/></head><body><p>"+text+"</p></body></html>";
+            helper.setText(body, true); //true indicate html support with mime message
+            javaMailSender.send(message);
+            LOGGER.info("Send [{}] email to {}", subject, to);
+        } catch (MessagingException e) {
+            LOGGER.error("Send [{}] email to {} failed", subject, to);
+            emailSent=false;
+        }
+        return emailSent;
+
     }
 }
