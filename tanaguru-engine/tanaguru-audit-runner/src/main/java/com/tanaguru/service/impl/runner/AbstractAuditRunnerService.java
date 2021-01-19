@@ -95,7 +95,8 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     @Override
     public final void onAuditEnd(AuditRunner auditRunner) {
         Audit audit = auditRunner.getAudit();
-        if(audit.getPages() == null || audit.getPages().isEmpty()) {
+        Collection<Page> pages = pageRepository.findAllByAudit_Id(audit.getId());
+        if(pages.isEmpty()) {
             audit.setStatus(ERROR);
             auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Audit failed because it does not contain pages");
         }else {
