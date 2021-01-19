@@ -19,6 +19,7 @@ import com.tanaguru.service.impl.MessageService;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
@@ -45,6 +46,9 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final MessageService messageService;
     protected final ActRepository actRepository;
     protected final ContractUserRepository contractUserRepository;
+    
+    @Value("${webapp.url}")
+    private String webappUrl;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -130,7 +134,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             Act act = actRepository.findByAudit(audit).get();
             Collection<ContractAppUser> contractAppUsers = contractUserRepository.findAllByContract(act.getProject().getContract());
             String domain = act.getProject().getDomain();
-            String url = "http://localhost:8080/#/audits/"+audit.getId();
+            String url = webappUrl+"audits/"+audit.getId();
             for(ContractAppUser contractAppUser : contractAppUsers) {
                 User user = contractAppUser.getUser();
                 boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
