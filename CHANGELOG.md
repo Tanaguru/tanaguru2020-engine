@@ -6,3 +6,4 @@
 
 ## 1.0.2
 - Rest : New key "admin.mail.whenblocked" (Allow send an email to admin when user is blocked)
+- Possibility to check the loading of a page with the search of a css selector
