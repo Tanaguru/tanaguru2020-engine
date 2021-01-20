@@ -377,7 +377,8 @@ public class UserController {
             userRepository.save(user);
 
             try{
-                mailService.sendSimpleMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent") + webappUrl + "reset-password/" + user.getId() + '/' + token );
+                String link = webappUrl + "reset-password/" + user.getId() + '/' + token;
+                mailService.sendMimeMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent").replaceAll("link",link));
             }catch (MailException e){
                 throw  new InternalError(CustomError.ERROR_SENDING_EMAIL.toString());
             }
