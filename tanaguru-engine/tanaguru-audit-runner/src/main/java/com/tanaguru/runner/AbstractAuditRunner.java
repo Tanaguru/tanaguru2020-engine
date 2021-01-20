@@ -166,13 +166,14 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
+                StringBuilder results = new StringBuilder();
                 for(String testScript : testScripts) {
-                    String result = (String) tanaguruDriver.executeScript(testScript);
-                    String source = tanaguruDriver.getPageSource();
-                    for (AuditRunnerListener tanaguruDriverListener : listeners) {
-                        tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
-                    }
+                    results.append((String) tanaguruDriver.executeScript(testScript));
                 }
+                String source = tanaguruDriver.getPageSource();
+                for (AuditRunnerListener tanaguruDriverListener : listeners) {
+                    tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(results.toString(), WebextPageResult.class), screenshot, source);
+                } 
                 currentRank++;
             } catch (Exception e) {
                 LOGGER.error("[Audit {}] Script error on page {}\n{}\n", audit.getId(), url, e.getMessage());
