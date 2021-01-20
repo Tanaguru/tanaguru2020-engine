@@ -20,6 +20,7 @@ import com.tanaguru.webextresult.WebextPageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 
 import java.util.*;
 
@@ -137,10 +138,15 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             String url = webappUrl+"audits/"+audit.getId();
             for(ContractAppUser contractAppUser : contractAppUsers) {
                 User user = contractAppUser.getUser();
-                boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
-                if(emailSent) {
-                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
-                }else {
+                try {
+                    boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
+                    if(emailSent) {
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+                    }else {
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                    }
+                }catch(MailException e) {
+                    LOGGER.error("[Audit {}] Failed to send email at the end of the audit", audit.getId());
                     auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
                 }
             }

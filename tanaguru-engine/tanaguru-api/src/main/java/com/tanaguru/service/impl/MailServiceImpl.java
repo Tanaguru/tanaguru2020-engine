@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -42,7 +43,7 @@ public class MailServiceImpl implements MailService {
         LOGGER.info("Send [{}] email to {}", subject, to);
     }
 
-    public boolean sendMimeMessage(String to, String subject, String text) {
+    public boolean sendMimeMessage(String to, String subject, String text) throws MailException{
         boolean emailSent = true;
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,"UTF-8");
