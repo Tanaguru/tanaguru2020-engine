@@ -143,7 +143,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Collection<String> projectAuthorities =
                 owner.getUser().getId() == user.getId() ?
-                        getRoleAuthorities(EProjectRole.PROJECT_MANAGER) :
+                        new ArrayList<>(getRoleAuthorities(EProjectRole.PROJECT_MANAGER)) :
 
         projectUserRepository.findByProjectAndContractAppUser_User(project, user)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()) , String.valueOf(project.getId())  ))
