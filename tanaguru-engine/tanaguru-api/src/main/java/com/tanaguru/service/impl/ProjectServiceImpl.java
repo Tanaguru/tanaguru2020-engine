@@ -144,12 +144,13 @@ public class ProjectServiceImpl implements ProjectService {
         Collection<String> projectAuthorities =
                 owner.getUser().getId() == user.getId() ?
                         new ArrayList<>(getRoleAuthorities(EProjectRole.PROJECT_MANAGER)) :
+                        new ArrayList<>();
 
-        projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()) , String.valueOf(project.getId())  ))
-                .getProjectRole().getAuthorities().stream()
-                .map((ProjectAuthority::getName))
-                .collect(Collectors.toList());
+        Optional<ProjectAppUser> projectUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user);
+        projectUser.ifPresent(projectAppUser -> projectAuthorities.addAll(
+                projectAppUser.getProjectRole().getAuthorities().stream()
+                        .map((ProjectAuthority::getName))
+                        .collect(Collectors.toList())));
 
         //Add override authorities
         projectAuthorities.addAll(
