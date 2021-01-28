@@ -81,6 +81,13 @@ public interface ProjectService {
     Collection<Project> findAllByUser(User user);
 
     /**
+     *
+     * @param user     The @see User
+     * @return A collection of @see Project
+     */
+    Collection<Project> findAllByUserNotOwner(User user);
+
+    /**
      * Find a @see ProjectRole for a given @see EProjectRole
      *
      * @param projectRole The @see EProjectRole to find

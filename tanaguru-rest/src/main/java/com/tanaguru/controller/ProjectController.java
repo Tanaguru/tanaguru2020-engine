@@ -93,7 +93,7 @@ public class ProjectController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/member-of", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Collection<Project> findAllCurrentUserIsMemberOf(@PathVariable long id) {
-        return projectService.findAllByUser(
+        return projectService.findAllByUserNotOwner(
                 tanaguruUserDetailsService.getCurrentUser()
         );
     }
