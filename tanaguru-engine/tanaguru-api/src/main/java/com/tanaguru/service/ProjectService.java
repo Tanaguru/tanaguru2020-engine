@@ -75,6 +75,12 @@ public interface ProjectService {
     Collection<Project> findAllByContractAndUser(Contract contract, User user);
 
     /**
+     * @param user     The @see User
+     * @return A collection of @see Project
+     */
+    Collection<Project> findAllByUser(User user);
+
+    /**
      * Find a @see ProjectRole for a given @see EProjectRole
      *
      * @param projectRole The @see EProjectRole to find

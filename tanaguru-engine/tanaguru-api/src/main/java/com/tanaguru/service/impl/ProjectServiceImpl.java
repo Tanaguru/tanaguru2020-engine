@@ -138,6 +138,13 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Collection<Project> findAllByUser(User user) {
+        return projectUserRepository.findAllByProject_ContractAppUser_User(user)
+                .stream().map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+    }
+
     public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(project.getContract());
 
