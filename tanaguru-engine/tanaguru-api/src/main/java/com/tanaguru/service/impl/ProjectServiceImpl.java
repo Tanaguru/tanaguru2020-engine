@@ -2,7 +2,6 @@ package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
-import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
@@ -136,21 +135,6 @@ public class ProjectServiceImpl implements ProjectService {
     public Collection<Project> findAllByContractAndUser(Contract contract, User user) {
         return projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user)
                 .stream().map(ProjectAppUser::getProject)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<Project> findAllByUser(User user) {
-        return projectUserRepository.findAllByProjectContract_ContractAppUsers_User(user)
-                .stream().map(ProjectAppUser::getProject)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<Project> findAllByUserNotOwner(User user) {
-        return projectUserRepository.findAllByProjectContract_ContractAppUsers_User(user).stream()
-                .filter((ProjectAppUser projectUser) -> projectUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
-                .map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
     }
 

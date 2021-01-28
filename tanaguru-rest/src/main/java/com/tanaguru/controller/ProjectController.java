@@ -85,19 +85,6 @@ public class ProjectController {
         );
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
-            @ApiResponse(code = 403, message = "Forbidden for current session"),
-    })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
-    @GetMapping(value = "/member-of", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Collection<Project> findAllCurrentUserIsMemberOf(@PathVariable long id) {
-        return projectService.findAllByUserNotOwner(
-                tanaguruUserDetailsService.getCurrentUser()
-        );
-    }
-
     @ApiOperation(
             value = "Get All projects current user has authority on for a given Contract id",
             notes = "User must must have SHOW_CONTRACT authority on contract"
@@ -383,4 +370,5 @@ public class ProjectController {
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);
     }
+
 }
