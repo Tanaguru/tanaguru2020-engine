@@ -65,9 +65,9 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
                 } else {
                     EAuditLogLevel level = EAuditLogLevel.INFO;
                     Result result = runner.execute(test);
-                    if(result.getLevel() == Result.Level.ERROR){
+                    if(result.getLevel().value == Result.Level.ERROR.value){
                         level = EAuditLogLevel.ERROR;
-                    }else if(result.getLevel() == Result.Level.WARNING){
+                    }else if(result.getLevel().value == Result.Level.WARNING.value){
                         level = EAuditLogLevel.WARNING;
                     }
 
