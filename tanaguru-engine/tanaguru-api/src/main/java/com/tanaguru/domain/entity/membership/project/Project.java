@@ -33,7 +33,7 @@ public class Project implements Serializable {
     private Contract contract;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "project")
     private Collection<ProjectAppUser> projectAppUsers;
 
     @JsonIgnore

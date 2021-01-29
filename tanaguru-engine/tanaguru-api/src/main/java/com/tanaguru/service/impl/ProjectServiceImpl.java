@@ -205,6 +205,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project){
         auditService.deleteAuditByProject(project);
+        projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }
 }

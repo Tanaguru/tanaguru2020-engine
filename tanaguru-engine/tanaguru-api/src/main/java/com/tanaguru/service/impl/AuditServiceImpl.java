@@ -101,16 +101,9 @@ public class AuditServiceImpl implements AuditService {
 
     public void deleteAudit(Audit audit){
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
-        pageService.deletePageByAudit(audit);
-
-        Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
-                .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
-        auditRepository.deleteById(audit.getId());
-        for(TestHierarchy reference : auditReferences){
-            if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
-                testHierarchyService.deleteReference(reference);
-            }
-        }
+        AuditDeletionThread deletionThread = new AuditDeletionThread(audit);
+        Thread thread = new Thread(deletionThread);
+        thread.start();
     }
     
     /**
@@ -129,5 +122,25 @@ public class AuditServiceImpl implements AuditService {
         }
         return jsonAuditObject;
     }
-    
+
+    private class AuditDeletionThread implements Runnable{
+        Audit audit;
+        public AuditDeletionThread(Audit audit){
+            this.audit = audit;
+        }
+
+        @Override
+        public void run() {
+            pageService.deletePageByAudit(audit);
+
+            Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
+                    .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
+            auditRepository.deleteById(audit.getId());
+            for(TestHierarchy reference : auditReferences){
+                if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
+                    testHierarchyService.deleteReference(reference);
+                }
+            }
+        }
+    }
 }

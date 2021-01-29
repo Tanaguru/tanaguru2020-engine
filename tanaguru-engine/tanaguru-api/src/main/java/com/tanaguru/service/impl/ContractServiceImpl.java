@@ -179,6 +179,7 @@ public class ContractServiceImpl implements ContractService {
 
     public void deleteContract(Contract contract){
         projectService.deleteByContract(contract);
+        contractUserRepository.deleteAllByContract(contract);
         contractRepository.deleteById(contract.getId());
     }
 

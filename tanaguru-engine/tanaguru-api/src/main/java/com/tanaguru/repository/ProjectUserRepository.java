@@ -18,4 +18,5 @@ public interface ProjectUserRepository extends JpaRepository<ProjectAppUser, Lon
     Collection<ProjectAppUser> findAllByProject_Id(long id);
 
     Collection<ProjectAppUser> findAllByProject_ContractAndContractAppUser_User(Contract contract, User user);
+    void deleteAllByProject(Project project);
 }
