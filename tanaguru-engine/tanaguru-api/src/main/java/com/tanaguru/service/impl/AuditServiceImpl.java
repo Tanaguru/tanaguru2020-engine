@@ -100,7 +100,9 @@ public class AuditServiceImpl implements AuditService {
     }
 
     public void deleteAudit(Audit audit){
+        LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
+        LOGGER.info("[Audit " + audit.getId() + "] delete content");
         AuditDeletionThread deletionThread = new AuditDeletionThread(audit);
         Thread thread = new Thread(deletionThread);
         thread.start();
