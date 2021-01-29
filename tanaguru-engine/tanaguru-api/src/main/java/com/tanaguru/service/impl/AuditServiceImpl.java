@@ -8,10 +8,7 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.repository.ActRepository;
-import com.tanaguru.repository.AuditLogRepository;
-import com.tanaguru.repository.AuditReferenceRepository;
-import com.tanaguru.repository.AuditRepository;
+import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditActService;
 import com.tanaguru.service.AuditLogService;
 import com.tanaguru.service.AuditParameterService;
@@ -49,6 +46,7 @@ public class AuditServiceImpl implements AuditService {
     private final AuditRepository auditRepository;
     private final PageService pageService;
     private final TestHierarchyService testHierarchyService;
+    private final AuditAuditParameterValueRepository auditAuditParameterValueRepository;
     
     @Autowired
     public AuditServiceImpl(
@@ -61,7 +59,7 @@ public class AuditServiceImpl implements AuditService {
             AuditRepository auditRepository,
             PageService pageService,
             TestHierarchyResultService testHierarchyResultService,
-            TestHierarchyService testHierarchyService) {
+            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository) {
         this.actRepository = actRepository;
         this.auditActService = auditActService;
         this.auditLogRepository = auditLogRepository;
@@ -71,6 +69,7 @@ public class AuditServiceImpl implements AuditService {
         this.auditRepository = auditRepository;
         this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
+        this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
     }
 
     public Collection<Audit> findAllByProject(Project project) {
@@ -134,6 +133,9 @@ public class AuditServiceImpl implements AuditService {
         @Override
         public void run() {
             pageService.deletePageByAudit(audit);
+
+            LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
+            auditAuditParameterValueRepository.deleteAllByAudit(audit);
 
             Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
                     .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
