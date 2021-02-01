@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import java.util.Collection;
@@ -70,6 +71,13 @@ public class AuditServiceImpl implements AuditService {
         this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
+    }
+
+    @PostConstruct
+    private void startDeletedAuditCleanup(){
+        for(Audit audit : auditRepository.findAllByDeletedIsTrue()){
+            deleteAudit(audit);
+        }
     }
 
     public Collection<Audit> findAllByProject(Project project) {

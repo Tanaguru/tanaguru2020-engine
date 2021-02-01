@@ -86,8 +86,6 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public void deletePage(Page page) {
-
-
         pageRepository.delete(page);
         LOGGER.info("[Page " + page.getId() + "] deleted");
 
