@@ -134,7 +134,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> findAllByContractAndUser(Contract contract, User user) {
-        return projectUserRepository.findAllByContractAndContractAppUser_User(contract, user)
+        return projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user)
                 .stream().map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
     }
