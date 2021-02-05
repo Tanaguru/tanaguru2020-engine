@@ -166,15 +166,16 @@ public class ContractServiceImpl implements ContractService {
         ContractAppUser contractOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         //Change owner
-        if(contractOwner.getId() != owner.getId()){
+        if(contractOwner.getUser().getId() != owner.getId()){
             ContractAppUser newOwner = contractUserRepository.findByContractAndUser(contract, owner)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId()) ));
 
-            newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
-            contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
-
-            contractUserRepository.save(contractOwner);
-            contractUserRepository.save(newOwner);
+            if(newOwner != null){
+                newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
+                contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
+                contractUserRepository.save(contractOwner);
+                contractUserRepository.save(newOwner);
+            }
         }
         return contract;
     }
