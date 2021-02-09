@@ -93,6 +93,7 @@ pipeline {
                     sh "echo $devDockerEnv > .env"
                     sh '''
                     REST_VERSION=$(cat version.txt)
+                    cat .env
 
                     docker stop tanaguru2020-rest-dev || true
                     docker image prune -f
