@@ -90,9 +90,9 @@ pipeline {
                 script{
                     unstash 'version'
                     def devDockerEnv = createDockerEnvFileContent('812179c5-a3f7-4664-aa64-72e047016d28');
-                    sh "echo $devDockerEnv > .env"
                     sh '''
                     REST_VERSION=$(cat version.txt)
+                    echo $devDockerEnv > .env
                     cat .env
 
                     docker stop tanaguru2020-rest-dev || true
