@@ -132,6 +132,7 @@ public class AuditServiceImpl implements AuditService {
         return jsonAuditObject;
     }
 
+    @Transactional
     private class AuditDeletionThread implements Runnable{
         Audit audit;
         public AuditDeletionThread(Audit audit){
