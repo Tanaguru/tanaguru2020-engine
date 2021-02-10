@@ -8,6 +8,7 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditActService;
 import com.tanaguru.service.AuditLogService;
@@ -114,6 +115,23 @@ public class AuditServiceImpl implements AuditService {
         Thread thread = new Thread(deletionThread);
         thread.start();
     }
+    private void deleteAuditById(long id){
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(CustomEntityNotFoundException::new);
+        pageService.deletePageByAudit(audit);
+
+        LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
+        auditAuditParameterValueRepository.deleteAllByAudit(audit);
+
+        Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
+                .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
+        auditRepository.deleteById(audit.getId());
+        for(TestHierarchy reference : auditReferences){
+            if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
+                testHierarchyService.deleteReference(reference);
+            }
+        }
+    }
     
     /**
      * Return a json object with the information of the audit
@@ -141,19 +159,7 @@ public class AuditServiceImpl implements AuditService {
 
         @Override
         public void run() {
-            pageService.deletePageByAudit(audit);
-
-            LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
-            auditAuditParameterValueRepository.deleteAllByAudit(audit);
-
-            Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
-                    .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
-            auditRepository.deleteById(audit.getId());
-            for(TestHierarchy reference : auditReferences){
-                if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
-                    testHierarchyService.deleteReference(reference);
-                }
-            }
+            deleteAuditById(audit.getId());
         }
     }
 }
