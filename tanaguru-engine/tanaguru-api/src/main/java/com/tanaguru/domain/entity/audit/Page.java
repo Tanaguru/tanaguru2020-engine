@@ -58,7 +58,7 @@ public class Page implements Serializable {
     private String url;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "page", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "page", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private PageContent pageContent;
 
     public long getId() {
