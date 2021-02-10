@@ -46,6 +46,7 @@ public class AuditController {
     private final ProjectRepository projectRepository;
     private final ActRepository actRepository;
     private final TestHierarchyRepository testHierarchyRepository;
+    private final AsyncAuditService asyncAuditService;
     
     @Autowired
     public AuditController(
@@ -54,7 +55,7 @@ public class AuditController {
             AuditRunnerService auditRunnerService,
             ProjectRepository projectRepository,
             ActRepository actRepository,
-            TestHierarchyRepository testHierarchyRepository) {
+            TestHierarchyRepository testHierarchyRepository, AsyncAuditService asyncAuditService) {
 
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -63,6 +64,7 @@ public class AuditController {
         this.projectRepository = projectRepository;
         this.actRepository = actRepository;
         this.testHierarchyRepository = testHierarchyRepository;
+        this.asyncAuditService = asyncAuditService;
     }
 
     /**
@@ -314,7 +316,7 @@ public class AuditController {
     @DeleteMapping("/{id}")
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
-        auditService.deleteAudit(auditRepository.findById(id)
+        asyncAuditService.deleteAudit(auditRepository.findById(id)
                 .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id )));
     }
 }

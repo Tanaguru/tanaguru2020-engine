@@ -75,13 +75,6 @@ public class AuditServiceImpl implements AuditService {
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
     }
 
-    @PostConstruct
-    private void startDeletedAuditCleanup(){
-        for(Audit audit : auditRepository.findAllByDeletedIsTrue()){
-            deleteAudit(audit);
-        }
-    }
-
     public Collection<Audit> findAllByProject(Project project) {
         return actRepository.findAllByProject(project).stream()
                 .map((Act::getAudit))
@@ -108,7 +101,7 @@ public class AuditServiceImpl implements AuditService {
         return !audit.isPrivate() || (shareCode != null && !shareCode.isEmpty() && audit.getShareCode().equals(shareCode));
     }
 
-    @Async("threadPoolTaskExecutor")
+
     public void deleteAudit(Audit audit){
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
