@@ -20,8 +20,12 @@ public class AESConverter implements AttributeConverter<String, String> {
     @Override
     public String convertToEntityAttribute(String encryptedMessage) {
         if(encryptedMessage == null || encryptedMessage.isEmpty()){
-            return "";
+            return null;
         }
-        return AESEncrypt.decrypt(encryptedMessage, PropertyConfig.cryptoKey);
+        try{
+            return AESEncrypt.decrypt(encryptedMessage, PropertyConfig.cryptoKey);
+        }catch (Exception e){
+            return null;
+        }
     }
 }
