@@ -19,8 +19,8 @@ public class AESConverter implements AttributeConverter<String, String> {
 
     @Override
     public String convertToEntityAttribute(String encryptedMessage) {
-        if(encryptedMessage == null){
-            return null;
+        if(encryptedMessage == null || encryptedMessage.isEmpty()){
+            return "";
         }
         return AESEncrypt.decrypt(encryptedMessage, PropertyConfig.cryptoKey);
     }
