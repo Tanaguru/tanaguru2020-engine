@@ -108,21 +108,15 @@ public class AuditServiceImpl implements AuditService {
         return !audit.isPrivate() || (shareCode != null && !shareCode.isEmpty() && audit.getShareCode().equals(shareCode));
     }
 
-
+    @Async("threadPoolTaskExecutor")
     public void deleteAudit(Audit audit){
-        deleteAuditAsync(audit, this);
-    }
-
-    private void deleteAuditCall(Audit audit){
-        audit = auditRepository.findById(audit.getId())
-                .orElseThrow(CustomEntityNotFoundException::new);
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
         pageService.deletePageByAudit(audit);
 
         LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
-        auditAuditParameterValueRepository.deleteAllByAudit(audit);
+        deleteAuditParameterByAudit(audit);
 
         Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
                 .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
@@ -134,9 +128,8 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
-    @Async("threadPoolTaskExecutor")
-    public void deleteAuditAsync(Audit audit, AuditServiceImpl auditService){
-        auditService.deleteAuditCall(audit);
+    public void deleteAuditParameterByAudit(Audit audit){
+        auditAuditParameterValueRepository.deleteAllByAudit(audit);
     }
     
     /**
