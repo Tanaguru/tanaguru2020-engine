@@ -109,7 +109,14 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Async("threadPoolTaskExecutor")
+    @Transactional
     public void deleteAudit(Audit audit){
+        deleteAuditByIdSync(audit.getId());
+    }
+
+    private void deleteAuditByIdSync(long id){
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(CustomEntityNotFoundException::new);
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
