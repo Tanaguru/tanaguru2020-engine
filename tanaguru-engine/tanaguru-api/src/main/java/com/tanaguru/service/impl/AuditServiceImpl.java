@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -107,17 +108,11 @@ public class AuditServiceImpl implements AuditService {
         return !audit.isPrivate() || (shareCode != null && !shareCode.isEmpty() && audit.getShareCode().equals(shareCode));
     }
 
+    @Async("threadPoolTaskExecutor")
     public void deleteAudit(Audit audit){
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
-        AuditDeletionThread deletionThread = new AuditDeletionThread(audit);
-        Thread thread = new Thread(deletionThread);
-        thread.start();
-    }
-    private void deleteAuditById(long id){
-        Audit audit = auditRepository.findById(id)
-                .orElseThrow(CustomEntityNotFoundException::new);
         pageService.deletePageByAudit(audit);
 
         LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
@@ -148,18 +143,5 @@ public class AuditServiceImpl implements AuditService {
             jsonAuditObject.append("pages", pageService.toJson(page));
         }
         return jsonAuditObject;
-    }
-
-    @Transactional
-    private class AuditDeletionThread implements Runnable{
-        Audit audit;
-        public AuditDeletionThread(Audit audit){
-            this.audit = audit;
-        }
-
-        @Override
-        public void run() {
-            deleteAuditById(audit.getId());
-        }
     }
 }
