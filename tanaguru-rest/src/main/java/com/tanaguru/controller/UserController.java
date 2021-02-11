@@ -20,11 +20,14 @@ import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.UserService;
+import com.tanaguru.service.impl.MailServiceImpl;
 import com.tanaguru.service.impl.MessageService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -43,6 +46,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
     private final TanaguruUserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final UserService userService;
@@ -380,6 +385,7 @@ public class UserController {
                 String link = webappUrl + "reset-password/" + user.getId() + '/' + token;
                 mailService.sendMimeMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent").replaceAll("link",link));
             }catch (MailException e){
+                LOGGER.error(e.getMessage());
                 throw  new InternalError(CustomError.ERROR_SENDING_EMAIL.toString());
             }
 
