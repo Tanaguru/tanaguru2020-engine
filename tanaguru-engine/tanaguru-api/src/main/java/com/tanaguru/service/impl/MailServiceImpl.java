@@ -57,7 +57,7 @@ public class MailServiceImpl implements MailService {
             javaMailSender.send(message);
             LOGGER.info("Send [{}] email to {}", subject, to);
         } catch (MessagingException e) {
-            LOGGER.error("Send [{}] email to {} failed", subject, to);
+            LOGGER.error("Send [{}] email to {} failed : {}", subject, to, e.getMessage());
             emailSent=false;
         }
         return emailSent;
