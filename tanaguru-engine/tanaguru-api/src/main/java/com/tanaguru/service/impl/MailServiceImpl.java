@@ -3,6 +3,7 @@ package com.tanaguru.service.impl;
 import com.tanaguru.service.MailService;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
@@ -48,7 +49,8 @@ public class MailServiceImpl implements MailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,"UTF-8");
         try {
-            helper.setTo(to);
+            InternetAddress email = new InternetAddress(to, false);
+            helper.setTo(email);
             helper.setReplyTo(from);
             helper.setFrom(from);
             helper.setSubject(subject);
