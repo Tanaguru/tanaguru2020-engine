@@ -1,6 +1,7 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.EAuditParameter;
@@ -92,6 +93,41 @@ public class AuditController {
             @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
         return auditRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
+    }
+
+    /**
+     * @param id The id of the @see Audit
+     * @param shareCode the share code of the @see Audit
+     * @return @see number of screenshot in audit
+     */
+    @ApiOperation(
+            value = "Get the number of screenshot in Audit for a given id",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id",
+            response = Audit.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
+    @GetMapping("/{id}/has-screenshot/{shareCode}")
+    public @ResponseBody
+    boolean hasScreenshotByAudit(
+            @PathVariable long id,
+            @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
+
+        for(Page page : audit.getPages()){
+            if(page.getPageContent().getScreenshot() != null){
+                return true;
+            }
+        }
+        return false;
+
     }
 
 
