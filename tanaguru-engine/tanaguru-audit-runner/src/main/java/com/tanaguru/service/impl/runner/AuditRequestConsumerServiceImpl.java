@@ -1,11 +1,16 @@
 package com.tanaguru.service.impl.runner;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.dto.AuditRequest;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
 import com.tanaguru.service.AuditService;
+import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
+import com.tanaguru.service.impl.MessageService;
+
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -20,7 +25,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.util.HashMap;
@@ -53,7 +57,11 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             TestHierarchyResultRepository testHierarchyResultRepository,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
-            ElementResultRepository elementResultRepository) {
+            ElementResultRepository elementResultRepository,
+            MailService mailService,
+            MessageService messageService,
+            ActRepository actRepository,
+            ContractUserRepository contractUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -64,7 +72,11 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 testHierarchyResultRepository,
                 resultAnalyzerService,
                 testHierarchyRepository,
-                elementResultRepository);
+                elementResultRepository,
+                mailService,
+                messageService,
+                actRepository,
+                contractUserRepository);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 
@@ -85,7 +97,7 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                         new OffsetAndMetadata(consumerRecord.offset() + 1));
 
                 Audit audit = auditRepository.findById(auditRequest.getIdAudit())
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find audit with id " + auditRequest.getIdAudit()));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditRequest.getIdAudit() ));
 
                 runAudit(audit);
                 auditRequestConsumer.commitSync(partitionOffsetAndMetadataMap);

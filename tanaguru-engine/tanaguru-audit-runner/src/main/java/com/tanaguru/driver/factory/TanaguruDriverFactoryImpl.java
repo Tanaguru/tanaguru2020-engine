@@ -3,15 +3,21 @@ package com.tanaguru.driver.factory;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
+import com.tanaguru.domain.constant.BrowserName;
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +28,13 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
 
     @Value("${auditrunner.firefox-binary}")
     private String firefoxBinaryPath;
-
+    
+    @Value("${auditrunner.chrome-binary}")
+    private String chromeBinaryPath;
+    
+    @Value("${auditrunner.chromedriver}")
+    private String chromedriver;
+    
     @Value("${auditrunner.geckodriver}")
     private String geckodriver;
 
@@ -37,6 +49,9 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
 
     @Value("${auditrunner.firefox.profile}")
     private String firefoxProfilePath;
+
+    @Value("${auditrunner.chrome.profile}")
+    private String chromeProfilePath;
 
     @Value("${auditrunner.proxy.host}")
     private String proxyHost;
@@ -58,39 +73,83 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         System.setProperty("webdriver.gecko.driver", geckodriver);
+        System.setProperty("webdriver.chrome.driver",chromedriver);
     }
 
     @Override
-    public Optional<RemoteWebDriver> create() {
-        FirefoxOptions options = new FirefoxOptions();
-        FirefoxProfile firefoxProfile = createFirefoxProfile();
+    public Optional<RemoteWebDriver> create(BrowserName browserName) {
+    	Optional<RemoteWebDriver> result = Optional.empty();
+    	RemoteWebDriver remoteWebDriver = null;
+    	switch (browserName) {
+        case CHROME:
+        	ChromeOptions chromeOptions = new ChromeOptions();
+        	setChromePreferences(chromeOptions);
+        	remoteWebDriver = new ChromeDriver(chromeOptions);
+        	remoteWebDriver.manage().deleteAllCookies();
+        	
+        	result = Optional.of(remoteWebDriver);
+            break;
 
-        options.setBinary(firefoxBinaryPath);
-        options.setHeadless(true);
-        options.setProfile(firefoxProfile);
+        case FIREFOX:
+        	FirefoxOptions firefoxOptions = new FirefoxOptions();
+            FirefoxProfile firefoxProfile = createFirefoxProfile();
 
-        FirefoxDriver firefoxDriver = null;
+            firefoxOptions.setBinary(firefoxBinaryPath);
+            firefoxOptions.setHeadless(true);
+            firefoxOptions.setProfile(firefoxProfile);
+            remoteWebDriver = new FirefoxDriver(firefoxOptions);
+            remoteWebDriver.manage().deleteAllCookies();
 
-        try{
-            firefoxDriver = new FirefoxDriver(options);
-            firefoxDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
-            firefoxDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
-            firefoxDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-        }catch (IllegalStateException e){
+            result = Optional.of(remoteWebDriver);
+            break;
+
+        default:
+            LOGGER.error("Browser type not handled : "+browserName);
+    	}
+    		
+    	try { 
+    		remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
+    		remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+            remoteWebDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
+    	}catch (IllegalStateException e){
             LOGGER.error("[Webdriver] Could not create webdriver with error :\n" + e.getMessage());
         }
-
-        return Optional.ofNullable(firefoxDriver);
+    	
+    	return result;
+            
     }
+    
+    private void setChromePreferences(ChromeOptions options) {
+    	options.addArguments("--disable-application-cache");
+        options.setBinary(chromeBinaryPath);
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--whitelisted-ips");
+    	options.addArguments("--no-default-browser-check");
+        options.addArguments("--safebrowsing-disable-auto-update");
+        options.addArguments("--user-agent=tanaguru");
+        options.addArguments("--disable-component-update");
+        options.addArguments("--ignore-certificate-errors");
+        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        chromePrefs.put("profile.block_third_party_cookies", true);
+        chromePrefs.put("download.default_directory", "/dev/null");
+        options.setExperimentalOption("prefs", chromePrefs);
 
-
-
+        File chromeProfileFile = new File(chromeProfilePath);
+        if(chromeProfileFile.exists()){
+            options.addArguments("--user-data-dir=" + chromeProfilePath);
+        }
+        setUpChromeProxy(options);
+    }
+    
     private FirefoxProfile createFirefoxProfile() {
         LOGGER.trace("Create firefox profile");
         File firefoxProfileFile = new File(firefoxProfilePath);
         FirefoxProfile firefoxProfile = firefoxProfileFile.exists() ?
                 new FirefoxProfile(firefoxProfileFile) :
                 new FirefoxProfile();
+        firefoxProfile.setPreference("general.useragent.override", "tanaguru");
+        firefoxProfile.setPreference("browser.download.dir", "/dev/null");
         firefoxProfile.setPreference("browser.startup.page", 0);
         firefoxProfile.setPreference("browser.cache.disk.capacity", 0);
         firefoxProfile.setPreference("browser.cache.disk.enable", false);
@@ -105,33 +164,58 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         firefoxProfile.setPreference("browser.link.open_newwindow", 2);
         firefoxProfile.setPreference("Network.cookie.cookieBehavior", 1);
         firefoxProfile.setPreference("signon.autologin.proxy", true);
-
-        firefoxProfile.setPreference("signon.autologin.proxy", true);
-
-        // to disable the update of search engines
         firefoxProfile.setPreference("browser.search.update", false);
         firefoxProfile.setAcceptUntrustedCertificates(true);
 
-        setUpProxy(firefoxProfile);
+        setUpFirefoxProxy(firefoxProfile);
 
         return firefoxProfile;
     }
 
-    private void setUpProxy(FirefoxProfile firefoxProfile) {
+    private void setUpFirefoxProxy(FirefoxProfile firefoxProfile) {
         if (!proxyPort.isEmpty() && !proxyHost.isEmpty()) {
             if (!proxyUsername.isEmpty() && !proxyPassword.isEmpty()) {
                 firefoxProfile.setPreference("network.proxy.username", proxyUsername);
                 firefoxProfile.setPreference("network.proxy.password", proxyPassword);
             }
 
+            StringBuilder strb = new StringBuilder(proxyHost);
+            strb.append(":");
+            strb.append(proxyPort);
+
+            Proxy proxy = new Proxy();
+            proxy.setFtpProxy(strb.toString());
+            proxy.setHttpProxy(strb.toString());
+            proxy.setSslProxy(strb.toString());
+
             if(!proxyExclusionUrls.isEmpty()){
-                firefoxProfile.setPreference("network.proxy.no_proxies_on", proxyExclusionUrls);
+                proxy.setNoProxy(proxyExclusionUrls);
             }
 
-            firefoxProfile.setPreference("network.proxy.http", proxyHost);
-            firefoxProfile.setPreference("network.proxy.http_port", proxyPort);
-            firefoxProfile.setPreference("network.proxy.ssl", proxyHost);
-            firefoxProfile.setPreference("network.proxy.ssl_port", proxyPort);
+            //SetProxyPreference has been deleted
+            firefoxProfile.setPreference("network.proxy.http", proxy.getHttpProxy());
+            firefoxProfile.setPreference("network.proxy.ssl", proxy.getSslProxy());
+            firefoxProfile.setPreference("network.proxy.socks_remote_dns", true);
         }
     }
+    
+    private void setUpChromeProxy(ChromeOptions options) {
+    	Proxy proxy = new Proxy();
+    	if (!proxyPort.isEmpty() && !proxyHost.isEmpty()) {
+            if (!proxyUsername.isEmpty() && !proxyPassword.isEmpty()) {
+            	proxy.setSocksUsername(proxyUsername);
+            	proxy.setSocksPassword(proxyPassword);
+            }
+            
+            if(!proxyExclusionUrls.isEmpty()){
+            	options.addArguments("--proxy-bypass-list="+proxyExclusionUrls);
+            }
+            options.addArguments("--proxy-server="+proxyHost+":"+proxyPort);
+            proxy.setSslProxy(proxyHost + ":" + proxyPort);
+            DesiredCapabilities desiredCapabilities = DesiredCapabilities.chrome();
+            desiredCapabilities.setCapability(CapabilityType.PROXY, proxy);
+            options.merge(desiredCapabilities);
+        }
+    }
+    
 }

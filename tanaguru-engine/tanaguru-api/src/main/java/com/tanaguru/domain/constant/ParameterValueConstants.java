@@ -7,6 +7,8 @@ public final class ParameterValueConstants {
     public static final int MAX_CRAWLER_DOCUMENTS = 1000;
     public static final int MAX_CRAWLER_TIME = 86400;
     public static final int MAX_CRAWLER_DEPTH = 10;
+    
+    public static final String[] ALL_WEBDRIVER_BROWSER = {"chrome","firefox"};
 
     private ParameterValueConstants() {
     }

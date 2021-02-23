@@ -1,6 +1,8 @@
 package com.tanaguru.service.impl;
 
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
@@ -12,7 +14,8 @@ import com.tanaguru.domain.entity.membership.project.ProjectAuthority;
 import com.tanaguru.domain.entity.membership.project.ProjectRole;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
@@ -20,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,7 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         for (EProjectRole projectRole : EProjectRole.values()) {
             projectRoleMap.put(projectRole, projectRoleRepository.findByName(projectRole)
-                    .orElseThrow(() -> new EntityNotFoundException("Cannot find project role with name " + projectRole)));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_ROLE_NOT_FOUND, projectRole.toString() )));
         }
     }
 
@@ -137,18 +139,28 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Collection<Project> findAllByUserMemberOfNotOwner(User user) {
+        return projectUserRepository.findAllByContractAppUser_User(user)
+                .stream()
+                .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
+                .map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+    }
+
     public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(project.getContract());
 
         Collection<String> projectAuthorities =
                 owner.getUser().getId() == user.getId() ?
-                        getRoleAuthorities(EProjectRole.PROJECT_MANAGER) :
+                        new ArrayList<>(getRoleAuthorities(EProjectRole.PROJECT_MANAGER)) :
+                        new ArrayList<>();
 
-        projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find user " + user.getId() + " for project " + project.getId()))
-                .getProjectRole().getAuthorities().stream()
-                .map((ProjectAuthority::getName))
-                .collect(Collectors.toList());
+        Optional<ProjectAppUser> projectUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user);
+        projectUser.ifPresent(projectAppUser -> projectAuthorities.addAll(
+                projectAppUser.getProjectRole().getAuthorities().stream()
+                        .map((ProjectAuthority::getName))
+                        .collect(Collectors.toList())));
 
         //Add override authorities
         projectAuthorities.addAll(
@@ -178,7 +190,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectAppUser addMember(Project project, User user){
         if(!projectUserRepository.findByProjectAndContractAppUser_User(project, user).isPresent()){
             ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(project.getContract(), user)
-                    .orElseThrow(() -> new InvalidEntityException("Cannot find user " + user.getId() + " in contract " + project.getContract().getId()));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, String.valueOf(user.getId()) , String.valueOf(project.getContract().getId()) ));
             ProjectAppUser projectAppUser = new ProjectAppUser();
             projectAppUser.setContractAppUser(contractAppUser);
             projectAppUser.setProject(project);
@@ -191,7 +203,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void removeMember(Project project, User user){
         ProjectAppUser projectAppUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()) , String.valueOf(project.getId()) ));
         projectUserRepository.delete(projectAppUser);
     }
 
@@ -203,6 +215,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project){
         auditService.deleteAuditByProject(project);
+        projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }
 }

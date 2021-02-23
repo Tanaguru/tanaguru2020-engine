@@ -3,6 +3,8 @@ package com.tanaguru.service;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
+import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
@@ -10,6 +12,8 @@ import com.tanaguru.domain.entity.membership.project.Project;
 
 import java.util.Collection;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * @author rcharre
@@ -50,4 +54,28 @@ public interface AuditParameterService {
      * @return A map containing @see AuditParameter and @see ParameterValues
      */
     Map<AuditParameter, AuditParameterValue> getParameterMapForAuditTypeWithParameterOverride(EAuditType auditType, Map<EAuditParameter, String> override, Project project);
+    
+    /**
+     * Return a json object with the parameters values of the audit
+     * @param audit the given @see Audit
+     * @return json object
+     */
+    JSONObject toJson(Audit audit);
+
+    /**
+     * Get or create a parameter value with the given value
+     * @param parameter
+     * @param value
+     * @return The AuditParameterValue
+     */
+    AuditParameterValue getOrCreateWithValue(EAuditParameter parameter, String value);
+
+    /**
+     * Modify an audit parameter value
+     * @param audit
+     * @param parameter
+     * @param value
+     * @return
+     */
+    AuditAuditParameterValue modifyAuditParameterValue(Audit audit, EAuditParameter parameter, String value);
 }

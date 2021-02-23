@@ -1,26 +1,37 @@
 package com.tanaguru.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tanaguru.config.PropertyConfig;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
+import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.exception.InvalidEntityException;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.helper.AESEncrypt;
 import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditParameterService;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.commons.validator.routines.UrlValidator;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.tanaguru.domain.constant.EAuditType.*;
@@ -70,18 +81,26 @@ public class AuditParameterServiceImpl implements AuditParameterService {
     private final AuditParameterRepository auditParameterRepository;
     private final ScenarioRepository scenarioRepository;
     private final ResourceRepository resourceRepository;
-
+    private final AuditAuditParameterValueRepository auditAuditParameterValueRepository;
+   
+    @Value("${auditrunner.active}")
+    private String[] browsersActive;
+  
     @Autowired
     public AuditParameterServiceImpl(
+            AuditAuditParameterValueRepository auditAuditParameterValueRepository,
             AuditParameterFamilyRepository auditParameterFamilyRepository,
             AuditParameterValueRepository auditParameterValueRepository,
-            AuditParameterRepository auditParameterRepository, ScenarioRepository scenarioRepository, ResourceRepository resourceRepository) {
+            AuditParameterRepository auditParameterRepository,
+            ScenarioRepository scenarioRepository,
+            ResourceRepository resourceRepository) {
 
         this.auditParameterFamilyRepository = auditParameterFamilyRepository;
         this.auditParameterValueRepository = auditParameterValueRepository;
         this.auditParameterRepository = auditParameterRepository;
         this.scenarioRepository = scenarioRepository;
         this.resourceRepository = resourceRepository;
+        this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
     }
 
     @PostConstruct
@@ -113,7 +132,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
             auditParameterDefaultValueMap.put(
                     auditParameter.getCode(),
                     auditParameterValueRepository.findFirstByIsDefaultAndAuditParameter(true, auditParameter)
-                            .orElseThrow(() -> new InvalidEntityException("Audit parameter " + auditParameter.getCode() + "has not default value"))
+                            .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_PARAMETER_NO_DEFAULT_VALUE , auditParameter.getCode().toString() ))
             );
         }
     }
@@ -179,7 +198,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
 
                 definiteParameters.put(parameter, existingParameterValueOpt);
             } else {
-                throw new InvalidEntityException("Invalid value for parameter " + parameter.getCode() + " : " + value);
+                throw new CustomInvalidEntityException(CustomError.INVALID_VALUE_PARAMETER, parameter.getCode().toString(), value );
             }
         }
 
@@ -231,7 +250,13 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                         int webdriverWidth = Integer.parseInt(resolution);
                         return webdriverWidth <= MAX_WEBDRIVER_WIDTH && webdriverWidth > 0;
                     });
-                break;
+                    break;
+                
+                case WEBDRIVER_BROWSER:
+                    String browser = value;
+                    ArrayList<String> browsers = new ArrayList(Arrays.asList(browsersActive));;
+                    result = Arrays.stream(ALL_WEBDRIVER_BROWSER).anyMatch(browser::equals) && browsers.contains(browser);
+                    break;
 
                 case CRAWLER_MAX_DOCUMENT:
                     long crawlerMaxDocument = Long.parseLong(value);
@@ -261,5 +286,53 @@ public class AuditParameterServiceImpl implements AuditParameterService {
         }
 
         return result;
+    }
+
+    /**
+     * Return a json object with the parameters values of the audit
+     * @param audit the relevant audit
+     * @return json object
+     */
+    @Override
+    public JSONObject toJson(Audit audit) {
+        JSONObject jsonAuditParameterObject = new JSONObject();
+        ObjectMapper mapper = new ObjectMapper();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        mapper.setDateFormat(df);
+        Collection<AuditAuditParameterValue> auditAuditParameterValues = auditAuditParameterValueRepository.findAllByAudit(audit);
+        if(!auditAuditParameterValues.isEmpty()) {
+            for(AuditAuditParameterValue auditParameterValue : auditAuditParameterValues) {
+                try {
+                    jsonAuditParameterObject.append("parameters", new JSONObject(mapper.writeValueAsString(auditParameterValue.getAuditParameterValue())));
+                } catch (JSONException | JsonProcessingException e) {
+                    LOGGER.error("Error in serializing audit parameters values");
+                }
+            }
+        }
+        return jsonAuditParameterObject;
+    }
+
+    @Override
+    public AuditParameterValue getOrCreateWithValue(EAuditParameter parameter, String value) {
+        AuditParameterValue result;
+        Optional<AuditParameterValue> valueOpt =auditParameterValueRepository.findByAuditParameter_CodeAndValue(parameter, value);
+        if(valueOpt.isPresent()){
+            result = valueOpt.get();
+        }else{
+            AuditParameterValue auditParameterValue = new AuditParameterValue();
+            auditParameterValue.setAuditParameter(auditParameterMap.get(parameter));
+            auditParameterValue.setValue(value);
+            result = auditParameterValueRepository.save(auditParameterValue);
+        }
+        return result;
+    }
+
+    public AuditAuditParameterValue modifyAuditParameterValue(Audit audit, EAuditParameter parameter, String value){
+        AuditAuditParameterValue auditAuditParameterValue = auditAuditParameterValueRepository.
+                findByAuditAndAuditParameterValue_AuditParameter(audit, auditParameterMap.get(parameter))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_AUDITPARAMETER, String.valueOf(audit.getId()), parameter.name()));
+        AuditParameterValue auditParameterValue = getOrCreateWithValue(parameter, value);
+        auditAuditParameterValue.setAuditParameterValue(auditParameterValue);
+        return auditAuditParameterValueRepository.save(auditAuditParameterValue);
     }
 }

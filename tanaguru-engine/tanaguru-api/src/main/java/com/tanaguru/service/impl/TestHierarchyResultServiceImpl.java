@@ -11,6 +11,10 @@ import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
 import com.tanaguru.service.TestHierarchyResultService;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class TestHierarchyResultServiceImpl implements TestHierarchyResultService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestHierarchyResultServiceImpl.class);
+
+
     private final TestHierarchyResultRepository testHierarchyResultRepository;
     private final PageRepository pageRepository;
 
@@ -33,7 +40,16 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
 
     @Override
     public void deleteTestHierarchyResult(TestHierarchyResult testHierarchyResult) {
+        LOGGER.info("[TestHierarchyResult " + testHierarchyResult.getId() + "] delete");
         testHierarchyResultRepository.delete(testHierarchyResult);
+    }
+
+    @Override
+    public void deleteTestHierarchyResultByPage(Page page) {
+        LOGGER.info("[Page " + page.getId() + "] delete test hierarchy results");
+        for(TestHierarchyResult testHierarchyResult : testHierarchyResultRepository.findAllByPage(page)){
+            testHierarchyResultRepository.delete(testHierarchyResult);
+        }
     }
 
     public AuditSynthesisDTO getAuditSynthesisForTestHierarchy(Audit audit, TestHierarchy testHierarchy, Pageable pageable ){
@@ -107,5 +123,32 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         }else{
             return TestStatusName.STATUS_NOT_TESTED;
         }
+    }
+
+    /**
+     * Return a json object with the information of the test hierarchy result
+     * @param testHierarchyResult
+     * @return json object
+     */
+    @Override
+    public JSONObject toJson(TestHierarchyResult testHierarchyResult) {
+        JSONObject results = new JSONObject();
+        results.put("nb_element_cant_tell", testHierarchyResult.getNbElementCantTell());
+        results.put("nb_cant_tell", testHierarchyResult.getNbCantTell());
+        results.put("nb_element_failed", testHierarchyResult.getNbElementFailed());
+        results.put("nb_element_passed", testHierarchyResult.getNbElementPassed());
+        results.put("nb_element_tested", testHierarchyResult.getNbElementTested());
+        results.put("nb_element_untested", testHierarchyResult.getNbElementUntested());
+        results.put("nb_failed", testHierarchyResult.getNbFailed());
+        results.put("nb_inapplicable", testHierarchyResult.getNbInapplicable());
+        results.put("nb_passed", testHierarchyResult.getNbPassed());
+        results.put("nb_test_cant_tell", testHierarchyResult.getNbTestCantTell());
+        results.put("nb_test_failed", testHierarchyResult.getNbTestFailed());
+        results.put("nb_test_inapplicable", testHierarchyResult.getNbTestInapplicable());
+        results.put("nb_test_passed", testHierarchyResult.getNbTestPassed());
+        results.put("nb_test_untested", testHierarchyResult.getNbTestUntested());
+        results.put("nb_untested", testHierarchyResult.getNbUntested());
+        results.put("status", testHierarchyResult.getStatus());
+        return results;
     }
 }

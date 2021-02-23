@@ -1,5 +1,9 @@
 package com.tanaguru.service;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
+import com.tanaguru.domain.entity.membership.user.Attempt;
 import com.tanaguru.domain.entity.membership.user.User;
 
 public interface UserService {
@@ -43,4 +47,24 @@ public interface UserService {
      * @return True if the @see User has the authority
      */
     boolean hasAuthority(User user, String authority);
+
+    /**
+     * Update the number of fail attempts of the user
+     * @param username
+     * @param ip
+     * @param sendAdminMail
+     */
+    void updateFailAttempts(User user, String ip, boolean sendAdminMail);
+
+    /**
+     * Reset the number of fail attempts of the user
+     * @param username
+     */
+    void resetFailAttempts(User user);
+
+    /**
+     * Set AccountNonLocked to true for the user
+     * @param username
+     */
+    void unlock(User user);
 }
