@@ -13,7 +13,7 @@
 
 	<groupId>com.tanaguru</groupId>
 	<artifactId>tanaguru2020</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.2</version>
 
     <properties>
 		<springboot-version>2.2.6.RELEASE</springboot-version>

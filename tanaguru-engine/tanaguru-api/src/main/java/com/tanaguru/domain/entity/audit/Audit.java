@@ -64,6 +64,9 @@ public class Audit implements Serializable {
     @Enumerated(EnumType.STRING)
     private EAuditStatus status = EAuditStatus.PENDING;
 
+    @Column
+    private boolean deleted = false;
+
     @JsonIgnore
     @OneToMany(mappedBy = "audit", cascade = CascadeType.REMOVE)
     private Collection<AuditAuditParameterValue> parameters;
@@ -194,5 +197,13 @@ public class Audit implements Serializable {
 
     public void setAuditReferences(Collection<AuditReference> auditReferences) {
         this.auditReferences = auditReferences;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

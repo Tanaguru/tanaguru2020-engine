@@ -2,6 +2,7 @@ package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
@@ -138,18 +139,28 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Collection<Project> findAllByUserMemberOfNotOwner(User user) {
+        return projectUserRepository.findAllByContractAppUser_User(user)
+                .stream()
+                .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
+                .map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+    }
+
     public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(project.getContract());
 
         Collection<String> projectAuthorities =
                 owner.getUser().getId() == user.getId() ?
-                        getRoleAuthorities(EProjectRole.PROJECT_MANAGER) :
+                        new ArrayList<>(getRoleAuthorities(EProjectRole.PROJECT_MANAGER)) :
+                        new ArrayList<>();
 
-        projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()) , String.valueOf(project.getId())  ))
-                .getProjectRole().getAuthorities().stream()
-                .map((ProjectAuthority::getName))
-                .collect(Collectors.toList());
+        Optional<ProjectAppUser> projectUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user);
+        projectUser.ifPresent(projectAppUser -> projectAuthorities.addAll(
+                projectAppUser.getProjectRole().getAuthorities().stream()
+                        .map((ProjectAuthority::getName))
+                        .collect(Collectors.toList())));
 
         //Add override authorities
         projectAuthorities.addAll(
@@ -204,6 +215,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project){
         auditService.deleteAuditByProject(project);
+        projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }
 }

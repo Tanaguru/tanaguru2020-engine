@@ -13,6 +13,8 @@ import com.tanaguru.repository.TestHierarchyResultRepository;
 import com.tanaguru.service.TestHierarchyResultService;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class TestHierarchyResultServiceImpl implements TestHierarchyResultService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestHierarchyResultServiceImpl.class);
+
+
     private final TestHierarchyResultRepository testHierarchyResultRepository;
     private final PageRepository pageRepository;
 
@@ -35,7 +40,16 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
 
     @Override
     public void deleteTestHierarchyResult(TestHierarchyResult testHierarchyResult) {
+        LOGGER.info("[TestHierarchyResult " + testHierarchyResult.getId() + "] delete");
         testHierarchyResultRepository.delete(testHierarchyResult);
+    }
+
+    @Override
+    public void deleteTestHierarchyResultByPage(Page page) {
+        LOGGER.info("[Page " + page.getId() + "] delete test hierarchy results");
+        for(TestHierarchyResult testHierarchyResult : testHierarchyResultRepository.findAllByPage(page)){
+            testHierarchyResultRepository.delete(testHierarchyResult);
+        }
     }
 
     public AuditSynthesisDTO getAuditSynthesisForTestHierarchy(Audit audit, TestHierarchy testHierarchy, Pageable pageable ){

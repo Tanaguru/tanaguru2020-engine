@@ -1,6 +1,8 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAuditParameter;
+import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Audit;
@@ -9,6 +11,7 @@ import com.tanaguru.domain.entity.audit.PageContent;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.PageContentRepository;
+import com.tanaguru.service.AuditParameterService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +21,8 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @author rcharre
@@ -31,14 +36,16 @@ public class PageContentController {
     private final TanaguruUserDetailsService tanaguruUserDetailsService;
     private final AuditRepository auditRepository;
     private final AuditService auditService;
+    private final AuditParameterService auditParameterService;
 
     @Autowired
-    public PageContentController(PageContentRepository pageContentRepository, PageRepository pageRepository, TanaguruUserDetailsService tanaguruUserDetailsService, AuditRepository auditRepository, AuditService auditService) {
+    public PageContentController(PageContentRepository pageContentRepository, PageRepository pageRepository, TanaguruUserDetailsService tanaguruUserDetailsService, AuditRepository auditRepository, AuditService auditService, AuditParameterService auditParameterService) {
         this.pageContentRepository = pageContentRepository;
         this.pageRepository = pageRepository;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
+        this.auditParameterService = auditParameterService;
     }
     /**
      * Get the @PageContent for a given page id
@@ -117,6 +124,8 @@ public class PageContentController {
             @PathVariable long id) {
         Audit audit = auditRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
+
+        auditParameterService.modifyAuditParameterValue(audit, EAuditParameter.ENABLE_SCREENSHOT, "false");
 
         for(PageContent pageContent : pageContentRepository.findAllByPage_Audit(audit)){
             pageContent.setScreenshot(null);

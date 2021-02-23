@@ -71,7 +71,7 @@ public class User implements Serializable {
     private Collection<Pair<String, Date>> modificationPasswordTokens = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user")
     private Collection<ContractAppUser> contractAppUsers;
 
     @Type(type = "jsonb")

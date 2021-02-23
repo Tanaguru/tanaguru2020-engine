@@ -3,6 +3,7 @@ package com.tanaguru.service;
 import com.tanaguru.domain.dto.AuditSynthesisDTO;
 import com.tanaguru.domain.dto.TestHierarchyResultDTO;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 
@@ -20,4 +21,6 @@ public interface TestHierarchyResultService {
     String getStatusByTestsStatus(boolean hasFailed, boolean hasSuccess, boolean hasNotApplicable, boolean hasCantTell);
     
     JSONObject toJson(TestHierarchyResult testHierarchyResult);
+
+    void deleteTestHierarchyResultByPage(Page page);
 }
