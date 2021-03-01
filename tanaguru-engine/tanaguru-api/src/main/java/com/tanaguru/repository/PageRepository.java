@@ -1,5 +1,6 @@
 package com.tanaguru.repository;
 
+import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,6 @@ public interface PageRepository extends JpaRepository<Page, Long> {
      * @return The audit's pages list
      */
     org.springframework.data.domain.Page<Page> findAllByAudit_Id(long auditId, Pageable pageable);
+
+    void deleteAllByAudit(Audit audit);
 }

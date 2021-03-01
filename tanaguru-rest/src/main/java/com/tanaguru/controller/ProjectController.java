@@ -86,6 +86,19 @@ public class ProjectController {
     }
 
     @ApiOperation(
+            value = "Get All projects current user is member and not owner"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+    })
+    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @GetMapping(value = "/member-of", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Collection<Project> findAllByContractAndCurrentUserIsMemberOfNotOwner() {
+        return projectService.findAllByUserMemberOfNotOwner(tanaguruUserDetailsService.getCurrentUser());
+    }
+
+    @ApiOperation(
             value = "Get All projects current user has authority on for a given Contract id",
             notes = "User must must have SHOW_CONTRACT authority on contract"
                     + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
@@ -218,7 +231,11 @@ public class ProjectController {
             throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId(), contract.getProjectLimit()  );
         }
 
-        if(!UrlHelper.isValid(project.getDomain())){
+        if((contract.isRestrictDomain() &&
+            !project.getDomain().isEmpty() &&
+            !UrlHelper.isValid(project.getDomain())) ||
+                    (!contract.isRestrictDomain() &&
+                    !UrlHelper.isValid(project.getDomain()))){
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain() );
         }
 

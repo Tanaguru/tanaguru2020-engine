@@ -11,6 +11,8 @@ import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractRoleRepository;
@@ -164,26 +166,28 @@ public class ContractServiceImpl implements ContractService {
         ContractAppUser contractOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         //Change owner
-        if(contractOwner.getId() != owner.getId()){
+        if(contractOwner.getUser().getId() != owner.getId()){
             ContractAppUser newOwner = contractUserRepository.findByContractAndUser(contract, owner)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId()) ));
 
-            newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
-            contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
-
-            contractUserRepository.save(contractOwner);
-            contractUserRepository.save(newOwner);
+            if(newOwner != null){
+                newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
+                contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
+                contractUserRepository.save(contractOwner);
+                contractUserRepository.save(newOwner);
+            }
         }
         return contract;
     }
 
     public void deleteContract(Contract contract){
         projectService.deleteByContract(contract);
+        contractUserRepository.deleteAllByContract(contract);
         contractRepository.deleteById(contract.getId());
     }
 
     public ContractAppUser addMember(Contract contract, User user){
-        if(!contractUserRepository.findByContractAndUser(contract, user).isPresent()){
+        if(contractUserRepository.findByContractAndUser(contract, user).isEmpty()){
             ContractAppUser contractAppUser = new ContractAppUser();
             contractAppUser.setUser(user);
             contractAppUser.setContract(contract);
@@ -198,6 +202,10 @@ public class ContractServiceImpl implements ContractService {
     public void removeMember(Contract contract, User user){
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(user.getId()) ));
+
+        if(contractAppUser.getContractRole().getName() == EContractRole.CONTRACT_OWNER){
+            throw new CustomInvalidArgumentException(CustomError.CANNOT_DELETE_CONTRACT_OWNER, String.valueOf(user.getId()));
+        }
         contractUserRepository.delete(contractAppUser);
     }
 }

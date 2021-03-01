@@ -1,23 +1,32 @@
 package com.tanaguru.service.impl.runner;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
+import com.tanaguru.domain.entity.membership.Act;
+import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
+import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.service.AuditRunnerService;
 import com.tanaguru.service.AuditService;
+import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
+import com.tanaguru.service.impl.MessageService;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 
 import java.util.*;
 
 import static com.tanaguru.domain.constant.EAuditStatus.DONE;
 import static com.tanaguru.domain.constant.EAuditStatus.RUNNING;
+import static com.tanaguru.domain.constant.EAuditStatus.ERROR;
 
 /**
  * @author rcharre
@@ -34,6 +43,13 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final ResultAnalyzerService resultAnalyzerService;
     protected final TestHierarchyRepository testHierarchyRepository;
     protected final ElementResultRepository elementResultRepository;
+    protected final MailService mailService;
+    protected final MessageService messageService;
+    protected final ActRepository actRepository;
+    protected final ContractUserRepository contractUserRepository;
+    
+    @Value("${webapp.url}")
+    private String webappUrl;
 
     public AbstractAuditRunnerService(
             PageRepository pageRepository,
@@ -44,7 +60,11 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             TestHierarchyResultRepository testHierarchyResultRepository,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
-            ElementResultRepository elementResultRepository) {
+            ElementResultRepository elementResultRepository,
+            MailService mailService,
+            MessageService messageService,
+            ActRepository actRepository,
+            ContractUserRepository contractUserRepository) {
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -54,6 +74,10 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.resultAnalyzerService = resultAnalyzerService;
         this.testHierarchyRepository = testHierarchyRepository;
         this.elementResultRepository = elementResultRepository;
+        this.mailService = mailService;
+        this.messageService = messageService;
+        this.actRepository = actRepository;
+        this.contractUserRepository = contractUserRepository;
     }
 
     @Override
@@ -94,12 +118,40 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     @Override
     public final void onAuditEnd(AuditRunner auditRunner) {
         Audit audit = auditRunner.getAudit();
+        Collection<Page> pages = pageRepository.findAllByAudit_Id(audit.getId());
+        if(pages.isEmpty()) {
+            audit.setStatus(ERROR);
+            auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Audit failed because it does not contain pages");
+        }else {
+            audit.setStatus(DONE);
+        }
         audit.setDateEnd(new Date());
-        audit.setStatus(DONE);
         audit = auditRepository.save(audit);
         auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
+
+        if(audit.getType().equals(EAuditType.SITE) || audit.getType().equals(EAuditType.SCENARIO) || pages.size() >= 2) {
+            Act act = actRepository.findByAudit(audit).get();
+            Collection<ContractAppUser> contractAppUsers = contractUserRepository.findAllByContract(act.getProject().getContract());
+            String domain = act.getProject().getDomain();
+            String url = webappUrl+"audits/"+audit.getId();
+            for(ContractAppUser contractAppUser : contractAppUsers) {
+                User user = contractAppUser.getUser();
+                try {
+                    boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
+                    if(emailSent) {
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+                    }else {
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                    }
+                }catch(MailException e) {
+                    LOGGER.error("[Audit {}] Failed to send email at the end of the audit", audit.getId());
+                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                }
+            }
+
+        }
     }
 
     @Override

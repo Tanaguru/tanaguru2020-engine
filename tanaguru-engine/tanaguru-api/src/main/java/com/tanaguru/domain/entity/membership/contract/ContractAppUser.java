@@ -34,7 +34,7 @@ public class ContractAppUser implements Serializable {
     private ContractRole contractRole;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "contractAppUser", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "contractAppUser")
     private Collection<ProjectAppUser> projectAppUsers;
 
     public Contract getContract() {

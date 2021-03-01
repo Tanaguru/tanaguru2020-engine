@@ -4,6 +4,37 @@ def COLOR_MAP = [
     'UNSTABLE': 'warning',
 ]
 
+def createDockerEnvFileContent(String propertyFileName){
+    configFileProvider([configFile(fileId: propertyFileName, variable: 'configFile')]) {
+         def props = readProperties file: "$configFile"
+         return "SERVER_ADDRESS=" + props['SERVER_ADDRESS'] + "\n" +
+             "SERVER_PORT=" + props['SERVER_PORT'] + "\n" +
+             "DB_URL=" + props['DB_URL'] + "\n" +
+             "DB_USERNAME=" + props['DB_USERNAME'] + "\n" +
+             "DB_PASSWORD=" + props['DB_PASSWORD'] + "\n" +
+             "MAIL_FROM_ADDRESS=" + props['MAIL_FROM_ADDRESS'] + "\n" +
+             "MAIL_HOST=" + props['MAIL_HOST'] + "\n" +
+             "MAIL_PORT=" + props['MAIL_PORT'] + "\n" +
+             "MAIL_USERNAME=" + props['MAIL_USERNAME'] + "\n" +
+             "MAIL_PASSWORD=" + props['MAIL_PASSWORD'] + "\n" +
+             "CRYPTO_KEY=" + props['CRYPTO_KEY'] + "\n" +
+             "PASSWORD_TOKEN_VALIDITY=" + props['PASSWORD_TOKEN_VALIDITY'] + "\n" +
+             "AUDITRUNNER_PROXY_EXCLUSION_URLS=" + props['AUDITRUNNER_PROXY_EXCLUSION_URLS'] + "\n" +
+             "AUDITRUNNER_PROXY_USERNAME=" + props['AUDITRUNNER_PROXY_USERNAME'] + "\n" +
+             "AUDITRUNNER_PROXY_PASSWORD=" + props['AUDITRUNNER_PROXY_PASSWORD'] + "\n" +
+             "AUDITRUNNER_PROXY_PORT=" + props['AUDITRUNNER_PROXY_PORT'] + "\n" +
+             "AUDITRUNNER_PROXY_HOST=" + props['AUDITRUNNER_PROXY_HOST'] + "\n" +
+             "AUDITRUNNER_IMPLICIT_WAIT=" + props['AUDITRUNNER_IMPLICIT_WAIT'] + "\n" +
+             "AUDITRUNNER_PAGE_LOAD_TIMEOUT=" + props['AUDITRUNNER_PAGE_LOAD_TIMEOUT'] + "\n" +
+             "AUDITRUNNER_SCRIPT_TIMEOUT=" + props['AUDITRUNNER_SCRIPT_TIMEOUT'] + "\n" +
+             "AUDITRUNNER_FIREFOX_PROFILE=" + props['AUDITRUNNER_FIREFOX_PROFILE'] + "\n" +
+             "AUDITRUNNER_MAX_CONCURRENT_AUDITS=" + props['AUDITRUNNER_MAX_CONCURRENT_AUDITS'] + "\n" +
+             "CORS_ORIGIN=" + props['CORS_ORIGIN'] + "\n" +
+             "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
+             "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT']
+    }
+}
+
 pipeline {
     agent any
     stages {
@@ -31,7 +62,6 @@ pipeline {
                 anyOf{
                     branch 'develop'
                     branch 'master'
-                    branch 'fix-docker-firefox'
                 }
             }
             steps {
@@ -54,56 +84,35 @@ pipeline {
             when {
                 anyOf{
                     branch 'develop'
-                    branch 'fix-docker-firefox'
                 }
             }
             steps {
-                unstash 'version'
-                sh '''
-                REST_VERSION=$(cat version.txt)
+                script{
+                    unstash 'version'
+                    def devDockerEnv = createDockerEnvFileContent('812179c5-a3f7-4664-aa64-72e047016d28');
+                    writeFile file: "./.env", text: devDockerEnv
+                    sh '''
+                    REST_VERSION=$(cat version.txt)
+                    cat ./.env
 
-                echo SERVER_ADDRESS=0.0.0.0 > .env
-                echo SERVER_PORT=9002 >> .env
-                echo DB_URL=jdbc:postgresql://tanaguru2020-db-dev:5432/tanaguru >> .env
-                echo DB_USERNAME=tanaguru >> .env
-                echo DB_PASSWORD=tngTanaguru2020 >> .env
-                echo MAIL_FROM_ADDRESS=support@tanaguru_com >> .env
-                echo MAIL_HOST=localhost >> .env
-                echo MAIL_PORT=587 >> .env
-                echo MAIL_USERNAME= >> .env
-                echo MAIL_PASSWORD= >> .env
-                echo CRYPTO_KEY=change_Me_Please >> .env
-                echo PASSWORD_TOKEN_VALIDITY=86400 >> .env
-                echo AUDITRUNNER_PROXY_EXCLUSION_URLS= >> .env
-                echo AUDITRUNNER_PROXY_USERNAME= >> .env
-                echo AUDITRUNNER_PROXY_PASSWORD= >> .env
-                echo AUDITRUNNER_PROXY_PORT= >> .env
-                echo AUDITRUNNER_PROXY_HOST= >> .env
-                echo AUDITRUNNER_IMPLICIT_WAIT=0 >> .env
-                echo AUDITRUNNER_PAGE_LOAD_TIMEOUT=10 >> .env
-                echo AUDITRUNNER_SCRIPT_TIMEOUT=10 >> .env
-                echo AUDITRUNNER_FIREFOX_PROFILE= >> .env
-                echo AUDITRUNNER_MAX_CONCURRENT_AUDITS=5 >> .env
-                echo CORS_ORIGIN=* >> .env
-                echo WEBAPP_URL=https://dev.tanaguru.com/#/ >> .env
-                echo SESSION_TIMEOUT=1800 >> .env
+                    docker stop tanaguru2020-rest-dev || true
+                    docker image prune -f
 
-                docker stop tanaguru2020-rest-dev || true
-                docker image prune -f
+                    docker run -d --rm \
+                        --name tanaguru2020-rest-dev \
+                        --shm-size=2gb \
+                        --env-file ./.env \
+                        --label "traefik.enable=true" \
+                        --label "traefik.frontend.redirect.entryPoint=secure" \
+                        --label "traefik.http.routers.tanaguru-rest-dev.entrypoints=secure" \
+                        --label "traefik.http.routers.tanaguru-rest-dev.rule=Host(\\`devapi.tanaguru.com\\`)" \
+                        --label "traefik.http.routers.tanaguru-rest-dev.tls=true" \
+                        --label "traefik.port=9002" \
+                        --network=web \
+                        tanaguru2020-rest:${REST_VERSION}
+                    '''
+                }
 
-                docker run -d --rm \
-                    --name tanaguru2020-rest-dev \
-                    --shm-size=2gb \
-                    --env-file ./.env \
-                    --label "traefik.enable=true" \
-                    --label "traefik.frontend.redirect.entryPoint=secure" \
-                    --label "traefik.http.routers.tanaguru-rest-dev.entrypoints=secure" \
-                    --label "traefik.http.routers.tanaguru-rest-dev.rule=Host(\\`devapi.tanaguru.com\\`)" \
-                    --label "traefik.http.routers.tanaguru-rest-dev.tls=true" \
-                    --label "traefik.port=9002" \
-                    --network=web \
-                    tanaguru2020-rest:${REST_VERSION}
-                '''
             }
         }
 
@@ -112,51 +121,31 @@ pipeline {
                 branch 'master'
             }
             steps {
-                unstash 'version'
-                sh '''
-                REST_VERSION=$(cat version.txt)
-                echo SERVER_ADDRESS=0.0.0.0 > .env
-                echo SERVER_PORT=9002 >> .env
-                echo DB_URL=jdbc:postgresql://tanaguru2020-db-prod:5432/tanaguru >> .env
-                echo DB_USERNAME=tanaguru >> .env
-                echo DB_PASSWORD=tngProd2020 >> .env
-                echo MAIL_FROM_ADDRESS=support@tanaguru_com >> .env
-                echo MAIL_HOST=localhost >> .env
-                echo MAIL_PORT=587 >> .env
-                echo MAIL_USERNAME= >> .env
-                echo MAIL_PASSWORD= >> .env
-                echo CRYPTO_KEY=tanaguruProd2020 >> .env
-                echo PASSWORD_TOKEN_VALIDITY=86400 >> .env
-                echo AUDITRUNNER_PROXY_EXCLUSION_URLS= >> .env
-                echo AUDITRUNNER_PROXY_USERNAME= >> .env
-                echo AUDITRUNNER_PROXY_PASSWORD= >> .env
-                echo AUDITRUNNER_PROXY_PORT= >> .env
-                echo AUDITRUNNER_PROXY_HOST= >> .env
-                echo AUDITRUNNER_IMPLICIT_WAIT=0 >> .env
-                echo AUDITRUNNER_PAGE_LOAD_TIMEOUT=10 >> .env
-                echo AUDITRUNNER_SCRIPT_TIMEOUT=10 >> .env
-                echo AUDITRUNNER_FIREFOX_PROFILE= >> .env
-                echo AUDITRUNNER_MAX_CONCURRENT_AUDITS=5 >> .env
-                echo CORS_ORIGIN=* >> .env
-                echo WEBAPP_URL=https://prod.tanaguru.com/#/ >> .env
-                echo SESSION_TIMEOUT=1800 >> .env
+                script{
+                    unstash 'version'
+                    def devDockerEnv = createDockerEnvFileContent('647f5360-4c98-456b-aa1f-0d2a3ea62f43');
+                    sh "echo $devDockerEnv > .env"
+                    sh '''
+                    REST_VERSION=$(cat version.txt)
 
-                docker stop tanaguru2020-rest-prod || true
-                docker image prune -f
-                
-                docker run -d --rm \
-                    --name tanaguru2020-rest-prod \
-                    --shm-size=2gb \
-                    --env-file ./.env \
-                    --label "traefik.enable=true" \
-                    --label "traefik.frontend.redirect.entryPoint=secure" \
-                    --label "traefik.http.routers.tanaguru-rest-prod.entrypoints=secure" \
-                    --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(`prodapi.tanaguru.com`)" \
-                    --label "traefik.http.routers.tanaguru-rest-prod.tls=true" \
-                    --label "traefik.port=9002" \
-                    --network=web \
-                    tanaguru2020-rest:${REST_VERSION}
-                '''
+                    docker stop tanaguru2020-rest-prod || true
+                    docker image prune -f
+
+                    docker run -d --rm \
+                        --name tanaguru2020-rest-prod \
+                        --shm-size=2gb \
+                        --env-file ./.env \
+                        --label "traefik.enable=true" \
+                        --label "traefik.frontend.redirect.entryPoint=secure" \
+                        --label "traefik.http.routers.tanaguru-rest-prod.entrypoints=secure" \
+                        --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(`prodapi.tanaguru.com`)" \
+                        --label "traefik.http.routers.tanaguru-rest-prod.tls=true" \
+                        --label "traefik.port=9002" \
+                        --network=web \
+                        tanaguru2020-rest:${REST_VERSION}
+                    '''
+                }
+
             }
         }
 
@@ -195,8 +184,8 @@ pipeline {
                     ).trim()
 
                     def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
-                    docker.withRegistry('https://registry.tanaguru.com', 'registry') {
-                        image.push('beta-${TIMESTAMP}')
+                    docker.withRegistry("https://registry.tanaguru.com", "registry") {
+                        image.push("beta-${TIMESTAMP}")
                     }
                 }
             }
@@ -216,7 +205,7 @@ pipeline {
                         ).trim()
 
                         def image = docker.image("tanaguru2020-rest:${REST_VERSION}")
-                        docker.withRegistry('https://registry.tanaguru.com', 'registry') {
+                        docker.withRegistry("https://registry.tanaguru.com", "registry") {
                             image.push()
                         }
                     }
@@ -233,4 +222,3 @@ pipeline {
         }
     }
 }
-

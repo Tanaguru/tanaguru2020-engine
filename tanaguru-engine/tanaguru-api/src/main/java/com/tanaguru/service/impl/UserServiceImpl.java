@@ -9,10 +9,12 @@ import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.AppRoleService;
+import com.tanaguru.service.ContractService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final ContractRepository contractRepository;
     private final ContractUserRepository contractUserRepository;
     private final AppRoleService appRoleService;
+    private final ContractService contractService;
     private final MailService mailService;
 
     private static final int FIRST_STEP_ATTEMPTS = 3;
@@ -45,15 +48,16 @@ public class UserServiceImpl implements UserService {
     private static final String ATTEMPTS_MAIL_SUBJECT_ADMIN = "Blocage d'un compte utilisateur";
     private static final String ATTEMPTS_MAIL_SUBJECT_USER = "Blocage de votre compte utilisateur";
 
-    public UserServiceImpl(UserRepository userRepository, 
-            ContractRepository contractRepository, 
-            ContractUserRepository contractUserRepository, 
-            AppRoleService appRoleService,
-            MailService mailService) {
+    public UserServiceImpl(UserRepository userRepository,
+                           ContractRepository contractRepository,
+                           ContractUserRepository contractUserRepository,
+                           AppRoleService appRoleService,
+                           ContractService contractService, MailService mailService) {
         this.userRepository = userRepository;
         this.contractRepository = contractRepository;
         this.contractUserRepository = contractUserRepository;
         this.appRoleService = appRoleService;
+        this.contractService = contractService;
         this.mailService = mailService;
     }
 
@@ -90,8 +94,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(User user) {
-        for (ContractAppUser contractUser : contractUserRepository.findAllByUser(user)) {
-            contractRepository.delete(contractUser.getContract());
+        for (ContractAppUser contractUser : contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)) {
+            contractService.deleteContract(contractUser.getContract());
         }
 
         userRepository.delete(user);
@@ -159,10 +163,21 @@ public class UserServiceImpl implements UserService {
                                 .append(longDateFormat.format(attempt.getBlockedUntil()));
                     }
                 }
-                if(sendAdminMail) {
-                    mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                try {
+                    if(sendAdminMail) {
+                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                        LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
+                    }
+                }catch(MailException e) {
+                    LOGGER.error("[User {}] Unable to send the account blocking email to admin", user.getId());
                 }
-                mailService.sendSimpleMessage(user.getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
+                try {
+                    mailService.sendSimpleMessage(user.getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
+                    LOGGER.info("[User {}] account blocking email sent to user", user.getId());
+                }catch(MailException e) {
+                    LOGGER.error("[User {}] Unable to send the account blocking email to user", user.getId());
+                }
+                
                 break;
 
             default: //Do nothing
