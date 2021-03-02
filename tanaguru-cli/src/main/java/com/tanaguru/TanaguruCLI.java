@@ -201,7 +201,7 @@ public class TanaguruCLI implements CommandLineRunner {
         Optional<Project> project = Optional.empty();
         if(projectRepository.count() >0) {
             showProjects();
-            String projectId = askStringId("project");
+            String projectId = "1";//askStringId("project");
             if(!projectId.equals("")) {
                 try {
                     project = projectRepository.findById(Long.parseLong(projectId));
@@ -214,7 +214,7 @@ public class TanaguruCLI implements CommandLineRunner {
         }else {
             LOGGER.info("No project found, no project reference used");
         }
-        long hierarchyId = selectTestHierarchyId();
+        long hierarchyId = 1; //selectTestHierarchyId();
         TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
         ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
         testsHierarchy.add(main);
@@ -242,7 +242,7 @@ public class TanaguruCLI implements CommandLineRunner {
             audit = cliFileWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
         }else {
             audit = cliFileWithoutPath(commandLine,auditParameters,auditName,privateAudit,auditType);   //The user want to launch an audit on a resource associated with a project
-        }																				
+        }                                                                               
         return audit;
     }
 
@@ -287,7 +287,7 @@ public class TanaguruCLI implements CommandLineRunner {
             Resource resource = new Resource();
             if(projectRepository.count() >0) {
                 showProjects();
-                project = selectProject();	    
+                project = selectProject();      
                 resource.setName(askName("resource"));
                 resource.setContent(fileContent);
                 resource.setProject(project.get());
@@ -634,7 +634,7 @@ public class TanaguruCLI implements CommandLineRunner {
                     }
                 }
                 auditParameters.put(EAuditParameter.PAGE_URLS, builder.toString());
-            }		 		
+            }               
         case SITE:
             String[] seedsArgs = commandLine.getOptionValues(SITE_OPTION_NAME);
             if(seedsArgs != null){
@@ -666,7 +666,7 @@ public class TanaguruCLI implements CommandLineRunner {
             String crawlerInclusionRegex = commandLine.getOptionValue(CRAWLER_INCLUSION_REGEX_OPTION_NAME);
             if(crawlerInclusionRegex != null) {
                 auditParameters.put(EAuditParameter.CRAWLER_INCLUSION_REGEX, crawlerInclusionRegex);
-            }	
+            }   
         }
         String waitTime = commandLine.getOptionValue(WAIT_TIME_OPTION_NAME);
         if(waitTime != null) {
@@ -694,7 +694,7 @@ public class TanaguruCLI implements CommandLineRunner {
         }
         if(commandLine.hasOption(ENABLE_SCREENSHOT_OPTION_NAME)) {
             auditParameters.put(EAuditParameter.ENABLE_SCREENSHOT, "True");
-        }  	
+        }   
         return auditParameters;
     }
 }
