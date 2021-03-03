@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -130,9 +131,12 @@ public class PageController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean isAsc) {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
-            return pageRepository.findAllByAudit_Id(id, PageRequest.of(page, size));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+            return pageRepository.findAllByAudit_Id(id, pageRequest);
         }else{
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }
