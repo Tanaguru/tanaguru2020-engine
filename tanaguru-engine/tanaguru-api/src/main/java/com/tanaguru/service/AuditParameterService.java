@@ -4,6 +4,7 @@ import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
@@ -60,4 +61,21 @@ public interface AuditParameterService {
      * @return json object
      */
     JSONObject toJson(Audit audit);
+
+    /**
+     * Get or create a parameter value with the given value
+     * @param parameter
+     * @param value
+     * @return The AuditParameterValue
+     */
+    AuditParameterValue getOrCreateWithValue(EAuditParameter parameter, String value);
+
+    /**
+     * Modify an audit parameter value
+     * @param audit
+     * @param parameter
+     * @param value
+     * @return
+     */
+    AuditAuditParameterValue modifyAuditParameterValue(Audit audit, EAuditParameter parameter, String value);
 }

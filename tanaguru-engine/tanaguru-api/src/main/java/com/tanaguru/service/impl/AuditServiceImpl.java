@@ -8,6 +8,7 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditActService;
 import com.tanaguru.service.AuditLogService;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -73,13 +75,6 @@ public class AuditServiceImpl implements AuditService {
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
     }
 
-    @PostConstruct
-    private void startDeletedAuditCleanup(){
-        for(Audit audit : auditRepository.findAllByDeletedIsTrue()){
-            deleteAudit(audit);
-        }
-    }
-
     public Collection<Audit> findAllByProject(Project project) {
         return actRepository.findAllByProject(project).stream()
                 .map((Act::getAudit))
@@ -106,13 +101,30 @@ public class AuditServiceImpl implements AuditService {
         return !audit.isPrivate() || (shareCode != null && !shareCode.isEmpty() && audit.getShareCode().equals(shareCode));
     }
 
+
     public void deleteAudit(Audit audit){
+        audit = auditRepository.findById(audit.getId())
+                .orElseThrow(CustomEntityNotFoundException::new);
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
-        AuditDeletionThread deletionThread = new AuditDeletionThread(audit);
-        Thread thread = new Thread(deletionThread);
-        thread.start();
+        pageService.deletePageByAudit(audit);
+
+        LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
+        deleteAuditParameterByAudit(audit);
+
+        Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
+                .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
+        auditRepository.deleteById(audit.getId());
+        for(TestHierarchy reference : auditReferences){
+            if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
+                testHierarchyService.deleteReference(reference);
+            }
+        }
+    }
+
+    public void deleteAuditParameterByAudit(Audit audit){
+        auditAuditParameterValueRepository.deleteAllByAudit(audit);
     }
     
     /**
@@ -130,29 +142,5 @@ public class AuditServiceImpl implements AuditService {
             jsonAuditObject.append("pages", pageService.toJson(page));
         }
         return jsonAuditObject;
-    }
-
-    private class AuditDeletionThread implements Runnable{
-        Audit audit;
-        public AuditDeletionThread(Audit audit){
-            this.audit = audit;
-        }
-
-        @Override
-        public void run() {
-            pageService.deletePageByAudit(audit);
-
-            LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
-            auditAuditParameterValueRepository.deleteAllByAudit(audit);
-
-            Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
-                    .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
-            auditRepository.deleteById(audit.getId());
-            for(TestHierarchy reference : auditReferences){
-                if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
-                    testHierarchyService.deleteReference(reference);
-                }
-            }
-        }
     }
 }

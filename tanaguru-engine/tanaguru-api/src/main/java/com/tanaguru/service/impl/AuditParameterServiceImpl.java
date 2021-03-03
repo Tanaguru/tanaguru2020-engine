@@ -13,6 +13,7 @@ import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.helper.AESEncrypt;
 import com.tanaguru.helper.UrlHelper;
@@ -309,5 +310,29 @@ public class AuditParameterServiceImpl implements AuditParameterService {
             }
         }
         return jsonAuditParameterObject;
+    }
+
+    @Override
+    public AuditParameterValue getOrCreateWithValue(EAuditParameter parameter, String value) {
+        AuditParameterValue result;
+        Optional<AuditParameterValue> valueOpt =auditParameterValueRepository.findByAuditParameter_CodeAndValue(parameter, value);
+        if(valueOpt.isPresent()){
+            result = valueOpt.get();
+        }else{
+            AuditParameterValue auditParameterValue = new AuditParameterValue();
+            auditParameterValue.setAuditParameter(auditParameterMap.get(parameter));
+            auditParameterValue.setValue(value);
+            result = auditParameterValueRepository.save(auditParameterValue);
+        }
+        return result;
+    }
+
+    public AuditAuditParameterValue modifyAuditParameterValue(Audit audit, EAuditParameter parameter, String value){
+        AuditAuditParameterValue auditAuditParameterValue = auditAuditParameterValueRepository.
+                findByAuditAndAuditParameterValue_AuditParameter(audit, auditParameterMap.get(parameter))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_AUDITPARAMETER, String.valueOf(audit.getId()), parameter.name()));
+        AuditParameterValue auditParameterValue = getOrCreateWithValue(parameter, value);
+        auditAuditParameterValue.setAuditParameterValue(auditParameterValue);
+        return auditAuditParameterValueRepository.save(auditAuditParameterValue);
     }
 }
