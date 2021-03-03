@@ -2,8 +2,8 @@ FROM ubuntu:20.04
 USER root
 WORKDIR /
 
-ARG TANAGURU_REST_ARCHIVE_PATH
-ARG CHROME_DRIVER_VERSION="87.0.4280.87"
+ARG TANAGURU_CLI_ARCHIVE_PATH
+ARG CHROME_DRIVER_VERSION="89.0.4389.23"
 ARG FIREFOX_VERSION="69.0"
 ARG GECKODRIVER_VERSION="0.21.0"
 ARG CHROME_VERSION="google-chrome-stable"
@@ -28,11 +28,10 @@ RUN if [ -z "$CHROME_DRIVER_VERSION" ]; \
   && echo "Using chromedriver version: "$CHROME_DRIVER_VERSION \
   && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
   && rm -rf /opt/selenium/chromedriver \
-  && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
+  && unzip /tmp/chromedriver_linux64.zip -d /opt/chromedriver \
   && rm /tmp/chromedriver_linux64.zip \
-  && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
+  && chmod 755 /opt/chromedriver/chromedriver \
+  && ln -fs /opt/chromedriver/chromedriver/usr/bin/chromedriver
 
 # FIREFOX
 RUN FIREFOX_DOWNLOAD_URL=$(if [ $FIREFOX_VERSION = "latest" ] || [ $FIREFOX_VERSION = "nightly-latest" ] || [ $FIREFOX_VERSION = "devedition-latest" ] || [ $FIREFOX_VERSION = "esr-latest" ]; then echo "https://download.mozilla.org/?product=firefox-$FIREFOX_VERSION-ssl&os=linux64&lang=en-US"; else echo "https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2"; fi) \
@@ -52,20 +51,12 @@ RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.
   && ln -fs /opt/geckodriver /usr/bin/geckodriver
 
 # ENTRYPOINT
-COPY ./tanaguru-entrypoint.sh /
-RUN chmod +x /tanaguru-entrypoint.sh
+COPY ./tanaguru-entrypoint-docker.sh /
+RUN chmod +x /tanaguru-entrypoint-docker.sh
 
 # TANAGURU
-ADD $TANAGURU_REST_ARCHIVE_PATH /opt
-RUN mv /opt/tanaguru-audit-runner-server /opt/tanaguru-rest
-RUN mv /opt/tanaguru-cli /opt/tanaguru-rest
-RUN mv /opt/tanaguru-engine /opt/tanaguru-rest
-RUN mv /opt/tanaguru-resources /opt/tanaguru-rest
-RUN mkdir /opt/tanaguru-rest/config
-RUN cp /opt/tanaguru-rest/tanaguru-resources/src/main/resources/* /opt/tanaguru-rest/config
+ADD $TANAGURU_CLI_ARCHIVE_PATH /opt
+RUN mkdir /opt/tanaguru-cli/config
+RUN cp /opt/tanaguru-resources/src/main/resources/* /opt/tanaguru-cli/config
 
-##################################################
-EXPOSE 9002
-##################################################
-
-ENTRYPOINT ["bash","tanaguru-entrypoint.sh"]
+ENTRYPOINT ["bash","tanaguru-entrypoint-docker.sh"]

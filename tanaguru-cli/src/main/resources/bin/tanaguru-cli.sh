@@ -1,5 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-java -Dspring.config.location="../../../../../tanaguru-resources/src/main/resources/" -Dspring.config.name="common,audit-runner,rest" \
-  -Dspring.profiles.active="dev" -jar ../../../../target/tanaguru-cli-*.jar \
-  "$@" -page "https://docs.python.org/3/howto/functional.html" -private -webdriverBrowser chrome
+java -jar ../lib/tanaguru-cli-*.jar \
+  "$@" \
+  --spring.config.location="../config/" \
+  --spring.config.name="common,audit-runner" \
+  --spring.profiles.active="prod" \
+  --logging.file="../logs/tanaguru-cli.log" > /dev/null &
