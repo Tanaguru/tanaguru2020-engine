@@ -102,7 +102,7 @@
 		<dependency>
 			<groupId>com.github.docker-java</groupId>
 			<artifactId>docker-java</artifactId>
-			<version>3.1.0-rc-2</version>
+			<version>3.2.7</version>
 		</dependency>
     </dependencies>
 

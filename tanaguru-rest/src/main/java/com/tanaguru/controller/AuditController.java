@@ -1,5 +1,14 @@
 package com.tanaguru.controller;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallbackTemplate;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
@@ -319,7 +328,7 @@ public class AuditController {
             references.add(testHierarchy);
         }
 
-        Audit audit = auditFactory.createAudit(
+        /**Audit audit = auditFactory.createAudit(
                 auditCommand.getName(),
                 auditCommand.getParameters(),
                 auditCommand.getType(),
@@ -327,12 +336,48 @@ public class AuditController {
                 project,
                 new ArrayList<>(references),
                 main
-                );
-
-        auditRunnerService.runAudit(audit);
-        return audit;
+                );**/
+        
+        //auditRunnerService.runAudit(audit);
+        String pages = auditCommand.getParameters().get(EAuditParameter.PAGE_URLS);
+        runAuditByCli(pages);
+        return null;
     }
 
+    private void runAuditByCli(String pages) {
+        DefaultDockerClientConfig.Builder config = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
+        
+        long shmsize = 2147483648L; //2gb
+        HostConfig hostConfig = HostConfig
+                .newHostConfig()
+                .withShmSize(shmsize)
+                .withNetworkMode("host")
+                .withAutoRemove(true);
+        
+        List<Container> containers = dockerClient.listContainersCmd().exec();
+        for(Container c : containers) {
+            dockerClient.stopContainerCmd(c.getId()).exec();
+            dockerClient.removeContainerCmd(c.getId()).exec();
+        }
+
+        CreateContainerResponse container = dockerClient.createContainerCmd("cliapp:latest")
+                .withHostConfig(hostConfig)
+                .withCmd("-pages",pages).exec(); //venir ajouter les bons params pour la cli et mettre a jour le module cli
+       
+        dockerClient.startContainerCmd(container.getId()).exec();
+        dockerClient.logContainerCmd(container.getId())
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .exec(new ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
+            @Override
+            public void onNext(Frame frame) {
+                System.out.print(new String(frame.getPayload()));
+            }
+        });
+    }
+    
     /**
      * @param id The id of the @see Audit to delete
      */

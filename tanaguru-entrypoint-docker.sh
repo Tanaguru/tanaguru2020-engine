@@ -40,6 +40,7 @@ sed -i "s;auditrunner.scriptTimeout.*;auditrunner.scriptTimeout=${AUDITRUNNER_SC
 sed -i "s;auditrunner.firefox.profile.*;auditrunner.firefox.profile=${AUDITRUNNER_FIREFOX_PROFILE};g" /opt/tanaguru-cli/config/audit-runner.properties
 sed -i "s;auditrunner.chrome.profile.*;auditrunner.chrome.profile=${AUDITRUNNER_CHROME_PROFILE};g" /opt/tanaguru-cli/config/audit-runner.properties
 sed -i "s;auditrunner.maxConcurrentAudit.*;auditrunner.maxConcurrentAudit=${AUDITRUNNER_MAX_CONCURRENT_AUDITS};g" /opt/tanaguru-cli/config/audit-runner.properties
+sed -i "s;auditrunner.profile.*;auditrunner.profile=${AUDITRUNNER_PROFILE};g" /opt/tanaguru-cli/config/audit-runner.properties
 
 echo "Launch Tanaguru CLI"
 chmod +x /opt/tanaguru-cli/src/main/resources/bin/tanaguru-cli-docker.sh
