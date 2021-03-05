@@ -15,6 +15,7 @@ RUN cd /opt                                                                     
 #MAIL
 RUN apt-get install -y postfix mailutils
 RUN sed -i 's/inet_interfaces = all/inet_interfaces = loopback-only/g' /etc/postfix/main.cf
+RUN apt-get install -y locales
 
 #CHROME
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \

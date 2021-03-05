@@ -339,10 +339,11 @@ public class AuditController {
                 );
         
         auditRunnerService.runAudit(audit);
-        return null;
+        //runAuditByCli(auditCommand.getParameters().get(EAuditParameter.SITE_SEEDS));
+        return audit;
     }
 
-    private void runAuditByCli(String pages) {
+    private void runAuditByCli(String site) {
         DefaultDockerClientConfig.Builder config = DefaultDockerClientConfig.createDefaultConfigBuilder();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
         
@@ -361,7 +362,8 @@ public class AuditController {
 
         CreateContainerResponse container = dockerClient.createContainerCmd("cliapp:latest")
                 .withHostConfig(hostConfig)
-                .withCmd("-pages",pages,"-projectId","2","-mainGuideline","1","-references","1").exec();
+                .withEnv("LANG","fr_FR.UTF-8","LANGUAGE","fr_FR:fr","LC_ALL","fr_FR.UTF-8")
+                .withCmd("-site",site,"-projectId","2","-mainGuideline","1","-references","1","-crawlerMaxDocument","3").exec();
        
         dockerClient.startContainerCmd(container.getId()).exec();
         dockerClient.logContainerCmd(container.getId())
