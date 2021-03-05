@@ -3,6 +3,7 @@ package service.impl;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
+import com.tanaguru.domain.entity.audit.Resource;
 import com.tanaguru.domain.entity.audit.Scenario;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
@@ -18,10 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.tanaguru.domain.constant.ParameterValueConstants.*;
 import static org.junit.Assert.assertFalse;
@@ -148,9 +146,16 @@ public class AuditParameterServiceImplTest {
 
     @Test
     public void checkParameterValueIsValid_DOMIDValid() {
-        Mockito.when(resourceRepository.existsById(0L))
-                .thenReturn(true);
+        Mockito.when(resourceRepository.findAllByIdIn(Mockito.anyList()))
+                .thenReturn(Arrays.asList(new Resource()));
         assertTrue(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.DOM_ID, "0", null));
+    }
+
+    @Test
+    public void checkParameterValueIsValid_DOMIDValidMultiple() {
+        Mockito.when(resourceRepository.findAllByIdIn(Mockito.anyList()))
+                .thenReturn(Arrays.asList(new Resource(), new Resource()));
+        assertTrue(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.DOM_ID, "0;1", null));
     }
 
     @Test
@@ -160,8 +165,8 @@ public class AuditParameterServiceImplTest {
 
     @Test
     public void checkParameterValueIsValid_DOMIDNotExists() {
-        Mockito.when(resourceRepository.existsById(0L))
-                .thenReturn(false);
+        Mockito.when(resourceRepository.findAllByIdIn(Mockito.anyList()))
+                .thenReturn(Collections.emptyList());
         assertFalse(auditParameterServiceImpl.checkParameterValueIsValid(EAuditParameter.DOM_ID, "0", null));
     }
 
