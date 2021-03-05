@@ -81,5 +81,5 @@ public interface AuditRunnerFactory {
      * @param enableScreeShot   True to enable webdriver to take screenshot
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createFileRunner(Collection<TanaguruTest> references, Audit audit, String content, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    Optional<AuditRunner> createFileRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> fileContents, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
 }

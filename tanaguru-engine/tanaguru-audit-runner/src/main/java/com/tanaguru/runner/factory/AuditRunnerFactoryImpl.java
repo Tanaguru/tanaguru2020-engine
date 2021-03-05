@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -162,13 +163,21 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         browserName);
                 break;
             case UPLOAD:
-                long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
-                Resource resource = resourceRepository.findById(resourceId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, resourceId ));
+                String[] resourceIdsStr = parameterStringMap.get(EAuditParameter.DOM_ID).getValue().split(";");
+                Collection<Resource> resources = resourceRepository.findAllByIdIn(
+                        Arrays.stream(resourceIdsStr)
+                            .map(Long::parseLong)
+                        .collect(Collectors.toList())
+                );
+
+                Collection<String> fileContents = resources.stream()
+                        .map(Resource::getContent)
+                        .collect(Collectors.toList());
+
                 result = createFileRunner(
                         tanaguruTests,
                         audit,
-                        resource.getContent(),
+                        fileContents,
                         waitTime,
                         resolutions,
                         basicAuthUrl,
@@ -305,7 +314,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     public Optional<AuditRunner> createFileRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit,
-            String content,
+            Collection<String> fileContents,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
@@ -320,7 +329,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             result = Optional.of(new AuditRunnerFile(
                     tanaguruTests,
                     audit,
-                    content,
+                    fileContents,
                     tanaguruDriver.get(),
                     coreScript,
                     waitTime,
