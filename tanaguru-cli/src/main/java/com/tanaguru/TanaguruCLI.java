@@ -55,7 +55,9 @@ public class TanaguruCLI implements CommandLineRunner {
     private static final String FILE_OPTION_NAME = "file";
     private static final String AUDIT_NAME_OPTION_NAME = "name";
     private static final String PRIVATE_AUDIT_OPTION_NAME = "private";
-    private static final String PROJECT_ID_OPTION_NAME = "projectID";
+    private static final String PROJECT_ID_OPTION_NAME = "projectId";
+    private static final String SCENARIO_ID_OPTION_NAME = "scenarioId";
+    private static final String FILE_ID_OPTION_NAME = "fileId";
 
     private static final String WAIT_TIME_OPTION_NAME = "waitTime";
     private static final String ENABLE_SCREENSHOT_OPTION_NAME = "enableScreenshot";
@@ -75,10 +77,6 @@ public class TanaguruCLI implements CommandLineRunner {
     
     private static final String MAIN_GUIDELINE_OPTION_NAME = "mainGuideline";
     private static final String REFERENCES_OPTION_NAME = "references";
-    
-    private static final String SCENARIO_ID_OPTION_NAME = "scenarioId";
-    private static final String FILE_ID_OPTION_NAME = "fileId";
-    
 
     @Autowired
     public TanaguruCLI(AuditFactory auditFactory, 
@@ -162,21 +160,20 @@ public class TanaguruCLI implements CommandLineRunner {
         pageOption.setValueSeparator(';');
         auditOptionGroup.addOption(pageOption);
 
-        Option scenarioOption = new Option(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, false, "Selenese scenario path (if no scenario path informed : mode select scenario in project)");
-        scenarioOption.setOptionalArg(true);
+        Option fileOption = new Option(FILE_ID_OPTION_NAME, FILE_ID_OPTION_NAME, true, "File id");
+        Option scenarioOption = new Option(SCENARIO_ID_OPTION_NAME, SCENARIO_ID_OPTION_NAME, true, "Scenario id");    
         scenarioOption.setArgs(1);
-        auditOptionGroup.addOption(scenarioOption);
-
-        Option fileOption = new Option(FILE_OPTION_NAME, FILE_OPTION_NAME, false, "File path (if no file path informed : mode select file in project)");
-        fileOption.setOptionalArg(true);
         fileOption.setArgs(1);
+        
+        auditOptionGroup.addOption(scenarioOption);
         auditOptionGroup.addOption(fileOption);
         auditOptionGroup.setRequired(true);
         options.addOptionGroup(auditOptionGroup);
         
-        options.addOption(FILE_ID_OPTION_NAME, FILE_ID_OPTION_NAME, true, "File id");
-        options.addOption(SCENARIO_ID_OPTION_NAME, SCENARIO_ID_OPTION_NAME, true, "Scenario id");
+        options.addOption(FILE_OPTION_NAME, FILE_OPTION_NAME, false, "File path");
+        options.addOption(SCENARIO_OPTION_NAME, SCENARIO_OPTION_NAME, false, "Selenese scenario path");
 
+        
         options.addOption(AUDIT_NAME_OPTION_NAME,AUDIT_NAME_OPTION_NAME,true, "Audit name");
         options.addOption(PRIVATE_AUDIT_OPTION_NAME, "Private audit");
         options.addOption(WAIT_TIME_OPTION_NAME,WAIT_TIME_OPTION_NAME,true,"Wait time (for JS frameworks like Angular, React...) ");
@@ -196,7 +193,7 @@ public class TanaguruCLI implements CommandLineRunner {
         options.addOption(WEBDRIVER_RESOLUTIONS_OPTION_NAME,WEBDRIVER_RESOLUTIONS_OPTION_NAME,true, "Webdriver resolutions");
         options.addOption(WEBDRIVER_BROWSER_OPTION_NAME,WEBDRIVER_BROWSER_OPTION_NAME,true, "Webdriver browser");
 
-        options.addOption(MAIN_GUIDELINE_OPTION_NAME,true, "ID of the repository that will be displayed in the dashboard.");
+        options.addRequiredOption(MAIN_GUIDELINE_OPTION_NAME,MAIN_GUIDELINE_OPTION_NAME,true, "ID of the repository that will be displayed in the dashboard.");
         Option referencesOption = new Option(REFERENCES_OPTION_NAME, REFERENCES_OPTION_NAME, true, "IDs of guidelines you want to apply to your audit.");
         referencesOption.setArgs(Option.UNLIMITED_VALUES);
         referencesOption.setValueSeparator(';');
@@ -223,7 +220,7 @@ public class TanaguruCLI implements CommandLineRunner {
                 try {
                     project = projectRepository.findById(Long.parseLong(projectId));
                 }catch(NumberFormatException e) {
-                    LOGGER.info("Not a number id writed, no project reference used");
+                    LOGGER.info("Not a number project id writed, no project reference used");
                 }
             }else {
                 LOGGER.info("No project reference used");
@@ -262,7 +259,7 @@ public class TanaguruCLI implements CommandLineRunner {
         if(commandLine.getOptionValue(FILE_OPTION_NAME) != null) {
             audit = cliFileWithPath(commandLine,auditParameters,auditName,privateAudit,auditType);
         }else if(commandLine.getOptionValue(FILE_ID_OPTION_NAME) != null ){
-            audit = cliFileWithoutPath(commandLine,auditParameters,auditName,privateAudit,auditType);   //The user want to launch an audit on a resource associated with a project
+            audit = cliFileWithoutPath(commandLine,auditParameters,auditName,privateAudit,auditType);
         }                                                                               
         return audit;
     }
@@ -306,10 +303,11 @@ public class TanaguruCLI implements CommandLineRunner {
             String fileContent = FileHelper.getFileContent(file);
             Optional<Project> project = Optional.empty();
             Resource resource = new Resource();
-            if(projectRepository.count() >0) {
-                showProjects();
-                project = selectProject();      
-                resource.setName(askName("resource"));
+            String projectId = commandLine.getOptionValue(PROJECT_ID_OPTION_NAME);
+            if(projectRepository.findById(Long.valueOf(projectId)).isPresent()) {
+                
+                project = projectRepository.findById(Long.parseLong(projectId));  
+                resource.setName(file.getName());
                 resource.setContent(fileContent);
                 resource.setProject(project.get());
                 Collection<Resource> resources = resourceRepository.findAllByProjectAndIsDeletedIsFalse(project.get());
@@ -317,11 +315,15 @@ public class TanaguruCLI implements CommandLineRunner {
                 project.get().setResources(resources);
                 projectRepository.save(project.get());
                 resourceRepository.save(resource);
-                auditParameters.put(EAuditParameter.DOM_ID,String.valueOf(resource.getId()));        
-                long hierarchyId = selectTestHierarchyId();
-                TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
+                auditParameters.put(EAuditParameter.DOM_ID,String.valueOf(resource.getId()));  
+                
+                String mainId = commandLine.getOptionValue(MAIN_GUIDELINE_OPTION_NAME);
+                TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(mainId));
+                String[] referencesId = commandLine.getOptionValue(REFERENCES_OPTION_NAME).split(";");
                 ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
-                testsHierarchy.add(main);
+                for(String refId : referencesId) {
+                    testsHierarchy.add(testHierarchyRepository.getOne(Long.valueOf(refId)));
+                }
                 audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
             }else {
                 LOGGER.info("No project found");
@@ -345,11 +347,9 @@ public class TanaguruCLI implements CommandLineRunner {
     private Optional<Audit> cliFileWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, boolean privateAudit, EAuditType auditType) throws IOException{
         Optional<Audit> audit = Optional.empty();
         Optional<Project> project = projectRepository.findById(Long.valueOf(commandLine.getOptionValue(PROJECT_ID_OPTION_NAME)));
-        Optional<Resource> file = Optional.empty();
-        if(scenarioRepository.findByIsDeletedIsFalse().size() > 0) {
-            file = resourceRepository.findById(Long.valueOf(commandLine.getOptionValue(FILE_ID_OPTION_NAME)));
-            auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(file.get().getId())); 
-            
+        long fileId = Long.valueOf(commandLine.getOptionValue(FILE_ID_OPTION_NAME));
+        if(resourceRepository.findById(fileId).isPresent()) {
+            auditParameters.put(EAuditParameter.DOM_ID, String.valueOf(fileId)); 
             String mainId = commandLine.getOptionValue(MAIN_GUIDELINE_OPTION_NAME);
             TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(mainId));
             String[] referencesId = commandLine.getOptionValue(REFERENCES_OPTION_NAME).split(";");
@@ -380,12 +380,10 @@ public class TanaguruCLI implements CommandLineRunner {
         File scenarioFile = new File(path);
         if (scenarioFile.exists()) {
             String scenarioContent = Base64.getEncoder().encodeToString(FileHelper.getFileContent(scenarioFile).getBytes());
-            Optional<Project> project = Optional.empty();
+            Optional<Project> project = projectRepository.findById(Long.valueOf(commandLine.getOptionValue(PROJECT_ID_OPTION_NAME)));
             Scenario scenario = new Scenario();
             if(projectRepository.count() >0) {
-                showProjects();
-                project = selectProject();
-                scenario.setName(askName("scenario"));
+                scenario.setName(scenarioFile.getName());
                 scenario.setContent(scenarioContent);
                 scenario.setProject(project.get());
                 Collection<Scenario> scenarios = scenarioRepository.findAllByProjectAndIsDeletedIsFalse(project.get());
@@ -393,11 +391,15 @@ public class TanaguruCLI implements CommandLineRunner {
                 project.get().setScenarios(scenarios);
                 projectRepository.save(project.get());
                 scenarioRepository.save(scenario);
-                auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId()));        
-                long hierarchyId = selectTestHierarchyId();
-                TestHierarchy main = testHierarchyRepository.getOne(hierarchyId);
+                auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.getId()));  
+                
+                String mainId = commandLine.getOptionValue(MAIN_GUIDELINE_OPTION_NAME);
+                TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(mainId));
+                String[] referencesId = commandLine.getOptionValue(REFERENCES_OPTION_NAME).split(";");
                 ArrayList<TestHierarchy> testsHierarchy = new ArrayList<>();
-                testsHierarchy.add(main);
+                for(String refId : referencesId) {
+                    testsHierarchy.add(testHierarchyRepository.getOne(Long.valueOf(refId)));
+                }
                 audit = Optional.ofNullable(auditFactory.createAudit(auditName, auditParameters, auditType, privateAudit, project.get(), testsHierarchy,main));
             }else {
                 LOGGER.info("No project found");
@@ -421,10 +423,9 @@ public class TanaguruCLI implements CommandLineRunner {
     private Optional<Audit> cliScenarioWithoutPath(CommandLine commandLine,HashMap<EAuditParameter, String> auditParameters, String auditName, boolean privateAudit,EAuditType auditType) throws IOException{
         Optional<Audit> audit = Optional.empty();
         Optional<Project> project = projectRepository.findById(Long.valueOf(commandLine.getOptionValue(PROJECT_ID_OPTION_NAME)));
-        Optional<Scenario> scenario = Optional.empty();
-        if(scenarioRepository.findByIsDeletedIsFalse().size() > 0) {
-            scenario = scenarioRepository.findById(Long.valueOf(commandLine.getOptionValue(SCENARIO_ID_OPTION_NAME)));
-            auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenario.get().getId())); 
+        long scenarioId = Long.valueOf(commandLine.getOptionValue(SCENARIO_ID_OPTION_NAME));
+        if(scenarioRepository.findById(scenarioId).isPresent()) {
+            auditParameters.put(EAuditParameter.SCENARIO_ID, String.valueOf(scenarioId)); 
             
             String mainId = commandLine.getOptionValue(MAIN_GUIDELINE_OPTION_NAME);
             TestHierarchy main = testHierarchyRepository.getOne(Long.valueOf(mainId));
@@ -646,7 +647,8 @@ public class TanaguruCLI implements CommandLineRunner {
                     }
                 }
                 auditParameters.put(EAuditParameter.PAGE_URLS, builder.toString());
-            }               
+            }
+            break;
         case SITE:
             String[] seedsArgs = commandLine.getOptionValues(SITE_OPTION_NAME);
             if(seedsArgs != null){
@@ -678,7 +680,20 @@ public class TanaguruCLI implements CommandLineRunner {
             String crawlerInclusionRegex = commandLine.getOptionValue(CRAWLER_INCLUSION_REGEX_OPTION_NAME);
             if(crawlerInclusionRegex != null) {
                 auditParameters.put(EAuditParameter.CRAWLER_INCLUSION_REGEX, crawlerInclusionRegex);
-            }   
+            }
+            break;
+        case UPLOAD:
+            String domId = commandLine.getOptionValue(FILE_ID_OPTION_NAME);
+            if(domId != null) {
+                auditParameters.put(EAuditParameter.DOM_ID, domId);
+            }
+            break;
+        case SCENARIO:
+            String scenarioId = commandLine.getOptionValue(SCENARIO_ID_OPTION_NAME);
+            if(scenarioId != null) {
+                auditParameters.put(EAuditParameter.SCENARIO_ID, scenarioId);
+            }
+            break;  
         }
         String waitTime = commandLine.getOptionValue(WAIT_TIME_OPTION_NAME);
         if(waitTime != null) {

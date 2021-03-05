@@ -328,7 +328,7 @@ public class AuditController {
             references.add(testHierarchy);
         }
 
-        /**Audit audit = auditFactory.createAudit(
+        Audit audit = auditFactory.createAudit(
                 auditCommand.getName(),
                 auditCommand.getParameters(),
                 auditCommand.getType(),
@@ -336,11 +336,9 @@ public class AuditController {
                 project,
                 new ArrayList<>(references),
                 main
-                );**/
+                );
         
-        //auditRunnerService.runAudit(audit);
-        String pages = auditCommand.getParameters().get(EAuditParameter.PAGE_URLS);
-        runAuditByCli(pages);
+        auditRunnerService.runAudit(audit);
         return null;
     }
 
@@ -363,7 +361,7 @@ public class AuditController {
 
         CreateContainerResponse container = dockerClient.createContainerCmd("cliapp:latest")
                 .withHostConfig(hostConfig)
-                .withCmd("-pages",pages).exec(); //venir ajouter les bons params pour la cli et mettre a jour le module cli
+                .withCmd("-pages",pages,"-projectId","2","-mainGuideline","1","-references","1").exec();
        
         dockerClient.startContainerCmd(container.getId()).exec();
         dockerClient.logContainerCmd(container.getId())

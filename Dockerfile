@@ -12,6 +12,10 @@ RUN cd /opt                                                                     
     apt-get update                                                                                                                      && \
     apt-get install -y openjdk-11-jre ca-certificates bzip2 gnupg2 wget unzip libgtk-3-0 libdbus-glib-1-2 libxt6 libx11-xcb1
 
+#MAIL
+RUN apt-get install -y postfix mailutils
+RUN sed -i 's/inet_interfaces = all/inet_interfaces = loopback-only/g' /etc/postfix/main.cf
+
 #CHROME
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
