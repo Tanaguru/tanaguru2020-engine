@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
                 }
                 try {
                     if(sendAdminMail) {
-                        //mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
                         LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
                     }
                 }catch(MailException e) {
