@@ -84,13 +84,13 @@ public class UserServiceImpl implements UserService {
             from.setEmail(to.getEmail());
         }
 
-        if(!from.isEnabled() && to.isEnabled()) {
-            from.setAttempts(new ArrayList<Attempt>());
-            from.setAccountNonLocked(true);
-        }
-        
         from.setEnabled(to.isEnabled());
 
+        if(!from.isAccountNonLocked() && to.isAccountNonLocked()) {
+            from.setAttempts(new ArrayList<Attempt>());
+        }
+        from.setAccountNonLocked(to.isAccountNonLocked());
+   
         if(to.getAppRole() != null){
             from.setAppRole(to.getAppRole());
         }
@@ -141,18 +141,16 @@ public class UserServiceImpl implements UserService {
             switch(attempts.get(attempts.size()-1).getNumber()) {
 
             case FIRST_STEP_ATTEMPTS: 
-                user.setEnabled(false);
                 blockAccount(user, attempts,FIRST_ATTEMPT_TIME);
                 break;
 
             case SECOND_STEP_ATTEMPTS:
-                user.setEnabled(false);
                 blockAccount(user, attempts,SECOND_ATTEMPT_TIME);
                 break;
 
             case MAX_ATTEMPTS:
-                //desactivate user
-                user.setEnabled(false);
+                //block user definitely
+                blockAccount(user, attempts,0);
                 //send mail to super admin with list of attempts
                 DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
                 StringBuilder builder = new StringBuilder();
@@ -172,7 +170,7 @@ public class UserServiceImpl implements UserService {
                 }
                 try {
                     if(sendAdminMail) {
-                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                        //mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
                         LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
                     }
                 }catch(MailException e) {
