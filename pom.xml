@@ -9,7 +9,8 @@
         <module>tanaguru-cli</module>
         <module>tanaguru-rest</module>
 		<module>tanaguru-resources</module>
-    </modules>
+		<module>tanaguru-cli-docker</module>
+	</modules>
 
 	<groupId>com.tanaguru</groupId>
 	<artifactId>tanaguru2020</artifactId>
