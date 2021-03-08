@@ -84,6 +84,11 @@ public class UserServiceImpl implements UserService {
             from.setEmail(to.getEmail());
         }
 
+        if(!from.isEnabled() && to.isEnabled()) {
+            from.setAttempts(new ArrayList<Attempt>());
+            from.setAccountNonLocked(true);
+        }
+        
         from.setEnabled(to.isEnabled());
 
         if(to.getAppRole() != null){
@@ -136,16 +141,18 @@ public class UserServiceImpl implements UserService {
             switch(attempts.get(attempts.size()-1).getNumber()) {
 
             case FIRST_STEP_ATTEMPTS: 
+                user.setEnabled(false);
                 blockAccount(user, attempts,FIRST_ATTEMPT_TIME);
                 break;
 
             case SECOND_STEP_ATTEMPTS:
+                user.setEnabled(false);
                 blockAccount(user, attempts,SECOND_ATTEMPT_TIME);
                 break;
 
             case MAX_ATTEMPTS:
-                //locked user definitely
-                blockAccount(user, attempts,0);
+                //desactivate user
+                user.setEnabled(false);
                 //send mail to super admin with list of attempts
                 DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
                 StringBuilder builder = new StringBuilder();
@@ -214,6 +221,7 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     public void unlock(User user) {
+        user.setEnabled(true);
         user.setAccountNonLocked(true);
         userRepository.save(user);
     }
