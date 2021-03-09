@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 echo
-echo "tanaguru-entrypoint cli launched"
+echo "tanaguru-entrypoint custom cli launched"
 echo
 
 echo "Container - Init Script - Tanaguru initialization"
@@ -43,8 +43,8 @@ sed -i "s;auditrunner.maxConcurrentAudit.*;auditrunner.maxConcurrentAudit=${AUDI
 sed -i "s;auditrunner.profile.*;auditrunner.profile=${AUDITRUNNER_PROFILE};g" /opt/tanaguru-cli/config/audit-runner.properties
 
 echo "Launch Tanaguru CLI"
-chmod +x /opt/tanaguru-cli/src/main/resources/bin/tanaguru-cli-docker.sh
-/opt/tanaguru-cli/src/main/resources/bin/tanaguru-cli-docker.sh "$@"
+chmod +x /opt/tanaguru-cli-docker/src/main/resources/bin/tanaguru-cli-docker.sh
+/opt/tanaguru-cli-docker/src/main/resources/bin/tanaguru-cli-docker.sh "$@"
 
 echo "Container - End Script - Tanaguru initialization"
 

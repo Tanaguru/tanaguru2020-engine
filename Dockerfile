@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 USER root
 WORKDIR /
 
-ARG TANAGURU_CLI_ARCHIVE_PATH
+ARG TANAGURU_CLI_DOCKER_ARCHIVE_PATH
 ARG CHROME_DRIVER_VERSION="89.0.4389.23"
 ARG FIREFOX_VERSION="69.0"
 ARG GECKODRIVER_VERSION="0.21.0"
@@ -56,12 +56,12 @@ RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.
   && ln -fs /opt/geckodriver /usr/bin/geckodriver
 
 # ENTRYPOINT
-COPY ./tanaguru-entrypoint-docker.sh /
-RUN chmod +x /tanaguru-entrypoint-docker.sh
+COPY ./tanaguru-entrypoint-cli-docker.sh /
+RUN chmod +x /tanaguru-entrypoint-cli-docker.sh
 
 # TANAGURU
-ADD $TANAGURU_CLI_ARCHIVE_PATH /opt
-RUN mkdir /opt/tanaguru-cli/config
-RUN cp /opt/tanaguru-resources/src/main/resources/* /opt/tanaguru-cli/config
+ADD $TANAGURU_CLI_DOCKER_ARCHIVE_PATH /opt
+RUN mkdir /opt/tanaguru-cli-docker/config
+RUN cp /opt/tanaguru-resources/src/main/resources/* /opt/tanaguru-cli-docker/config
 
-ENTRYPOINT ["bash","tanaguru-entrypoint-docker.sh"]
+ENTRYPOINT ["bash","tanaguru-entrypoint-cli-docker.sh"]
