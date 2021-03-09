@@ -46,8 +46,6 @@ public class UserServiceImpl implements UserService {
     private static final int FIRST_ATTEMPT_TIME = 300000; //5min
     private static final int SECOND_ATTEMPT_TIME = 43200000;  //12h
     private static final String ADMIN_MAIL = "support@tanaguru.com";
-    private static final String ATTEMPTS_MAIL_SUBJECT_ADMIN = "Blocage d'un compte utilisateur";
-    private static final String ATTEMPTS_MAIL_SUBJECT_USER = "Blocage de votre compte utilisateur";
 
     public UserServiceImpl(UserRepository userRepository,
                            ContractRepository contractRepository,
@@ -168,14 +166,14 @@ public class UserServiceImpl implements UserService {
                 }
                 try {
                     if(sendAdminMail) {
-                        mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com",ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                        mailService.sendSimpleMessage(ADMIN_MAIL,messageService.getMessage("mail.block.user.attempts.adminSubject"), builder.toString());
                         LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
                     }
                 }catch(MailException e) {
                     LOGGER.error("[User {}] Unable to send the account blocking email to admin", user.getId());
                 }
                 try {
-                    mailService.sendSimpleMessage(user.getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
+                    mailService.sendSimpleMessage(user.getEmail(), messageService.getMessage("mail.block.user.attempts.subject"), builder.toString());
                     LOGGER.info("[User {}] account blocking email sent to user", user.getId());
                 }catch(MailException e) {
                     LOGGER.error("[User {}] Unable to send the account blocking email to user", user.getId());
