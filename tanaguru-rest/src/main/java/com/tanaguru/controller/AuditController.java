@@ -32,6 +32,7 @@ import com.tanaguru.service.*;
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,12 @@ public class AuditController {
     private final TestHierarchyRepository testHierarchyRepository;
     private final AsyncAuditService asyncAuditService;
     
+    @Value("${auditrunner.audit-docker.enabled}")
+    private boolean auditWithDocker;
+    
+    @Value("${auditrunner.audit-docker.container}")
+    private String containerName;
+       
     @Autowired
     public AuditController(
             AuditRepository auditRepository,
@@ -339,9 +346,12 @@ public class AuditController {
                 new ArrayList<>(references),
                 main
                 );
-
-        auditRunnerService.runAudit(audit);
-        //runAuditByCli(audit);
+        
+        if(auditWithDocker) {
+            runAuditByCli(audit);
+        }else{
+            auditRunnerService.runAudit(audit);
+        }
         return audit;
     }
 
@@ -358,12 +368,11 @@ public class AuditController {
         
         List<Container> containers = dockerClient.listContainersCmd().exec();
         for(Container c : containers) {
-            System.out.println(c.getNames());
             dockerClient.stopContainerCmd(c.getId()).exec();
             dockerClient.removeContainerCmd(c.getId()).exec();
         }
 
-        CreateContainerResponse container = dockerClient.createContainerCmd("clidockerapp:latest")
+        CreateContainerResponse container = dockerClient.createContainerCmd(containerName+":latest")
                 .withHostConfig(hostConfig)
                 .withEnv("LANG","fr_FR.UTF-8","LANGUAGE","fr_FR:fr","LC_ALL","fr_FR.UTF-8")
                 .withCmd("-auditId",String.valueOf(audit.getId())).exec();

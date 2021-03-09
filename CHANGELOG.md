@@ -11,4 +11,5 @@
 - Send email at the end of the audit (site, scenario, group of pages)
 
 ## 1.0.3
--New module for launching audits in docker container
+- New module for launching audits in docker container : 
+- 2 news configurations keys in audit-runner.properties, "auditrunner.audit-docker.enabled" to enable the launch of the audits in docker containers and "auditrunner.audit-docker.container" to specify the name of the docker image to use

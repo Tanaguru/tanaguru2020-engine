@@ -45,7 +45,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springboot-version}</version>
                 <configuration>
-                    <mainClass>com.tanaguru.TanaguruCLI</mainClass>
+                    <mainClass>com.tanaguru.TanaguruCliDocker</mainClass>
                     <profiles>
                         <profile>prod</profile>
                     </profiles>
