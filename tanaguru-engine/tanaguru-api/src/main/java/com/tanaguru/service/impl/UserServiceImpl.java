@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final AppRoleService appRoleService;
     private final ContractService contractService;
     private final MailService mailService;
+    private final MessageService messageService;
 
     private static final int FIRST_STEP_ATTEMPTS = 3;
     private static final int SECOND_STEP_ATTEMPTS = 5;
@@ -52,13 +53,15 @@ public class UserServiceImpl implements UserService {
                            ContractRepository contractRepository,
                            ContractUserRepository contractUserRepository,
                            AppRoleService appRoleService,
-                           ContractService contractService, MailService mailService) {
+                           ContractService contractService, MailService mailService,
+                           MessageService messageService) {
         this.userRepository = userRepository;
         this.contractRepository = contractRepository;
         this.contractUserRepository = contractUserRepository;
         this.appRoleService = appRoleService;
         this.contractService = contractService;
         this.mailService = mailService;
+        this.messageService = messageService;
     }
 
     public boolean checkUsernameIsUsed(String username) {
@@ -149,23 +152,23 @@ public class UserServiceImpl implements UserService {
                 //send mail to super admin with list of attempts
                 DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
                 StringBuilder builder = new StringBuilder();
-                builder.append("Multiples tentatives de connexions sur le compte : ")
-                        .append(user.getEmail()).append("\nNom d'utilisateur : ")
-                        .append(user.getUsername()).append("\nID utilisateur : ")
+                builder.append(messageService.getMessage("mail.block.user.attempts.email"))
+                        .append(user.getEmail()).append("\n"+messageService.getMessage("mail.block.user.attempts.username"))
+                        .append(user.getUsername()).append("\n"+messageService.getMessage("mail.block.user.attempts.userid"))
                         .append(user.getId());
                 for(Attempt attempt : attempts) {
-                    builder.append("\n\nTentative numéro ")
+                    builder.append("\n\n"+messageService.getMessage("mail.block.user.attempts.number"))
                             .append(attempt.getNumber()).append(" | IP : ")
-                            .append(attempt.getIp()).append(" | Dernier accés : ")
+                            .append(attempt.getIp()).append(" | "+messageService.getMessage("mail.block.user.attempts.lastAttempt"))
                             .append(longDateFormat.format(attempt.getLastModified()));
                     if( attempt.getBlockedUntil() != null ){
-                        builder.append(" | Bloqué jusqu'à : ")
+                        builder.append(" | "+messageService.getMessage("mail.block.user.attempts.until"))
                                 .append(longDateFormat.format(attempt.getBlockedUntil()));
                     }
                 }
                 try {
                     if(sendAdminMail) {
-                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
+                        mailService.sendSimpleMessage("lpedrau@oceaneconsulting.com",ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
                         LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
                     }
                 }catch(MailException e) {
