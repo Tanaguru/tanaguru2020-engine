@@ -288,6 +288,12 @@ public class ContractController {
         User owner = userRepository.findById(contractDto.getOwnerId())
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId() ));
 
+        // limit to 1 contract
+        Collection<Contract> contracts = contractService.findByOwner(owner);
+        if(contracts.size() > 0){
+            throw new CustomInvalidEntityException(CustomError.USER_ALREADY_HAS_CONTRACT);
+        }
+
         return contractService.modifyContract(
                 contract,
                 owner,

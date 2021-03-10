@@ -1,6 +1,7 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
@@ -352,7 +353,14 @@ public class AuditController {
     @DeleteMapping("/{id}")
     public @ResponseBody
     void deleteAudit(@PathVariable long id) {
-        asyncAuditService.deleteAudit(auditRepository.findById(id)
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id ));
+        if(audit.getStatus() == EAuditStatus.DONE || audit.getStatus() == EAuditStatus.ERROR){
+            asyncAuditService.deleteAudit(auditRepository.findById(id)
                 .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id )));
+        }else{
+            throw new CustomInvalidEntityException(CustomError.CANNOT_DELETE_RUNNING_AUDIT , audit.getId());
+        }
+        
     }
 }
