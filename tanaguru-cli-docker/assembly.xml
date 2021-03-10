@@ -18,8 +18,8 @@
             <directory>../tanaguru-resources/src/main/resources</directory>
             <outputDirectory>config</outputDirectory>
             <includes>
+            	<include>audit-docker.properties</include>
                 <include>common.properties</include>
-                <include>audit-runner.properties</include>
             </includes>
         </fileSet>
         <fileSet>
