@@ -76,10 +76,12 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
                     }
                 }else {
                     error = "User account is locked - Username : "+ authentication.getName();
+                    LOGGER.info(error);
                     throw new LockedException(error);
                 }
             }else {
                 error = "User account is locked - Username : "+ authentication.getName();
+                LOGGER.info(error);
                 throw new LockedException(error);
             }
         }

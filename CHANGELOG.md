@@ -11,5 +11,8 @@
 - Send email at the end of the audit (site, scenario, group of pages)
 
 ## 1.0.3
+- Multiple files for upload audit
+- Fix contract modification : could change owner to get multiple contract on 1 user
+- Admin and SuperAdmin can unlock/lock users
 - New module for launching audits in docker container : tanaguru-cli-docker
 - 2 news configurations keys in audit-runner.properties, "auditrunner.audit-docker.enabled" to enable the launch of the audits in docker containers and "auditrunner.audit-docker.container" to specify the name of the docker image to use
