@@ -12,12 +12,16 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Base64;
 
 public abstract class AbstractAuditRunner implements AuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuditRunner.class);
@@ -29,6 +33,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private Audit audit;
     private RemoteWebDriver tanaguruDriver;
     private String coreScript;
+    private String cssQuery;
 
     private int currentRank = 1;
 
@@ -60,7 +65,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String cssQuery) {
         this.audit = audit;
         this.tanaguruDriver = driver;
         this.coreScript = coreScript;
@@ -71,6 +77,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
+        this.cssQuery = cssQuery;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -166,7 +173,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 }
             }
 
-            try {
+            try {               
                 String result = (String) tanaguruDriver.executeScript(testScript);
                 String source = tanaguruDriver.getPageSource();
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
@@ -286,6 +293,21 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
         try {
             Thread.sleep(waitTime);
+            if(cssQuery != null && !cssQuery.equals("")) {
+                try {
+                    List<WebElement> elements = tanaguruDriver.findElementsByCssSelector(cssQuery);
+                    if(!elements.isEmpty()) {
+                        LOGGER.info("[Audit {}] Page loaded, {} elements found for the css query {} on page {}", audit.getId(), elements.size(), cssQuery, url);
+                        auditLog(EAuditLogLevel.INFO, "Page loaded, "+ elements.size()+" elements found for the css query "+cssQuery+" on page "+url);
+                    }else {
+                        LOGGER.info("[Audit {}] No element found for the css query {} on page {}", audit.getId(), cssQuery, url);
+                        auditLog(EAuditLogLevel.INFO, "No element found for the css query "+cssQuery+" on page "+url);
+                    }
+                }catch(Exception e) {
+                    LOGGER.info("[Audit {}] Css query incorrect : {}", audit.getId(), cssQuery);
+                    auditLog(EAuditLogLevel.INFO, "Css query incorrect : "+cssQuery);
+                }
+            }
             onGetNewPage(url, tanaguruDriver.getTitle(), false);
         } catch (InterruptedException e) {
             LOGGER.debug("Waiting time interrupted for url {}", url);

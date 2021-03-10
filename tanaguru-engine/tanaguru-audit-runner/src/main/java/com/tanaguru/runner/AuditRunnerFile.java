@@ -29,7 +29,8 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String cssQuery) {
         super(
                 tanaguruTests,
                 audit,
@@ -40,7 +41,8 @@ public class AuditRunnerFile extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                cssQuery);
         this.fileContent = fileContent;
     }
 

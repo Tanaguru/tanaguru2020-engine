@@ -38,7 +38,8 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String cssQuery) {
         super(tanaguruTests,
                 audit,
                 driver,
@@ -48,7 +49,8 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                cssQuery);
         this.scenario = scenario;
     }
 

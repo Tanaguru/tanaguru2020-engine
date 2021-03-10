@@ -276,7 +276,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                 case ENABLE_SCREENSHOT:
                     boolean enableScreenshot = Boolean.parseBoolean(value);
                     result = true;
-
+                    break;
                 default:
                     result = true;
             }

@@ -36,7 +36,7 @@ public interface AuditRunnerFactory {
      * @param webdriverType		The given driver type browser
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createPageRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> urls, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    Optional<AuditRunner> createPageRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> urls, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName, String cssQuery);
 
     /**
      * Create an @see AuditRunner from an @see Audit and an seeds list
@@ -51,7 +51,7 @@ public interface AuditRunnerFactory {
      * @param enableScreeShot   True to enable webdriver to take screenshot
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createSiteRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> seeds, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    Optional<AuditRunner> createSiteRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> seeds, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName, String cssQuery);
 
     /**
      * Create an @see AuditRunner from an @see Audit and a selenese scenario
@@ -66,7 +66,7 @@ public interface AuditRunnerFactory {
      * @param enableScreeShot   True to enable webdriver to take screenshot
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createSeleneseRunner(Collection<TanaguruTest> references, Audit audit, String scenario, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    Optional<AuditRunner> createSeleneseRunner(Collection<TanaguruTest> references, Audit audit, String scenario, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName, String cssQuery);
 
     /**
      * Create an @see AuditRunner from an Audit and html page
@@ -81,5 +81,5 @@ public interface AuditRunnerFactory {
      * @param enableScreeShot   True to enable webdriver to take screenshot
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createFileRunner(Collection<TanaguruTest> references, Audit audit, String content, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    Optional<AuditRunner> createFileRunner(Collection<TanaguruTest> references, Audit audit, String content, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName, String cssQuery);
 }

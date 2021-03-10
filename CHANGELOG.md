@@ -14,3 +14,4 @@
 - Multiple files for upload audit
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
+- Possibility to check the loading of a page with the search of a css selector
