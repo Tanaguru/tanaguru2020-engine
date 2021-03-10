@@ -87,6 +87,11 @@ public class UserServiceImpl implements UserService {
 
         from.setEnabled(to.isEnabled());
 
+        if(!from.isAccountNonLocked() && to.isAccountNonLocked()) {
+            from.setAttempts(new ArrayList<Attempt>());
+        }
+        from.setAccountNonLocked(to.isAccountNonLocked());
+   
         if(to.getAppRole() != null){
             from.setAppRole(to.getAppRole());
         }
@@ -145,7 +150,7 @@ public class UserServiceImpl implements UserService {
                 break;
 
             case MAX_ATTEMPTS:
-                //locked user definitely
+                //block user definitely
                 blockAccount(user, attempts,0);
                 //send mail to super admin with list of attempts
                 DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
@@ -215,6 +220,7 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     public void unlock(User user) {
+        user.setEnabled(true);
         user.setAccountNonLocked(true);
         userRepository.save(user);
     }

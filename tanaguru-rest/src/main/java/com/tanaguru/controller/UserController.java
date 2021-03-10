@@ -246,7 +246,8 @@ public class UserController {
         to.setUsername(user.getUsername());
         to.setEmail(user.getEmail());
         to.setEnabled(user.isEnabled());
-
+        to.setAccountNonLocked(user.isAccountNonLocked());
+        
         to.setAppRole(from.getAppRole());
         if(from.getAppRole().getName() != user.getAppRole() &&
                 userDetailsService.getCurrentUser().getId() != from.getId() &&
