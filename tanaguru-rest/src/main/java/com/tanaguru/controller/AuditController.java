@@ -1,5 +1,15 @@
 package com.tanaguru.controller;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallbackTemplate;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.entity.audit.Page;
@@ -22,6 +32,7 @@ import com.tanaguru.service.*;
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +60,17 @@ public class AuditController {
     private final ActRepository actRepository;
     private final TestHierarchyRepository testHierarchyRepository;
     private final AsyncAuditService asyncAuditService;
+    private final static Long SHM_SIZE = 2147483648L; //2gb
     
+    @Value("${auditrunner.audit-docker.enabled}")
+    private boolean auditWithDocker;
+    
+    @Value("${auditrunner.audit-docker.image}")
+    private String imageName;
+    
+    @Value("${auditrunner.audit-docker.network.mode}")
+    private String networkMode;
+       
     @Autowired
     public AuditController(
             AuditRepository auditRepository,
@@ -329,11 +350,49 @@ public class AuditController {
                 new ArrayList<>(references),
                 main
                 );
-
-        auditRunnerService.runAudit(audit);
+        
+        if(auditWithDocker) {
+            runAuditByCli(audit);
+        }else{
+            auditRunnerService.runAudit(audit);
+        }
         return audit;
     }
 
+    private void runAuditByCli(Audit audit) {
+        DefaultDockerClientConfig.Builder config = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
+        
+        HostConfig hostConfig = HostConfig
+                .newHostConfig()
+                .withShmSize(SHM_SIZE)
+                .withNetworkMode(networkMode)
+                .withAutoRemove(true);
+        
+        List<Container> containers = dockerClient.listContainersCmd().exec();
+        for(Container c : containers) {
+            dockerClient.stopContainerCmd(c.getId()).exec();
+            dockerClient.removeContainerCmd(c.getId()).exec();
+        }
+
+        CreateContainerResponse container = dockerClient.createContainerCmd(imageName+":latest")
+                .withHostConfig(hostConfig)
+                .withEnv("LANG","fr_FR.UTF-8","LANGUAGE","fr_FR:fr","LC_ALL","fr_FR.UTF-8")
+                .withCmd("-auditId",String.valueOf(audit.getId())).exec();
+       
+        dockerClient.startContainerCmd(container.getId()).exec();
+        dockerClient.logContainerCmd(container.getId())
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .exec(new ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
+            @Override
+            public void onNext(Frame frame) {
+                System.out.print(new String(frame.getPayload()));
+            }
+        });
+    }
+    
     /**
      * @param id The id of the @see Audit to delete
      */
