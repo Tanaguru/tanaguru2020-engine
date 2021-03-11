@@ -60,12 +60,16 @@ public class AuditController {
     private final ActRepository actRepository;
     private final TestHierarchyRepository testHierarchyRepository;
     private final AsyncAuditService asyncAuditService;
+    private final static Long SHM_SIZE = 2147483648L; //2gb
     
     @Value("${auditrunner.audit-docker.enabled}")
     private boolean auditWithDocker;
     
-    @Value("${auditrunner.audit-docker.container}")
-    private String containerName;
+    @Value("${auditrunner.audit-docker.image}")
+    private String imageName;
+    
+    @Value("${auditrunner.audit-docker.network.mode}")
+    private String networkMode;
        
     @Autowired
     public AuditController(
@@ -359,11 +363,10 @@ public class AuditController {
         DefaultDockerClientConfig.Builder config = DefaultDockerClientConfig.createDefaultConfigBuilder();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
         
-        long shmsize = 2147483648L; //2gb
         HostConfig hostConfig = HostConfig
                 .newHostConfig()
-                .withShmSize(shmsize)
-                .withNetworkMode("host")
+                .withShmSize(SHM_SIZE)
+                .withNetworkMode(networkMode)
                 .withAutoRemove(true);
         
         List<Container> containers = dockerClient.listContainersCmd().exec();
@@ -372,7 +375,7 @@ public class AuditController {
             dockerClient.removeContainerCmd(c.getId()).exec();
         }
 
-        CreateContainerResponse container = dockerClient.createContainerCmd(containerName+":latest")
+        CreateContainerResponse container = dockerClient.createContainerCmd(imageName+":latest")
                 .withHostConfig(hostConfig)
                 .withEnv("LANG","fr_FR.UTF-8","LANGUAGE","fr_FR:fr","LC_ALL","fr_FR.UTF-8")
                 .withCmd("-auditId",String.valueOf(audit.getId())).exec();

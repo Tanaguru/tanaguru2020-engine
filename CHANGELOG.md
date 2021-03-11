@@ -15,4 +15,4 @@
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
 - New module for launching audits in docker container : tanaguru-cli-docker
-- 2 news configurations keys in audit-runner.properties, "auditrunner.audit-docker.enabled" to enable the launch of the audits in docker containers and "auditrunner.audit-docker.container" to specify the name of the docker image to use
+- 3 news configurations keys in audit-runner.properties, "auditrunner.audit-docker.enabled" to enable the launch of the audits in docker containers and "auditrunner.audit-docker.container" to specify the name of the docker image to use, and "auditrunner.audit-docker.network.mode" to specify the network host config of the container

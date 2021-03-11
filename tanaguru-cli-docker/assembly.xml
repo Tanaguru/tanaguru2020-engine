@@ -19,6 +19,7 @@
             <outputDirectory>config</outputDirectory>
             <includes>
             	<include>audit-docker.properties</include>
+            	<include>audit-runner.properties</include>
                 <include>common.properties</include>
             </includes>
         </fileSet>
