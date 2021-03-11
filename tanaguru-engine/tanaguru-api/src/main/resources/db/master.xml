@@ -29,5 +29,4 @@
     <include file="db/changelogs/20201023_changelog_updateUsers_accountNonLocked.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20201027_changelog_updateUsers_attemptsColumn.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20201224_changelog_webextEngine.xml" relativeToChangelogFile="false"/>
-    <include file="db/changelogs/20210105_changelog_updateTestHierarchy_engineVersion.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
