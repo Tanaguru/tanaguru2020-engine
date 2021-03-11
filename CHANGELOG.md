@@ -14,3 +14,4 @@
 - Multiple files for upload audit
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
+- Translation of the mail sended when the user is blocked
