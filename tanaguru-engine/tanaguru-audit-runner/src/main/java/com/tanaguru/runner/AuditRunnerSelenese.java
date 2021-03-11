@@ -14,6 +14,7 @@ import jp.vmi.selenium.selenese.Selenese;
 import jp.vmi.selenium.selenese.TestProject;
 import jp.vmi.selenium.selenese.command.CommandFactory;
 import jp.vmi.selenium.selenese.command.ICommand;
+import jp.vmi.selenium.selenese.result.Result;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,15 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
                     LOGGER.warn("[Audit {}] Interrupting current audit", super.getAudit().getId());
                     break;
                 } else {
-                    runner.execute(test);
+                    EAuditLogLevel level = EAuditLogLevel.INFO;
+                    Result result = runner.execute(test);
+                    if(result.getLevel().value == Result.Level.ERROR.value){
+                        level = EAuditLogLevel.ERROR;
+                    }else if(result.getLevel().value == Result.Level.WARNING.value){
+                        level = EAuditLogLevel.WARNING;
+                    }
+
+                    auditLog(level, result.getMessage());
                 }
 
             }

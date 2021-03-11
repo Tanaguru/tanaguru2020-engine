@@ -148,13 +148,13 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
                 try {
                     boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain",domain).replaceAll("url",url));
                     if(emailSent) {
-                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent");
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "E-mail notifying the end of the audit sent to "+user.getEmail());
                     }else {
-                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                        auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit to "+user.getEmail());
                     }
                 }catch(MailException e) {
-                    LOGGER.error("[Audit {}] Failed to send email at the end of the audit", audit.getId());
-                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit");
+                    LOGGER.error("[Audit {}] Failed to send email at the end of the audit to {}", audit.getId(), user.getEmail());
+                    auditService.log(auditRunner.getAudit(), EAuditLogLevel.ERROR, "Failed to send email at the end of the audit to "+user.getEmail());
                 }
             }
 

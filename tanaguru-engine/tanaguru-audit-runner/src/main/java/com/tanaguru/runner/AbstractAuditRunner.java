@@ -111,9 +111,14 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         }catch (Exception e){
             LOGGER.error("Error during run : " + e.getMessage());
             auditLog(EAuditLogLevel.ERROR, "Error during run : " + e.getMessage());
-        }finally {
+        }
+
+        try{
             LOGGER.debug("[Audit {}] Closing webdriver", audit.getId());
             tanaguruDriver.quit();
+        }catch (Exception e){
+            LOGGER.error("[Audit {}] Error while closing webdriver", audit.getId());
+            auditLog(EAuditLogLevel.ERROR, "Error while closing webdriver");
         }
 
         LOGGER.info("[Audit {}] Runner ended", audit.getId());
@@ -123,7 +128,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     }
 
     protected abstract void runImpl();
-
 
     public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {
         int firstHash = url.indexOf('#');

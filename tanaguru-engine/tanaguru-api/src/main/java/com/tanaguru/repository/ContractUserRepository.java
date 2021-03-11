@@ -35,4 +35,6 @@ public interface ContractUserRepository extends JpaRepository<ContractAppUser, L
     Collection<ContractAppUser> findAllByContract(Contract contract);
     Collection<ContractAppUser> findAllByContract_Id(long id);
 
+    void deleteAllByContract(Contract contract);
+
 }

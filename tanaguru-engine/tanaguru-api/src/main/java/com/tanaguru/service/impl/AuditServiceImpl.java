@@ -8,10 +8,8 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.repository.ActRepository;
-import com.tanaguru.repository.AuditLogRepository;
-import com.tanaguru.repository.AuditReferenceRepository;
-import com.tanaguru.repository.AuditRepository;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditActService;
 import com.tanaguru.service.AuditLogService;
 import com.tanaguru.service.AuditParameterService;
@@ -24,8 +22,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import java.util.Collection;
@@ -49,6 +49,7 @@ public class AuditServiceImpl implements AuditService {
     private final AuditRepository auditRepository;
     private final PageService pageService;
     private final TestHierarchyService testHierarchyService;
+    private final AuditAuditParameterValueRepository auditAuditParameterValueRepository;
     
     @Autowired
     public AuditServiceImpl(
@@ -61,7 +62,7 @@ public class AuditServiceImpl implements AuditService {
             AuditRepository auditRepository,
             PageService pageService,
             TestHierarchyResultService testHierarchyResultService,
-            TestHierarchyService testHierarchyService) {
+            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository) {
         this.actRepository = actRepository;
         this.auditActService = auditActService;
         this.auditLogRepository = auditLogRepository;
@@ -71,6 +72,7 @@ public class AuditServiceImpl implements AuditService {
         this.auditRepository = auditRepository;
         this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
+        this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
     }
 
     public Collection<Audit> findAllByProject(Project project) {
@@ -99,9 +101,17 @@ public class AuditServiceImpl implements AuditService {
         return !audit.isPrivate() || (shareCode != null && !shareCode.isEmpty() && audit.getShareCode().equals(shareCode));
     }
 
+
     public void deleteAudit(Audit audit){
+        audit = auditRepository.findById(audit.getId())
+                .orElseThrow(CustomEntityNotFoundException::new);
+        LOGGER.info("[Audit " + audit.getId() + "] delete act");
         actRepository.findByAudit(audit).ifPresent(actRepository::delete);
+        LOGGER.info("[Audit " + audit.getId() + "] delete content");
         pageService.deletePageByAudit(audit);
+
+        LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
+        deleteAuditParameterByAudit(audit);
 
         Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
                 .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
@@ -111,6 +121,10 @@ public class AuditServiceImpl implements AuditService {
                 testHierarchyService.deleteReference(reference);
             }
         }
+    }
+
+    public void deleteAuditParameterByAudit(Audit audit){
+        auditAuditParameterValueRepository.deleteAllByAudit(audit);
     }
     
     /**
@@ -129,5 +143,4 @@ public class AuditServiceImpl implements AuditService {
         }
         return jsonAuditObject;
     }
-    
 }

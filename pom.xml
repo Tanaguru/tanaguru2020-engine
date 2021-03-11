@@ -13,14 +13,14 @@
 
 	<groupId>com.tanaguru</groupId>
 	<artifactId>tanaguru2020</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 
     <properties>
 		<springboot-version>2.2.6.RELEASE</springboot-version>
 		<spring-version>5.2.9.RELEASE</spring-version>
 		<kafka-version>2.4.0</kafka-version>
 		<maven-compiler-version>3.8.1</maven-compiler-version>
-		<jackson-version>2.10.3</jackson-version>
+		<jackson-version>2.10.5</jackson-version>
     </properties>
 
 	<dependencyManagement>
