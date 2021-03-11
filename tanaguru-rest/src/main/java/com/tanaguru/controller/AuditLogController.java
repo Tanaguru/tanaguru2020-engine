@@ -3,10 +3,8 @@ package com.tanaguru.controller;
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
-import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.repository.AuditLogRepository;
 import com.tanaguru.repository.AuditRepository;
 import io.swagger.annotations.ApiOperation;
@@ -14,16 +12,13 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,7 +75,6 @@ public class AuditLogController {
             value = "Get paginable AuditLog for a given Audit id filtered by date and/or level",
             notes = "User must have SHOW_AUDIT authority on audit's project or a valid sharecode"
                     + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id "
-                    + "\nDate format must be : dd-MM-yyyy"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -88,8 +82,8 @@ public class AuditLogController {
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
             @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
-    @PreAuthorize(
-            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
+    /**@PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")**/
     @GetMapping("/by-audit-filtered/{id}/{shareCode}")
     public @ResponseBody
     Page<AuditLog> getAuditLogByAuditFiltered(
@@ -97,26 +91,14 @@ public class AuditLogController {
             @PathVariable(required = false) @ApiParam(required = false) String shareCode,
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") Optional<LocalDate> date,
-            @RequestParam(required = false) @ApiParam(required = false) Optional<EAuditLogLevel> level) {
+            @RequestParam(defaultValue = "true", required = false) boolean asc,
+            @RequestParam(required = true) @ApiParam(required = true) Collection<EAuditLogLevel> levels) {
         
         Audit audit = auditRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
         
-        Page<AuditLog> logs = null;
-        
-        if(level.isPresent() && date.isPresent()) {
-            LocalDate localDate = date.get();
-            logs = auditLogRepository.findAllByAuditAndLevelAndDate(audit,level.get(), localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),PageRequest.of(page, size, Sort.by("date"))); 
-        }else if(level.isPresent()) {
-            logs = auditLogRepository.findAllByAuditAndLevel(audit,level.get(),PageRequest.of(page, size, Sort.by("date"))); 
-        }else if(date.isPresent()) {
-            LocalDate localDate = date.get();
-            logs = auditLogRepository.findAllByAuditAndDate(audit, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),PageRequest.of(page, size, Sort.by("date"))); 
-        }else {
-            logs = auditLogRepository.findAllByAudit(audit,PageRequest.of(page, size, Sort.by("date")));
-        }
-
+        Direction direction = (asc) ? Direction.ASC : Direction.DESC;
+        Page<AuditLog> logs = auditLogRepository.findAllByAuditAndLevel(audit,levels,PageRequest.of(page, size, Sort.by(direction,"date"))); 
         return logs;
     }
     

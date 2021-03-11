@@ -18,12 +18,7 @@ import java.util.Collection;
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     Collection<AuditLog> findAllByAudit(Audit audit);
     Page<AuditLog> findAllByAudit(Audit audit, Pageable pageable);
-    Page<AuditLog> findAllByAuditAndLevel(Audit audit, EAuditLogLevel level, Pageable pageable);
     
-    @Query("select e from AuditLog e where e.audit = ?1 and year(e.date) = ?2 and month(e.date) = ?3 and day(e.date)= ?4 ")
-    Page<AuditLog> findAllByAuditAndDate(Audit audit, int year, int month, int day, Pageable pageable);
-    
-    @Query("select e from AuditLog e where e.audit = ?1 and e.level = ?2 and year(e.date) = ?3 and month(e.date) = ?4 and day(e.date)= ?5 ")
-    Page<AuditLog> findAllByAuditAndLevelAndDate(Audit audit, EAuditLogLevel level, int year, int month, int day , Pageable pageable);
-
+    @Query("SELECT a FROM AuditLog a WHERE a.audit = ?1 AND a.level IN ?2")
+    Page<AuditLog> findAllByAuditAndLevel(Audit audit, Collection<EAuditLogLevel> levels, Pageable pageable);
 }
