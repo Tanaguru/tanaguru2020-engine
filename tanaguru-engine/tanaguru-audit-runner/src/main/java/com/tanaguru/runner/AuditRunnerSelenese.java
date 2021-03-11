@@ -4,6 +4,7 @@ package com.tanaguru.runner;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.selenese.command.SeleneseAudit;
 import com.tanaguru.selenese.command.SeleneseClick;
 import com.tanaguru.selenese.command.SeleneseOpen;
@@ -32,7 +33,6 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             Audit audit,
             String scenario,
             RemoteWebDriver driver,
-            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
@@ -42,7 +42,6 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
         super(tanaguruTests,
                 audit,
                 driver,
-                coreScript,
                 waitTime,
                 resolutions,
                 basicAuthUrl,

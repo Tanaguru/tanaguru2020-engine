@@ -16,6 +16,7 @@ import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.ResourceRepository;
 import com.tanaguru.repository.ScenarioRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
+import com.tanaguru.repository.WebextEngineRepository;
 import com.tanaguru.runner.*;
 import com.tanaguru.service.AuditService;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -41,8 +42,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ResourceRepository resourceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final AuditReferenceRepository auditReferenceRepository;
-
-    private final String coreScript;
+    
     private static final String CHROME = "chrome";
     private static final String FIREFOX = "firefox";
 
@@ -53,7 +53,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             AuditService auditService,
             ScenarioRepository scenarioRepository,
             ResourceRepository resourceRepository,
-            TanaguruTestRepository tanaguruTestRepository, AuditReferenceRepository auditReferenceRepository, String coreScript) {
+            TanaguruTestRepository tanaguruTestRepository,
+            AuditReferenceRepository auditReferenceRepository) {
 
         this.tanaguruDriverFactory = tanaguruDriverFactory;
         this.tanaguruCrawlerControllerFactory = tanaguruCrawlerControllerFactory;
@@ -62,7 +63,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         this.resourceRepository = resourceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.auditReferenceRepository = auditReferenceRepository;
-        this.coreScript = coreScript;
     }
 
     @Override
@@ -204,7 +204,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     urls,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
@@ -239,7 +238,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     scenario,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
@@ -286,7 +284,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     tanaguruCrawlerController.get(),
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,
@@ -322,7 +319,6 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                     audit,
                     content,
                     tanaguruDriver.get(),
-                    coreScript,
                     waitTime,
                     resolutions,
                     basicAuthUrl,

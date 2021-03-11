@@ -3,8 +3,11 @@ package com.tanaguru.service.impl.runner;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.AuditReference;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
+import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.WebextEngine;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
@@ -42,6 +45,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
     protected final TestHierarchyResultRepository testHierarchyResultRepository;
     protected final ResultAnalyzerService resultAnalyzerService;
     protected final TestHierarchyRepository testHierarchyRepository;
+    protected final AuditReferenceRepository auditReferenceRepository;
     protected final ElementResultRepository elementResultRepository;
     protected final MailService mailService;
     protected final MessageService messageService;
@@ -61,10 +65,12 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
+            AuditReferenceRepository auditReferenceRepository,
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
             ContractUserRepository contractUserRepository) {
+
         this.pageRepository = pageRepository;
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -74,6 +80,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         this.resultAnalyzerService = resultAnalyzerService;
         this.testHierarchyRepository = testHierarchyRepository;
         this.elementResultRepository = elementResultRepository;
+        this.auditReferenceRepository = auditReferenceRepository;
         this.mailService = mailService;
         this.messageService = messageService;
         this.actRepository = actRepository;

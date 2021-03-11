@@ -15,6 +15,7 @@ public class TestHierarchyDTO {
     private String code;
     private Integer rank;
     private Boolean isDeleted;
+    private Long webextEngineId;
 
     public TestHierarchyDTO() {
     }
@@ -97,5 +98,13 @@ public class TestHierarchyDTO {
 
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
+    }
+    
+    public Long getWebextEngineId() {
+        return webextEngineId;
+    }
+    
+    public void setWebextEngineId(Long webextEngineId) {
+        this.webextEngineId = webextEngineId;
     }
 }

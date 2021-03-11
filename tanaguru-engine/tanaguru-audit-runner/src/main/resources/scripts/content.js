@@ -1,3 +1,4 @@
+// version=1
 // content script
 /* Extension du DOM. */
 var ariaroles = {

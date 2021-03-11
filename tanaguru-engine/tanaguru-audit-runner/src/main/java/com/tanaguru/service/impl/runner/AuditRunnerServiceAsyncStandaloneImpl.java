@@ -58,10 +58,12 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
             ResultAnalyzerService resultAnalyzerService,
             TestHierarchyRepository testHierarchyRepository,
             ElementResultRepository elementResultRepository,
+            AuditReferenceRepository auditReferenceRepository,
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
             ContractUserRepository contractUserRepository) {
+
         super(pageRepository,
                 auditRepository,
                 auditService,
@@ -71,10 +73,12 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
                 resultAnalyzerService,
                 testHierarchyRepository,
                 elementResultRepository,
+                auditReferenceRepository,
                 mailService,
                 messageService,
                 actRepository,
                 contractUserRepository);
+
         this.auditRunnerFactory = auditRunnerFactory;
     }
 

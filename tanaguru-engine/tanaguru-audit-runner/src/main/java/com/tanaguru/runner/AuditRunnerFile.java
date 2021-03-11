@@ -3,6 +3,8 @@ package com.tanaguru.runner;
 
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.repository.WebextEngineRepository;
+
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,6 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             Audit audit,
             String fileContent,
             RemoteWebDriver driver,
-            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
@@ -34,7 +35,6 @@ public class AuditRunnerFile extends AbstractAuditRunner {
                 tanaguruTests,
                 audit,
                 driver,
-                coreScript,
                 waitTime,
                 resolutions,
                 basicAuthUrl,

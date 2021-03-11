@@ -4,6 +4,8 @@ import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.listener.TanaguruCrawlerListener;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.repository.WebextEngineRepository;
+
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.Collection;
@@ -16,14 +18,13 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
             Audit audit,
             TanaguruCrawlerController crawlerController,
             RemoteWebDriver driver,
-            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot) {
-        super(tanaguruTests, audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
+        super(tanaguruTests, audit, driver, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
         this.crawlerController = crawlerController;
     }
 
