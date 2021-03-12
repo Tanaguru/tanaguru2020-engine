@@ -82,8 +82,8 @@ public class AuditLogController {
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
             @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
     })
-    /**@PreAuthorize(
-            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")**/
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserCanShowAudit(#id, #shareCode)")
     @GetMapping("/by-audit-filtered/{id}/{shareCode}")
     public @ResponseBody
     Page<AuditLog> getAuditLogByAuditFiltered(
