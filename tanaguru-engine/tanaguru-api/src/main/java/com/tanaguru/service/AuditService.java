@@ -1,11 +1,13 @@
 package com.tanaguru.service;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.project.Project;
 
 import java.util.Collection;
 import org.json.JSONObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
@@ -31,6 +33,14 @@ public interface AuditService {
      */
     Collection<Audit> findAllByProject(Project project);
 
+    /**
+     * Find all @see Audit for a given @see Project and for a given type
+     *
+     * @param project The given @see Project
+     * @return An @see Audit list
+     */
+    Page<Audit> findAllByProjectAndType(Project project, EAuditType type, Pageable pageable);
+    
     /**
      * Find page of @see Audit for a given @see Project
      *
