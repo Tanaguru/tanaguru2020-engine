@@ -20,6 +20,9 @@ import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -97,9 +100,10 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Collection<Contract> findByUser(User user) {
-        return contractUserRepository.findAllByUser(user)
+    public Page<Contract> findByUser(User user, Pageable pageable) {
+        List<Contract> contracts = contractUserRepository.findAllByUser(user)
                 .stream().map((ContractAppUser::getContract)).collect(Collectors.toList());
+        return new PageImpl<>(contracts, pageable, contracts.size());
     }
 
     public Collection<Contract> findByOwner(User user) {

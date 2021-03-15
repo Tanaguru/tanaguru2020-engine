@@ -4,6 +4,9 @@ import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -33,7 +36,7 @@ public interface ContractUserRepository extends JpaRepository<ContractAppUser, L
     List<ContractAppUser> findAllByUserAndContractRole_Name(User user, EContractRole contractRole);
 
     Collection<ContractAppUser> findAllByContract(Contract contract);
-    Collection<ContractAppUser> findAllByContract_Id(long id);
+    Page<ContractAppUser> findAllByContract_Id(long id, Pageable pageable);
 
     void deleteAllByContract(Contract contract);
 

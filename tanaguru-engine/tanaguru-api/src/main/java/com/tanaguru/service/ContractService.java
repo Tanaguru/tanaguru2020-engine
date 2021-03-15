@@ -10,6 +10,9 @@ import com.tanaguru.domain.entity.membership.user.User;
 import java.util.Collection;
 import java.util.Date;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface ContractService {
     /**
      * Find authorities for a given @see EContractRole
@@ -85,7 +88,7 @@ public interface ContractService {
      * @param user The given @see User
      * @return A list of @see Contract
      */
-    Collection<Contract> findByUser(User user);
+    Page<Contract> findByUser(User user, Pageable pageable);
 
     /**
      * Find all contracts an @see User owns

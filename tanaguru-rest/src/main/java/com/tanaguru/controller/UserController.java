@@ -360,8 +360,11 @@ public class UserController {
             "#id)")
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<ContractAppUser> findAllByContract(@PathVariable long id) {
-        return contractUserRepository.findAllByContract_Id(id);
+    Page<ContractAppUser> findAllByContract(@PathVariable long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
+        return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
     }
 
     /**
