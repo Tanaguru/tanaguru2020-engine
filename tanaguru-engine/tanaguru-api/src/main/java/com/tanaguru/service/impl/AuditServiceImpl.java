@@ -1,6 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
 import com.tanaguru.domain.entity.audit.AuditReference;
@@ -33,6 +34,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -153,5 +155,15 @@ public class AuditServiceImpl implements AuditService {
             jsonAuditObject.append("pages", pageService.toJson(page));
         }
         return jsonAuditObject;
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Audit> findAllByProjectAndType(Project project, EAuditType type,
+            Pageable pageable) {
+        
+        List<Audit> audits = actRepository.findAllByProjectAndAudit_Type(project, type).stream()
+                .map((Act::getAudit))
+                .collect(Collectors.toList());
+        return new PageImpl<> (audits, pageable, audits.size());
     }
 }

@@ -216,7 +216,7 @@ public class AuditController {
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
             "#id)")
-    @GetMapping("/by-project/{id}")
+    @GetMapping("/by-project-and-type/{id}")
     public @ResponseBody
     org.springframework.data.domain.Page<Audit> getAuditsByProjectAndType(@PathVariable long id, 
             @PathVariable EAuditType type,

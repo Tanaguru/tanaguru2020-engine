@@ -16,6 +16,8 @@ public interface ActRepository extends JpaRepository<Act, Long> {
     Optional<Act> findByAudit(Audit audit);
 
     Collection<Act> findAllByProject(Project project);
+    
+    Collection<Act> findAllByProjectAndAudit_Type(Project project, EAuditType type);
 
     org.springframework.data.domain.Page<Act> findAll(Pageable pageable);
     org.springframework.data.domain.Page<Act> findAllByProject(Project project, Pageable pageable);
