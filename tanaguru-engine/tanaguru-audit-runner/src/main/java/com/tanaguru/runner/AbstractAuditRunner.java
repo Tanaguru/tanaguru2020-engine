@@ -281,10 +281,12 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             tanaguruDriver.get(url);
         } catch (TimeoutException e) {
             LOGGER.debug("Webdriver timeout for url {}", url);
-            auditLog(EAuditLogLevel.WARNING, "Webdriver timeout on page " + url);
+            auditLog(EAuditLogLevel.WARNING, "Webdriver automatic wait time timed out when loading page " + url + ". This is not an error, it just means that the browser does not have the time to load the page with your current configuration. If you see this WARNING more often you should probably increase the wait time in your server configuration and check how long your website takes to load on a fresh installed browser.");
         }
 
         try {
+            LOGGER.debug("Custom wait time ", waitTime);
+            auditLog(EAuditLogLevel.ERROR, "Custom wait time " + waitTime);
             Thread.sleep(waitTime);
             onGetNewPage(url, tanaguruDriver.getTitle(), false);
         } catch (InterruptedException e) {

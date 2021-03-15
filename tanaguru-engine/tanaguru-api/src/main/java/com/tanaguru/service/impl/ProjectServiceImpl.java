@@ -20,6 +20,9 @@ import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -146,6 +149,22 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
                 .map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Project> findPageByUserMemberOfNotOwner(User user, Pageable pageable) {
+        Page<ProjectAppUser> projects = projectUserRepository.findAllByContractAppUser_User(user, pageable);
+        List<Project> projectsList = projects.toList()
+                .stream()
+                .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
+                .map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(
+                projectsList,
+                pageable,
+                projects.getTotalElements()
+        );
+
     }
 
     public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
