@@ -87,10 +87,8 @@ public class TestHierarchyController {
     public @ResponseBody
     Page<TestHierarchyDTO> getReferences(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
-            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
-        List<TestHierarchyDTO> testHierarchies = testHierarchyRepository.findAllByParentIsNull()
-                .stream().map((TestHierarchyDTO::new)).collect(Collectors.toList());
-        return new PageImpl<>(testHierarchies, PageRequest.of(page, size), testHierarchies.size());
+            @RequestParam(defaultValue = "5") @ApiParam(required = false) int size) {
+        return testHierarchyRepository.findAllByParentIsNull(PageRequest.of(page, size));
     }
 
     /**
