@@ -101,9 +101,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     public Page<Contract> findByUser(User user, Pageable pageable) {
-        List<Contract> contracts = contractUserRepository.findAllByUser(user)
-                .stream().map((ContractAppUser::getContract)).collect(Collectors.toList());
-        return new PageImpl<>(contracts, pageable, contracts.size());
+        return contractUserRepository.findAllContractByUser(user, pageable);
     }
 
     public Collection<Contract> findByOwner(User user) {

@@ -100,12 +100,11 @@ public class ContractController {
     public @ResponseBody
     Page<Contract> findAllByUser(@PathVariable long id,
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
-            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Pageable pageable = PageRequest.of(page, size);
         Page<Contract> userContracts = contractService.findByUser(user, pageable);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
             List<Contract> contracts = userContracts.stream().filter(contract ->
