@@ -129,10 +129,11 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean isAsc
+            @RequestParam(defaultValue = "true") boolean isAsc,
+            @RequestParam(defaultValue = "") String usernameOrEmail
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
-        return userRepository.findAll(pageRequest);
+        return userRepository.findByUsernameContainingOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest);
     }
 
 
