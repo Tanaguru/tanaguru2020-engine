@@ -13,4 +13,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
     Page<Contract> findAll(Pageable pageable);
+    Page<Contract> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

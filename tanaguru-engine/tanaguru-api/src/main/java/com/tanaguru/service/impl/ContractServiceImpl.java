@@ -100,10 +100,14 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    public Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable) {
+        return contractUserRepository.findAllContractByUserAndContractNameContaining(user, contractName, pageable);
+    }
+
     public Page<Contract> findByUser(User user, Pageable pageable) {
         return contractUserRepository.findAllContractByUser(user, pageable);
     }
-
+    
     public Collection<Contract> findByOwner(User user) {
         return contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)
                 .stream().map((ContractAppUser::getContract))

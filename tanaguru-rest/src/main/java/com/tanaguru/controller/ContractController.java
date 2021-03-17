@@ -72,13 +72,15 @@ public class ContractController {
     Page<Contract> findAllWithAuthorities(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "") String name
+            ) {
 
         return contractService.getRoleAuthorities(
                 tanaguruUserDetailsService.getCurrentUser().getAppRole().getName())
                 .contains(ContractAuthorityName.SHOW_CONTRACT) ?
-                        contractRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy))):
-                            findAllOwnedOrCurrentUserIsMemberOf(page, size, sortBy);
+                        contractRepository.findByNameContainingIgnoreCase(name, PageRequest.of(page, size, Sort.by(sortBy))):
+                            findAllByNameOwnedOrCurrentUserIsMemberOf(page, size, sortBy, name);
     }
     
     /**
@@ -133,11 +135,12 @@ public class ContractController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Page<Contract> findAllOwnedOrCurrentUserIsMemberOf(
+    Page<Contract> findAllByNameOwnedOrCurrentUserIsMemberOf(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        return contractService.findByUser(
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "") String name) {
+        return contractService.findByUserAndContractName(name,
                 tanaguruUserDetailsService.getCurrentUser(), PageRequest.of(page, size, Sort.by(sortBy))
                 );   
     }

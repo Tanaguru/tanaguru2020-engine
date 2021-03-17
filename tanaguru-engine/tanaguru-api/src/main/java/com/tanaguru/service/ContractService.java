@@ -83,13 +83,21 @@ public interface ContractService {
     void deleteContract(Contract contract);
 
     /**
+     * Get all @see Contract for a given @see User and containing the name
+     *
+     * @param user The given @see User
+     * @return A list of @see Contract
+     */
+    Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable);
+
+    /**
      * Get all @see Contract for a given @see User
      *
      * @param user The given @see User
      * @return A list of @see Contract
      */
     Page<Contract> findByUser(User user, Pageable pageable);
-
+    
     /**
      * Find all contracts an @see User owns
      *

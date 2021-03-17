@@ -23,6 +23,9 @@ public interface ContractUserRepository extends JpaRepository<ContractAppUser, L
 
     Collection<ContractAppUser> findAllByUser(User user);
     
+    @Query("SELECT contractAppUser.contract from ContractAppUser as contractAppUser where contractAppUser.user = :user and contractAppUser.contract.name like %:contractName% ")
+    Page<Contract> findAllContractByUserAndContractNameContaining(@Param("user") User user,@Param("contractName") String contractName, Pageable pageable);
+
     @Query("SELECT contractAppUser.contract from ContractAppUser as contractAppUser where contractAppUser.user = :user")
     Page<Contract> findAllContractByUser(@Param("user") User user, Pageable pageable);
 
