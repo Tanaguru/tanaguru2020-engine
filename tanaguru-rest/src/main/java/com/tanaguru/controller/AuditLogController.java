@@ -105,12 +105,6 @@ public class AuditLogController {
     @ApiOperation(
             value = "Get the different log levels"
     )
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Invalid parameters"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 403, message = "Forbidden for current session"),
-            @ApiResponse(code = 404, message = "Not found")
-    })
     @GetMapping("/levels")
     public @ResponseBody
     EAuditLogLevel[] getLevels() {
