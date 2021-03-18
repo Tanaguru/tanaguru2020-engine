@@ -62,6 +62,7 @@ pipeline {
                 anyOf{
                     branch 'develop'
                     branch 'master'
+                    branch 'beta'
                 }
             }
             steps {
