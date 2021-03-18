@@ -15,3 +15,4 @@
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
 - Translation of the mail sended when the user is blocked
+- Endpoint : audit logs filtered by date and/or level
