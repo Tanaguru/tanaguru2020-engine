@@ -44,6 +44,9 @@ public interface ContractUserRepository extends JpaRepository<ContractAppUser, L
     List<ContractAppUser> findAllByUserAndContractRole_Name(User user, EContractRole contractRole);
 
     Collection<ContractAppUser> findAllByContract(Contract contract);
+    
+    Collection<ContractAppUser> findAllByContract_Id(long id);
+    
     Page<ContractAppUser> findAllByContract_Id(long id, Pageable pageable);
 
     void deleteAllByContract(Contract contract);

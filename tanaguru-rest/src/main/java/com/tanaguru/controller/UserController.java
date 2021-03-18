@@ -344,6 +344,31 @@ public class UserController {
     }
 
     /**
+     * @return All the @see ContractAppUser paginated for a given @see Contract id
+     */
+    @ApiOperation(
+            value = "Get all User paginated for a given Contract id",
+            notes = "User must have SHOW_CONTRACT authority on Contract")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Contract not found")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
+                    "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
+            "#id)")
+    @GetMapping(value = "/by-contract-paginated/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Page<ContractAppUser> findAllByContractPaginated(@PathVariable long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
+        return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
+    }
+
+    /**
      * @return All the @see ContractAppUser for a given @see Contract id
      */
     @ApiOperation(
@@ -361,13 +386,10 @@ public class UserController {
             "#id)")
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Page<ContractAppUser> findAllByContract(@PathVariable long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
+    Collection<ContractAppUser> findAllByContract(@PathVariable long id) {
+        return contractUserRepository.findAllByContract_Id(id);
     }
-
+    
     /**
      * @return All the @see ProjectAppUser for a given @see Project id
      */
