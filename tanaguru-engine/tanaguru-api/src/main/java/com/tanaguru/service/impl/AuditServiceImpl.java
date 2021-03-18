@@ -160,10 +160,6 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public org.springframework.data.domain.Page<Audit> findAllByProjectAndType(Project project, EAuditType type,
             Pageable pageable) {
-        
-        List<Audit> audits = actRepository.findAllByProjectAndAudit_Type(project, type).stream()
-                .map((Act::getAudit))
-                .collect(Collectors.toList());
-        return new PageImpl<> (audits, pageable, audits.size());
+        return actRepository.findAllAuditByProjectAndAudit_Type(project, type, pageable);
     }
 }

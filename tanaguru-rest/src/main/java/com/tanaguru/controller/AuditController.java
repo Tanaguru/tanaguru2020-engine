@@ -30,6 +30,8 @@ import org.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -195,14 +197,14 @@ public class AuditController {
     }
     
     /**
-     * Get all @see Audit for a given project id and of a given type
+     * Get all @see Audit paginated for a given project id and of a given type
      *
      * @param id The id of the @see Project
      * @param type The type of the @see Audit
      * @return A collection of @see Audit
      */
     @ApiOperation(
-            value = "Get all audits for a given Project id and a given type",
+            value = "Get all audits paginated for a given Project id and a given type",
             notes = "User must have SHOW_AUDIT authority on project"
                     + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
     )
@@ -216,14 +218,17 @@ public class AuditController {
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
             "#id)")
-    @GetMapping("/by-project-and-type/{id}")
+    @GetMapping("/by-project-and-type-paginated/{id}/{type}")
     public @ResponseBody
     org.springframework.data.domain.Page<Audit> getAuditsByProjectAndType(@PathVariable long id, 
             @PathVariable EAuditType type,
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
-            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
+            @RequestParam(defaultValue = "5") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "id") @ApiParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "false") @ApiParam(required = false) boolean isAsc) {
+        Direction direction = (isAsc) ? Direction.ASC : Direction.DESC;
         return auditService.findAllByProjectAndType(projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id )), type, PageRequest.of(page, size));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id )), type, PageRequest.of(page, size, Sort.by(direction, sortBy)));
     }
     
     @ApiOperation(
