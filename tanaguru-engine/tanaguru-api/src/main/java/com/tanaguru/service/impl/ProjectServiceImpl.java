@@ -22,6 +22,7 @@ import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -140,6 +141,15 @@ public class ProjectServiceImpl implements ProjectService {
         return projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user)
                 .stream().map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Project> findPageByContractAndUser(Contract contract, User user, Pageable pageable) {
+        Page<ProjectAppUser> appUsers = projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user, pageable);
+        List<Project> projects = appUsers.toList()
+                .stream().map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(projects, PageRequest.of(pageable.getPageSize(), pageable.getPageNumber()), appUsers.getTotalElements());
     }
 
     @Override

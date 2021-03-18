@@ -21,6 +21,8 @@ public interface ProjectUserRepository extends JpaRepository<ProjectAppUser, Lon
 
     Collection<ProjectAppUser> findAllByProject_ContractAndContractAppUser_User(Contract contract, User user);
 
+    Page<ProjectAppUser> findAllByProject_ContractAndContractAppUser_User(Contract contract, User user, Pageable pageable);
+
     Collection<ProjectAppUser> findAllByContractAppUser_User(User user);
 
     Page<ProjectAppUser> findAllByContractAppUser_User(User user, Pageable pageable);

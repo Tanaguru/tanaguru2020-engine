@@ -75,6 +75,7 @@ public interface ProjectService {
      * @return A collection of @see Project
      */
     Collection<Project> findAllByContractAndUser(Contract contract, User user);
+    Page<Project> findPageByContractAndUser(Contract contract, User user, Pageable pageable);
 
     /**
      * @param user     The @see User
