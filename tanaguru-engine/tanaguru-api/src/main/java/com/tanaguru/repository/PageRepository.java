@@ -29,5 +29,7 @@ public interface PageRepository extends JpaRepository<Page, Long> {
      */
     org.springframework.data.domain.Page<Page> findAllByAudit_Id(long auditId, Pageable pageable);
 
+    org.springframework.data.domain.Page<Page> findByNameContainingIgnoreCaseAndAudit_Id(String name, long auditId, Pageable pageable);
+
     void deleteAllByAudit(Audit audit);
 }

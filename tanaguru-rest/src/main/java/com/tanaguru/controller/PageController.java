@@ -133,10 +133,11 @@ public class PageController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean isAsc) {
+            @RequestParam(defaultValue = "true") boolean isAsc,
+            @RequestParam(defaultValue = "") String name) {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
-            return pageRepository.findAllByAudit_Id(id, pageRequest);
+            return pageRepository.findByNameContainingIgnoreCaseAndAudit_Id(name, id, pageRequest);
         }else{
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }
