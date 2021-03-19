@@ -86,9 +86,10 @@ public interface ProjectService {
     /**
      * @param user     The @see User
      * @param pageable page parameter
+     * @param search Search by name string
      * @return A collection of @see Project
      */
-    Page<Project> findPageByUserMemberOfNotOwner(User user, Pageable pageable);
+    Page<Project> findPageByUserMemberOfNotOwner(User user, String search, Pageable pageable);
 
     /**
      * Find a @see ProjectRole for a given @see EProjectRole

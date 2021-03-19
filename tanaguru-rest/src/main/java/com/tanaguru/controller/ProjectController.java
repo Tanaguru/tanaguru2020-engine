@@ -109,15 +109,17 @@ public class ProjectController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
-            @RequestParam(defaultValue = "asc") ESortOrder order) {
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
         PageRequest pageRequest = PageRequest.of(
                 page,
                 size,
                 Sort.by(order == ESortOrder.asc ? Sort.Direction.ASC : Sort.Direction.DESC,
-                        String.valueOf(sortBy)));
+                        "project." + sortBy.name()));
 
         return projectService.findPageByUserMemberOfNotOwner(
                 tanaguruUserDetailsService.getCurrentUser(),
+                search,
                 pageRequest
         );
     }
@@ -171,7 +173,8 @@ public class ProjectController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
-            @RequestParam(defaultValue = "asc") ESortOrder order) {
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
         PageRequest pageRequest = PageRequest.of(
                 page,
                 size,
@@ -179,7 +182,7 @@ public class ProjectController {
                         String.valueOf(sortBy)));
         User user = tanaguruUserDetailsService.getCurrentUser();
         Collection<Contract> contracts = contractService.findByOwner(user);
-        return projectRepository.findAllByContractIn(contracts, pageRequest);
+        return projectRepository.findAllByContractInAndNameContaining(contracts, search, pageRequest);
     }
 
     @ApiResponses(value = {
@@ -194,7 +197,8 @@ public class ProjectController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
-            @RequestParam(defaultValue = "asc") ESortOrder order) {
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
         PageRequest pageRequest = PageRequest.of(
                 page,
                 size,
@@ -202,7 +206,7 @@ public class ProjectController {
                         String.valueOf(sortBy)));
         User user = tanaguruUserDetailsService.getCurrentUser();
         Collection<Contract> contracts = contractService.findByOwner(user);
-        return projectRepository.findSharedProject(contracts, pageRequest);
+        return projectRepository.findSharedProject(contracts,search, pageRequest);
     }
 
     /**
