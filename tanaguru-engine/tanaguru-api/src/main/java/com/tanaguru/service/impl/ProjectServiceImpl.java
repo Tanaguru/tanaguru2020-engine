@@ -217,6 +217,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project){
         Collection<Audit> audits = auditService.findAllByProject(project);
+        actRepository.deleteAllByProject(project);
         for(Audit audit : audits){
             asyncAuditService.deleteAudit(audit);
         }
