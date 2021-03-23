@@ -40,7 +40,7 @@ public class TanaguruRestServer {
         return messageSource;
     }
 
-    @Bean
+    @Bean("threadPoolTaskExecutor")
     public TaskExecutor getAsyncExecutor(){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(20);
