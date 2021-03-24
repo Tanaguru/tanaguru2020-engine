@@ -17,6 +17,7 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.*;
+import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
