@@ -17,6 +17,18 @@ import java.util.Optional;
 
 @Repository
 public interface ActRepository extends JpaRepository<Act, Long> {
+    /**
+     * Delete all acts by project
+     * @param project The project to delete acts from
+     */
+    void deleteAllByProject(Project project);
+
+    /**
+     * Delete an act for a given Audit
+     * @param audit The given audit
+     */
+    void deleteByAudit(Audit audit);
+
     Optional<Act> findByAudit(Audit audit);
 
     Collection<Act> findAllByProject(Project project);

@@ -31,7 +31,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "AUDITRUNNER_MAX_CONCURRENT_AUDITS=" + props['AUDITRUNNER_MAX_CONCURRENT_AUDITS'] + "\n" +
              "CORS_ORIGIN=" + props['CORS_ORIGIN'] + "\n" +
              "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
-             "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT']
+             "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
+             "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER']
     }
 }
 
@@ -62,6 +63,7 @@ pipeline {
                 anyOf{
                     branch 'develop'
                     branch 'master'
+                    branch 'beta'
                 }
             }
             steps {

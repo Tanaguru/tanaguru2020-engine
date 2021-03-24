@@ -294,6 +294,7 @@ public class ContractController {
             notes = "User must have MODIFY_CONTRACT authority"
                     + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
                     + "\nOr if user not found exception raise : USER_NOT_FOUND with user id"
+                    + "\nOr if owned already has a contract : USER_ALREADY_HAS_CONTRACT"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -309,8 +310,18 @@ public class ContractController {
         Contract contract = contractRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
 
+        ContractAppUser currentOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
+
         User owner = userRepository.findById(contractDto.getOwnerId())
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId() ));
+
+        // limit to 1 contract
+        if(owner.getId() != currentOwner.getUser().getId()){
+            Collection<Contract> contracts = contractService.findByOwner(owner);
+            if(contracts.size() > 0){
+                throw new CustomInvalidEntityException(CustomError.USER_ALREADY_HAS_CONTRACT);
+            }
+        }
 
         return contractService.modifyContract(
                 contract,

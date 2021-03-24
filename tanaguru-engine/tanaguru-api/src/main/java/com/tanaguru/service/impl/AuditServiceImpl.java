@@ -119,7 +119,7 @@ public class AuditServiceImpl implements AuditService {
         audit = auditRepository.findById(audit.getId())
                 .orElseThrow(CustomEntityNotFoundException::new);
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
-        actRepository.findByAudit(audit).ifPresent(actRepository::delete);
+        actRepository.deleteByAudit(audit);
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
         pageService.deletePageByAudit(audit);
 

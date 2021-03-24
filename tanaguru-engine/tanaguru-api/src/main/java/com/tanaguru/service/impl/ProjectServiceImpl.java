@@ -41,6 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ActRepository actRepository;
     private final ContractUserRepository contractUserRepository;
     private final AuditService auditService;
+    private final AsyncAuditService asyncAuditService;
 
     private Map<EProjectRole, ProjectRole> projectRoleMap = new EnumMap<>(EProjectRole.class);
     private Map<EProjectRole, Collection<String>> projectRoleAuthorityMap = new EnumMap<>(EProjectRole.class);
@@ -50,7 +51,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectServiceImpl(
             AppRoleRepository appRoleRepository, ProjectRepository projectRepository,
             ProjectUserRepository projectUserRepository,
-            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService) {
+            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService, AsyncAuditService asyncAuditService) {
         this.appRoleRepository = appRoleRepository;
         this.projectRepository = projectRepository;
         this.projectUserRepository = projectUserRepository;
@@ -58,6 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.actRepository = actRepository;
         this.contractUserRepository = contractUserRepository;
         this.auditService = auditService;
+        this.asyncAuditService = asyncAuditService;
     }
 
     @PostConstruct
@@ -243,7 +245,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public void deleteProject(Project project){
-        auditService.deleteAuditByProject(project);
+        Collection<Audit> audits = auditService.findAllByProject(project);
+        actRepository.deleteAllByProject(project);
+        for(Audit audit : audits){
+            asyncAuditService.deleteAudit(audit);
+        }
+
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }

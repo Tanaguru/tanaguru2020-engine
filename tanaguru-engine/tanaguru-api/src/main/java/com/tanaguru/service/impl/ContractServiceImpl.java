@@ -212,6 +212,11 @@ public class ContractServiceImpl implements ContractService {
         if(contractAppUser.getContractRole().getName() == EContractRole.CONTRACT_OWNER){
             throw new CustomInvalidArgumentException(CustomError.CANNOT_DELETE_CONTRACT_OWNER, String.valueOf(user.getId()));
         }
+
+        Collection<Project> projects = projectService.findAllByContractAndUser(contract, user);
+        for(Project project : projects){
+            projectService.removeMember(project, user);
+        }
         contractUserRepository.delete(contractAppUser);
     }
 }
