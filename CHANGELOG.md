@@ -9,3 +9,6 @@
 - Rest : New key "admin.mail.whenblocked" (Allow send an email to admin when user is blocked)
 - JSON export of audits and pages
 - Send email at the end of the audit (site, scenario, group of pages)
+
+## 1.0.3
+- Pagination for contracts, users, references, projects
