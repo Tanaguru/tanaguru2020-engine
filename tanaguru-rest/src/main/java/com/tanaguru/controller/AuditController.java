@@ -10,6 +10,7 @@ import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.AuditCommandDTO;
 import com.tanaguru.domain.dto.DemoCommandDTO;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
@@ -30,6 +31,10 @@ import org.springframework.web.bind.annotation.*;
 import org.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.*;
@@ -192,7 +197,42 @@ public class AuditController {
         return auditService.findAllByProject(projectRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id )));
     }
-
+    
+    /**
+     * Get all @see Audit paginated for a given project id and of a given type
+     *
+     * @param id The id of the @see Project
+     * @param type The type of the @see Audit
+     * @return A collection of @see Audit
+     */
+    @ApiOperation(
+            value = "Get all audits paginated for a given Project id and a given type",
+            notes = "User must have SHOW_AUDIT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
+                    "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_AUDIT, " +
+            "#id)")
+    @GetMapping("/by-project-and-type-paginated/{id}/{type}")
+    public @ResponseBody
+    org.springframework.data.domain.Page<Audit> getAuditsByProjectAndType(@PathVariable long id, 
+            @PathVariable EAuditType type,
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "5") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "id") @ApiParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "false") @ApiParam(required = false) boolean isAsc) {
+        Direction direction = (isAsc) ? Direction.ASC : Direction.DESC;
+        return auditService.findAllByProjectAndType(projectRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id )), type, PageRequest.of(page, size, Sort.by(direction, sortBy)));
+    }
+    
     @ApiOperation(
             value = "Get last Audit by project id",
             notes = "User must have SHOW_AUDIT authority on project"

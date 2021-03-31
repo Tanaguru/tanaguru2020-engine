@@ -16,3 +16,4 @@
 - Admin and SuperAdmin can unlock/lock users
 - Translation of the mail sended when the user is blocked
 - Endpoint : audit logs filtered by date and/or level
+- Pagination for contracts, users, references, projects

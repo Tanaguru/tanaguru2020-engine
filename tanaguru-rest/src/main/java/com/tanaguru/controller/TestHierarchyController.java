@@ -18,12 +18,17 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -80,9 +85,10 @@ public class TestHierarchyController {
     })
     @GetMapping("/references")
     public @ResponseBody
-    Collection<TestHierarchyDTO> getReferences() {
-        return testHierarchyRepository.findAllByParentIsNull()
-                .stream().map((TestHierarchyDTO::new)).collect(Collectors.toList());
+    Page<TestHierarchyDTO> getReferences(
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "5") @ApiParam(required = false) int size) {
+        return testHierarchyRepository.findAllByParentIsNull(PageRequest.of(page, size));
     }
 
     /**

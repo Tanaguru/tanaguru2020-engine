@@ -1,7 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.repository.AsyncAuditService;
+import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.service.AuditService;
 import org.springframework.scheduling.annotation.Async;

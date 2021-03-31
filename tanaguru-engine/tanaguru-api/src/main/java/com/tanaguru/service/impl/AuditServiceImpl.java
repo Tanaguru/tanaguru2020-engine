@@ -1,6 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditLog;
 import com.tanaguru.domain.entity.audit.AuditReference;
@@ -22,14 +23,18 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +84,14 @@ public class AuditServiceImpl implements AuditService {
         return actRepository.findAllByProject(project).stream()
                 .map((Act::getAudit))
                 .collect(Collectors.toList());
+    }
+
+    public org.springframework.data.domain.Page<Audit> findAllByProject(Project project, Pageable pageable) {
+        Collection<Audit> audits = actRepository.findAllByProject(project).stream()
+                .map((Act::getAudit))
+                .collect(Collectors.toList());
+        return new PageImpl<>(new ArrayList<>(audits), pageable, audits.size());
+
     }
 
     public void deleteAuditByProject(Project project) {
@@ -142,5 +155,11 @@ public class AuditServiceImpl implements AuditService {
             jsonAuditObject.append("pages", pageService.toJson(page));
         }
         return jsonAuditObject;
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Audit> findAllByProjectAndType(Project project, EAuditType type,
+            Pageable pageable) {
+        return actRepository.findAllAuditByProjectAndAudit_Type(project, type, pageable);
     }
 }

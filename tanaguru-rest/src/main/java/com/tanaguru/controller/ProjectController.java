@@ -1,10 +1,8 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.*;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
-import com.tanaguru.domain.constant.EProjectRole;
-import com.tanaguru.domain.constant.ProjectAuthorityName;
 import com.tanaguru.domain.dto.ProjectDTO;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.contract.Contract;
@@ -15,14 +13,17 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
+import com.tanaguru.service.ContractService;
 import com.tanaguru.service.ProjectService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,7 @@ public class ProjectController {
     private final ProjectUserRepository projectUserRepository;
     private final UserRepository userRepository;
     private final AuditRepository auditRepository;
+    private final ContractService contractService;
 
     @Autowired
     public ProjectController(
@@ -49,7 +51,7 @@ public class ProjectController {
             ProjectRepository projectRepository,
             ContractRepository contractRepository,
             ContractUserRepository contractUserRepository,
-            ProjectUserRepository projectUserRepository, UserRepository userRepository, AuditRepository auditRepository) {
+            ProjectUserRepository projectUserRepository, UserRepository userRepository, AuditRepository auditRepository, ContractService contractService) {
 
         this.projectService = projectService;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
@@ -59,7 +61,9 @@ public class ProjectController {
         this.projectUserRepository = projectUserRepository;
         this.userRepository = userRepository;
         this.auditRepository = auditRepository;
+        this.contractService = contractService;
     }
+
     @ApiOperation(
             value = "Get All projects current user is member of for a given Contract id",
             notes = "User must must have SHOW_CONTRACT authority on contract"
@@ -76,17 +80,24 @@ public class ProjectController {
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
                     "#id)")
     @GetMapping(value = "/member-of/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Collection<Project> findAllByContractAndCurrentUserIsMemberOf(@PathVariable long id) {
+    public Page<Project> findAllByContractAndCurrentUserIsMemberOf(@PathVariable long id,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size) {
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.ASC, "project.name"));
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
-        return projectService.findAllByContractAndUser(
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+        return projectService.findPageByContractAndUser(
                 contract,
-                tanaguruUserDetailsService.getCurrentUser()
+                tanaguruUserDetailsService.getCurrentUser(),
+                pageRequest
         );
     }
 
     @ApiOperation(
-            value = "Get All projects current user is member and not owner"
+            value = "Get page of projects current user is member and not owner"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
@@ -94,8 +105,23 @@ public class ProjectController {
     })
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/member-of", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Collection<Project> findAllByContractAndCurrentUserIsMemberOfNotOwner() {
-        return projectService.findAllByUserMemberOfNotOwner(tanaguruUserDetailsService.getCurrentUser());
+    public Page<Project> findAllByContractAndCurrentUserIsMemberOfNotOwner(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(order == ESortOrder.asc ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        "project." + sortBy.name()));
+
+        return projectService.findPageByUserMemberOfNotOwner(
+                tanaguruUserDetailsService.getCurrentUser(),
+                search,
+                pageRequest
+        );
     }
 
     @ApiOperation(
@@ -114,16 +140,73 @@ public class ProjectController {
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
                     "#id)")
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Collection<Project> findAllWithAuthoritiesByContract(@PathVariable long id) {
+    public Page<Project> findAllWithAuthoritiesByContract(
+            @PathVariable long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.ASC, "name"));
+
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
 
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         return projectService.hasOverrideAuthority(tanaguruUserDetailsService.getCurrentUser(), ProjectAuthorityName.SHOW_PROJECT) ||
                 contractAppUser.getUser().getId() == tanaguruUserDetailsService.getCurrentUser().getId() ?
-                projectRepository.findAllByContract(contract) :
-                findAllByContractAndCurrentUserIsMemberOf(id);
+                projectRepository.findAllByContract(contract, pageRequest) :
+                findAllByContractAndCurrentUserIsMemberOf(id, page, size);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
+    })
+    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @GetMapping(value = "/my-projects", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Page<Project> findMyProjects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(order == ESortOrder.asc ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        String.valueOf(sortBy)));
+        User user = tanaguruUserDetailsService.getCurrentUser();
+        Collection<Contract> contracts = contractService.findByOwner(user);
+        return projectRepository.findAllByContractInAndNameContaining(contracts, search, pageRequest);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error")
+    })
+    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @GetMapping(value = "/my-shared-projects", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Page<Project> findMySharedProjects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") EProjectSortFields sortBy,
+            @RequestParam(defaultValue = "asc") ESortOrder order,
+            @RequestParam(defaultValue = "") String search) {
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(order == ESortOrder.asc ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        String.valueOf(sortBy)));
+        User user = tanaguruUserDetailsService.getCurrentUser();
+        Collection<Contract> contracts = contractService.findByOwner(user);
+        return projectRepository.findSharedProject(contracts,search, pageRequest);
     }
 
     /**
@@ -147,7 +230,7 @@ public class ProjectController {
                           @ApiParam(required = false) @PathVariable(required = false) String shareCode) {
 
         Audit audit = auditRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
 
         return projectService.findByAudit(audit)
                 .orElse(null);
@@ -175,7 +258,7 @@ public class ProjectController {
     public @ResponseBody
     Project findById(@PathVariable long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
     }
 
     /**
@@ -195,7 +278,7 @@ public class ProjectController {
     public @ResponseBody
     Collection<String> findAuthoritiesByProjectId(@PathVariable long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
 
         return projectService.getUserAuthoritiesOnProject(tanaguruUserDetailsService.getCurrentUser(), project);
     }
@@ -225,18 +308,18 @@ public class ProjectController {
         User user = tanaguruUserDetailsService.getCurrentUser();
 
         Contract contract = contractRepository.findById(project.getContractId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, project.getContractId() ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, project.getContractId()));
 
-        if(contract.getProjectLimit() > 0 && contract.getProjects().size() >= contract.getProjectLimit()) {
-            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId(), contract.getProjectLimit()  );
+        if (contract.getProjectLimit() > 0 && contract.getProjects().size() >= contract.getProjectLimit()) {
+            throw new CustomForbiddenException(CustomError.PROJECT_LIMIT_FOR_CONTRACT, contract.getId(), contract.getProjectLimit());
         }
 
-        if((contract.isRestrictDomain() &&
-            !project.getDomain().isEmpty() &&
-            !UrlHelper.isValid(project.getDomain())) ||
-                    (!contract.isRestrictDomain() &&
-                    !UrlHelper.isValid(project.getDomain()))){
-            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain() );
+        if ((contract.isRestrictDomain() &&
+                !project.getDomain().isEmpty() &&
+                !UrlHelper.isValid(project.getDomain())) ||
+                (!contract.isRestrictDomain() &&
+                        !UrlHelper.isValid(project.getDomain()))) {
+            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
         }
 
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
@@ -272,13 +355,14 @@ public class ProjectController {
     public void deleteProject(@PathVariable long id) {
         projectService.deleteProject(
                 projectRepository.findById(id)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id))
         );
     }
 
     /**
      * Add an @see User to a @see Project
-     * @param userId The @see User id to add
+     *
+     * @param userId    The @see User id to add
      * @param projectId The @see targeted project id
      */
     @ApiOperation(
@@ -299,17 +383,18 @@ public class ProjectController {
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).INVITE_MEMBER, " +
                     "#projectId)")
     @PutMapping(value = "/{projectId}/add-member/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ProjectAppUser addMember(@PathVariable long projectId, @PathVariable long userId){
+    public ProjectAppUser addMember(@PathVariable long projectId, @PathVariable long userId) {
         return projectService.addMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId )));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
     }
 
     /**
      * Delete a @see ProjectAppUser
-     * @param userId The @see User id to remove from @see Project
+     *
+     * @param userId    The @see User id to remove from @see Project
      * @param projectId The @see Project id to remove the @see User from
      */
     @ApiOperation(
@@ -330,12 +415,12 @@ public class ProjectController {
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).REMOVE_MEMBER, " +
                     "#projectId)")
     @PutMapping(value = "/{projectId}/remove-member/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void removeMember(@PathVariable long projectId, @PathVariable long userId){
+    public void removeMember(@PathVariable long projectId, @PathVariable long userId) {
         projectService.removeMember(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
         );
     }
 
@@ -363,22 +448,23 @@ public class ProjectController {
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).PROMOTE_MEMBER, " +
                     "#projectId)")
     @PutMapping(value = "/{projectId}/promote-member/{userId}/to/{projectRole}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ProjectAppUser promoteMember(@PathVariable long projectId, @PathVariable long userId, @PathVariable EProjectRole projectRole){
+    public ProjectAppUser promoteMember(@PathVariable long projectId, @PathVariable long userId,
+                                        @PathVariable EProjectRole projectRole) {
         User current = tanaguruUserDetailsService.getCurrentUser();
-        if(current.getId() == userId){
+        if (current.getId() == userId) {
             throw new CustomForbiddenException(CustomError.CANNOT_PROMOTE_YOURSELF);
         }
 
-        if(projectService.getProjectRole(projectRole).isHidden()){
+        if (projectService.getProjectRole(projectRole).isHidden()) {
             throw new CustomInvalidEntityException(CustomError.PROJECT_CANNOT_PROMOTE_USER);
         }
 
         ProjectAppUser target = projectUserRepository.findByProjectAndContractAppUser_User(
                 projectRepository.findById(projectId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId, projectId ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId, projectId));
 
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);
