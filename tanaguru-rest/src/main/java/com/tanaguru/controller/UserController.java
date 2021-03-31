@@ -365,7 +365,7 @@ public class UserController {
     Page<ContractAppUser> findAllByContractPaginated(@PathVariable long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
+            @RequestParam(defaultValue = "username") String sortBy) {
         return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
     }
 

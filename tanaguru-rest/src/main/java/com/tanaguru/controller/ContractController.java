@@ -72,7 +72,7 @@ public class ContractController {
     Page<Contract> findAllWithAuthorities(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "") String name
             ) {
 
@@ -138,7 +138,7 @@ public class ContractController {
     Page<Contract> findAllByNameOwnedOrCurrentUserIsMemberOf(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "") String name) {
         return contractService.findByUserAndContractName(name,
                 tanaguruUserDetailsService.getCurrentUser(), PageRequest.of(page, size, Sort.by(sortBy))
