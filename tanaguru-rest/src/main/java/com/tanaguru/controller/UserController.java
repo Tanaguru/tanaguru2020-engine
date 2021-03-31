@@ -128,7 +128,7 @@ public class UserController {
     Page<User> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "username") String sortBy,
             @RequestParam(defaultValue = "true") boolean isAsc,
             @RequestParam(defaultValue = "") String usernameOrEmail
     ) {

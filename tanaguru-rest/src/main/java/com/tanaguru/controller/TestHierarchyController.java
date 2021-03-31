@@ -78,7 +78,7 @@ public class TestHierarchyController {
      * @return The Collection of @see TestHierarchy
      */
     @ApiOperation(
-            value = "Get all TestHierarchy for a given reference id")
+            value = "Get all TestHierarchy parent")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 404, message = "Reference not found")
@@ -88,7 +88,8 @@ public class TestHierarchyController {
     Page<TestHierarchyDTO> getReferences(
             @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
             @RequestParam(defaultValue = "5") @ApiParam(required = false) int size) {
-        return testHierarchyRepository.findAllByParentIsNull(PageRequest.of(page, size));
+        return testHierarchyRepository.findAllByParentIsNullAndIsDeletedIsFalse(PageRequest.of(page, size, Sort.by(Sort.Direction.ASC,"name")))
+                .map(TestHierarchyDTO::new);
     }
 
     /**
