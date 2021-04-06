@@ -4,7 +4,6 @@ import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
@@ -55,7 +54,8 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -69,7 +69,8 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository,
+                projectUserRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 

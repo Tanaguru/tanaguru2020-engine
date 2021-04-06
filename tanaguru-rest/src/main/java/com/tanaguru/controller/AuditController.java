@@ -14,6 +14,7 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
@@ -38,6 +39,8 @@ import org.springframework.data.domain.Sort.Direction;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.*;
+
+import static com.tanaguru.domain.constant.CustomError.CANNOT_STOP_FINISHED_AUDIT;
 
 /**
  * @author rcharre
@@ -372,6 +375,37 @@ public class AuditController {
 
         auditRunnerService.runAudit(audit);
         return audit;
+    }
+
+    /**
+     * @param id TheAudit id
+     */
+    @ApiOperation(
+            value = "Stop an audit",
+            notes = "User must have START_AUDIT authority on project")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters, CANNOT_STOP_FINISHED_AUDIT error"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
+                    "T(com.tanaguru.domain.constant.ProjectAuthorityName).START_AUDIT, " +
+                    "#auditCommand.getProjectId())")
+    @PostMapping("/stop/{id}")
+    public @ResponseBody
+    void stopAudit(@PathVariable long id) {
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+        if(audit.getStatus() == EAuditStatus.DONE && audit.getStatus() == EAuditStatus.ERROR){
+            throw new CustomInvalidEntityException(CustomError.CANNOT_STOP_FINISHED_AUDIT, id);
+        }
+        try{
+            auditRunnerService.stopAudit(audit);
+        }catch (Exception e){
+            throw new CustomIllegalStateException(CustomError.CANNOT_STOP_AUDIT_WITH_CURRENT_CONFIGURATION);
+        }
     }
 
     /**

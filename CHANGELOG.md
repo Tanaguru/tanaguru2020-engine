@@ -14,6 +14,8 @@
 - Multiple files for upload audit
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
-- Translation of the mail sended when the user is blocked
+- Translation of the mail sent when the user is blocked
 - Endpoint : audit logs filtered by date and/or level
 - Pagination for contracts, users, references, projects
+- Fix mail at the end of audit (was sending to all contract users)
+- Endpoint stop audit for async audit (other profiles will throw a bad request exception)

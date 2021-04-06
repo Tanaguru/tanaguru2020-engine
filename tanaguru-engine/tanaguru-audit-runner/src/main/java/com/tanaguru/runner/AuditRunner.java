@@ -52,4 +52,6 @@ public interface AuditRunner extends Runnable {
     void webDriverGet(String url);
 
     RemoteWebDriver getDriver();
+
+    void interrupt();
 }
