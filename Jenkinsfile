@@ -153,8 +153,10 @@ pipeline {
 
         stage('Store packages') {
             when {
-                branch 'master'
-                branch 'beta'
+                anyOf{
+                    branch 'master'
+                    branch 'beta'
+                }
             }
             steps {
                 unstash 'tanaguru2020-rest'
