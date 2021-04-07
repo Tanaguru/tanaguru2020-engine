@@ -166,7 +166,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> findPageByUserMemberOfNotOwner(User user, String search, Pageable pageable) {
-        Page<ProjectAppUser> projects = projectUserRepository.findAllByContractAppUser_UserAndProject_NameContainingIgnoreCase(user, search, pageable);
+        Page<ProjectAppUser> projects = projectUserRepository.findSharedWith(user, search, pageable);
         List<Project> projectsList = projects.toList()
                 .stream()
                 .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
