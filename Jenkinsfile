@@ -164,7 +164,7 @@ pipeline {
 
                 sh '''
                     REST_VERSION=$(cat version.txt)
-                    DIR = /html/tanaguru2020-rest/${REST_VERSION}
+                    DIR=/html/tanaguru2020-rest/${REST_VERSION}
                     if [ -d "$DIR" ]; then rm -Rf $DIR; fi
                     mkdir -p $DIR
                     mv -f tanaguru-rest/target/tanaguru2020-rest-*.tar.gz /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
