@@ -20,6 +20,9 @@ import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -97,11 +100,14 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Collection<Contract> findByUser(User user) {
-        return contractUserRepository.findAllByUser(user)
-                .stream().map((ContractAppUser::getContract)).collect(Collectors.toList());
+    public Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable) {
+        return contractUserRepository.findAllContractByUserAndContractNameContaining(user, contractName, pageable);
     }
 
+    public Page<Contract> findByUser(User user, Pageable pageable) {
+        return contractUserRepository.findAllContractByUser(user, pageable);
+    }
+    
     public Collection<Contract> findByOwner(User user) {
         return contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)
                 .stream().map((ContractAppUser::getContract))
@@ -205,6 +211,11 @@ public class ContractServiceImpl implements ContractService {
 
         if(contractAppUser.getContractRole().getName() == EContractRole.CONTRACT_OWNER){
             throw new CustomInvalidArgumentException(CustomError.CANNOT_DELETE_CONTRACT_OWNER, String.valueOf(user.getId()));
+        }
+
+        Collection<Project> projects = projectService.findAllByContractAndUser(contract, user);
+        for(Project project : projects){
+            projectService.removeMember(project, user);
         }
         contractUserRepository.delete(contractAppUser);
     }

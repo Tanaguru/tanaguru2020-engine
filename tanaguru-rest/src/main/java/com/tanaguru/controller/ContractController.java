@@ -15,14 +15,22 @@ import com.tanaguru.repository.*;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -61,14 +69,20 @@ public class ContractController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllWithAuthorities() {
-        return contractService.getRoleAuthorities(
-                    tanaguruUserDetailsService.getCurrentUser().getAppRole().getName())
-                .contains(ContractAuthorityName.SHOW_CONTRACT) ?
-                contractRepository.findAll() :
-                findAllOwnedOrCurrentUserIsMemberOf();
-    }
+    Page<Contract> findAllWithAuthorities(
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "") String name
+            ) {
 
+        return contractService.getRoleAuthorities(
+                tanaguruUserDetailsService.getCurrentUser().getAppRole().getName())
+                .contains(ContractAuthorityName.SHOW_CONTRACT) ?
+                        contractRepository.findByNameContainingIgnoreCase(name, PageRequest.of(page, size, Sort.by(sortBy))):
+                            findAllByNameOwnedOrCurrentUserIsMemberOf(page, size, sortBy, name);
+    }
+    
     /**
      * @return All the @see Contract for a given @see User id that current user can see
      */
@@ -86,18 +100,23 @@ public class ContractController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/by-user/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllByUser(@PathVariable long id) {
+    Page<Contract> findAllByUser(@PathVariable long id,
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
-        Collection<Contract> userContracts = contractService.findByUser(user);
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Contract> userContracts = contractService.findByUser(user, pageable);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
-            userContracts = userContracts.stream().filter(contract ->
+            List<Contract> contracts = userContracts.stream().filter(contract ->
                     contractService.hasAuthority(
                             user,
                             ContractAuthorityName.SHOW_CONTRACT,
                             contract,
                             false)
             ).collect(Collectors.toList());
+            userContracts = new PageImpl<>(contracts, pageable, contracts.size());      
         }
 
         return userContracts;
@@ -116,9 +135,14 @@ public class ContractController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllOwnedOrCurrentUserIsMemberOf() {
-        return contractService.findByUser(
-                tanaguruUserDetailsService.getCurrentUser());
+    Page<Contract> findAllByNameOwnedOrCurrentUserIsMemberOf(
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "") String name) {
+        return contractService.findByUserAndContractName(name,
+                tanaguruUserDetailsService.getCurrentUser(), PageRequest.of(page, size, Sort.by(sortBy))
+                );   
     }
 
     /**

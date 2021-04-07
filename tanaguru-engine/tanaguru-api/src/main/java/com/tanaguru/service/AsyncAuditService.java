@@ -1,4 +1,4 @@
-package com.tanaguru.repository;
+package com.tanaguru.service;
 
 import com.tanaguru.domain.entity.audit.Audit;
 

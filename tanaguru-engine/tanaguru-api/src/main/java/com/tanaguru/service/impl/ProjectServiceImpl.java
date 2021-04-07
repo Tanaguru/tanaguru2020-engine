@@ -17,9 +17,14 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.*;
+import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -37,6 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ActRepository actRepository;
     private final ContractUserRepository contractUserRepository;
     private final AuditService auditService;
+    private final AsyncAuditService asyncAuditService;
 
     private Map<EProjectRole, ProjectRole> projectRoleMap = new EnumMap<>(EProjectRole.class);
     private Map<EProjectRole, Collection<String>> projectRoleAuthorityMap = new EnumMap<>(EProjectRole.class);
@@ -46,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectServiceImpl(
             AppRoleRepository appRoleRepository, ProjectRepository projectRepository,
             ProjectUserRepository projectUserRepository,
-            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService) {
+            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService, AsyncAuditService asyncAuditService) {
         this.appRoleRepository = appRoleRepository;
         this.projectRepository = projectRepository;
         this.projectUserRepository = projectUserRepository;
@@ -54,6 +60,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.actRepository = actRepository;
         this.contractUserRepository = contractUserRepository;
         this.auditService = auditService;
+        this.asyncAuditService = asyncAuditService;
     }
 
     @PostConstruct
@@ -140,12 +147,37 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Page<Project> findPageByContractAndUser(Contract contract, User user, Pageable pageable) {
+        Page<ProjectAppUser> appUsers = projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user, pageable);
+        List<Project> projects = appUsers.toList()
+                .stream().map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(projects, PageRequest.of(pageable.getPageSize(), pageable.getPageNumber()), appUsers.getTotalElements());
+    }
+
+    @Override
     public Collection<Project> findAllByUserMemberOfNotOwner(User user) {
         return projectUserRepository.findAllByContractAppUser_User(user)
                 .stream()
                 .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
                 .map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Project> findPageByUserMemberOfNotOwner(User user, String search, Pageable pageable) {
+        Page<ProjectAppUser> projects = projectUserRepository.findSharedWith(user, search, pageable);
+        List<Project> projectsList = projects.toList()
+                .stream()
+                .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
+                .map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(
+                projectsList,
+                pageable,
+                projects.getTotalElements()
+        );
+
     }
 
     public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
@@ -214,7 +246,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public void deleteProject(Project project){
-        auditService.deleteAuditByProject(project);
+        Collection<Audit> audits = auditService.findAllByProject(project);
+        actRepository.deleteAllByProject(project);
+        for(Audit audit : audits){
+            asyncAuditService.deleteAudit(audit);
+        }
+
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }

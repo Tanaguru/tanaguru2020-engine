@@ -30,6 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailException;
@@ -107,6 +110,32 @@ public class UserController {
     Collection<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    /**
+     * @return A @see Page of @see User
+     */
+    @ApiOperation(
+            value = "Get a page of User",
+            notes = "User must have SHOW_USER authority")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
+    @GetMapping(value = "/paginated", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Page<User> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "true") boolean isAsc,
+            @RequestParam(defaultValue = "") String usernameOrEmail
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest);
+    }
+
 
     /**
      * @param id The @see User id
@@ -316,6 +345,31 @@ public class UserController {
     }
 
     /**
+     * @return All the @see ContractAppUser paginated for a given @see Contract id
+     */
+    @ApiOperation(
+            value = "Get all User paginated for a given Contract id",
+            notes = "User must have SHOW_CONTRACT authority on Contract")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Contract not found")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
+                    "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
+            "#id)")
+    @GetMapping(value = "/by-contract-paginated/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Page<ContractAppUser> findAllByContractPaginated(@PathVariable long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "user.username") String sortBy) {
+        return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
+    }
+
+    /**
      * @return All the @see ContractAppUser for a given @see Contract id
      */
     @ApiOperation(
@@ -336,7 +390,7 @@ public class UserController {
     Collection<ContractAppUser> findAllByContract(@PathVariable long id) {
         return contractUserRepository.findAllByContract_Id(id);
     }
-
+    
     /**
      * @return All the @see ProjectAppUser for a given @see Project id
      */

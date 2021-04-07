@@ -31,7 +31,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "AUDITRUNNER_MAX_CONCURRENT_AUDITS=" + props['AUDITRUNNER_MAX_CONCURRENT_AUDITS'] + "\n" +
              "CORS_ORIGIN=" + props['CORS_ORIGIN'] + "\n" +
              "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
-             "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT']
+             "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
+             "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER']
     }
 }
 
@@ -153,6 +154,7 @@ pipeline {
         stage('Store packages') {
             when {
                 branch 'master'
+                branch 'beta'
             }
             steps {
                 unstash 'tanaguru2020-rest'
@@ -160,7 +162,9 @@ pipeline {
 
                 sh '''
                     REST_VERSION=$(cat version.txt)
-                    mkdir -p /html/tanaguru2020-rest/${REST_VERSION}
+                    DIR = /html/tanaguru2020-rest/${REST_VERSION}
+                    if [ -d "$DIR" ]; then rm -Rf $DIR; fi
+                    mkdir -p $DIR
                     mv -f tanaguru-rest/target/tanaguru2020-rest-*.tar.gz /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
                     chown 1000:1000 /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 '''
