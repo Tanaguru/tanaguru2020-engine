@@ -286,7 +286,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
         try {
             LOGGER.debug("Custom wait time ", waitTime);
-            auditLog(EAuditLogLevel.ERROR, "Custom wait time " + waitTime);
+            auditLog(EAuditLogLevel.INFO, "Custom wait time " + waitTime);
             Thread.sleep(waitTime);
             onGetNewPage(url, tanaguruDriver.getTitle(), false);
         } catch (InterruptedException e) {
