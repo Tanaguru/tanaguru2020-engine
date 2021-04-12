@@ -7,7 +7,7 @@
         
     <changeSet id="create_test_result_page_reference" author="rcharre">
         <createIndex tableName="test_hierarchy" indexName="index_test_hierarchy_reference_id">
-            <column>reference_id</column>
+            <column name="reference_id" />
         </createIndex>
 
         <rollback>
