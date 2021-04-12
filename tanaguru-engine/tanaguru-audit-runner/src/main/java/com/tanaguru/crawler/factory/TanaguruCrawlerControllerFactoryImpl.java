@@ -3,7 +3,6 @@ package com.tanaguru.crawler.factory;
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.TanaguruCrawlerControllerImpl;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +21,7 @@ import java.util.Optional;
 @Component
 public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerControllerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TanaguruCrawlerControllerFactoryImpl.class);
+    private static final String USER_AGENT_NAME = "tanaguru";
 
     @Value("${auditrunner.crawler.outputDir}")
     private String outputDir;
@@ -41,6 +40,9 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
 
     @Value("${auditrunner.proxy.exclusionUrls}")
     private String[] proxyExclusionUrls;
+
+    @Value("${auditrunner.crawler.follow-robots}")
+    private boolean followRobots;
 
     private void prepareEnv() {
         File outDir = new File(outputDir);
@@ -67,6 +69,8 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
             CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword, seeds);
             PageFetcher pageFetcher = new PageFetcher(crawlerConfig);
             RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
+            robotstxtConfig.setUserAgentName(USER_AGENT_NAME);
+            robotstxtConfig.setEnabled(followRobots);
             RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
             crawlerController = new TanaguruCrawlerControllerImpl(
                     crawlerConfig,
@@ -96,9 +100,9 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
         crawlerConfig.setMaxDepthOfCrawling(maxDepth);
         crawlerConfig.setFollowRedirects(true);
         crawlerConfig.setIncludeHttpsPages(true);
-        crawlerConfig.setUserAgentString("tanaguru");
+        crawlerConfig.setUserAgentString(USER_AGENT_NAME);
 
-        if(!basicAuthLogin.isEmpty()){
+        if (!basicAuthLogin.isEmpty()) {
             crawlerConfig.addAuthInfo(
                     new BasicAuthInfo(basicAuthLogin, basicAuthPassword, basicAuthUrl)
             );
@@ -109,11 +113,11 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
         return crawlerConfig;
     }
 
-    private void setupProxy(CrawlConfig crawlConfig, Collection<String> seeds){
+    private void setupProxy(CrawlConfig crawlConfig, Collection<String> seeds) {
         boolean noProxy = Arrays.stream(proxyExclusionUrls)
                 .anyMatch((exclusionUrl) ->
-                    seeds.stream()
-                            .anyMatch((seed) -> seed.contains(exclusionUrl)));
+                        seeds.stream()
+                                .anyMatch((seed) -> seed.contains(exclusionUrl)));
 
         if (!noProxy && proxyPort != null && !proxyHost.isEmpty()) {
             if (!proxyUsername.isEmpty() && !proxyPassword.isEmpty()) {
