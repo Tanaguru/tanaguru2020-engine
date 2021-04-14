@@ -1165,6 +1165,23 @@ function getUniqueSelector(xpath) {
     return csses.join(', ');
 }
 
+var sub_regexes = {
+    "tag": "([a-zA-Z][a-zA-Z0-9]{0,10}|\\*)",
+    "attribute": "[.a-zA-Z_:][-\\w:.]*(\\(\\))?)",
+    "value": "\\s*[\\w/:][-/\\w\\s,:;.]*"
+};
+var validation_re = "(?P<node>" + "(" + "^id\\([\"\\']?(?P<idvalue>%(value)s)[\"\\']?\\)" + "|" + "(?P<nav>//?(?:following-sibling::)?)(?P<tag>%(tag)s)" + "(\\[(" + "(?P<matched>(?P<mattr>@?%(attribute)s=[\"\\'](?P<mvalue>%(value)s))[\"\\']" + "|" + "(?P<contained>contains\\((?P<cattr>@?%(attribute)s,\\s*[\"\\'](?P<cvalue>%(value)s)[\"\\']\\))" + ")\\])?" + "(\\[\\s*(?P<nth>\\d|last\\(\\s*\\))\\s*\\])?" + ")" + ")";
+for (var prop in sub_regexes) {
+    validation_re = validation_re.replace(new RegExp('%\\(' + prop + '\\)s', 'gi'), sub_regexes[prop]);
+}
+
+validation_re = validation_re.replace(/\?P<node>|\?P<idvalue>|\?P<nav>|\?P<tag>|\?P<matched>|\?P<mattr>|\?P<mvalue>|\?P<contained>|\?P<cattr>|\?P<cvalue>|\?P<nth>/gi, '');
+
+function XPathException(message) {
+    this.message = message;
+    this.name = "[XPathException]";
+}
+
 function XPathException(message) {
     this.message = message;
     this.name = "[XPathException]";
