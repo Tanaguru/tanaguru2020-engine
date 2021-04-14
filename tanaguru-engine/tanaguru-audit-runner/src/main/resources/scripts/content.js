@@ -1048,7 +1048,7 @@ function manageOutput(element) {
     return {
         status: status,
         outer: fakeelement.outerHTML,
-        cssSelector: xpath,
+        cssSelector: getUniqueSelector(xpath),
         xpath: xpath,
         role: {implicit: implicitARIASemantic, explicit: explicitARIASemantic},
         accessibleName: accessibleName,
