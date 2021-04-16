@@ -31,7 +31,7 @@
     <changeSet id="populate_test_result_reference" author="rcharre">
         <sql>
             INSERT INTO test_result_reference
-            SELECT tr.id::bigint,th.reference_id FROM test_result tr
+            SELECT DISTINCT tr.id::bigint,th.reference_id FROM test_result tr
             INNER JOIN tanaguru_test tt ON tr.tanaguru_test_id=tt.id
             INNER JOIN test_hierarchy_tanaguru_test thtt ON tt.id=thtt.tanaguru_test_id
             INNER JOIN test_hierarchy th ON th.id=thtt.test_hierarchy_id;
