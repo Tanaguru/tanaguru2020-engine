@@ -22,11 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
 
-import static com.tanaguru.domain.constant.EAuditStatus.DONE;
-import static com.tanaguru.domain.constant.EAuditStatus.RUNNING;
-import static com.tanaguru.domain.constant.EAuditStatus.ERROR;
+import static com.tanaguru.domain.constant.EAuditStatus.*;
 
 /**
  * @author rcharre

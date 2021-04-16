@@ -7,8 +7,10 @@ import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
-import org.openqa.selenium.*;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
 
 public abstract class AbstractAuditRunner implements AuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuditRunner.class);

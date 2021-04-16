@@ -1,8 +1,8 @@
 package com.tanaguru.domain.exception;
 
-import javax.persistence.EntityNotFoundException;
-
 import com.tanaguru.domain.constant.CustomError;
+
+import javax.persistence.EntityNotFoundException;
 
 public class CustomEntityNotFoundException extends EntityNotFoundException{
     

@@ -1,6 +1,5 @@
 package com.tanaguru.repository;
 
-import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;

@@ -1,7 +1,5 @@
 package com.tanaguru;
 
-import java.util.Locale;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import java.util.Locale;
 
 /**
  * @author rcharre
@@ -43,7 +43,7 @@ public class TanaguruRestServer {
     @Bean("threadPoolTaskExecutor")
     public TaskExecutor getAsyncExecutor(){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(1000);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("Async-");
