@@ -22,5 +22,5 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
     Collection<TestResult> findAllByPage(Page page);
 
 
-    Collection<TestResult> findDistinctByPageAndReferencesContaining(Page page, TestHierarchy testHierarchy);
+    Collection<TestResult> findAllByPageAndReferencesContaining(Page page, TestHierarchy testHierarchy);
 }
