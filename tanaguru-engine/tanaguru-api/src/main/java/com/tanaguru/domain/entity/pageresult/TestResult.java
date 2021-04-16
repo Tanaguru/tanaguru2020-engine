@@ -72,7 +72,7 @@ public class TestResult implements Serializable {
     @JoinTable(
             name = "test_result_reference",
             joinColumns = {@JoinColumn(name = "test_result_id")},
-            inverseJoinColumns = @JoinColumn(name = "test_hierarchy_id"))
+            inverseJoinColumns = @JoinColumn(name = "reference_id"))
     Collection<TestHierarchy> references;
 
     public Collection<ElementResult> getElementResults() {
