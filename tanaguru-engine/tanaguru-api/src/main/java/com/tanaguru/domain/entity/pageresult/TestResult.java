@@ -2,6 +2,7 @@ package com.tanaguru.domain.entity.pageresult;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
@@ -67,6 +68,7 @@ public class TestResult implements Serializable {
     @Column(columnDefinition = "jsonb")
     private Map<String, Collection<String>> marks;
 
+    @JsonIgnore
     @ManyToMany(targetEntity = TestHierarchy.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(
