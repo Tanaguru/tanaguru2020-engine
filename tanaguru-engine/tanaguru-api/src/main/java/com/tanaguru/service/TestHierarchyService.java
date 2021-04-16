@@ -1,8 +1,7 @@
 package com.tanaguru.service;
 
-import org.json.JSONObject;
-
 import com.tanaguru.domain.entity.audit.TestHierarchy;
+import org.json.JSONObject;
 
 public interface TestHierarchyService {
 

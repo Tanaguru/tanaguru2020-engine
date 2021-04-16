@@ -1,9 +1,7 @@
 package com.tanaguru.repository;
 
-import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
-import com.tanaguru.domain.entity.pageresult.TestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

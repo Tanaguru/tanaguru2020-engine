@@ -1,13 +1,5 @@
 package com.tanaguru.domain.jsonmapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;

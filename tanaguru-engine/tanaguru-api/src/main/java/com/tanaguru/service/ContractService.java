@@ -6,12 +6,11 @@ import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.contract.ContractRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.Date;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface ContractService {
     /**

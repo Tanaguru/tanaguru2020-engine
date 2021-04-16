@@ -2,29 +2,13 @@ package com.tanaguru.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.domain.entity.audit.AuditReference;
-import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.audit.TanaguruTest;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.*;
 import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.domain.entity.pageresult.StatusResult;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
-import com.tanaguru.repository.ActRepository;
-import com.tanaguru.repository.AuditReferenceRepository;
-import com.tanaguru.repository.ElementResultRepository;
-import com.tanaguru.repository.PageRepository;
-import com.tanaguru.repository.StatusResultRepository;
-import com.tanaguru.repository.TestHierarchyRepository;
-import com.tanaguru.repository.TestHierarchyResultRepository;
-import com.tanaguru.repository.TestResultRepository;
-import com.tanaguru.service.AuditActService;
-import com.tanaguru.service.PageService;
-import com.tanaguru.service.TanaguruTestService;
-import com.tanaguru.service.TestHierarchyResultService;
-import com.tanaguru.service.TestHierarchyService;
-
+import com.tanaguru.repository.*;
+import com.tanaguru.service.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,14 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
 
 @Service
 @Transactional

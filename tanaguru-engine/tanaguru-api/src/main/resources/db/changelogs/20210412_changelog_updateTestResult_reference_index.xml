@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="create_test_result_reference" author="rcharre">
+        <createTable tableName="test_result_reference">
+            <column name="test_result_id" type="bigint"/>
+            <column name="reference_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="test_result_reference" columnNames="test_result_id,reference_id"/>
+        <addForeignKeyConstraint baseTableName="test_result_reference"
+                                 baseColumnNames="test_result_id"
+                                 constraintName="fk_test_result_reference_test_result_id__test_result_id"
+                                 referencedTableName="test_result"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="test_result_reference"
+                                 baseColumnNames="reference_id"
+                                 constraintName="fk_test_result_reference_reference_id__reference_id"
+                                 referencedTableName="test_hierarchy"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="test_result_reference"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="populate_test_result_reference" author="rcharre">
+        <sql>
+            INSERT INTO test_result_reference
+            SELECT tr.id::bigint,th.id FROM test_result tr
+            INNER JOIN tanaguru_test tt ON tr.tanaguru_test_id=tt.id
+            INNER JOIN test_hierarchy_tanaguru_test thtt ON tt.id=thtt.tanaguru_test_id
+            INNER JOIN test_hierarchy th ON th.id=thtt.test_hierarchy_id;
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM populate_test_result_reference;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

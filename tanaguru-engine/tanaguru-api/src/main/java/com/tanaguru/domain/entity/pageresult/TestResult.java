@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.*;
 
-import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -65,6 +66,14 @@ public class TestResult implements Serializable {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private Map<String, Collection<String>> marks;
+
+    @ManyToMany(targetEntity = TestHierarchy.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JoinTable(
+            name = "test_result_reference",
+            joinColumns = {@JoinColumn(name = "test_result_id")},
+            inverseJoinColumns = @JoinColumn(name = "test_hierarchy_id"))
+    Collection<TestHierarchy> references;
 
     public Collection<ElementResult> getElementResults() {
         return elementResults;
@@ -152,5 +161,13 @@ public class TestResult implements Serializable {
 
     public void setNbElementUntested(int nbElementUntested) {
         this.nbElementUntested = nbElementUntested;
+    }
+
+    public Collection<TestHierarchy> getReferences() {
+        return references;
+    }
+
+    public void setReferences(Collection<TestHierarchy> references) {
+        this.references = references;
     }
 }

@@ -1,9 +1,7 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.domain.constant.CustomError;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.AppAuthorityName;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.dto.ChangePasswordCommandDTO;
 import com.tanaguru.domain.dto.ForgotEmailDTO;
@@ -11,7 +9,8 @@ import com.tanaguru.domain.dto.UserDTO;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.domain.exception.CustomInvalidEntityException;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.ProjectUserRepository;
@@ -20,9 +19,7 @@ import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.UserService;
-import com.tanaguru.service.impl.MailServiceImpl;
 import com.tanaguru.service.impl.MessageService;
-
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -55,9 +52,10 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final UserFactory userFactory;
+
+    private final ContractUserRepository contractUserRepository;
     private final AppRoleService appRoleService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final ContractUserRepository contractUserRepository;
     private final ProjectUserRepository projectUserRepository;
     private final MailService mailService;
     private final MessageService messageService;
@@ -67,7 +65,6 @@ public class UserController {
 
     @Value("${password.tokenValidity}")
     private int passwordTokenValidity;
-    
 
     @Autowired
     public UserController(
@@ -77,8 +74,8 @@ public class UserController {
             UserFactory userFactory,
             AppRoleService appRoleService,
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            ContractUserRepository contractUserRepository, 
-            ProjectUserRepository projectUserRepository, 
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository,
             MailService mailService,
             MessageService messageService) {
         this.userDetailsService = userDetailsService;
@@ -157,7 +154,7 @@ public class UserController {
     public @ResponseBody
     User getUser(@PathVariable long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
     }
 
     /**
@@ -198,7 +195,7 @@ public class UserController {
     public @ResponseBody
     User getUser(@PathVariable String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username));
     }
 
     /**
@@ -224,26 +221,22 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_USER)")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User createUser(@RequestBody @Valid UserDTO user) {
-        if (userService.checkUsernameIsUsed(user.getUsername())) {
-            throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
-        }
-
-        if (userService.checkEmailIsUsed(user.getEmail())) {
-            throw new CustomInvalidEntityException(CustomError.EMAIL_ALREADY_EXISTS);
-        }
-
-        if(user.getPassword() == null || user.getPassword().isEmpty()){
-            throw new CustomInvalidEntityException(CustomError.INVALID_PASSWORD);
-        }
-
+    User createUser(
+            @RequestBody @Valid UserDTO user,
+            @RequestParam(defaultValue = "false", name = "create-contract") boolean createContract
+    ) {
         EAppRole approle = EAppRole.USER;
-        if(userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)){
+        if (userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)) {
             approle = user.getAppRole();
         }
 
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        return userFactory.createUser(user.getUsername(), user.getEmail(), user.getPassword(), approle, user.isEnabled());
+        return userService.createUser(
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                approle,
+                user.isEnabled(),
+                createContract);
     }
 
     /**
@@ -269,20 +262,20 @@ public class UserController {
     public @ResponseBody
     User modifyUser(@RequestBody @Valid UserDTO user) {
         User from = userRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId() ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId()));
 
         User to = new User();
         to.setUsername(user.getUsername());
         to.setEmail(user.getEmail());
         to.setEnabled(user.isEnabled());
         to.setAccountNonLocked(user.isAccountNonLocked());
-        
+
         to.setAppRole(from.getAppRole());
-        if(from.getAppRole().getName() != user.getAppRole() &&
+        if (from.getAppRole().getName() != user.getAppRole() &&
                 userDetailsService.getCurrentUser().getId() != from.getId() &&
-                userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)){
+                userService.hasAuthority(userDetailsService.getCurrentUser(), AppAuthorityName.PROMOTE_USER)) {
             to.setAppRole(appRoleService.getAppRole(user.getAppRole())
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString() )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString())));
         }
 
         return userService.modifyUser(from, to);
@@ -341,7 +334,7 @@ public class UserController {
         }
 
         userService.deleteUser(userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id )));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id)));
     }
 
     /**
@@ -359,13 +352,13 @@ public class UserController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
-            "#id)")
+                    "#id)")
     @GetMapping(value = "/by-contract-paginated/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Page<ContractAppUser> findAllByContractPaginated(@PathVariable long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "user.username") String sortBy) {
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(defaultValue = "user.username") String sortBy) {
         return contractUserRepository.findAllByContract_Id(id, PageRequest.of(page, size, Sort.by(sortBy)));
     }
 
@@ -384,13 +377,13 @@ public class UserController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).SHOW_CONTRACT, " +
-            "#id)")
+                    "#id)")
     @GetMapping(value = "/by-contract/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Collection<ContractAppUser> findAllByContract(@PathVariable long id) {
         return contractUserRepository.findAllByContract_Id(id);
     }
-    
+
     /**
      * @return All the @see ProjectAppUser for a given @see Project id
      */
@@ -406,7 +399,7 @@ public class UserController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_PROJECT, " +
-            "#id)")
+                    "#id)")
     @GetMapping(value = "/by-project/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Collection<ProjectAppUser> findAllByProject(@PathVariable long id) {
@@ -425,7 +418,7 @@ public class UserController {
     void forgotPassword(@RequestBody ForgotEmailDTO forgotEmailDTO) {
         Date date = new Date();
         Optional<User> userOpt = userRepository.findByEmail(forgotEmailDTO.getEmail());
-        if(userOpt.isPresent()){
+        if (userOpt.isPresent()) {
             User user = userOpt.get();
             Collection<Pair<String, Date>> tokens = user.getModificationPasswordTokens();
 
@@ -436,12 +429,12 @@ public class UserController {
             user.setModificationPasswordTokens(tokens);
             userRepository.save(user);
 
-            try{
+            try {
                 String link = webappUrl + "reset-password/" + user.getId() + '/' + token;
-                mailService.sendMimeMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent").replaceAll("link",link));
-            }catch (MailException e){
+                mailService.sendMimeMessage(forgotEmailDTO.getEmail(), messageService.getMessage("mail.forgotPasswordSubject"), messageService.getMessage("mail.forgotPasswordContent").replaceAll("link", link));
+            } catch (MailException e) {
                 LOGGER.error(e.getMessage());
-                throw  new InternalError(CustomError.ERROR_SENDING_EMAIL.toString());
+                throw new InternalError(CustomError.ERROR_SENDING_EMAIL.toString());
             }
 
         }
@@ -467,25 +460,25 @@ public class UserController {
     public @ResponseBody
     User changePassword(@RequestBody ChangePasswordCommandDTO changePasswordCommandDTO) {
         User user = userRepository.findById(changePasswordCommandDTO.getUserId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, changePasswordCommandDTO.getUserId() ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, changePasswordCommandDTO.getUserId()));
 
         User current = userDetailsService.getCurrentUser();
         Calendar c = Calendar.getInstance();
         Date currentDate = new Date();
-        if((current != null && userService.hasAuthority(current, AppAuthorityName.MODIFY_USER)) ||
+        if ((current != null && userService.hasAuthority(current, AppAuthorityName.MODIFY_USER)) ||
                 (current != null && current.getId() == user.getId()) ||
                 (changePasswordCommandDTO.getToken() != null &&
-                user.getModificationPasswordTokens().stream().anyMatch(pair -> {
-                    c.setTime(pair.getSecond());
-                    c.add(Calendar.SECOND, passwordTokenValidity);
-                    return pair.getFirst().equals(changePasswordCommandDTO.getToken()) &&
-                            currentDate.compareTo(c.getTime()) <= 0;
-                })
-                        )
-                ){
+                        user.getModificationPasswordTokens().stream().anyMatch(pair -> {
+                            c.setTime(pair.getSecond());
+                            c.add(Calendar.SECOND, passwordTokenValidity);
+                            return pair.getFirst().equals(changePasswordCommandDTO.getToken()) &&
+                                    currentDate.compareTo(c.getTime()) <= 0;
+                        })
+                )
+        ) {
             return userDetailsService.changeUserPassword(user, changePasswordCommandDTO.getPassword());
-        }else{
-            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, changePasswordCommandDTO.getUserId() );
+        } else {
+            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, changePasswordCommandDTO.getUserId());
         }
     }
 }

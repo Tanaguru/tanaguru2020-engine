@@ -1,9 +1,6 @@
 package com.tanaguru.domain.entity.audit;
 
-import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
-
 import javax.persistence.*;
-import java.util.Collection;
 
 /**
  * @author rcharre

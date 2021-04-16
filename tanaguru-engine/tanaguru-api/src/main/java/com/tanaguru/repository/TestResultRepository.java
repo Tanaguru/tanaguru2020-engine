@@ -1,7 +1,6 @@
 package com.tanaguru.repository;
 
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,15 +15,12 @@ import java.util.Collection;
 public interface TestResultRepository extends JpaRepository<TestResult, Long> {
     /**
      * Find all @see TestResult for a given @see Page
+     *
      * @param page The @see Page
      * @return The collection of @see TestResult
      */
     Collection<TestResult> findAllByPage(Page page);
 
-    /**
-     *
-     * @param testHierarchy
-     * @return
-     */
-    Collection<TestResult> findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(Page page, TestHierarchy testHierarchy);
+
+    Collection<TestResult> findDistinctByPageAndReferencesContaining(Page page, TestHierarchy testHierarchy);
 }
