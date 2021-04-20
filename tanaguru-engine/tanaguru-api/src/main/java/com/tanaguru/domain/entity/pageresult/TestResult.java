@@ -38,7 +38,7 @@ public class TestResult implements Serializable {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private TanaguruTest tanaguruTest;
 
     @Column

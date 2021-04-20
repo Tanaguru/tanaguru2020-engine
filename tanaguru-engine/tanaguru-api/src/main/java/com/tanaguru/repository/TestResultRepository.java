@@ -6,6 +6,7 @@ import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -26,14 +27,8 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
 
     Collection<TestResult> findDistinctByPageAndTanaguruTest_In(Page page, Collection<TanaguruTest> tests);
 
-    @Query(value = "SELECT DISTINCT tr FROM test_result tr " +
-            "INNER JOIN tanaguru_test tt ON tr.tanaguru_test_id=tt.id " +
-            "INNER JOIN test_hierarchy_tanaguru_test thtt ON tt.id=thtt.tanaguru_test_id " +
-            "INNER JOIN test_hierarchy th ON th.id=thtt.test_hierarchy_id " +
-            "WHERE tr.page_id=?1 AND th.reference_id=?2", nativeQuery = true)
-    Collection<TestResult> findTestResultByReference(long pageId, long referenceId);
-
-    default Collection<TestResult> findTestResultByReference(Page page, TestHierarchy reference) {
-        return findTestResultByReference(page.getId(), reference.getId());
-    }
+    @Query("SELECT DISTINCT tr FROM TestResult tr " +
+            "INNER JOIN TanaguruTest tt ON tr.tanaguruTest=tt " +
+            "INNER JOIN tt.testHierarchies th WHERE tr.page=:page and th.reference=:reference")
+    Collection<TestResult> findTestResultByReference(@Param("page")Page page, @Param("reference")TestHierarchy reference);
 }
