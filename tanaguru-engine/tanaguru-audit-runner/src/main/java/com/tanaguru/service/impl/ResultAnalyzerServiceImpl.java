@@ -136,15 +136,6 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
                 elementResults.add(elementResultRepository.save(elementResult));
             }
             testResult.setElementResults(elementResults);
-
-            Set<TestHierarchy> referencesSet = new HashSet<>();
-            for(TestHierarchy reference : testResult.getTanaguruTest().getTestHierarchies()){
-                if(!referencesSet.contains(reference)){
-                    testResult.getReferences().add(reference);
-                    referencesSet.add(reference);
-                }
-
-            }
             testResultByTestId.put(webextTestResult.getId(), testResultRepository.save(testResult));
         }
 

@@ -68,15 +68,6 @@ public class TestResult implements Serializable {
     @Column(columnDefinition = "jsonb")
     private Map<String, Collection<String>> marks;
 
-    @JsonIgnore
-    @ManyToMany(targetEntity = TestHierarchy.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @Fetch(value = FetchMode.SUBSELECT)
-    @JoinTable(
-            name = "test_result_reference",
-            joinColumns = {@JoinColumn(name = "test_result_id")},
-            inverseJoinColumns = @JoinColumn(name = "reference_id"))
-    Collection<TestHierarchy> references;
-
     public Collection<ElementResult> getElementResults() {
         return elementResults;
     }
@@ -163,13 +154,5 @@ public class TestResult implements Serializable {
 
     public void setNbElementUntested(int nbElementUntested) {
         this.nbElementUntested = nbElementUntested;
-    }
-
-    public Collection<TestHierarchy> getReferences() {
-        return references;
-    }
-
-    public void setReferences(Collection<TestHierarchy> references) {
-        this.references = references;
     }
 }

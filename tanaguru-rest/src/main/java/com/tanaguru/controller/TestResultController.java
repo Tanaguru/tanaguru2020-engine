@@ -141,6 +141,6 @@ public class TestResultController {
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, page.getAudit().getId() );
         }
 
-        return testResultRepository.findAllByPageAndReferencesContaining(page, testHierarchy);
+        return testResultRepository.findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(page, testHierarchy);
     }
 }
