@@ -29,7 +29,6 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
 
     @Query("SELECT DISTINCT tr FROM TestResult tr " +
             "INNER JOIN TanaguruTest tt ON tr.tanaguruTest=tt " +
-            "INNER JOIN tt.testHierarchies th " +
-            "WHERE tr.page=:page and th=:reference")
+            "INNER JOIN tt.testHierarchies th WHERE tr.page=:page and th.reference=:reference")
     Collection<TestResult> findTestResultByReference(@Param("page")Page page, @Param("reference")TestHierarchy reference);
 }
