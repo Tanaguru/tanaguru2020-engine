@@ -149,7 +149,7 @@ public class PageServiceImpl implements PageService {
                 JSONObject jsonStatusResultsObject = new JSONObject();
                 JSONObject jsonPageStatusResultsObject = new JSONObject(mapper.writeValueAsString(statusRes));
 
-                Collection<TestResult> testsResults = testResultRepository.findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(
+                Collection<TestResult> testsResults = testResultRepository.findTestResultByReference(
                         statusRes.getPage(),
                         ref.getTestHierarchy());
                 for (TestResult testResult : testsResults) { //for each test
