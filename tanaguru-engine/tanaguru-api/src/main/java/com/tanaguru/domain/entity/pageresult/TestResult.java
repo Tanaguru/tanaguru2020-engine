@@ -154,8 +154,4 @@ public class TestResult implements Serializable {
     public void setNbElementUntested(int nbElementUntested) {
         this.nbElementUntested = nbElementUntested;
     }
-
-    public boolean hasElementResults(){
-        return elementResults.size() > 0;
-    }
 }
