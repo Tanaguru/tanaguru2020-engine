@@ -59,8 +59,7 @@ public class TestResult implements Serializable {
     @Column
     private int nbElementUntested = 0;
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIgnore
     @OneToMany(mappedBy = "testResult", cascade = CascadeType.REMOVE)
     private Collection<ElementResult> elementResults;
 
