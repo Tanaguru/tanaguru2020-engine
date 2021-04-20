@@ -33,7 +33,7 @@ public class TestResult implements Serializable {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Page page;
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -153,5 +153,9 @@ public class TestResult implements Serializable {
 
     public void setNbElementUntested(int nbElementUntested) {
         this.nbElementUntested = nbElementUntested;
+    }
+
+    public boolean hasElementResults(){
+        return elementResults.size() > 0;
     }
 }
