@@ -30,7 +30,7 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
             "INNER JOIN tanaguru_test tt ON tr.tanaguru_test_id=tt.id " +
             "INNER JOIN test_hierarchy_tanaguru_test thtt ON tt.id=thtt.tanaguru_test_id " +
             "INNER JOIN test_hierarchy th ON th.id=thtt.test_hierarchy_id " +
-            "WHERE tr.page_id=?1 AND th.reference_id=?2;", nativeQuery = true)
+            "WHERE tr.page_id=?1 AND th.reference_id=?2", nativeQuery = true)
     Collection<TestResult> findTestResultByReference(long pageId, long referenceId);
 
     default Collection<TestResult> findTestResultByReference(Page page, TestHierarchy reference) {
