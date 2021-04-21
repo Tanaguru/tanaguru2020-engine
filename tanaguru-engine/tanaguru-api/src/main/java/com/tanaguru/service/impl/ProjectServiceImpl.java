@@ -152,7 +152,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = appUsers.toList()
                 .stream().map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
-        return new PageImpl<>(projects, PageRequest.of(pageable.getPageSize(), pageable.getPageNumber()), appUsers.getTotalElements());
+        return new PageImpl<>(projects, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), appUsers.getTotalElements());
     }
 
     @Override
