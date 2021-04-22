@@ -276,8 +276,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         return stop;
     }
 
-    public void setStop(boolean stop) {
-        this.stop = stop;
+    public void interrupt(){
+        stop = true;
     }
 
     public void webDriverGet(String url) {

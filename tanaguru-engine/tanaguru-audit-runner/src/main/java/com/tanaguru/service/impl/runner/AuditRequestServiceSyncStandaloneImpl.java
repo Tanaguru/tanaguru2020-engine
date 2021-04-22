@@ -53,7 +53,8 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -67,7 +68,8 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository,
+                projectUserRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 

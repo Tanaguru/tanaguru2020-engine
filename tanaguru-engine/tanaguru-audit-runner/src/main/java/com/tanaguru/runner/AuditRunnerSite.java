@@ -49,10 +49,10 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
     }
 
     @Override
-    public void setStop(boolean stop) {
-        if (stop) {
+    public void interrupt() {
+        super.interrupt();
+        if (super.isStop()) {
             crawlerController.shutdown();
         }
-        super.setStop(stop);
     }
 }

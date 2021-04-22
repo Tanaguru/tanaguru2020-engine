@@ -60,7 +60,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -75,7 +76,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository,
+                projectUserRepository);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 

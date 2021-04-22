@@ -5,6 +5,7 @@ import com.tanaguru.domain.dto.AuditRequest;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.service.AuditRunnerService;
 import com.tanaguru.service.AuditService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -68,5 +69,10 @@ public class AuditRequestProducerServiceImpl implements AuditRunnerService {
             LOGGER.error("[Audit {}] {}", audit.getId(), e.getMessage());
             throw new IllegalStateException("[Audit " + audit.getId() + "] Could not send auditRequest");
         }
+    }
+
+    @Override
+    public void stopAudit(Audit audit){
+        throw new NotImplementedException("Function not implemented yet");
     }
 }
