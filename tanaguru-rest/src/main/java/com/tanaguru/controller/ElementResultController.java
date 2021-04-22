@@ -1,10 +1,10 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.repository.ElementResultRepository;
 import com.tanaguru.repository.TestResultRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;

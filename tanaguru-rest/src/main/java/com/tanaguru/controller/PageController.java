@@ -1,9 +1,9 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
-import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.PageService;
@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -26,8 +25,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-
-import javax.persistence.EntityNotFoundException;
 
 /**
  * @author rcharre

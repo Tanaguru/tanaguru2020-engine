@@ -152,7 +152,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = appUsers.toList()
                 .stream().map(ProjectAppUser::getProject)
                 .collect(Collectors.toList());
-        return new PageImpl<>(projects, PageRequest.of(pageable.getPageSize(), pageable.getPageNumber()), appUsers.getTotalElements());
+        return new PageImpl<>(projects, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), appUsers.getTotalElements());
     }
 
     @Override
@@ -166,7 +166,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> findPageByUserMemberOfNotOwner(User user, String search, Pageable pageable) {
-        Page<ProjectAppUser> projects = projectUserRepository.findAllByContractAppUser_UserAndProject_NameContainingIgnoreCase(user, search, pageable);
+        Page<ProjectAppUser> projects = projectUserRepository.findSharedWith(user, search, pageable);
         List<Project> projectsList = projects.toList()
                 .stream()
                 .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)

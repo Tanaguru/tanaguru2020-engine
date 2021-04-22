@@ -1,8 +1,7 @@
 package com.tanaguru.domain.exception;
 
-import org.openqa.selenium.InvalidArgumentException;
-
 import com.tanaguru.domain.constant.CustomError;
+import org.openqa.selenium.InvalidArgumentException;
 
 public class CustomInvalidArgumentException extends InvalidArgumentException {
 

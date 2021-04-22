@@ -2,39 +2,24 @@ package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditType;
-import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.domain.entity.audit.AuditLog;
-import com.tanaguru.domain.entity.audit.AuditReference;
-import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.*;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
-import com.tanaguru.service.AuditActService;
-import com.tanaguru.service.AuditLogService;
-import com.tanaguru.service.AuditParameterService;
-import com.tanaguru.service.AuditService;
-import com.tanaguru.service.PageService;
-import com.tanaguru.service.TestHierarchyResultService;
-import com.tanaguru.service.TestHierarchyService;
-
+import com.tanaguru.service.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**

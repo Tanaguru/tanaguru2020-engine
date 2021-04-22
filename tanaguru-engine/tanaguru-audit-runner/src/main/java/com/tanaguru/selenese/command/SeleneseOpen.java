@@ -4,7 +4,6 @@ import com.tanaguru.runner.AuditRunner;
 import jp.vmi.selenium.selenese.Context;
 import jp.vmi.selenium.selenese.SeleneseRunnerRuntimeException;
 import jp.vmi.selenium.selenese.command.AbstractCommand;
-import jp.vmi.selenium.selenese.command.ArgumentType;
 import jp.vmi.selenium.selenese.result.Result;
 import jp.vmi.selenium.selenese.result.Success;
 
