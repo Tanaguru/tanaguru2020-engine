@@ -8,6 +8,7 @@ import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EParameterFamily;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.Resource;
 import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
@@ -32,6 +33,7 @@ import javax.annotation.PostConstruct;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.tanaguru.domain.constant.EAuditType.*;
 import static com.tanaguru.domain.constant.ParameterValueConstants.*;
@@ -214,8 +216,13 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                     break;
 
                 case DOM_ID:
-                    long resourceId = Long.parseLong(value);
-                    result = resourceRepository.existsById(resourceId);
+                    String[] resourceIdsStr = value.split(";");
+                    Collection<Resource> resources = resourceRepository.findAllByIdIn(
+                            Arrays.stream(resourceIdsStr)
+                                    .map(Long::parseLong)
+                                    .collect(Collectors.toList())
+                    );
+                    result = resourceIdsStr.length == resources.size();
                     break;
 
                 case SCENARIO_ID:
