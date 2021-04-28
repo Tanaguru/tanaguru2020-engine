@@ -398,7 +398,7 @@ public class AuditController {
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
                     "T(com.tanaguru.domain.constant.ProjectAuthorityName).START_AUDIT, " +
                     "#auditCommand.getProjectId())")
-    @PostMapping("/stop/{id}")
+    @PostMapping("/{id}/stop")
     public @ResponseBody
     void stopAudit(@PathVariable long id) {
         Audit audit = auditRepository.findById(id)
