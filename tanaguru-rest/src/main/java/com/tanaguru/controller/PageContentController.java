@@ -2,15 +2,14 @@ package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditParameter;
-import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.PageContent;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.repository.AuditRepository;
-import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.PageContentRepository;
+import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.AuditParameterService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -21,8 +20,6 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * @author rcharre

@@ -153,7 +153,10 @@ pipeline {
 
         stage('Store packages') {
             when {
-                branch 'master'
+                anyOf{
+                    branch 'master'
+                    branch 'beta'
+                }
             }
             steps {
                 unstash 'tanaguru2020-rest'
@@ -161,7 +164,9 @@ pipeline {
 
                 sh '''
                     REST_VERSION=$(cat version.txt)
-                    mkdir -p /html/tanaguru2020-rest/${REST_VERSION}
+                    DIR=/html/tanaguru2020-rest/${REST_VERSION}
+                    if [ -d "$DIR" ]; then rm -Rf $DIR; fi
+                    mkdir -p $DIR
                     mv -f tanaguru-rest/target/tanaguru2020-rest-*.tar.gz /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
                     chown 1000:1000 /html/tanaguru2020-rest/${REST_VERSION}/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 '''

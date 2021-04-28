@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -141,6 +138,7 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
             testResult.setElementResults(elementResults);
             testResultByTestId.put(webextTestResult.getId(), testResultRepository.save(testResult));
         }
+
         return testResultByTestId;
     }
 

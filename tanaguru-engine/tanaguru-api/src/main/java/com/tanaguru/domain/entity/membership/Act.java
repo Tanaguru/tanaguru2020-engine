@@ -2,7 +2,6 @@ package com.tanaguru.domain.entity.membership;
 
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.entity.membership.user.User;
 
 import javax.persistence.*;
 import javax.validation.Valid;

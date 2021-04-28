@@ -1,6 +1,5 @@
 package com.tanaguru.domain.entity.membership.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 
 import javax.persistence.*;

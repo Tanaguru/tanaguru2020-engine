@@ -12,7 +12,6 @@ import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidArgumentException;
-import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractRoleRepository;
@@ -21,7 +20,6 @@ import com.tanaguru.service.ContractService;
 import com.tanaguru.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -101,11 +99,11 @@ public class ContractServiceImpl implements ContractService {
     }
 
     public Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable) {
-        return contractUserRepository.findAllContractByUserAndContractNameContaining(user, contractName, pageable);
+        return contractRepository.findAllByContractAppUsers_UserAndNameContainingIgnoreCase(user, contractName, pageable);
     }
 
     public Page<Contract> findByUser(User user, Pageable pageable) {
-        return contractUserRepository.findAllContractByUser(user, pageable);
+        return contractRepository.findAllByContractAppUsers_User(user, pageable);
     }
     
     public Collection<Contract> findByOwner(User user) {
