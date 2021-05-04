@@ -5,9 +5,12 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.StatusResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,4 +30,10 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
      * @return The collection of @see StatusResult
      */
     Collection<StatusResult> findAllByReferenceAndPage_Audit(TestHierarchy reference, Audit audit);
+    
+    @Query(value = "SELECT avg(nbElementFailed*1.0) FROM StatusResult")
+    double getAverageNumberOfErrorsByPage();
+    
+    @Query(value = "SELECT sum(nbElementFailed) FROM StatusResult WHERE id in :ids")
+    int getSumNumberOfErrorsForPages(@Param("ids") List<Long> pageIdList);
 }
