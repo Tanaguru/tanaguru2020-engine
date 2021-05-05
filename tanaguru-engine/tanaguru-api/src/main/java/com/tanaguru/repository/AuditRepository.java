@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author rcharre
@@ -20,4 +21,7 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     
     @Query(value = "SELECT count(*) FROM Audit WHERE type = :type ")
     int numberOfAuditByType(@Param("type") EAuditType type);
+    
+    @Query(value = "SELECT count(*) FROM Audit WHERE type = :type AND dateStart>:startDate AND dateStart<:endDate")
+    int numberOfAuditByTypeAndPeriod(@Param("type") EAuditType type, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }
