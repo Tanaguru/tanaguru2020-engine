@@ -32,7 +32,7 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
     Collection<StatusResult> findAllByReferenceAndPage_Audit(TestHierarchy reference, Audit audit);
     
     @Query(value = "SELECT avg(nbElementFailed*1.0) FROM StatusResult")
-    double getAverageNumberOfErrorsByPage();
+    Optional<Double> getAverageNumberOfErrorsByPage();
     
     @Query(value = "SELECT sum(nbElementFailed) FROM StatusResult WHERE id in :ids")
     Optional<Integer> getSumNumberOfErrorsForPages(@Param("ids") List<Long> pageIdList);

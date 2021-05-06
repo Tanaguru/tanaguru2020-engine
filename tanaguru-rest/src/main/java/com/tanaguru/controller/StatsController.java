@@ -138,4 +138,27 @@ public class StatsController {
     Integer getNbFilesAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getNbFileAuditedByPeriod(startDate, endDate);
     }
+    
+    /**
+     * Get the average number of errors by page audited over a period
+     *
+     * @param startDate the start date of the period
+     * @param endDate the end date of the period
+     * @return average number of errors by page audited over a period
+     */
+    @ApiOperation(
+            value = "Get the average number of errors by page audited over a period",
+            notes = "User must be SUPER_ADMIN"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @GetMapping("/average-page-error-period/{startDate}/{endDate}")
+    public @ResponseBody
+    Double getAverageNbErrorsForPageByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+        return this.statsService.getAverageNbErrorsForPageByPeriod(startDate, endDate);
+    }
 }

@@ -16,4 +16,5 @@ public interface StatsService {
 
 	Integer getNbFileAuditedByPeriod(Date startDate, Date endDate);
 
+	Double getAverageNbErrorsForPageByPeriod(Date startDate, Date endDate);
 }

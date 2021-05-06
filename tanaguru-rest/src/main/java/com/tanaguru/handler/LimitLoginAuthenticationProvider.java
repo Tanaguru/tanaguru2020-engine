@@ -1,7 +1,9 @@
 package com.tanaguru.handler;
 
 import com.tanaguru.domain.entity.membership.user.Attempt;
+import com.tanaguru.domain.entity.membership.user.Connection;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.repository.ConnectionRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.UserService;
 import org.slf4j.Logger;
@@ -32,12 +34,17 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     private final UserService userService;
     private final UserRepository userRepository;
     private final HttpServletRequest request;
+    private final ConnectionRepository connectionRepository;
 
     @Autowired
-    public LimitLoginAuthenticationProvider(UserService userService, UserRepository userRepository, HttpServletRequest request) {
+    public LimitLoginAuthenticationProvider(UserService userService, 
+    		UserRepository userRepository, 
+    		HttpServletRequest request, 
+    		ConnectionRepository connectionRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.request = request;
+        this.connectionRepository = connectionRepository;
     }
 
     @Override
@@ -48,6 +55,7 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
             Authentication auth = super.authenticate(authentication);
             //sucess login, reset user attempts
             user.ifPresent(value -> userService.resetFailAttempts(value));
+            this.connectionRepository.save(new Connection(new Date()));
             return auth;		
 
         } catch (BadCredentialsException e) {

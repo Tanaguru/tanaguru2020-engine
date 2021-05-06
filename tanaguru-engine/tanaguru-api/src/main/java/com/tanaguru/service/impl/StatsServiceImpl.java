@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
+import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.PageRepository;
@@ -61,20 +63,55 @@ public class StatsServiceImpl implements StatsService{
 		jsonStatsObject.put("nbUsers", this.userRepository.count());
 		jsonStatsObject.put("nbAudits", this.auditRepository.count());
 		jsonStatsObject.put("nbContracts", this.contractRepository.count());
-		jsonStatsObject.put("meanNbErrorsPage", this.statusResultRepository.getAverageNumberOfErrorsByPage());
+		Optional<Double> avgNbOfErrorsByPage = this.statusResultRepository.getAverageNumberOfErrorsByPage();
+		if(avgNbOfErrorsByPage.isPresent()) {
+			jsonStatsObject.put("meanNbErrorsPage", avgNbOfErrorsByPage.get());
+		}else {
+			jsonStatsObject.put("meanNbErrorsPage", 0);
+		}
 		jsonStatsObject.put("meanNbErrorsAudit", this.getAverageNbErrorsByAudit());
 		jsonStatsObject.put("meanNbErrorsProject", this.getAverageNbErrorsByProject());
 		for(EAuditType type : EAuditType.values()) {
 			jsonStatsObject.put("nb"+type.toString()+"Audit", this.auditRepository.numberOfAuditByType(type));
 		}
+		jsonStatsObject.put("meanNbUsersByProject", this.getAverageNbUsersByProject());
+		jsonStatsObject.put("meanNbAuditsByProject", this.getAverageNbAuditsByProject());
 		return jsonStatsObject;
+	}
+	
+	/**
+	 * Return the average of number of users per project
+	 * @return the average of number of users per project
+	 */
+	private Double getAverageNbUsersByProject() {
+		Collection<Project> projects = this.projectRepository.findAll();
+		double nbUsers = 0.0;
+		for(Project project: projects) {
+			Collection<ProjectAppUser> projectAppUsers = project.getProjectAppUsers();
+			nbUsers += projectAppUsers.size();
+		}
+		return (double) (nbUsers/projects.size());
+	}
+	
+	/**
+	 * Return the average of number of audits per project
+	 * @return the average of number of audits per project
+	 */
+	private Double getAverageNbAuditsByProject() {
+		Collection<Project> projects = this.projectRepository.findAll();
+		double nbAudits = 0.0;
+		for(Project project: projects) {
+			Collection<Act> acts = project.getActs();
+			nbAudits += acts.size();
+		}
+		return (double) (nbAudits/projects.size());
 	}
 	
 	/***
 	 * Returns the average number of errors per audit
 	 * @return the average number of errors per audit
 	 */
-	private double getAverageNbErrorsByAudit() {
+	private Double getAverageNbErrorsByAudit() {
 		List<Audit> audits = this.auditRepository.findAll();
 		List<Long> pagesId = new ArrayList<>();
 		List<Integer> auditErrors = new ArrayList<>();
@@ -147,5 +184,23 @@ public class StatsServiceImpl implements StatsService{
 	@Override
 	public Integer getNbFileAuditedByPeriod(Date startDate, Date endDate) {
 		return this.auditRepository.numberOfAuditByTypeAndPeriod(EAuditType.UPLOAD, startDate, endDate);
+	}
+
+	@Override
+	public Double getAverageNbErrorsForPageByPeriod(Date startDate, Date endDate) {
+		Double avg = 0.0;
+		Collection<Page> pages = this.pageRepository.findAll();
+		List<Long> pagesId = new ArrayList<>();
+		for(Page page: pages) {
+			Audit audit = page.getAudit();
+			if(audit.getDateStart().after(startDate) && audit.getDateStart().before(endDate)) {
+				pagesId.add(page.getId());
+			}
+		}
+		Optional<Integer> errorSum = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
+		if(errorSum.isPresent()) {
+			avg = (double) errorSum.get()/pagesId.size();
+		}
+		return avg;
 	}
 }
