@@ -1,12 +1,12 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.domain.entity.pageresult.TestResult;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
@@ -141,6 +141,6 @@ public class TestResultController {
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_RESULT_AUDIT, page.getAudit().getId() );
         }
 
-        return testResultRepository.findDistinctByPageAndTanaguruTest_TestHierarchies_Reference(page, testHierarchy);
+        return testResultRepository.findTestResultByReference(page, testHierarchy);
     }
 }

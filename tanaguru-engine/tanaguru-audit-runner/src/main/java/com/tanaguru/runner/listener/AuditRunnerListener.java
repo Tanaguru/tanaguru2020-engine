@@ -4,8 +4,6 @@ import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.webextresult.WebextPageResult;
 
-import java.util.Map;
-
 /**
  * @author rcharre
  */

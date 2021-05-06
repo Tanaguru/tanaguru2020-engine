@@ -3,9 +3,7 @@ package com.tanaguru.runner.factory;
 import com.tanaguru.domain.constant.BrowserName;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.runner.AuditRunner;
-import org.openqa.selenium.Dimension;
 
 import java.util.Collection;
 import java.util.Optional;

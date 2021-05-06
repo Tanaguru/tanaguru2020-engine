@@ -6,13 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
+import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.*;
 
-import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -32,12 +33,12 @@ public class TestResult implements Serializable {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Page page;
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private TanaguruTest tanaguruTest;
 
     @Column
@@ -58,8 +59,7 @@ public class TestResult implements Serializable {
     @Column
     private int nbElementUntested = 0;
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIgnore
     @OneToMany(mappedBy = "testResult", cascade = CascadeType.REMOVE)
     private Collection<ElementResult> elementResults;
 

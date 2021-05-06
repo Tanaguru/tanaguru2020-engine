@@ -6,7 +6,6 @@ import com.tanaguru.domain.constant.EAuditType;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 

@@ -10,7 +10,6 @@ import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import com.tanaguru.service.impl.MessageService;
-
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -61,7 +60,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -76,7 +76,8 @@ public class AuditRequestConsumerServiceImpl extends AuditRequestServiceSyncStan
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository,
+                projectUserRepository);
         this.auditRequestConsumer = auditRequestConsumer;
     }
 

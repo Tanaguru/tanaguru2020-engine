@@ -1,6 +1,7 @@
 package com.tanaguru.runner;
 
 
+import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -36,7 +37,13 @@ public class AuditRunnerPage extends AbstractAuditRunner {
                 LOGGER.warn("[Audit {}] Interrupting current audit", super.getAudit().getId());
                 break;
             } else {
-                webDriverGet(url);
+                try {
+                    webDriverGet(url);
+                } catch (Exception e) {
+                    LOGGER.error("Error happened while auditing page {} : {}", url, e.getMessage());
+                    auditLog(EAuditLogLevel.ERROR, "Error happened while auditing page " + url + " : " + e.getMessage());
+                }
+
             }
         }
     }

@@ -3,8 +3,8 @@ package com.tanaguru.runner.factory;
 import com.tanaguru.config.PropertyConfig;
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.factory.TanaguruCrawlerControllerFactory;
-import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.BrowserName;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.entity.audit.*;
@@ -80,16 +80,14 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String basicAuthLogin = parameterStringMap.get(EAuditParameter.BASICAUTH_LOGIN).getValue();
         String basicAuthPassword = parameterStringMap.get(EAuditParameter.BASICAUTH_PASSWORD).getValue();
         String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
-        BrowserName browserName = null;
+        BrowserName browserName;
         switch(webdriverBrowser) {
         	case CHROME:
         		browserName = BrowserName.CHROME;
         		break;
         	case FIREFOX:
-        		browserName = BrowserName.FIREFOX;
-        		break;
         	default:
-        		browserName = BrowserName.FIREFOX;    
+        		browserName = BrowserName.FIREFOX;
         }
 
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());
