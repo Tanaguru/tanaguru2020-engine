@@ -8,12 +8,12 @@ public interface StatsService {
 
 	JSONObject createStats();
 	
-	Integer getNbPageByPeriod(Date startDate, Date endDate);
+	Integer getNbPageAuditedByPeriod(Date startDate, Date endDate);
 	
-	Integer getNbSiteByPeriod(Date startDate, Date endDate);
+	Integer getNbSiteAuditedByPeriod(Date startDate, Date endDate);
 
-	Integer getNbScenarioByPeriod(Date startDate, Date endDate);
+	Integer getNbScenarioAuditedByPeriod(Date startDate, Date endDate);
 
-	Integer getNbFileByPeriod(Date startDate, Date endDate);
+	Integer getNbFileAuditedByPeriod(Date startDate, Date endDate);
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -82,7 +83,10 @@ public class StatsServiceImpl implements StatsService{
 			for(Page page : pages) {
 				pagesId.add(page.getId());
 			}
-			auditErrors.add(this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId));
+			Optional<Integer> error = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
+			if(error.isPresent()) {
+				auditErrors.add(error.get());
+			}
 			pagesId.clear();
 		}
 	    Double average = auditErrors.stream().mapToInt(val -> val).average().orElse(0.0);
@@ -105,7 +109,10 @@ public class StatsServiceImpl implements StatsService{
 				for(Page page : pages) {
 					pagesId.add(page.getId());
 				}
-				auditErrors.add(this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId));
+				Optional<Integer> error = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
+				if(error.isPresent()) {
+					auditErrors.add(error.get());
+				}
 				pagesId.clear();
 			}
 			projectErrors.add(auditErrors.stream().reduce(0, Integer::sum));
@@ -115,30 +122,30 @@ public class StatsServiceImpl implements StatsService{
 	}
 
 	@Override
-	public Integer getNbPageByPeriod(Date startDate, Date endDate) {
-		List<Page> pages = this.pageRepository.findAll();
+	public Integer getNbPageAuditedByPeriod(Date startDate, Date endDate) {
+		Collection<Page> pages = this.pageRepository.findAll();
 		int cpt = 0;
-		for(Page page : pages) {
+		for(Page page: pages) {
 			Audit audit = page.getAudit();
 			if(audit.getDateStart().after(startDate) && audit.getDateStart().before(endDate)) {
-				cpt++;
+				cpt += 1;
 			}
 		}
 		return cpt;
 	}
 	
 	@Override
-	public Integer getNbSiteByPeriod(Date startDate, Date endDate) {
+	public Integer getNbSiteAuditedByPeriod(Date startDate, Date endDate) {
 		return this.auditRepository.numberOfAuditByTypeAndPeriod(EAuditType.SITE, startDate, endDate);
 	}
 
 	@Override
-	public Integer getNbScenarioByPeriod(Date startDate, Date endDate) {
+	public Integer getNbScenarioAuditedByPeriod(Date startDate, Date endDate) {
 		return this.auditRepository.numberOfAuditByTypeAndPeriod(EAuditType.SCENARIO, startDate, endDate);
 	}
 	
 	@Override
-	public Integer getNbFileByPeriod(Date startDate, Date endDate) {
+	public Integer getNbFileAuditedByPeriod(Date startDate, Date endDate) {
 		return this.auditRepository.numberOfAuditByTypeAndPeriod(EAuditType.UPLOAD, startDate, endDate);
 	}
 }

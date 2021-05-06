@@ -35,5 +35,5 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
     double getAverageNumberOfErrorsByPage();
     
     @Query(value = "SELECT sum(nbElementFailed) FROM StatusResult WHERE id in :ids")
-    int getSumNumberOfErrorsForPages(@Param("ids") List<Long> pageIdList);
+    Optional<Integer> getSumNumberOfErrorsForPages(@Param("ids") List<Long> pageIdList);
 }
