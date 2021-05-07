@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.json.JSONObject;
@@ -38,6 +40,7 @@ public class StatsServiceImpl implements StatsService{
 	private final AuditService auditService;
 	private final ContractRepository contractRepository;
 	private final PageRepository pageRepository;
+	private final EntityManager entityManager;
 
 	@Autowired
 	public StatsServiceImpl(ProjectRepository projectRepository,
@@ -46,7 +49,8 @@ public class StatsServiceImpl implements StatsService{
 			AuditRepository auditRepository,
 			AuditService auditService,
 			ContractRepository contractRepository,
-			PageRepository pageRepository) {
+			PageRepository pageRepository,
+			EntityManager entityManager) {
 		this.projectRepository = projectRepository;
 		this.userRepository = userRepository;
 		this.statusResultRepository = statusResultRepository;
@@ -54,6 +58,7 @@ public class StatsServiceImpl implements StatsService{
 		this.auditService = auditService;
 		this.contractRepository = contractRepository;
 		this.pageRepository = pageRepository;
+		this.entityManager = entityManager;
 	}
 	
 	@Override
@@ -74,8 +79,10 @@ public class StatsServiceImpl implements StatsService{
 		for(EAuditType type : EAuditType.values()) {
 			jsonStatsObject.put("nb"+type.toString()+"Audit", this.auditRepository.numberOfAuditByType(type));
 		}
-		jsonStatsObject.put("meanNbUsersByProject", this.getAverageNbUsersByProject());
-		jsonStatsObject.put("meanNbAuditsByProject", this.getAverageNbAuditsByProject());
+		Double avgNbUsersByProject = this.getAverageNbUsersByProject();
+		jsonStatsObject.put("meanNbUsersByProject",Double.isFinite(avgNbUsersByProject) ? avgNbUsersByProject : 0.0);
+		Double avgNbAuditsByProject = this.getAverageNbAuditsByProject();
+		jsonStatsObject.put("meanNbAuditsByProject", Double.isFinite(avgNbAuditsByProject) ? avgNbAuditsByProject : 0.0);
 		return jsonStatsObject;
 	}
 	
@@ -84,13 +91,14 @@ public class StatsServiceImpl implements StatsService{
 	 * @return the average of number of users per project
 	 */
 	private Double getAverageNbUsersByProject() {
-		Collection<Project> projects = this.projectRepository.findAll();
-		double nbUsers = 0.0;
-		for(Project project: projects) {
+		Stream<Project> projectStream = this.projectRepository.getAll();
+		List<Double> nbUsersList = new ArrayList<>();
+		projectStream.forEach(project -> {
 			Collection<ProjectAppUser> projectAppUsers = project.getProjectAppUsers();
-			nbUsers += projectAppUsers.size();
-		}
-		return (double) (nbUsers/projects.size());
+			nbUsersList.add((double) projectAppUsers.size());
+		});
+		double nbUsers = nbUsersList.stream().reduce(0.0, Double::sum);
+		return (double) (nbUsers/nbUsersList.size());
 	}
 	
 	/**
@@ -98,24 +106,26 @@ public class StatsServiceImpl implements StatsService{
 	 * @return the average of number of audits per project
 	 */
 	private Double getAverageNbAuditsByProject() {
-		Collection<Project> projects = this.projectRepository.findAll();
-		double nbAudits = 0.0;
-		for(Project project: projects) {
+		Stream<Project> projectStream = this.projectRepository.getAll();
+		List<Double> nbAuditsList = new ArrayList<>();
+		projectStream.forEach(project -> {
 			Collection<Act> acts = project.getActs();
-			nbAudits += acts.size();
-		}
-		return (double) (nbAudits/projects.size());
+			nbAuditsList.add((double) acts.size());
+		});
+		double nbAudits = nbAuditsList.stream().reduce(0.0, Double::sum);
+		return (double) (nbAudits/nbAuditsList.size());
 	}
 	
 	/***
 	 * Returns the average number of errors per audit
 	 * @return the average number of errors per audit
 	 */
+	@Transactional
 	private Double getAverageNbErrorsByAudit() {
-		List<Audit> audits = this.auditRepository.findAll();
+		Stream<Audit> auditStream = this.auditRepository.getAll();
 		List<Long> pagesId = new ArrayList<>();
 		List<Integer> auditErrors = new ArrayList<>();
-		for(Audit audit : audits) {
+		auditStream.forEach(audit -> {
 			Collection<Page> pages = audit.getPages();
 			for(Page page : pages) {
 				pagesId.add(page.getId());
@@ -125,7 +135,8 @@ public class StatsServiceImpl implements StatsService{
 				auditErrors.add(error.get());
 			}
 			pagesId.clear();
-		}
+			this.entityManager.detach(audit);
+		});
 	    Double average = auditErrors.stream().mapToInt(val -> val).average().orElse(0.0);
 	    return average;
 	}
@@ -135,9 +146,9 @@ public class StatsServiceImpl implements StatsService{
 	 * @return the average number of errors per project
 	 */
 	private double getAverageNbErrorsByProject() {
-		List<Project> projects = this.projectRepository.findAll();
+		Stream<Project> projectStream = this.projectRepository.getAll();
 		List<Integer> projectErrors = new ArrayList<>();
-		for(Project project : projects) {
+		projectStream.forEach(project -> {
 			Collection<Audit> audits = this.auditService.findAllByProject(project);
 			List<Long> pagesId = new ArrayList<>();
 			List<Integer> auditErrors = new ArrayList<>();
@@ -153,7 +164,8 @@ public class StatsServiceImpl implements StatsService{
 				pagesId.clear();
 			}
 			projectErrors.add(auditErrors.stream().reduce(0, Integer::sum));
-		}
+			this.entityManager.detach(project);
+		});
 	    Double average = projectErrors.stream().mapToInt(val -> val).average().orElse(0.0);
 	    return average;
 	}
@@ -189,14 +201,14 @@ public class StatsServiceImpl implements StatsService{
 	@Override
 	public Double getAverageNbErrorsForPageByPeriod(Date startDate, Date endDate) {
 		Double avg = 0.0;
-		Collection<Page> pages = this.pageRepository.findAll();
+		Stream<Page> pageStream = this.pageRepository.getAll();
 		List<Long> pagesId = new ArrayList<>();
-		for(Page page: pages) {
+		pageStream.forEach(page -> {
 			Audit audit = page.getAudit();
 			if(audit.getDateStart().after(startDate) && audit.getDateStart().before(endDate)) {
 				pagesId.add(page.getId());
 			}
-		}
+		});
 		Optional<Integer> errorSum = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
 		if(errorSum.isPresent()) {
 			avg = (double) errorSum.get()/pagesId.size();
