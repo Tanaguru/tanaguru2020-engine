@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author rcharre
@@ -104,8 +105,18 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<User> getAllUsers() {
-        return userRepository.findAll();
+    List<UserDTO> getAllUsers() {
+        User current = userDetailsService.getCurrentUser();
+        return
+                userRepository.findAll().stream()
+                        .map(UserDTO::new)
+                        .map(userDTO -> {
+                            if (current.getAppRole().getName() == EAppRole.USER && userDTO.getId() != current.getId()) {
+                                userDTO = userDTO.convertToPublicEntity();
+                            }
+                            return userDTO;
+                        })
+                        .collect(Collectors.toList());
     }
 
     /**
@@ -122,7 +133,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/paginated", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Page<User> getAllUsers(
+    Page<UserDTO> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "username") String sortBy,
@@ -130,7 +141,15 @@ public class UserController {
             @RequestParam(defaultValue = "") String usernameOrEmail
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
-        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest);
+        User current = userDetailsService.getCurrentUser();
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest)
+                .map(UserDTO::new)
+                .map(userDTO -> {
+                    if (current.getAppRole().getName() == EAppRole.USER && userDTO.getId() != current.getId()) {
+                        userDTO = userDTO.convertToPublicEntity();
+                    }
+                    return userDTO;
+                });
     }
 
 
@@ -152,16 +171,23 @@ public class UserController {
             "(@tanaguruUserDetailsServiceImpl.getCurrentUser() != null && @tanaguruUserDetailsServiceImpl.getCurrentUser().getId() == #id)")
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User getUser(@PathVariable long id) {
-        return userRepository.findById(id)
+    UserDTO getUser(@PathVariable long id) {
+        User current = userDetailsService.getCurrentUser();
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
+
+        UserDTO result = new UserDTO(user);
+        if (current.getAppRole().getName() == EAppRole.USER && result.getId() != current.getId()) {
+            result = result.convertToPublicEntity();
+        }
+        return result;
     }
 
     /**
      * @return The @see User
      */
     @ApiOperation(
-            value = "Get currentu User")
+            value = "Get current User")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
@@ -170,8 +196,8 @@ public class UserController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User getCurrentUser() {
-        return userDetailsService.getCurrentUser();
+    UserDTO getCurrentUser() {
+        return new UserDTO(userDetailsService.getCurrentUser());
     }
 
     /**
@@ -193,9 +219,15 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/by-name/{username}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User getUser(@PathVariable String username) {
-        return userRepository.findByUsername(username)
+    UserDTO getUser(@PathVariable String username) {
+        User current = userDetailsService.getCurrentUser();
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, username));
+        UserDTO result = new UserDTO(user);
+        if (current.getAppRole().getName() == EAppRole.USER && result.getId() != current.getId()) {
+            result = result.convertToPublicEntity();
+        }
+        return result;
     }
 
     /**
@@ -221,7 +253,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_USER)")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User createUser(
+    UserDTO createUser(
             @RequestBody @Valid UserDTO user,
             @RequestParam(defaultValue = "false", name = "create-contract") boolean createContract
     ) {
@@ -230,13 +262,13 @@ public class UserController {
             approle = user.getAppRole();
         }
 
-        return userService.createUser(
+        return new UserDTO(userService.createUser(
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
                 approle,
                 user.isEnabled(),
-                createContract);
+                createContract));
     }
 
     /**
@@ -260,7 +292,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).MODIFY_USER)")
     @PutMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User modifyUser(@RequestBody @Valid UserDTO user) {
+    UserDTO modifyUser(@RequestBody @Valid UserDTO user) {
         User from = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId()));
 
@@ -278,7 +310,7 @@ public class UserController {
                     .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString())));
         }
 
-        return userService.modifyUser(from, to);
+        return new UserDTO(userService.modifyUser(from, to));
     }
 
     /**
@@ -298,13 +330,13 @@ public class UserController {
     @PutMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     public @ResponseBody
-    User modifyCurrentUser(@RequestBody @Valid UserDTO user) {
+    UserDTO modifyCurrentUser(@RequestBody @Valid UserDTO user) {
         User from = userDetailsService.getCurrentUser();
         User to = new User();
         to.setUsername(user.getUsername());
         to.setEmail(user.getEmail());
 
-        return userService.modifyUser(from, to);
+        return new UserDTO(userService.modifyUser(from, to));
 
     }
 
