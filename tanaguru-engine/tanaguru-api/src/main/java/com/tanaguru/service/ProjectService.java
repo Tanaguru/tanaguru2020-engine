@@ -120,4 +120,13 @@ public interface ProjectService {
      * @param project The given @see Project
      */
     void deleteProject(Project project);
+
+    /**
+     * Modify a given project.
+     * @param project the project to modify
+     * @param name the new name
+     * @param domain the new domain
+     * @return The modified project
+     */
+    Project modifyProject(Project project, String name, String domain);
 }
