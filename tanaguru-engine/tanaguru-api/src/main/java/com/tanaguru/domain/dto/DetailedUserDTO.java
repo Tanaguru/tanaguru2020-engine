@@ -1,49 +1,36 @@
 package com.tanaguru.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-public class UserDTO {
+public class DetailedUserDTO {
     private long id;
 
     private String username;
 
-    @JsonIgnore
-    private String password;
-
-    @Email
     private String email;
 
-    @NotNull
-    private EAppRole appRole;
+    private AppRole appRole;
 
-    private boolean isEnabled = false;
+    private boolean isEnabled;
 
-    private boolean accountNonLocked = true;
+    private boolean accountNonLocked;
 
-    public UserDTO() {
+    public DetailedUserDTO() {
     }
 
-    public UserDTO(User user) {
-        new UserDTO(user.getId(),
+    public DetailedUserDTO(User user) {
+        this(user.getId(),
                 user.getUsername(),
-                user.getPassword(),
                 user.getEmail(),
-                user.getAppRole().getName(),
+                user.getAppRole(),
                 user.isEnabled(),
                 user.isAccountNonLocked());
     }
 
-    public UserDTO(long id, @Size(min = 4, max = 30) @NotBlank String username, String password, @Email String email, @NotNull EAppRole appRole, boolean isEnabled, boolean accountNonLocked) {
+    public DetailedUserDTO(long id, String username, String email, AppRole appRole, boolean isEnabled, boolean accountNonLocked) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.email = email;
         this.appRole = appRole;
         this.isEnabled = isEnabled;
@@ -67,14 +54,6 @@ public class UserDTO {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -91,11 +70,11 @@ public class UserDTO {
         isEnabled = enabled;
     }
 
-    public EAppRole getAppRole() {
+    public AppRole getAppRole() {
         return appRole;
     }
 
-    public void setAppRole(EAppRole appRole) {
+    public void setAppRole(AppRole appRole) {
         this.appRole = appRole;
     }
 
@@ -107,10 +86,8 @@ public class UserDTO {
         this.accountNonLocked = accountNonLocked;
     }
 
-    public UserDTO convertToPublicEntity(){
+    public DetailedUserDTO convertToPublicEntity(){
         this.email = null;
-        this.password = null;
         return this;
     }
-
 }
