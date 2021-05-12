@@ -206,7 +206,7 @@ public class ProjectController {
                         String.valueOf(sortBy)));
         User user = tanaguruUserDetailsService.getCurrentUser();
         Collection<Contract> contracts = contractService.findByOwner(user);
-        return projectRepository.findSharedProject(contracts,search, pageRequest);
+        return projectRepository.findSharedProject(contracts, search, pageRequest);
     }
 
     /**
@@ -334,6 +334,46 @@ public class ProjectController {
         projectUserRepository.save(projectAppUser);
 
         return newProject;
+    }
+
+    @ApiOperation(
+            value = "Create a Project",
+            notes = "User must have CREATE_PROJECT authority on Contract"
+                    + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
+                    + "\nIf project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number"
+                    + "\nIf the project domain is invalid, exception raise : INVALID_DOMAIN with project domain"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
+                    + "\nProject limit for contract : PROJECT_LIMIT_FOR_CONTRACT error"
+                    + "\nInvalid domain : INVALID_DOMAIN error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
+                    "T(com.tanaguru.domain.constant.ContractAuthorityName).CREATE_PROJECT, " +
+                    "#project.getContractId())")
+    @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Project modifyProject(@RequestBody @Valid ProjectDTO projectDto, @PathVariable long id) {
+        User user = tanaguruUserDetailsService.getCurrentUser();
+
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
+
+        Contract contract = project.getContract();
+
+        if ((contract.isRestrictDomain() &&
+                !projectDto.getDomain().isEmpty() &&
+                !UrlHelper.isValid(projectDto.getDomain())) ||
+                (!contract.isRestrictDomain() &&
+                        !UrlHelper.isValid(projectDto.getDomain()))) {
+            throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, projectDto.getDomain());
+        }
+
+        return projectService.modifyProject(project, project.getName(), projectDto.getDomain());
     }
 
     @ApiOperation(

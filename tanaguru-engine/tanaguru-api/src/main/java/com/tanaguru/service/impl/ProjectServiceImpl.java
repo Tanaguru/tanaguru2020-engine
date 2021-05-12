@@ -255,4 +255,10 @@ public class ProjectServiceImpl implements ProjectService {
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
     }
+
+    public Project modifyProject(Project project, String name, String domain) {
+        project.setName(name);
+        project.setDomain(domain);
+        return projectRepository.save(project);
+    }
 }
