@@ -69,14 +69,13 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public void deletePage(Page page) {
+        LOGGER.info("[] delete page", page.getId());
         pageRepository.delete(page);
-        LOGGER.info("[Page " + page.getId() + "] deleted");
-
     }
 
     @Override
     public void deletePageByAudit(Audit audit) {
-        LOGGER.info("[Audit " + audit.getId() + "] delete pages");
+        LOGGER.info("Delete pages for audit {}", audit.getId());
         for (Page page : pageRepository.findAllByAudit_Id(audit.getId())) {
             deletePage(page);
         }

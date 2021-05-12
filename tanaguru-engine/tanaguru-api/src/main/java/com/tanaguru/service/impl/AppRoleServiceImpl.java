@@ -7,6 +7,8 @@ import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.service.AppRoleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class AppRoleServiceImpl implements AppRoleService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppRoleServiceImpl.class);
     private Map<EAppRole, AppRole> appRoleMap = new EnumMap<>(EAppRole.class);
     private Map<EAppRole, Collection<String>> appAuthorityByAppRoleMap = new EnumMap<>(EAppRole.class);
 
@@ -31,6 +34,7 @@ public class AppRoleServiceImpl implements AppRoleService {
 
     @PostConstruct
     public void initRoleMap() {
+        LOGGER.debug("Initialize app role authorities maps");
         for (EAppRole role : EAppRole.values()) {
             AppRole appRole = appRoleRepository.findByName(role)
                     .orElseThrow(() -> new CustomIllegalStateException(CustomError.APP_ROLE_NOT_FOUND, role.toString() ));

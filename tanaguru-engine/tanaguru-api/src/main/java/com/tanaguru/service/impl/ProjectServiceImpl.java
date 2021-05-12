@@ -20,6 +20,8 @@ import com.tanaguru.repository.*;
 import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ProjectServiceImpl implements ProjectService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectServiceImpl.class);
+
     private final AppRoleRepository appRoleRepository;
     private final ProjectRepository projectRepository;
     private final ProjectUserRepository projectUserRepository;
@@ -65,6 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @PostConstruct
     public void initMap() {
+        LOGGER.debug("Initialize project role authorities map");
         for (ProjectRole projectRole : projectRoleRepository.findAll()) {
             Collection<String> authorities = projectRole.getAuthorities()
                     .stream()
@@ -124,6 +129,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project createProject(Contract contract, String name, String domain) {
+        LOGGER.info("Create project {} for contract {}", name, contract.getId());
         Project project = new Project();
         project.setContract(contract);
         project.setName(name);
@@ -227,6 +233,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectAppUser.setContractAppUser(contractAppUser);
             projectAppUser.setProject(project);
             projectAppUser.setProjectRole(getProjectRole(EProjectRole.PROJECT_GUEST));
+            LOGGER.info("[Project {}] Add user {}", project.getId(), projectAppUser.getContractAppUser().getUser().getId());
             return projectUserRepository.save(projectAppUser);
         } else {
             return null;
@@ -236,15 +243,18 @@ public class ProjectServiceImpl implements ProjectService {
     public void removeMember(Project project, User user) {
         ProjectAppUser projectAppUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user)
                 .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()), String.valueOf(project.getId())));
+        LOGGER.info("[Project {}] remove user {}", project.getId(), projectAppUser.getContractAppUser().getUser().getId());
         projectUserRepository.delete(projectAppUser);
     }
 
     public void deleteByContract(Contract contract) {
+        LOGGER.info("Delete all projects for contract {}", contract.getId());
         contract.getProjects()
                 .forEach(this::deleteProject);
     }
 
     public void deleteProject(Project project) {
+        LOGGER.info("[Project {}] delete", project.getId());
         actRepository.deleteAllByProject(project);
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
@@ -254,6 +264,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project modifyProject(Project project, String name, String domain) {
+        LOGGER.info("[Project {}] modify", project.getId());
         project.setName(name);
         project.setDomain(domain);
         return projectRepository.save(project);

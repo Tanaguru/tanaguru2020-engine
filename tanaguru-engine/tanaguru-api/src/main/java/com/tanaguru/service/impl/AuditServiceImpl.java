@@ -82,7 +82,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     public void deleteAuditByProject(Project project) {
-        LOGGER.debug("[Project {}] Delete all audits", project.getId());
+        LOGGER.info("Delete all audits for project {}", project.getId());
         for (Act act : project.getActs()) {
             deleteAudit(act.getAudit());
         }
@@ -120,6 +120,7 @@ public class AuditServiceImpl implements AuditService {
                 .map(AuditReference::getTestHierarchy)
                 .collect(Collectors.toList());
 
+        LOGGER.info("[Audit {}] delete", audit.getId());
         auditRepository.delete(audit);
         auditReferences.stream()
                 .filter(testHierarchy ->
@@ -140,6 +141,7 @@ public class AuditServiceImpl implements AuditService {
      * @return json object
      */
     public JSONObject toJson(Audit audit) {
+        LOGGER.info("[Audit {}] export to json", audit.getId());
         JSONObject jsonAuditObject = new JSONObject();
         jsonAuditObject.put("auditLogs", auditLogService.toJson(audit).get("auditLogs"));
         jsonAuditObject.put("act", auditActService.toJson(audit));
