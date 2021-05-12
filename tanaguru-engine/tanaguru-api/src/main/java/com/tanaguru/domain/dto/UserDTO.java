@@ -1,8 +1,6 @@
 package com.tanaguru.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tanaguru.domain.constant.EAppRole;
-import com.tanaguru.domain.entity.membership.user.User;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -12,9 +10,10 @@ import javax.validation.constraints.Size;
 public class UserDTO {
     private long id;
 
+    @Size(min = 4, max = 30)
+    @NotBlank
     private String username;
 
-    @JsonIgnore
     private String password;
 
     @Email
@@ -26,30 +25,6 @@ public class UserDTO {
     private boolean isEnabled = false;
 
     private boolean accountNonLocked = true;
-
-    public UserDTO() {
-    }
-
-    public UserDTO(User user) {
-        new UserDTO(user.getId(),
-                user.getUsername(),
-                user.getPassword(),
-                user.getEmail(),
-                user.getAppRole().getName(),
-                user.isEnabled(),
-                user.isAccountNonLocked());
-    }
-
-    public UserDTO(long id, @Size(min = 4, max = 30) @NotBlank String username, String password, @Email String email, @NotNull EAppRole appRole, boolean isEnabled, boolean accountNonLocked) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.appRole = appRole;
-        this.isEnabled = isEnabled;
-        this.accountNonLocked = accountNonLocked;
-    }
-
 
     public long getId() {
         return id;
@@ -106,11 +81,4 @@ public class UserDTO {
     public void setAccountNonLocked(boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
-
-    public UserDTO convertToPublicEntity(){
-        this.email = null;
-        this.password = null;
-        return this;
-    }
-
 }

@@ -299,8 +299,8 @@ public class ProjectController {
                     + "\nInvalid domain : INVALID_DOMAIN error")
     })
     @PreAuthorize(
-            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
-                    "T(com.tanaguru.domain.constant.ContractAuthorityName).CREATE_PROJECT, " +
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
+                    "T(com.tanaguru.domain.constant.ProjectAuthorityName).MODIFY_PROJECT, " +
                     "#project.getContractId())")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
