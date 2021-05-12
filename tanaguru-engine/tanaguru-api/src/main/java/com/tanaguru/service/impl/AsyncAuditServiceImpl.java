@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -19,6 +22,8 @@ public class AsyncAuditServiceImpl implements AsyncAuditService {
 
     private final AuditService auditService;
     private final AuditRepository auditRepository;
+
+    private final Set<Audit> deletionSet = Collections.synchronizedSet( new HashSet<>());
 
     public AsyncAuditServiceImpl(AuditService auditService, AuditRepository auditRepository) {
         this.auditService = auditService;
@@ -35,6 +40,9 @@ public class AsyncAuditServiceImpl implements AsyncAuditService {
     @Async("threadPoolTaskExecutor")
     @Override
     public void deleteAudit(Audit audit) {
-        auditService.deleteAudit(audit);
+        if(!deletionSet.contains(audit)){
+            deletionSet.add(audit);
+            auditService.deleteAudit(audit);
+        }
     }
 }
