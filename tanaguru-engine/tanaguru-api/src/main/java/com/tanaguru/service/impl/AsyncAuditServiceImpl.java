@@ -23,9 +23,8 @@ public class AsyncAuditServiceImpl implements AsyncAuditService {
 
     @PostConstruct
     private void startDeletedAuditCleanup(){
-        for(Audit audit : auditRepository.findAllByDeletedIsTrue()){
-            deleteAudit(audit);
-        }
+        auditRepository.findAllByDeletedIsTrue()
+                .forEach(this::deleteAudit);
     }
 
     @Async("threadPoolTaskExecutor")
