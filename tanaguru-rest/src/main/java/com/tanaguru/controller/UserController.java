@@ -106,8 +106,15 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    List<User> getAllUsers() {
-        return userRepository.findAll();
+    List<DetailedUserDTO> getAllUsers() {
+        User current = userDetailsService.getCurrentUser();
+        return userRepository.findAll().stream().map(user -> {
+            DetailedUserDTO dto = new DetailedUserDTO(user);
+            if (user.getId() != current.getId() && current.getAppRole().getName() == EAppRole.USER){
+                dto = dto.convertToPublicEntity();
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -124,7 +131,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/paginated", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Page<User> getAllUsers(
+    Page<DetailedUserDTO> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "username") String sortBy,
@@ -132,7 +139,15 @@ public class UserController {
             @RequestParam(defaultValue = "") String usernameOrEmail
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
-        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest);
+        User current = userDetailsService.getCurrentUser();
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(usernameOrEmail, usernameOrEmail, pageRequest)
+                .map(user -> {
+                    DetailedUserDTO dto = new DetailedUserDTO(user);
+                    if (user.getId() != current.getId() && current.getAppRole().getName() == EAppRole.USER){
+                        dto = dto.convertToPublicEntity();
+                    }
+                    return dto;
+                });
     }
 
 
@@ -236,7 +251,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_USER)")
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User createUser(
+    DetailedUserDTO createUser(
             @RequestBody @Valid UserDTO user,
             @RequestParam(defaultValue = "false", name = "create-contract") boolean createContract
     ) {
@@ -245,13 +260,13 @@ public class UserController {
             approle = user.getAppRole();
         }
 
-        return userService.createUser(
+        return new DetailedUserDTO(userService.createUser(
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
                 approle,
                 user.isEnabled(),
-                createContract);
+                createContract));
     }
 
     /**
@@ -275,7 +290,7 @@ public class UserController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).MODIFY_USER)")
     @PutMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    User modifyUser(@RequestBody @Valid UserDTO user) {
+    DetailedUserDTO modifyUser(@RequestBody @Valid UserDTO user) {
         User from = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user.getId()));
 
@@ -293,7 +308,7 @@ public class UserController {
                     .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, user.getAppRole().toString())));
         }
 
-        return userService.modifyUser(from, to);
+        return new DetailedUserDTO(userService.modifyUser(from, to));
     }
 
     /**
