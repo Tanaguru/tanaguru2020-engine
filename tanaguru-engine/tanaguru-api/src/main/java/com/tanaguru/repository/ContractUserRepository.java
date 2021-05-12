@@ -42,4 +42,10 @@ public interface ContractUserRepository extends JpaRepository<ContractAppUser, L
 
     void deleteAllByContract(Contract contract);
 
+    /**
+     * Delete all contract user for a given user. Will fail if contract owner
+     * @param user the user.
+     */
+    void deleteAllByUser(User user);
+
 }

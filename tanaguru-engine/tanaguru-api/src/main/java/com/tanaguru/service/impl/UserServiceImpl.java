@@ -129,10 +129,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(User user) {
-        for (ContractAppUser contractUser : contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)) {
-            contractService.deleteContract(contractUser.getContract());
-        }
+        contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)
+                .stream()
+                .map(ContractAppUser::getContract)
+                .forEach(contractService::deleteContract);
 
+        contractUserRepository.deleteAllByUser(user);
         userRepository.delete(user);
         LOGGER.info("[User {}] deleted", user.getId());
     }
