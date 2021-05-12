@@ -82,7 +82,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     public void deleteAuditByProject(Project project) {
-        LOGGER.info("Delete all audits for project {}", project.getId());
+        LOGGER.info("[Project {}] Delete all audits", project.getId());
         for (Act act : project.getActs()) {
             deleteAudit(act.getAudit());
         }
