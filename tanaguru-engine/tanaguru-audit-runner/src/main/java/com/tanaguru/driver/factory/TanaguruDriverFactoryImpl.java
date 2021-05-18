@@ -114,6 +114,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                 remoteWebDriver.close();
                 remoteWebDriver.quit();
             }
+            return Optional.empty();
         }
 
         try {
