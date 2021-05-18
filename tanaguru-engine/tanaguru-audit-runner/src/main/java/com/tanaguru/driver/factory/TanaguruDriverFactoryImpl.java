@@ -29,13 +29,13 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
 
     @Value("${auditrunner.firefox-binary}")
     private String firefoxBinaryPath;
-    
+
     @Value("${auditrunner.chrome-binary}")
     private String chromeBinaryPath;
-    
+
     @Value("${auditrunner.chromedriver}")
     private String chromedriver;
-    
+
     @Value("${auditrunner.geckodriver}")
     private String geckodriver;
 
@@ -74,59 +74,67 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         System.setProperty("webdriver.gecko.driver", geckodriver);
-        System.setProperty("webdriver.chrome.driver",chromedriver);
+        System.setProperty("webdriver.chrome.driver", chromedriver);
     }
 
     @Override
     public Optional<RemoteWebDriver> create(BrowserName browserName) {
-    	Optional<RemoteWebDriver> result = Optional.empty();
-    	RemoteWebDriver remoteWebDriver = null;
-    	switch (browserName) {
-        case CHROME:
-        	ChromeOptions chromeOptions = new ChromeOptions();
-        	setChromePreferences(chromeOptions);
-        	remoteWebDriver = new ChromeDriver(chromeOptions);
-        	remoteWebDriver.manage().deleteAllCookies();
-        	
-        	result = Optional.of(remoteWebDriver);
-            break;
+        Optional<RemoteWebDriver> result = Optional.empty();
+        RemoteWebDriver remoteWebDriver = null;
+        try{
+            switch (browserName) {
+                case CHROME:
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    setChromePreferences(chromeOptions);
+                    remoteWebDriver = new ChromeDriver(chromeOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
 
-        case FIREFOX:
-        	FirefoxOptions firefoxOptions = new FirefoxOptions();
-            FirefoxProfile firefoxProfile = createFirefoxProfile();
+                    result = Optional.of(remoteWebDriver);
+                    break;
 
-            firefoxOptions.setBinary(firefoxBinaryPath);
-            firefoxOptions.setHeadless(true);
-            firefoxOptions.setProfile(firefoxProfile);
-            remoteWebDriver = new FirefoxDriver(firefoxOptions);
-            remoteWebDriver.manage().deleteAllCookies();
+                case FIREFOX:
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    FirefoxProfile firefoxProfile = createFirefoxProfile();
 
-            result = Optional.of(remoteWebDriver);
-            break;
+                    firefoxOptions.setBinary(firefoxBinaryPath);
+                    firefoxOptions.setHeadless(true);
+                    firefoxOptions.setProfile(firefoxProfile);
+                    remoteWebDriver = new FirefoxDriver(firefoxOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
 
-        default:
-            LOGGER.error("Browser type not handled : "+browserName);
-    	}
-    		
-    	try { 
-    		remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
-    		remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+                    result = Optional.of(remoteWebDriver);
+                    break;
+
+                default:
+                    LOGGER.error("Browser type not handled : " + browserName);
+            }
+        }catch (Exception e){
+            LOGGER.error("Failed to create webdriver {}", e.getMessage());
+            if(remoteWebDriver != null){
+                remoteWebDriver.close();
+                remoteWebDriver.quit();
+            }
+            return Optional.empty();
+        }
+
+        try {
+            remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
+            remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
             remoteWebDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-    	}catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             LOGGER.error("[Webdriver] Could not create webdriver with error :\n" + e.getMessage());
         }
-    	
-    	return result;
-            
+
+        return result;
     }
-    
+
     private void setChromePreferences(ChromeOptions options) {
-    	options.addArguments("--disable-application-cache");
+        options.addArguments("--disable-application-cache");
         options.setBinary(chromeBinaryPath);
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--whitelisted-ips");
-    	options.addArguments("--no-default-browser-check");
+        options.addArguments("--no-default-browser-check");
         options.addArguments("--safebrowsing-disable-auto-update");
         options.addArguments("--user-agent=tanaguru");
         options.addArguments("--disable-component-update");
@@ -137,12 +145,12 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.setExperimentalOption("prefs", chromePrefs);
 
         File chromeProfileFile = new File(chromeProfilePath);
-        if(chromeProfileFile.exists()){
+        if (chromeProfileFile.exists()) {
             options.addArguments("--user-data-dir=" + chromeProfilePath);
         }
         setUpChromeProxy(options);
     }
-    
+
     private FirefoxProfile createFirefoxProfile() {
         LOGGER.trace("Create firefox profile");
         File firefoxProfileFile = new File(firefoxProfilePath);
@@ -189,7 +197,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
             proxy.setHttpProxy(strb.toString());
             proxy.setSslProxy(strb.toString());
 
-            if(!proxyExclusionUrls.isEmpty()){
+            if (!proxyExclusionUrls.isEmpty()) {
                 proxy.setNoProxy(proxyExclusionUrls);
             }
 
@@ -199,24 +207,24 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
             firefoxProfile.setPreference("network.proxy.socks_remote_dns", true);
         }
     }
-    
+
     private void setUpChromeProxy(ChromeOptions options) {
-    	Proxy proxy = new Proxy();
-    	if (!proxyPort.isEmpty() && !proxyHost.isEmpty()) {
+        Proxy proxy = new Proxy();
+        if (!proxyPort.isEmpty() && !proxyHost.isEmpty()) {
             if (!proxyUsername.isEmpty() && !proxyPassword.isEmpty()) {
-            	proxy.setSocksUsername(proxyUsername);
-            	proxy.setSocksPassword(proxyPassword);
+                proxy.setSocksUsername(proxyUsername);
+                proxy.setSocksPassword(proxyPassword);
             }
-            
-            if(!proxyExclusionUrls.isEmpty()){
-            	options.addArguments("--proxy-bypass-list="+proxyExclusionUrls);
+
+            if (!proxyExclusionUrls.isEmpty()) {
+                options.addArguments("--proxy-bypass-list=" + proxyExclusionUrls);
             }
-            options.addArguments("--proxy-server="+proxyHost+":"+proxyPort);
+            options.addArguments("--proxy-server=" + proxyHost + ":" + proxyPort);
             proxy.setSslProxy(proxyHost + ":" + proxyPort);
             DesiredCapabilities desiredCapabilities = DesiredCapabilities.chrome();
             desiredCapabilities.setCapability(CapabilityType.PROXY, proxy);
             options.merge(desiredCapabilities);
         }
     }
-    
+
 }

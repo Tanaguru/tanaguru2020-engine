@@ -116,6 +116,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
         try{
             LOGGER.debug("[Audit {}] Closing webdriver", audit.getId());
+            tanaguruDriver.close();
             tanaguruDriver.quit();
         }catch (Exception e){
             LOGGER.error("[Audit {}] Error while closing webdriver", audit.getId());
