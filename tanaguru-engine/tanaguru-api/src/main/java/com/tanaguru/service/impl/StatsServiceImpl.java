@@ -172,15 +172,7 @@ public class StatsServiceImpl implements StatsService{
 
 	@Override
 	public Integer getNbPageAuditedByPeriod(Date startDate, Date endDate) {
-		Collection<Page> pages = this.pageRepository.findAll();
-		int cpt = 0;
-		for(Page page: pages) {
-			Audit audit = page.getAudit();
-			if(audit.getDateStart().after(startDate) && audit.getDateStart().before(endDate)) {
-				cpt += 1;
-			}
-		}
-		return cpt;
+		return this.auditRepository.numberOfAuditByTypeAndPeriod(EAuditType.PAGE, startDate, endDate);
 	}
 	
 	@Override
