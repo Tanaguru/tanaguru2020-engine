@@ -102,7 +102,7 @@ public class AuditFactoryImpl implements AuditFactory {
         }
 
         auditService.log(audit, EAuditLogLevel.INFO, "Audit created for scope " + auditType);
-        LOGGER.info("[Audit {}] Created for scope [{}]", audit.getId(), auditType);
+        LOGGER.info("[Audit {}] Created for scope {}", audit.getId(), auditType);
         return audit;
     }
 
@@ -123,7 +123,7 @@ public class AuditFactoryImpl implements AuditFactory {
 
         audit.setParameters(auditAuditParameterValues);
 
-        LOGGER.info("[Audit {}] Created for scope [{}] from audit {}", audit.getId(), audit.getType(), from.getId());
+        LOGGER.info("[Audit {}] Created for scope {} from audit {}", audit.getId(), audit.getType(), from.getId());
         return audit;
     }
 }

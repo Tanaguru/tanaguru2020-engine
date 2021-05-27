@@ -1,7 +1,6 @@
 package com.tanaguru.controller;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +21,12 @@ public class ConfigurationController {
     @Value("${auditrunner.active}")
     private String[] browsers;
 
-    @Autowired
-    BuildProperties buildProperties;
-    
+    private final BuildProperties buildProperties;
+
+    public ConfigurationController(BuildProperties buildProperties) {
+        this.buildProperties = buildProperties;
+    }
+
     @ApiOperation(
             value = "Get session duration value",
             response = Long.class

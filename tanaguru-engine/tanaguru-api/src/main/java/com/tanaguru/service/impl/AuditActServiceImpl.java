@@ -35,7 +35,7 @@ public class AuditActServiceImpl implements AuditActService {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         mapper.setDateFormat(df);
         Optional<Act> act = actRepository.findByAudit(audit);
-        if (!act.isEmpty()) {
+        if (act.isPresent()) {
             try {
                 jsonActObject = new JSONObject(mapper.writeValueAsString(act.get()));
             } catch (JSONException | JsonProcessingException e) {

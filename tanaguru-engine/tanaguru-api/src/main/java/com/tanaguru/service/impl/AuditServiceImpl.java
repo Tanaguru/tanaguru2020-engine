@@ -40,6 +40,7 @@ public class AuditServiceImpl implements AuditService {
     private final PageService pageService;
     private final TestHierarchyService testHierarchyService;
     private final AuditAuditParameterValueRepository auditAuditParameterValueRepository;
+    private final TestHierarchyRepository testHierarchyRepository;
     
     @Autowired
     public AuditServiceImpl(
@@ -52,7 +53,7 @@ public class AuditServiceImpl implements AuditService {
             AuditRepository auditRepository,
             PageService pageService,
             TestHierarchyResultService testHierarchyResultService,
-            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository) {
+            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository, TestHierarchyRepository testHierarchyRepository) {
         this.actRepository = actRepository;
         this.auditActService = auditActService;
         this.auditLogRepository = auditLogRepository;
@@ -63,6 +64,7 @@ public class AuditServiceImpl implements AuditService {
         this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
+        this.testHierarchyRepository = testHierarchyRepository;
     }
 
     public Collection<Audit> findAllByProject(Project project) {
@@ -80,7 +82,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     public void deleteAuditByProject(Project project) {
-        LOGGER.debug("[Project {}] Delete all audits", project.getId());
+        LOGGER.info("[Project {}] Delete all audits", project.getId());
         for (Act act : project.getActs()) {
             deleteAudit(act.getAudit());
         }
@@ -103,22 +105,30 @@ public class AuditServiceImpl implements AuditService {
     public void deleteAudit(Audit audit){
         audit = auditRepository.findById(audit.getId())
                 .orElseThrow(CustomEntityNotFoundException::new);
+
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
-        actRepository.deleteByAudit(audit);
+        actRepository.findByAudit(audit)
+                .ifPresent(actRepository::delete);
+
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
         pageService.deletePageByAudit(audit);
 
         LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
         deleteAuditParameterByAudit(audit);
 
-        Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
-                .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
-        auditRepository.deleteById(audit.getId());
-        for(TestHierarchy reference : auditReferences){
-            if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
-                testHierarchyService.deleteReference(reference);
-            }
-        }
+        Collection<TestHierarchy> auditReferences = audit.getAuditReferences().stream()
+                .map(AuditReference::getTestHierarchy)
+                .collect(Collectors.toList());
+
+        LOGGER.info("[Audit {}] delete", audit.getId());
+        auditRepository.delete(audit);
+        auditReferences.stream()
+                .filter(testHierarchy ->
+                                testHierarchy.isDeleted() &&
+                                !auditReferenceRepository.existsByTestHierarchy(testHierarchy) &&
+                                testHierarchyRepository.findById(testHierarchy.getId()).isPresent()
+                        )
+                .forEach(testHierarchyService::deleteReference);
     }
 
     public void deleteAuditParameterByAudit(Audit audit){
@@ -131,6 +141,7 @@ public class AuditServiceImpl implements AuditService {
      * @return json object
      */
     public JSONObject toJson(Audit audit) {
+        LOGGER.info("[Audit {}] export to json", audit.getId());
         JSONObject jsonAuditObject = new JSONObject();
         jsonAuditObject.put("auditLogs", auditLogService.toJson(audit).get("auditLogs"));
         jsonAuditObject.put("act", auditActService.toJson(audit));

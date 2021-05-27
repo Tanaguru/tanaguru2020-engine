@@ -129,10 +129,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(User user) {
-        for (ContractAppUser contractUser : contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)) {
-            contractService.deleteContract(contractUser.getContract());
-        }
+        contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)
+                .stream()
+                .map(ContractAppUser::getContract)
+                .forEach(contractService::deleteContract);
 
+        contractUserRepository.deleteAllByUser(user);
         userRepository.delete(user);
         LOGGER.info("[User {}] deleted", user.getId());
     }
@@ -230,6 +232,7 @@ public class UserServiceImpl implements UserService {
      * @param duration blocking time
      */
     private void blockAccount(User user, ArrayList<Attempt> attempts, int duration) {
+        LOGGER.info("[User {}] block account with {} attempts for {} ", user.getId(), attempts.size(), duration);
         user.setAccountNonLocked(false);
         if (duration != 0) {
             attempts.get(attempts.size() - 1).setBlockedUntil(currentDateAdd(duration));
@@ -243,6 +246,7 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     public void resetFailAttempts(User user) {
+        LOGGER.info("[User {}] reset authentication attempts ", user.getId());
         user.setAttempts(new ArrayList<Attempt>());
         userRepository.save(user);
     }
@@ -253,6 +257,7 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     public void unlock(User user) {
+        LOGGER.info("[User {}] unlock ", user.getId());
         user.setEnabled(true);
         user.setAccountNonLocked(true);
         userRepository.save(user);
@@ -267,7 +272,6 @@ public class UserServiceImpl implements UserService {
     private Date currentDateAdd(int miliseconds) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MILLISECOND, miliseconds);
-        Date addMilliSeconds = calendar.getTime();
-        return addMilliSeconds;
+        return calendar.getTime();
     }
 }

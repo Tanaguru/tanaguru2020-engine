@@ -442,9 +442,11 @@ public class AuditController {
     void deleteAudit(@PathVariable long id) {
         Audit audit = auditRepository.findById(id)
                 .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id));
+
         if (audit.getStatus() == EAuditStatus.DONE || audit.getStatus() == EAuditStatus.ERROR) {
-            asyncAuditService.deleteAudit(auditRepository.findById(id)
-                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.AUDIT_NOT_FOUND, id)));
+            audit.setDeleted(true);
+            audit = auditRepository.save(audit);
+            asyncAuditService.deleteAudit(audit);
         } else {
             throw new CustomInvalidEntityException(CustomError.CANNOT_DELETE_RUNNING_AUDIT, audit.getId());
         }
