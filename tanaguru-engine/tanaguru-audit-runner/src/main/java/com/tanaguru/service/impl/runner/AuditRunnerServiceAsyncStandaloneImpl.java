@@ -144,13 +144,20 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
 
     @Override
     public void stopAudit(Audit audit){
-        for (AuditRunner runner : concurrentAuditRunnerMap.keySet()) {
-            if(runner.getAudit().getId() == audit.getId()){
-                LOGGER.warn("[Audit {}] Interrupting audit", runner.getAudit().getId());
-                auditService.log(runner.getAudit(), EAuditLogLevel.WARNING, "Audit Interrupted by server");
-                runner.interrupt();
-            }
-        }
+        concurrentAuditRunnerMap.keySet()
+                .stream().filter(auditRunner -> auditRunner.getAudit().getId() == audit.getId())
+                .findFirst()
+                .ifPresentOrElse(
+                        auditRunner -> {
+                            LOGGER.warn("[Audit {}] Interrupting audit", auditRunner.getAudit().getId());
+                            auditService.log(audit, EAuditLogLevel.WARNING, "Audit Interrupted by server");
+                            auditRunner.interrupt();
+                        },
+                        () -> {
+                            auditService.log(audit, EAuditLogLevel.ERROR, "No runner found on server set audit status to error");
+                            audit.setStatus(EAuditStatus.ERROR);
+                        }
+                );
     }
 
     /**

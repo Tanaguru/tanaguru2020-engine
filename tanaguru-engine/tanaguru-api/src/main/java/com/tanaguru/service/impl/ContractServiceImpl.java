@@ -104,7 +104,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     public Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable) {
-        return contractRepository.findAllByContractAppUsers_UserAndNameContainingIgnoreCase(user, contractName, pageable);
+        return contractRepository.findAllByName_AndContractAppUsers_User(contractName, user, pageable);
     }
 
     public Page<Contract> findByUser(User user, Pageable pageable) {
