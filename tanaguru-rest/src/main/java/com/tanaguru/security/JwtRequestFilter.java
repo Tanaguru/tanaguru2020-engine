@@ -2,6 +2,8 @@ package com.tanaguru.security;
 
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +32,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String requestTokenHeader = request.getHeader("Authorization");
-        System.out.println("passage jwt filter websecurityconfig1");
         String username = null;
         String jwtToken = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
@@ -41,6 +42,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 logger.debug("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
                 logger.debug("JWT Token has expired");
+            } catch( SignatureException e) {
+            	logger.debug("JWT Token signature not valid for classic JWT filter");
             }
         } else {
             logger.trace("JWT Token does not begin with Bearer String");
@@ -56,7 +59,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                System.out.println("authentifié via jwtrequestfilter");
             }
         }
         chain.doFilter(request, response);
