@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tanaguru.domain.dto.StatisticsDTO;
 import com.tanaguru.service.StatsService;
 
 import io.swagger.annotations.ApiOperation;
@@ -41,10 +42,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping(value = "/", produces = "application/json")
-    String getStats(){
-        return this.statsService.createStats().toString();
+    StatisticsDTO getStats(){
+        return this.statsService.createStats();
     }	
     
     /**
@@ -63,10 +64,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping("/nb-page-audited/{startDate}/{endDate}")
     public @ResponseBody
-    Integer getNbPageAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+    int getNbPageAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getNbPageAuditedByPeriod(startDate, endDate);
     }
     
@@ -86,10 +87,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping("/nb-site-audited/{startDate}/{endDate}")
     public @ResponseBody
-    Integer getNbSiteAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+    int getNbSiteAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getNbSiteAuditedByPeriod(startDate, endDate);
     }
     
@@ -109,10 +110,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping("/nb-scenario-audited/{startDate}/{endDate}")
     public @ResponseBody
-    Integer getNbScenarioAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+    int getNbScenarioAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getNbScenarioAuditedByPeriod(startDate, endDate);
     }
     
@@ -132,10 +133,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping("/nb-file-audited/{startDate}/{endDate}")
     public @ResponseBody
-    Integer getNbFilesAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+    int getNbFilesAuditedByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getNbFileAuditedByPeriod(startDate, endDate);
     }
     
@@ -155,10 +156,10 @@ public class StatsController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session")
     })
-    @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
     @GetMapping("/average-page-error-period/{startDate}/{endDate}")
     public @ResponseBody
-    Double getAverageNbErrorsForPageByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
+    double getAverageNbErrorsForPageByPeriod(@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate) {
         return this.statsService.getAverageNbErrorsForPageByPeriod(startDate, endDate);
     }
 }

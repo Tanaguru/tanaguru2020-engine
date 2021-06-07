@@ -40,11 +40,7 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     void deleteAllByAudit(Audit audit);
     
-    @QueryHints(value = {
-            @QueryHint(name = "HINT_FETCH_SIZE", value = "" + Integer.MIN_VALUE),
-            @QueryHint(name = "HINT_CACHEABLE", value = "false"),
-            @QueryHint(name = "READ_ONLY", value = "true")
-    })
     @Query("select p from Page p")
     Stream<Page> getAll();
+
 }

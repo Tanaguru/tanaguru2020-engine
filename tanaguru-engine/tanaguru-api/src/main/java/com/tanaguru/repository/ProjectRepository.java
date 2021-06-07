@@ -43,11 +43,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             "and cr.name='CONTRACT_OWNER'))")
     org.springframework.data.domain.Page<Project> findSharedProject(@Param("contracts") Collection<Contract> contracts, @Param("search") String search, Pageable pageable);
     
-    @QueryHints(value = {
-            @QueryHint(name = "HINT_FETCH_SIZE", value = "" + Integer.MIN_VALUE),
-            @QueryHint(name = "HINT_CACHEABLE", value = "false"),
-            @QueryHint(name = "READ_ONLY", value = "true")
-    })
     @Query("select p from Project p")
     Stream<Project> getAll();
 }

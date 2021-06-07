@@ -29,11 +29,6 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     @Query(value = "SELECT count(*) FROM Audit WHERE type = :type AND dateStart>:startDate AND dateStart<:endDate")
     int numberOfAuditByTypeAndPeriod(@Param("type") EAuditType type, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
     
-    @QueryHints(value = {
-            @QueryHint(name = "HINT_FETCH_SIZE", value = "" + Integer.MIN_VALUE),
-            @QueryHint(name = "HINT_CACHEABLE", value = "false"),
-            @QueryHint(name = "READ_ONLY", value = "true")
-    })
     @Query("select a from Audit a")
     Stream<Audit> getAll();
 }
