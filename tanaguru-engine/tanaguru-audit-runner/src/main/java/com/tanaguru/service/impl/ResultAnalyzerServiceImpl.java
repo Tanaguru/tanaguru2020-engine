@@ -11,16 +11,21 @@ import com.tanaguru.service.ResultAnalyzerService;
 import com.tanaguru.service.TestHierarchyResultService;
 import com.tanaguru.webextresult.WebextPageResult;
 import com.tanaguru.webextresult.WebextTestResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Transactional
 public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultAnalyzerServiceImpl.class);
     private final TestHierarchyResultRepository testHierarchyResultRepository;
     private final AuditReferenceRepository auditReferenceRepository;
     private final ElementResultRepository elementResultRepository;
@@ -35,7 +40,7 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
             TestHierarchyResultRepository testHierarchyResultRepository,
             AuditReferenceRepository auditReferenceRepository,
             ElementResultRepository elementResultRepository,
-            TestResultRepository testResultRepository, TanaguruTestRepository tanaguruTestRepository, StatusResultRepository statusResultRepository, TestHierarchyResultService testgetStatusByTestsStatus){
+            TestResultRepository testResultRepository, TanaguruTestRepository tanaguruTestRepository, StatusResultRepository statusResultRepository, TestHierarchyResultService testgetStatusByTestsStatus) {
         this.testHierarchyResultRepository = testHierarchyResultRepository;
         this.auditReferenceRepository = auditReferenceRepository;
         this.elementResultRepository = elementResultRepository;
@@ -45,23 +50,24 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
         this.testgetStatusByTestsStatus = testgetStatusByTestsStatus;
     }
 
-    public void extractWebextPageResult(WebextPageResult webextPageResult, Audit audit, Page page){
+    public void extractWebextPageResult(WebextPageResult webextPageResult, Audit audit, Page page) {
+        LOGGER.info("[Audit {}] extract result for page {}", audit.getId(), page.getId());
         Collection<AuditReference> auditReferences = auditReferenceRepository.findAllByAudit(audit);
         Map<Long, TestResult> testResultByTestId = extractWebextTestResult(webextPageResult.getTests(), page);
 
         Map<Long, StatusResult> statusResultByReferenceId = new HashMap<>();
-        for(TestResult testResult : testResultByTestId.values()){
-            for(AuditReference auditReference : auditReferences){
-                if(testResult.getTanaguruTest().getTestHierarchies().stream().anyMatch(testHierarchy ->
-                    testHierarchy.getReference().getId() == auditReference.getTestHierarchy().getId()
-                )){
+        for (TestResult testResult : testResultByTestId.values()) {
+            for (AuditReference auditReference : auditReferences) {
+                if (testResult.getTanaguruTest().getTestHierarchies().stream().anyMatch(testHierarchy ->
+                        testHierarchy.getReference().getId() == auditReference.getTestHierarchy().getId()
+                )) {
                     StatusResult statusResult;
-                    if(!statusResultByReferenceId.containsKey(auditReference.getTestHierarchy().getId())){
+                    if (!statusResultByReferenceId.containsKey(auditReference.getTestHierarchy().getId())) {
                         statusResult = new StatusResult();
                         statusResult.setReference(auditReference.getTestHierarchy());
                         statusResult.setPage(page);
                         statusResultByReferenceId.put(auditReference.getTestHierarchy().getId(), statusResult);
-                    }else{
+                    } else {
                         statusResult = statusResultByReferenceId.get(auditReference.getTestHierarchy().getId());
                     }
 
@@ -70,7 +76,7 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
                     statusResult.setNbElementPassed(statusResult.getNbElementPassed() + testResult.getNbElementPassed());
                     statusResult.setNbElementTested(statusResult.getNbElementTested() + testResult.getNbElementTested());
                     statusResult.setNbElementUntested(statusResult.getNbElementUntested() + testResult.getNbElementUntested());
-                    switch(testResult.getStatus()){
+                    switch (testResult.getStatus()) {
                         case TestStatusName.STATUS_FAILED:
                             statusResult.setNbTestFailed(statusResult.getNbTestFailed() + 1);
                             break;
@@ -91,20 +97,22 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
                 }
             }
 
-            for(StatusResult statusResult : statusResultByReferenceId.values()){
-                statusResultRepository.save(statusResult);
-            }
+            statusResultByReferenceId.values()
+                    .forEach(statusResultRepository::save);
         }
 
-        for(AuditReference auditReference : auditReferences){
-            TestHierarchy testHierarchy = auditReference.getTestHierarchy();
-            extractWebextTestsResultByTestHierarchy(testResultByTestId, testHierarchy, page, null);
-        }
+        auditReferences.stream()
+                .map(AuditReference::getTestHierarchy)
+                .forEach(testHierarchy -> extractWebextTestsResultByTestHierarchy(
+                        testResultByTestId,
+                        testHierarchy,
+                        page,
+                        null));
     }
 
-    public Map<Long, TestResult> extractWebextTestResult(Collection<WebextTestResult> webextTestResults, Page page){
+    public Map<Long, TestResult> extractWebextTestResult(Collection<WebextTestResult> webextTestResults, Page page) {
         Map<Long, TestResult> testResultByTestId = new HashMap<>();
-        for(WebextTestResult webextTestResult : webextTestResults){
+        for (WebextTestResult webextTestResult : webextTestResults) {
             TestResult testResult = new TestResult();
             testResult.setPage(page);
             testResult.setMarks(webextTestResult.getMarks());
@@ -114,9 +122,9 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
             testResult = testResultRepository.save(testResult);
 
             Collection<ElementResult> elementResults = new ArrayList<>();
-            for(ElementResult elementResult : webextTestResult.getData()){
+            for (ElementResult elementResult : webextTestResult.getData()) {
                 elementResult.setTestResult(testResult);
-                switch(elementResult.getStatus()){
+                switch (elementResult.getStatus()) {
                     case TestStatusName.STATUS_FAILED:
                         testResult.setNbElementFailed(testResult.getNbElementFailed() + 1);
                         break;
@@ -145,7 +153,7 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
     public TestHierarchyResult extractWebextTestsResultByTestHierarchy(Map<Long, TestResult> testResultByTestId,
                                                                        TestHierarchy testHierarchy,
                                                                        Page page,
-                                                                       TestHierarchyResult parent){
+                                                                       TestHierarchyResult parent) {
         TestHierarchyResult testHierarchyResult = new TestHierarchyResult();
         testHierarchyResult.setTestHierarchy(testHierarchy);
         testHierarchyResult.setPage(page);
@@ -153,9 +161,9 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
         testHierarchyResult = testHierarchyResultRepository.save(testHierarchyResult);
 
         Collection<TestResult> testResults = new ArrayList<>();
-        for(TanaguruTest tanaguruTest : testHierarchy.getTanaguruTests()){
+        for (TanaguruTest tanaguruTest : testHierarchy.getTanaguruTests()) {
             TestResult testResult = testResultByTestId.get(tanaguruTest.getId());
-            switch (testResult.getStatus()){
+            switch (testResult.getStatus()) {
                 case TestStatusName.STATUS_FAILED:
                     testHierarchyResult.setNbTestFailed(testHierarchyResult.getNbTestFailed() + 1);
                     break;
@@ -181,14 +189,14 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
             testHierarchyResult.setNbElementUntested(testHierarchyResult.getNbElementUntested() + testResult.getNbElementUntested());
         }
         testHierarchyResult.setTestResults(testResults);
-        if(testHierarchy.getChildren().isEmpty()){
+        if (testHierarchy.getChildren().isEmpty()) {
             testHierarchyResult.setStatus(testgetStatusByTestsStatus.getStatusByTestsStatus(
                     testHierarchyResult.getNbTestFailed() != 0,
                     testHierarchyResult.getNbTestPassed() != 0,
                     testHierarchyResult.getNbTestInapplicable() != 0,
                     testHierarchyResult.getNbTestCantTell() != 0
             ));
-            switch (testHierarchyResult.getStatus()){
+            switch (testHierarchyResult.getStatus()) {
                 case TestStatusName.STATUS_FAILED:
                     testHierarchyResult.setNbFailed(1);
                     break;
@@ -206,8 +214,8 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
                     break;
                 default:
             }
-        }else{
-            for(TestHierarchy child : testHierarchy.getChildren()){
+        } else {
+            for (TestHierarchy child : testHierarchy.getChildren()) {
                 TestHierarchyResult childResult = extractWebextTestsResultByTestHierarchy(testResultByTestId, child, page, testHierarchyResult);
                 testHierarchyResult.setNbCantTell(testHierarchyResult.getNbCantTell() + childResult.getNbCantTell());
                 testHierarchyResult.setNbUntested(testHierarchyResult.getNbUntested() + childResult.getNbUntested());

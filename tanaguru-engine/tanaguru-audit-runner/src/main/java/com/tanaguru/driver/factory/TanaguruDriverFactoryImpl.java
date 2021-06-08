@@ -79,45 +79,51 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
 
     @Override
     public Optional<RemoteWebDriver> create(BrowserName browserName) {
-    	Optional<RemoteWebDriver> result = Optional.empty();
-    	RemoteWebDriver remoteWebDriver = null;
-    	switch (browserName) {
-        case CHROME:
-        	ChromeOptions chromeOptions = new ChromeOptions();
-        	setChromePreferences(chromeOptions);
-        	remoteWebDriver = new ChromeDriver(chromeOptions);
-        	remoteWebDriver.manage().deleteAllCookies();
-        	
-        	result = Optional.of(remoteWebDriver);
-            break;
+        Optional<RemoteWebDriver> result = Optional.empty();
+        RemoteWebDriver remoteWebDriver = null;
+        try{
+            switch (browserName) {
+                case CHROME:
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    setChromePreferences(chromeOptions);
+                    remoteWebDriver = new ChromeDriver(chromeOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
 
-        case FIREFOX:
-        	FirefoxOptions firefoxOptions = new FirefoxOptions();
-            FirefoxProfile firefoxProfile = createFirefoxProfile();
+                    result = Optional.of(remoteWebDriver);
+                    break;
 
-            firefoxOptions.setBinary(firefoxBinaryPath);
-            firefoxOptions.setHeadless(true);
-            firefoxOptions.setProfile(firefoxProfile);
-            remoteWebDriver = new FirefoxDriver(firefoxOptions);
-            remoteWebDriver.manage().deleteAllCookies();
+                case FIREFOX:
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    FirefoxProfile firefoxProfile = createFirefoxProfile();
 
-            result = Optional.of(remoteWebDriver);
-            break;
+                    firefoxOptions.setBinary(firefoxBinaryPath);
+                    firefoxOptions.setHeadless(true);
+                    firefoxOptions.setProfile(firefoxProfile);
+                    remoteWebDriver = new FirefoxDriver(firefoxOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
 
-        default:
-            LOGGER.error("Browser type not handled : "+browserName);
-    	}
-    		
-    	try { 
-    		remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
-    		remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+                    result = Optional.of(remoteWebDriver);
+                    break;
+
+                default:
+                    LOGGER.error("Browser type not handled : " + browserName);
+            }
+        }catch (Exception e){
+            LOGGER.error("Failed to create webdriver {}", e.getMessage());
+            if(remoteWebDriver != null){
+                remoteWebDriver.quit();
+            }
+            return Optional.empty();
+        }
+
+        try {
+            remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
+            remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
             remoteWebDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
     	}catch (IllegalStateException e){
             LOGGER.error("[Webdriver] Could not create webdriver with error :\n" + e.getMessage());
         }
-    	
     	return result;
-            
     }
     
     private void setChromePreferences(ChromeOptions options) {

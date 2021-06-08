@@ -28,3 +28,5 @@
 - Optimize TestResult getAllTestResultByReference endpoint
 - Add a parameter on createUser endpoint to create a contract
 - Add statistics page for super-admin
+- Upgrade logging
+- Fix audit and user deletion

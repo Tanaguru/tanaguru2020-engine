@@ -199,4 +199,13 @@ public class Audit implements Serializable {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof Audit)){
+            return false;
+        }
+        Audit audit = (Audit) o;
+        return audit.getId() == getId();
+    }
 }

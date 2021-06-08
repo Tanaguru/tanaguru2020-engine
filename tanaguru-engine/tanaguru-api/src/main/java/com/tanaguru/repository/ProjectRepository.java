@@ -25,7 +25,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Page<Project> findAllByContract(Contract contract, Pageable pageable);
 
-    org.springframework.data.domain.Page<Project> findAllByContractInAndNameContaining(Collection<Contract> contracts, String name, Pageable pageable);
+    @Query(value = "select p from Project p " +
+            "where p.contract in :contracts and UPPER(p.name) LIKE CONCAT('%',UPPER(:search),'%') ")
+    org.springframework.data.domain.Page<Project> findAllByContractInAndNameContaining(@Param("contracts") Collection<Contract> contracts, @Param("search") String search, Pageable pageable);
 
     /**
      * Find a page of shared project for a contract
@@ -40,9 +42,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             "where p=pu.project " +
             "and pu.contractAppUser <> (select cu from ContractAppUser cu inner join ContractRole cr ON cu.contractRole=cr " +
             "where cu.contract=p.contract " +
-            "and cr.name='CONTRACT_OWNER'))")
-    org.springframework.data.domain.Page<Project> findSharedProject(@Param("contracts") Collection<Contract> contracts, @Param("search") String search, Pageable pageable);
-    
+            "and cr.name='CONTRACT_OWNER')) ")
+    org.springframework.data.domain.Page<Project> findSharedProject(@Param("contracts") Collection<Contract> contracts, @Param("search") String search, @Param("pageable") Pageable pageable);
+  
     @Query("select p from Project p")
     Stream<Project> getAll();
+  
 }

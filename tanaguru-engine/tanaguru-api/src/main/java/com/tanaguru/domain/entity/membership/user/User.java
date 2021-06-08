@@ -45,16 +45,19 @@ public class User implements Serializable {
 
     @Column(nullable = false, unique = true)
     @Email
+    @JsonIgnore
     private String email;
 
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation;
 
+    @JsonIgnore
     @Column(nullable = false)
     @NotNull
     private boolean isEnabled = false;
-    
+
+    @JsonIgnore
     @Column(nullable = false)
     @NotNull
     private boolean accountNonLocked = true;

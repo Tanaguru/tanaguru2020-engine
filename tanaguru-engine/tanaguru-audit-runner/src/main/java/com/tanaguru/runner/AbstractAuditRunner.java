@@ -1,16 +1,16 @@
 package com.tanaguru.runner;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
+import org.json.JSONException;
+import org.openqa.selenium.*;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,8 +118,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             LOGGER.debug("[Audit {}] Closing webdriver", audit.getId());
             tanaguruDriver.quit();
         }catch (Exception e){
-            LOGGER.error("[Audit {}] Error while closing webdriver", audit.getId());
-            auditLog(EAuditLogLevel.ERROR, "Error while closing webdriver");
+            LOGGER.error("[Audit {}] Error while closing webdriver : {}", audit.getId(), e.getMessage());
+            auditLog(EAuditLogLevel.ERROR, "Error while closing webdriver : " + e.getMessage());
         }
 
         LOGGER.info("[Audit {}] Runner ended", audit.getId());
@@ -177,9 +177,13 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                     tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
                 }
                 currentRank++;
-            } catch (Exception e) {
+            } catch (WebDriverException e) {
                 LOGGER.error("[Audit {}] Script error on page {}\n{}\n", audit.getId(), url, e.getMessage());
                 auditLog(EAuditLogLevel.ERROR, "Error during script execution on page " + url + "\n"
+                        + e.getMessage());
+            }catch (JsonSyntaxException e){
+                LOGGER.error("[Audit {}] Error while parsing result on page {}\n{}\n", audit.getId(), url, e.getMessage());
+                auditLog(EAuditLogLevel.ERROR, "Error while parsing result on page " + url + "\n"
                         + e.getMessage());
             }
         }

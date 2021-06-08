@@ -34,7 +34,7 @@ public interface ActRepository extends JpaRepository<Act, Long> {
     
     Collection<Act> findAllByProjectAndAudit_Type(Project project, EAuditType type);
     
-    @Query("SELECT act.audit from Act as act where act.project = :project and act.audit.type = :type")
+    @Query("SELECT act.audit from Act as act where act.project=:project and act.audit.type=:type and act.audit.deleted=false")
     Page<Audit> findAllAuditByProjectAndAudit_Type(@Param("project") Project project, @Param("type") EAuditType type, Pageable pageable);
 
 
