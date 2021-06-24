@@ -41,7 +41,10 @@ pipeline {
     stages {
         stage('Build') {
             agent {
-                    docker 'maven'
+                    docker {
+                        image 'maven'
+                        args '-v /root/.m2:/root/.m2'
+                    }
             }
             steps {
                 sh 'mvn clean install -X'
