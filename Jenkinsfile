@@ -44,7 +44,7 @@ pipeline {
                     docker 'maven'
             }
             steps {
-                sh 'mvn clean package -X'
+                sh 'mvn clean install -X'
                 sh '''
                 REST_VERSION=$(mvn -q \
                     -Dexec.executable=echo \
