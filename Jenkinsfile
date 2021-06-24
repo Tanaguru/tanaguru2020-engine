@@ -41,13 +41,10 @@ pipeline {
     stages {
         stage('Build') {
             agent {
-                    docker {
-                        image 'maven'
-                        args '-v /root/.m2:/root/.m2'
-                    }
+                    docker 'maven'
             }
             steps {
-                sh 'mvn clean install -X'
+                sh 'mvn clean package -X'
                 sh '''
                 REST_VERSION=$(mvn -q \
                     -Dexec.executable=echo \
