@@ -110,6 +110,9 @@
                             <goal>repackage</goal>
                             <goal>build-info</goal>
                         </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
