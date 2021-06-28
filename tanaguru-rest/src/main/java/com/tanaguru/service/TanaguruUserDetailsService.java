@@ -2,6 +2,8 @@ package com.tanaguru.service;
 
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.user.User;
+
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface TanaguruUserDetailsService extends UserDetailsService{
@@ -59,4 +61,11 @@ public interface TanaguruUserDetailsService extends UserDetailsService{
      * @return The new @see User
      */
     User changeUserPassword(User user, String password);
+    
+    /**
+     * Get the user's details from their email
+     * @param email
+     * @return user details
+     */
+    UserDetails loadUserByEmail(String email);
 }
