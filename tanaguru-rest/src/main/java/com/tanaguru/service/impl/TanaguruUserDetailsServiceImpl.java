@@ -105,6 +105,23 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                         ).collect(Collectors.toList())
         );
     }
+    
+    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(CustomError.EMAIL_NOT_FOUND.toString()));
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                user.isAccountNonLocked(),
+                user.getAppRole().getAuthorities().stream()
+                        .map(appAuthority ->
+                                new SimpleGrantedAuthority(appAuthority.getName())
+                        ).collect(Collectors.toList())
+        );
+    }
 
     public User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
