@@ -31,13 +31,6 @@ public interface AuditRunner extends Runnable {
     Audit getAudit();
 
     /**
-     * Audit setter
-     *
-     * @param audit The audit to set
-     */
-    void setAudit(Audit audit);
-
-    /**
      * Fire a new page event
      *
      * @param url                   of the page

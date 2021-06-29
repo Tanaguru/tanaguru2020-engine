@@ -112,8 +112,7 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         Audit audit = auditRunner.getAudit();
         audit.setDateStart(new Date());
         audit.setStatus(RUNNING);
-        audit = auditRepository.save(audit);
-        auditRunner.setAudit(audit);
+        auditRepository.save(audit);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit start");
         onAuditStartImpl(auditRunner);
     }
@@ -130,7 +129,6 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
         }
         audit.setDateEnd(new Date());
         audit = auditRepository.save(audit);
-        auditRunner.setAudit(audit);
         onAuditEndImpl(auditRunner);
         auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO, "Audit end");
 

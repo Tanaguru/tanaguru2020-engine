@@ -12,10 +12,9 @@ import java.util.Collection;
 
 public class AuditRunnerPage extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerPage.class);
-    private Collection<String> urls;
+    private final Collection<String> urls;
 
     public AuditRunnerPage(
-            Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             Collection<String> urls,
             RemoteWebDriver driver,
@@ -26,7 +25,7 @@ public class AuditRunnerPage extends AbstractAuditRunner {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot) {
-        super(tanaguruTests, audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
+        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
         this.urls = urls;
     }
 

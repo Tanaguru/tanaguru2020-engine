@@ -74,15 +74,15 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
     }
 
     public void runAudit(Audit audit) {
-        Optional<AuditRunner> auditRunnerOptional = auditRunnerFactory.create(audit);
-        if (auditRunnerOptional.isPresent()) {
-            AuditRunner auditRunner = auditRunnerOptional.get();
+        try {
+            AuditRunner auditRunner = auditRunnerFactory.create(audit);
             auditRunner.addListener(this);
             this.currentRunner = auditRunner;
             auditRunner.run();
-        }else{
+        } catch (Exception e) {
             audit.setStatus(EAuditStatus.ERROR);
             audit = auditRepository.save(audit);
+            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to start audit : " + e.getMessage());
             LOGGER.error("[Audit {}] Unable to start audit", audit.getId());
         }
     }
