@@ -1,5 +1,6 @@
 package com.tanaguru.service.impl;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,9 +14,11 @@ import org.springframework.stereotype.Service;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.StatisticsDTO;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.ContractRepository;
+import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.StatusResultRepository;
 import com.tanaguru.repository.UserRepository;
@@ -32,6 +35,7 @@ public class StatsServiceImpl implements StatsService{
 	private final AuditRepository auditRepository;
 	private final AuditService auditService;
 	private final ContractRepository contractRepository;
+	private final PageRepository pageRepository;
 
 	@Autowired
 	public StatsServiceImpl(ProjectRepository projectRepository,
@@ -39,13 +43,15 @@ public class StatsServiceImpl implements StatsService{
 			StatusResultRepository statusResultRepository,
 			AuditRepository auditRepository,
 			AuditService auditService,
-			ContractRepository contractRepository) {
+			ContractRepository contractRepository,
+			PageRepository pageRepository) {
 		this.projectRepository = projectRepository;
 		this.userRepository = userRepository;
 		this.statusResultRepository = statusResultRepository;
 		this.auditRepository = auditRepository;
 		this.auditService = auditService;
 		this.contractRepository = contractRepository;
+		this.pageRepository = pageRepository;
 	}
 	
 	@Override
@@ -156,12 +162,8 @@ public class StatsServiceImpl implements StatsService{
 
 	@Override
 	public double getAverageNbErrorsForPageByPeriod(Date startDate, Date endDate) {
-		Stream<Audit> auditStream = this.auditRepository.getAll();
-		List<Long> pagesId = auditStream.filter(audit -> audit.getDateStart().after(startDate) && audit.getDateStart().before(endDate))
-				.flatMap(audit -> audit.getPages().stream())
-				.map(page -> page.getId())
-				.collect(Collectors.toList());
-		
+		Collection<Page> pages = pageRepository.findAllByAuditDateStartLessThanEqualAndAuditDateEndGreaterThanEqual(endDate, startDate);
+		List<Long> pagesId = pages.stream().map(page -> page.getId()).collect(Collectors.toList());
 		Double avg = 0.0;
 		Integer errorSum = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
 		if(errorSum != null && errorSum != 0) {

@@ -2,18 +2,16 @@ package com.tanaguru.repository;
 
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.membership.project.Project;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Stream;
 
-import javax.persistence.QueryHint;
 
 /**
  * @author rcharre
@@ -42,5 +40,13 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     
     @Query("select p from Page p")
     Stream<Page> getAll();
+    
+    /**
+     * Find all page for audit between dates
+     *
+     * @param date start and date end
+     * @return all page
+     */
+    Collection<Page> findAllByAuditDateStartLessThanEqualAndAuditDateEndGreaterThanEqual(Date endDate, Date startDate);
 
 }
