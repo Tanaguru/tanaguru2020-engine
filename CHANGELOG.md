@@ -27,6 +27,6 @@
 - Add configuration key to enable or not robots.txt respect (auditrunner.crawler.follow-robots)
 - Optimize TestResult getAllTestResultByReference endpoint
 - Add a parameter on createUser endpoint to create a contract
-- Add statistics page for super-admin and config key (statistics.fixedDelay.in.milliseconds)
+- Add statistics page for super-admin and config key (statistics.fixedDelay)
 - Upgrade logging
 - Fix audit and user deletion

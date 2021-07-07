@@ -61,7 +61,7 @@ public class StatsServiceImpl implements StatsService{
 		return this.stats;
 	}
 	
-	@Scheduled(fixedDelayString = "${statistics.fixedDelay.in.milliseconds}")
+	@Scheduled(fixedDelayString = "${statistics.fixedDelay}")
 	public void createStatsScheduled() {
 	    this.stats.setNbProjects((int) this.projectRepository.count());
         this.stats.setNbUsers((int) this.userRepository.count());
