@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.tanaguru.domain.constant.EAuditType;
@@ -36,6 +37,7 @@ public class StatsServiceImpl implements StatsService{
 	private final AuditService auditService;
 	private final ContractRepository contractRepository;
 	private final PageRepository pageRepository;
+	private StatisticsDTO stats = new StatisticsDTO();
 
 	@Autowired
 	public StatsServiceImpl(ProjectRepository projectRepository,
@@ -56,25 +58,28 @@ public class StatsServiceImpl implements StatsService{
 	
 	@Override
 	public StatisticsDTO createStats() {
-		StatisticsDTO stats = new StatisticsDTO();
-		stats.setNbProjects((int) this.projectRepository.count());
-		stats.setNbUsers((int) this.userRepository.count());
-		stats.setNbAudits((int) this.auditRepository.count());
-		stats.setNbContracts((int) this.contractRepository.count());
-		stats.setMeanNbErrorsPage(this.statusResultRepository.getAverageNumberOfErrorsByPage());
-		stats.setMeanNbErrorsAudit(this.getAverageNbErrorsByAudit());
-		stats.setMeanNbErrorsProject(this.getAverageNbErrorsByProject());
-		
-		stats.setNbPageAudit(this.auditRepository.numberOfAuditByType(EAuditType.PAGE));
-		stats.setNbSiteAudit(this.auditRepository.numberOfAuditByType(EAuditType.SITE));
-		stats.setNbUploadAudit(this.auditRepository.numberOfAuditByType(EAuditType.UPLOAD));
-		stats.setNbScenarioAudit(this.auditRepository.numberOfAuditByType(EAuditType.SCENARIO));
-		
-		Double avgNbAuditsByProject = this.getAverageNbAuditsByProject();
-		stats.setMeanNbAuditsByProject( Double.isFinite(avgNbAuditsByProject) ? avgNbAuditsByProject : 0.0);
-		Double avgNbUsersByProject = this.getAverageNbUsersByProject();
-		stats.setMeanNbUsersByProject(Double.isFinite(avgNbUsersByProject) ? avgNbUsersByProject : 0.0);
-		return stats;
+		return this.stats;
+	}
+	
+	@Scheduled(fixedDelayString = "${statistics.fixedDelay.in.milliseconds}")
+	public void createStatsScheduled() {
+	    this.stats.setNbProjects((int) this.projectRepository.count());
+        this.stats.setNbUsers((int) this.userRepository.count());
+        this.stats.setNbAudits((int) this.auditRepository.count());
+        this.stats.setNbContracts((int) this.contractRepository.count());
+        this.stats.setMeanNbErrorsPage(this.statusResultRepository.getAverageNumberOfErrorsByPage());
+        this.stats.setMeanNbErrorsAudit(this.getAverageNbErrorsByAudit());
+        this.stats.setMeanNbErrorsProject(this.getAverageNbErrorsByProject());
+        
+        this.stats.setNbPageAudit(this.auditRepository.numberOfAuditByType(EAuditType.PAGE));
+        this.stats.setNbSiteAudit(this.auditRepository.numberOfAuditByType(EAuditType.SITE));
+        this.stats.setNbUploadAudit(this.auditRepository.numberOfAuditByType(EAuditType.UPLOAD));
+        this.stats.setNbScenarioAudit(this.auditRepository.numberOfAuditByType(EAuditType.SCENARIO));
+        
+        Double avgNbAuditsByProject = this.getAverageNbAuditsByProject();
+        this.stats.setMeanNbAuditsByProject( Double.isFinite(avgNbAuditsByProject) ? avgNbAuditsByProject : 0.0);
+        Double avgNbUsersByProject = this.getAverageNbUsersByProject();
+        this.stats.setMeanNbUsersByProject(Double.isFinite(avgNbUsersByProject) ? avgNbUsersByProject : 0.0);
 	}
 	
 	/**
