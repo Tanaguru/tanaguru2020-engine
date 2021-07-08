@@ -16,6 +16,7 @@ import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.ProjectUserRepository;
 import com.tanaguru.repository.UserRepository;
+import com.tanaguru.security.JwtTokenUtil;
 import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.TanaguruUserDetailsService;
@@ -35,6 +36,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +63,7 @@ public class UserController {
     private final ProjectUserRepository projectUserRepository;
     private final MailService mailService;
     private final MessageService messageService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Value("${webapp.url}")
     private String webappUrl;
@@ -79,7 +82,8 @@ public class UserController {
             ContractUserRepository contractUserRepository,
             ProjectUserRepository projectUserRepository,
             MailService mailService,
-            MessageService messageService) {
+            MessageService messageService,
+            JwtTokenUtil jwtTokenUtil) {
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.userService = userService;
@@ -90,6 +94,7 @@ public class UserController {
         this.projectUserRepository = projectUserRepository;
         this.mailService = mailService;
         this.messageService = messageService;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     /**
@@ -328,13 +333,20 @@ public class UserController {
     @PutMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     public @ResponseBody
-    DetailedUserDTO modifyCurrentUser(@RequestBody @Valid UserDTO user) {
+    Map<String,Object> modifyCurrentUser(@RequestBody @Valid UserDTO user) {
         User from = userDetailsService.getCurrentUser();
         User to = new User();
         to.setUsername(user.getUsername());
         to.setEmail(user.getEmail());
-
-        return new DetailedUserDTO(userService.modifyUser(from, to));
+        to.setEnabled(true);
+        
+        Map<String,Object> map= new HashMap<>();
+        map.put("user", new DetailedUserDTO(userService.modifyUser(from, to)));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(to.getUsername());
+        String token = jwtTokenUtil.generateToken(userDetails);
+        map.put("token",token);
+        
+        return map;
 
     }
 
