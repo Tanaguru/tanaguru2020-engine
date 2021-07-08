@@ -292,35 +292,6 @@ public class AuditController {
     }
 
     /**
-     * @param demoCommandDTO The @see DemoCommandDTO of the demo audit
-     * @return @see AuditRequest
-     */
-    @ApiOperation(
-            value = "Start a demo audit",
-            response = Audit.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Invalid parameters")
-    })
-    @PostMapping("/demo")
-    public @ResponseBody
-    Audit startDemo(@RequestBody DemoCommandDTO demoCommandDTO) {
-        Map<EAuditParameter, String> auditParameters = new HashMap<>();
-        auditParameters.put(EAuditParameter.PAGE_URLS, demoCommandDTO.getUrl());
-        TestHierarchy testHierarchy = testHierarchyRepository.getOne(1L);
-        Audit audit = auditFactory.createAudit(
-                demoCommandDTO.getUrl(),
-                auditParameters,
-                EAuditType.PAGE,
-                false,
-                null,
-                new ArrayList<>(Collections.singletonList(testHierarchy)),
-                testHierarchy);
-
-        auditRunnerService.runAudit(audit);
-        return audit;
-    }
-
-    /**
      * @param auditCommand The @see AuditCommandDTO with bare bones data to start an audit
      * @return @see AuditRequest
      */
