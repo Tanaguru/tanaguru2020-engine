@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="update_app_authority_user_statistics" author="lpedrau">
+         <insert tableName="app_authority">
+            <column name="name" value="SHOW_STATISTICS"/>
+        </insert>
+        
+         <sql>
+            INSERT INTO app_role_app_authority(app_role_id, app_authority_id) VALUES
+            ((SELECT id FROM app_role WHERE name = 'SUPER_ADMIN'), (SELECT id FROM app_authority WHERE name = 'SHOW_STATISTICS'));
+         </sql>
+          
+    </changeSet>
+            
+</databaseChangeLog>

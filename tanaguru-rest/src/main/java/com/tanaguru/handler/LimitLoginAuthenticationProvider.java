@@ -34,7 +34,9 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     private final HttpServletRequest request;
 
     @Autowired
-    public LimitLoginAuthenticationProvider(UserService userService, UserRepository userRepository, HttpServletRequest request) {
+    public LimitLoginAuthenticationProvider(UserService userService, 
+    		UserRepository userRepository, 
+    		HttpServletRequest request) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.request = request;
