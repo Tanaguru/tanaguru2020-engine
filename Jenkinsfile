@@ -68,7 +68,7 @@ pipeline {
                 }
             }
             steps {
-                git(url: "https://github.com/Tanaguru/tanaguru2020-docker", branch: "master", credentialsId: "github-rcharre")
+                git(url: "https://github.com/Tanaguru/tanaguru2020-docker", branch: "develop", credentialsId: "github-rcharre")
                 unstash 'tanaguru2020-rest'
                 unstash 'version'
                 sh '''
