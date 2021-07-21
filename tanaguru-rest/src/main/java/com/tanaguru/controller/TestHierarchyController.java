@@ -3,6 +3,7 @@ package com.tanaguru.controller;
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.dto.TestHierarchyDTO;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.AuditReference;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -210,6 +212,48 @@ public class TestHierarchyController {
         return audit.getAuditReferences().stream().map(
                 (auditReference) -> new TestHierarchyDTO(auditReference.getTestHierarchy())
         ).collect(Collectors.toList());
+    }
+    
+    /**
+     * Return the main @TestHierarchy for a given @see Audit id
+     *
+     * @param id The id of the @see Audit
+     * @return The main @see TestHierarchy
+     */
+    @ApiOperation(
+            value = "Get the main reference for a given audit id",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
+                    + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error"
+                    + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
+                    + "\nTest hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
+    })
+    @GetMapping("/main-reference-by-audit/{id}/{sharecode}")
+    public @ResponseBody TestHierarchyDTO getMainReferenceByAudit(
+            @PathVariable long id,
+            @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
+        Audit audit = auditRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
+
+        if (!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)) {
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId());
+        }
+
+        AuditReference auditReference = audit.getAuditReferences().stream().
+                filter( auditRef-> auditRef.isMain()).
+                findAny().orElse(null);
+        if(auditReference != null) {
+            return new TestHierarchyDTO(auditReference.getTestHierarchy());
+        }else {
+            throw new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND);
+        }
+        
     }
 
     /**
