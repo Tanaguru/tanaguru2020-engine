@@ -13,10 +13,9 @@ import java.util.Collection;
 
 public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCrawlerListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerSite.class);
-    private TanaguruCrawlerController crawlerController;
+    private final TanaguruCrawlerController crawlerController;
 
     public AuditRunnerSite(
-            Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             TanaguruCrawlerController crawlerController,
             RemoteWebDriver driver,
@@ -27,7 +26,7 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot) {
-        super(tanaguruTests, audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
+        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
         this.crawlerController = crawlerController;
     }
 

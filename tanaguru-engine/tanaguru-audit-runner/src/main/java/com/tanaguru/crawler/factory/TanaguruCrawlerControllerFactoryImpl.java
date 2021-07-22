@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerControllerFactory {
@@ -51,7 +50,7 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
         }
     }
 
-    public Optional<TanaguruCrawlerController> create(
+    public TanaguruCrawlerController create(
             Collection<String> seeds,
             long maxDuration,
             String inclusionRegex,
@@ -60,37 +59,31 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
             int maxDepth,
             String basicAuthUrl,
             String basicAuthPassword,
-            String basicAuthLogin) {
+            String basicAuthLogin) throws Exception {
 
-        TanaguruCrawlerController crawlerController = null;
-
+        LOGGER.debug("Create crawler controller");
         this.prepareEnv();
-        try {
-            CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword, seeds);
-            PageFetcher pageFetcher = new PageFetcher(crawlerConfig);
-            RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-            robotstxtConfig.setUserAgentName(USER_AGENT_NAME);
-            robotstxtConfig.setEnabled(followRobots);
-            RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-            crawlerController = new TanaguruCrawlerControllerImpl(
-                    crawlerConfig,
-                    pageFetcher,
-                    robotstxtServer,
-                    maxDuration,
-                    maxPage,
-                    exclusionRegex,
-                    inclusionRegex
-            );
+        CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword, seeds);
+        PageFetcher pageFetcher = new PageFetcher(crawlerConfig);
+        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
+        robotstxtConfig.setUserAgentName(USER_AGENT_NAME);
+        robotstxtConfig.setEnabled(followRobots);
+        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
+        TanaguruCrawlerController crawlerController = new TanaguruCrawlerControllerImpl(
+                crawlerConfig,
+                pageFetcher,
+                robotstxtServer,
+                maxDuration,
+                maxPage,
+                exclusionRegex,
+                inclusionRegex
+        );
 
-            for (String seed : seeds) {
-                crawlerController.addSeed(seed);
-            }
-
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+        for (String seed : seeds) {
+            crawlerController.addSeed(seed);
         }
 
-        return Optional.ofNullable(crawlerController);
+        return crawlerController;
     }
 
     private CrawlConfig getCrawlerConfig(int maxDepth, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, Collection<String> seeds) throws Exception {

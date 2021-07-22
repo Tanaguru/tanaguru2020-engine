@@ -30,3 +30,4 @@
 - Add statistics page for super-admin and config key (statistics.fixedDelay)
 - Upgrade logging
 - Fix audit and user deletion
+- Support contrast from webext engine

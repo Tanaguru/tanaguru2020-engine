@@ -112,15 +112,14 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
      * @param audit the audit request
      */
     private void auditThread(Audit audit) {
-        Optional<AuditRunner> auditRunnerOptional = auditRunnerFactory.create(audit);
-
-        if(auditRunnerOptional.isPresent()){
-            AuditRunner auditRunner = auditRunnerOptional.get();
+        try{
+            AuditRunner auditRunner = auditRunnerFactory.create(audit);
             auditRunner.addListener(this);
             Thread runnerThread = new Thread(auditRunner);
             concurrentAuditRunnerMap.put(auditRunner, runnerThread);
             runnerThread.start();
-        }else{
+        } catch (Exception e) {
+            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to start audit : " + e.getMessage());
             audit.setStatus(EAuditStatus.ERROR);
             audit = auditRepository.save(audit);
             LOGGER.error("[Audit {}] Unable to start audit", audit.getId());

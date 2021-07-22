@@ -25,10 +25,9 @@ import java.util.Collection;
 
 public class AuditRunnerSelenese extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerSelenese.class);
-    private String scenario;
+    private final String scenario;
 
     public AuditRunnerSelenese(
-            Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             String scenario,
             RemoteWebDriver driver,
@@ -39,8 +38,7 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot) {
-        super(tanaguruTests,
-                audit,
+        super(audit,
                 driver,
                 coreScript,
                 waitTime,

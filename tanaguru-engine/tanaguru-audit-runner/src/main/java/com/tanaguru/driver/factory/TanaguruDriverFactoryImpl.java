@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -78,8 +77,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     }
 
     @Override
-    public Optional<RemoteWebDriver> create(BrowserName browserName) {
-        Optional<RemoteWebDriver> result = Optional.empty();
+    public RemoteWebDriver create(BrowserName browserName) {
         RemoteWebDriver remoteWebDriver = null;
         try{
             switch (browserName) {
@@ -88,8 +86,6 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                     setChromePreferences(chromeOptions);
                     remoteWebDriver = new ChromeDriver(chromeOptions);
                     remoteWebDriver.manage().deleteAllCookies();
-
-                    result = Optional.of(remoteWebDriver);
                     break;
 
                 case FIREFOX:
@@ -101,29 +97,23 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
                     firefoxOptions.setProfile(firefoxProfile);
                     remoteWebDriver = new FirefoxDriver(firefoxOptions);
                     remoteWebDriver.manage().deleteAllCookies();
-
-                    result = Optional.of(remoteWebDriver);
                     break;
 
                 default:
                     LOGGER.error("Browser type not handled : " + browserName);
             }
-        }catch (Exception e){
-            LOGGER.error("Failed to create webdriver {}", e.getMessage());
-            if(remoteWebDriver != null){
-                remoteWebDriver.quit();
-            }
-            return Optional.empty();
-        }
-
-        try {
             remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
             remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
             remoteWebDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-    	}catch (IllegalStateException e){
-            LOGGER.error("[Webdriver] Could not create webdriver with error :\n" + e.getMessage());
+
+        }catch (Exception e){
+            if(remoteWebDriver != null){
+                remoteWebDriver.quit();
+            }
+            throw e;
         }
-    	return result;
+
+    	return remoteWebDriver;
     }
     
     private void setChromePreferences(ChromeOptions options) {
@@ -137,7 +127,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--user-agent=tanaguru");
         options.addArguments("--disable-component-update");
         options.addArguments("--ignore-certificate-errors");
-        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        HashMap<String, Object> chromePrefs = new HashMap<>();
         chromePrefs.put("profile.block_third_party_cookies", true);
         chromePrefs.put("download.default_directory", "/dev/null");
         options.setExperimentalOption("prefs", chromePrefs);
