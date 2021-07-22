@@ -32,7 +32,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "CORS_ORIGIN=" + props['CORS_ORIGIN'] + "\n" +
              "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
              "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
-             "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER']
+             "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER'] + "\n" +
+             "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY']
     }
 }
 

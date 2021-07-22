@@ -10,6 +10,7 @@ public final class AppAuthorityName {
     public static final String PROMOTE_USER = "PROMOTE_USER";
     public static final String MODIFY_USER = "MODIFY_USER";
     public static final String DELETE_USER = "DELETE_USER";
+    public static final String SHOW_STATISTICS = "SHOW_STATISTICS";
 
     public static final String CREATE_TEST = "CREATE_TEST";
     public static final String CREATE_REFERENCE = "CREATE_REFERENCE";
