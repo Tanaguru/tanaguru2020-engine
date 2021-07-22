@@ -2,7 +2,6 @@ package com.tanaguru.runner;
 
 
 import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.domain.entity.audit.TanaguruTest;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +15,10 @@ import java.util.Collection;
 
 public class AuditRunnerFile extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerFile.class);
-    private String fileContent;
+    private final String fileContent;
+
 
     public AuditRunnerFile(
-            Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             String fileContent,
             RemoteWebDriver driver,
@@ -31,7 +30,6 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             String basicAuthPassword,
             boolean enableScreenShot) {
         super(
-                tanaguruTests,
                 audit,
                 driver,
                 coreScript,

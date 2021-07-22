@@ -30,6 +30,9 @@ public class TanaguruTest implements Serializable {
     private String description;
 
     @Column
+    private String contrast;
+
+    @Column
     private String query;
 
     @Column
@@ -135,6 +138,14 @@ public class TanaguruTest implements Serializable {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public String getContrast() {
+        return contrast;
+    }
+
+    public void setContrast(String contrast) {
+        this.contrast = contrast;
     }
 }
 

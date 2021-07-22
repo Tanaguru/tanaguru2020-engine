@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
-import org.json.JSONException;
-import org.openqa.selenium.*;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,32 +28,23 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private static final int DEFAULT_WINDOW_SIZE = 1080;
     private static final float SCREENSHOT_QUALITY_COMPRESSION = 1f;
 
-    private Audit audit;
-    private RemoteWebDriver tanaguruDriver;
-    private String coreScript;
-
-    private int currentRank = 1;
-
-    private Collection<AuditRunnerListener> listeners = new ArrayList<>();
-    private Collection<String> visitedUrl = new ArrayList<>();
-    private Collection<TanaguruTest> tanaguruTests;
-    private Collection<Integer> resolutions;
-
-    private String testScript;
-
-    private String basicAuthUrl;
-    private String basicAuthLogin;
-    private String basicAuthPassword;
-    private boolean enableScreenShot;
-
-    private Gson gson = new Gson();
+    private final Audit audit;
+    private final RemoteWebDriver tanaguruDriver;
+    private final Collection<AuditRunnerListener> listeners = new ArrayList<>();
+    private final Collection<String> visitedUrl = new ArrayList<>();
+    private final Collection<Integer> resolutions;
+    private final String basicAuthUrl;
+    private final String basicAuthLogin;
+    private final String basicAuthPassword;
+    private final boolean enableScreenShot;
+    private final Gson gson = new Gson();
+    private final long waitTime;
+    private final String coreScript;
 
     private boolean stop = false;
-
-    private long waitTime;
+    private int currentRank = 1;
 
     public AbstractAuditRunner(
-            Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             RemoteWebDriver driver,
             String coreScript,
@@ -67,14 +56,13 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             boolean enableScreenShot) {
         this.audit = audit;
         this.tanaguruDriver = driver;
-        this.coreScript = coreScript;
-        this.tanaguruTests = tanaguruTests;
         this.waitTime = waitTime;
         this.resolutions = resolutions;
         this.basicAuthUrl = basicAuthUrl;
         this.basicAuthLogin = basicAuthLogin;
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
+        this.coreScript = coreScript;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -82,16 +70,14 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     }
 
     public final void run() {
-        this.testScript = createFullScripts();
-
         LOGGER.info("[Audit {}] Start runner", audit.getId());
         for (AuditRunnerListener tanaguruDriverListener : listeners) {
             tanaguruDriverListener.onAuditStart(this);
         }
 
-        try{
+        try {
             //Use basic auth
-            if(!basicAuthUrl.isEmpty() && !basicAuthLogin.isEmpty() && !basicAuthPassword.isEmpty()){
+            if (!basicAuthUrl.isEmpty() && !basicAuthLogin.isEmpty() && !basicAuthPassword.isEmpty()) {
                 URL url = new URL(basicAuthUrl);
                 StringBuilder strb = new StringBuilder();
                 strb.append(url.getProtocol());
@@ -101,7 +87,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 strb.append(basicAuthPassword);
                 strb.append("@");
                 strb.append(url.getHost());
-                if(url.getPort() != -1){
+                if (url.getPort() != -1) {
                     strb.append(":");
                     strb.append(url.getPort());
                 }
@@ -109,15 +95,15 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 tanaguruDriver.get(strb.toString());
             }
             this.runImpl();
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("Error during run : " + e.getMessage());
             auditLog(EAuditLogLevel.ERROR, "Error during run : " + e.getMessage());
         }
 
-        try{
+        try {
             LOGGER.debug("[Audit {}] Closing webdriver", audit.getId());
             tanaguruDriver.quit();
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("[Audit {}] Error while closing webdriver : {}", audit.getId(), e.getMessage());
             auditLog(EAuditLogLevel.ERROR, "Error while closing webdriver : " + e.getMessage());
         }
@@ -135,7 +121,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         int lastSlash = url.lastIndexOf('/');
 
         //Cut anchor but keep url for framework that use hash in url as Vue.js
-        if(firstHash != -1 && lastSlash != -1 && lastSlash < firstHash){
+        if (firstHash != -1 && lastSlash != -1 && lastSlash < firstHash) {
             url = url.substring(0, firstHash);
         }
 
@@ -153,13 +139,13 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
     private void auditPage(String url, String name) {
         LOGGER.info("[Audit {}] Execute tests on page {}", audit.getId(), url);
-        for(Integer width : resolutions) {
+        for (Integer width : resolutions) {
             Dimension resolution = new Dimension(width, DEFAULT_WINDOW_SIZE);
             String definiteName = name + "_" + width;
 
             tanaguruDriver.manage().window().setSize(resolution);
             String screenshot = null;
-            if(enableScreenShot){
+            if (enableScreenShot) {
                 LOGGER.debug("[Audit {}] Take screenshot for url {}", audit.getId(), url);
 
                 try {
@@ -171,7 +157,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
-                String result = (String) tanaguruDriver.executeScript(testScript);
+                String result = (String) tanaguruDriver.executeScript(coreScript);
                 String source = tanaguruDriver.getPageSource();
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
                     tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
@@ -181,7 +167,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 LOGGER.error("[Audit {}] Script error on page {}\n{}\n", audit.getId(), url, e.getMessage());
                 auditLog(EAuditLogLevel.ERROR, "Error during script execution on page " + url + "\n"
                         + e.getMessage());
-            }catch (JsonSyntaxException e){
+            } catch (JsonSyntaxException e) {
                 LOGGER.error("[Audit {}] Error while parsing result on page {}\n{}\n", audit.getId(), url, e.getMessage());
                 auditLog(EAuditLogLevel.ERROR, "Error while parsing result on page " + url + "\n"
                         + e.getMessage());
@@ -196,8 +182,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         jpgImage.createGraphics().drawImage(screenImage, 0, 0, Color.BLACK, null);
         jpgImage = ImageHelper.scaleImage(jpgImage, 0.5f);
         screenshotImage = ImageHelper.appendImages(screenshotImage, jpgImage);
-        int yOffset = 0;
-        /*while(yOffset < resolution.height){
+        /*int yOffset = 0;
+        while(yOffset < resolution.height){
             if(resolution.height - yOffset < DEFAULT_WINDOW_SIZE * 2){
                 tanaguruDriver.manage().window().setSize(new Dimension(resolution.width, resolution.height - yOffset));
                 tanaguruDriver.executeScript("window.scrollTo(0, " + yOffset + ");");
@@ -217,47 +203,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 ImageHelper.compressImage(screenshotImage, SCREENSHOT_QUALITY_COMPRESSION, "jpg"));
     }
 
-    private String createFullScripts() {
-        StringBuilder strb = new StringBuilder();
-        Gson gson = new Gson();
-        LOGGER.debug("[Audit {}] Generating script", audit.getId());
-        strb.append(coreScript);
-        strb.append("\n");
-        for (TanaguruTest tanaguruTest : this.tanaguruTests) {
-            strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
-            strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
-            strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
-            strb.append(",\ntags:").append(gson.toJson(tanaguruTest.getTags()));
-
-
-            if(tanaguruTest.getExpectedNbElements() != null){
-                strb.append(",\nexpectedNbElements:");
-                try {
-                    strb.append(
-                            Integer.parseInt(tanaguruTest.getExpectedNbElements()));
-                }catch (NumberFormatException nfe){
-                    strb.append(gson.toJson(tanaguruTest.getExpectedNbElements()));
-                }
-            }
-
-            if(tanaguruTest.getDescription() != null){
-                strb.append(",\ndescription:\"").append(tanaguruTest.getDescription()).append("\"");
-            }
-
-            if(tanaguruTest.getFilter() != null){
-                strb.append(",\nfilter:").append("new Function('item', 'HTML', `return ").append(tanaguruTest.getFilter()).append("(item, HTML)`)");
-            }
-
-            if(tanaguruTest.getAnalyzeElements() != null){
-                strb.append(",\nanalyzeElements:").append("new Function('collection', 'HTML', `return ").append(tanaguruTest.getAnalyzeElements()).append("(collection, HTML)`)");
-            }
-            strb.append("});");
-        }
-        strb.append("\nreturn JSON.stringify(loadTanaguruTests());");
-        auditLog(EAuditLogLevel.INFO, "Tests script for audit created");
-        return strb.toString();
-    }
-
     public void addListener(AuditRunnerListener auditRunnerListener) {
         LOGGER.debug("[Audit {}] Listener added to runner", audit.getId());
         this.listeners.add(auditRunnerListener);
@@ -268,19 +213,11 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.listeners.remove(auditRunnerListener);
     }
 
-    public Audit getAudit() {
-        return audit;
-    }
-
-    public void setAudit(Audit audit) {
-        this.audit = audit;
-    }
-
     public boolean isStop() {
         return stop;
     }
 
-    public void interrupt(){
+    public void interrupt() {
         stop = true;
     }
 
@@ -293,7 +230,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         }
 
         try {
-            LOGGER.debug("Custom wait time ", waitTime);
+            LOGGER.debug("Custom wait time {}", waitTime);
             auditLog(EAuditLogLevel.INFO, "Custom wait time " + waitTime);
             Thread.sleep(waitTime);
             onGetNewPage(url, tanaguruDriver.getTitle(), false);
@@ -303,15 +240,18 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         }
     }
 
-    protected void auditLog(EAuditLogLevel logLevel, String message){
+    protected void auditLog(EAuditLogLevel logLevel, String message) {
         for (AuditRunnerListener tanaguruDriverListener : listeners) {
             tanaguruDriverListener.onAuditLog(this, logLevel, message);
         }
     }
 
-    public RemoteWebDriver getDriver(){
+    public RemoteWebDriver getDriver() {
         return tanaguruDriver;
     }
-    
-    
+
+
+    public Audit getAudit() {
+        return audit;
+    }
 }

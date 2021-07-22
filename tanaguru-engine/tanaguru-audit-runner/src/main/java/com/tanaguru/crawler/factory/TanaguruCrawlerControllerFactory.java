@@ -18,7 +18,7 @@ public interface TanaguruCrawlerControllerFactory {
      * @param maxDepth       The maximum depth to crawl to
      * @return TanaguruCrawlerController
      */
-    Optional<TanaguruCrawlerController> create(Collection<String> seeds,
+    TanaguruCrawlerController create(Collection<String> seeds,
                                                long maxDuration,
                                                String inclusionRegex,
                                                String exclusionRegex,
@@ -26,5 +26,5 @@ public interface TanaguruCrawlerControllerFactory {
                                                int maxDepth,
                                                String basicAuthUrl,
                                                String basicAuthPassword,
-                                               String basicAuthLogin);
+                                               String basicAuthLogin) throws Exception;
 }

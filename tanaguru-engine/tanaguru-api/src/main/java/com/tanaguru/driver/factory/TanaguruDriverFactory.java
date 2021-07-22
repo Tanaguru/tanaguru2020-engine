@@ -13,5 +13,5 @@ public interface TanaguruDriverFactory {
      * Create a TanaguruDriver from the audit parameters map
      * @return A configured TanaguruDriver
      */
-    Optional<RemoteWebDriver> create(BrowserName webdriverBrowser);
+    RemoteWebDriver create(BrowserName webdriverBrowser);
 }
