@@ -31,5 +31,6 @@
     <include file="db/changelogs/20202001_changelog_updateAudit_deleted.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210412_changelog_index_test_hierarchy_reference.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210607_changelog_updateUsers_appRole.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210722_changelog_updateProject.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

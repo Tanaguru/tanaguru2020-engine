@@ -214,11 +214,4 @@
             <dropTable tableName="project_app_user"/>
         </rollback>
     </changeSet>
-    
-    <changeSet author="lpedrau" id="update_name_column_project">
-	    <modifyDataType
-	        columnName="name"
-	        newDataType="varchar(50)"
-	        tableName="project"/>
-	</changeSet>
 </databaseChangeLog>
