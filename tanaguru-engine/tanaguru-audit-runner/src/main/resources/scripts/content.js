@@ -1,172 +1,138 @@
 // content script
 /* Extension du DOM. */
 var ariaroles = {
-    'alert': {type: ['live region', 'standalone ui widget']},
-    'alertdialog': {type: 'standalone ui widget'},
-    'application': {type: 'document structure'},
-    'article': {type: 'document structure'},
-    'banner': {type: 'landmark'},
-    'button': {
-        type: 'standalone ui widget',
-        supportNameFromContents: true,
-        supportedStatesProperties: ['aria-expanded', 'aria-pressed']
-    },
-    'checkbox': {type: 'standalone ui widget', supportNameFromContents: true},
-    'cell': {type: 'document structure', supportNameFromContents: true},
-    'columnheader': {type: 'document structure', supportNameFromContents: true},
-    'combobox': {type: 'composite ui widget'},
-    'command': {type: 'abstract'},
-    'complementary': {type: 'landmark'},
-    'composite': {type: 'abstract'},
-    'contentinfo': {type: 'landmark'},
-    'definition': {type: 'document structure'},
-    'dialog': {type: 'standalone ui widget'},
-    'directory': {type: 'document structure'},
-    'document': {type: 'document structure'},
-    'feed': {type: 'document structure'},
-    'figure': {type: 'document structure'},
-    'form': {type: 'landmark'},
-    'grid': {type: 'composite ui widget'},
-    'gridcell': {type: 'standalone ui widget', supportNameFromContents: true},
-    'group': {type: 'document structure'},
-    'heading': {
-        type: 'document structure',
-        supportNameFromContents: true,
-        requiredStatesProperties: 'aria-level',
-        supportedStatesProperties: 'aria-expanded'
-    },
-    'img': {type: 'document structure'},
-    'input': {type: 'abstract'},
-    'landmark': {type: 'abstract'},
-    'link': {type: 'standalone ui widget', supportNameFromContents: true},
-    'list': {type: 'document structure'},
-    'listbox': {type: 'composite ui widget'},
-    'listitem': {type: 'document structure'},
-    'log': {type: ['live region', 'standalone ui widget']},
-    'main': {type: 'landmark'},
-    'marquee': {type: ['live region', 'standalone ui widget']},
-    'math': {type: 'document structure'},
-    'menu': {type: 'composite ui widget'},
-    'menubar': {type: 'composite ui widget'},
-    'menuitem': {type: 'standalone ui widget', supportNameFromContents: true},
-    'menuitemcheckbox': {type: 'standalone ui widget', supportNameFromContents: true},
-    'menuitemradio': {type: 'standalone ui widget', supportNameFromContents: true},
-    'navigation': {type: 'landmark'},
-    'none': {type: 'document structure', supportNameFromAuthors: false},
-    'note': {type: 'document structure'},
-    'option': {type: 'standalone ui widget', supportNameFromContents: true},
-    'presentation': {type: 'document structure', supportNameFromAuthors: false},
-    'progressbar': {type: 'standalone ui widget'},
-    'radio': {type: 'standalone ui widget', supportNameFromContents: true},
-    'radiogroup': {type: 'composite ui widget'},
-    'range': {type: 'abstract'},
-    'region': {type: ['landmark', 'document structure']},
-    'roletype': {type: 'abstract'},
-    'row': {type: 'document structure', supportNameFromContents: true},
-    'rowgroup': {type: 'document structure', supportNameFromContents: true},
-    'rowheader': {type: 'document structure', supportNameFromContents: true},
-    'scrollbar': {type: 'standalone ui widget'},
-    'search': {type: 'landmark'},
-    'searchbox': {type: 'standalone ui widget'},
-    'section': {type: 'abstract'},
-    'sectionhead': {type: 'abstract'},
-    'select': {type: 'abstract'},
-    'separator': {type: 'document structure'},
-    'slider': {type: 'standalone ui widget'},
-    'spinbutton': {type: 'standalone ui widget'},
-    'status': {type: ['live region', 'standalone ui widget']},
-    'structure': {type: 'abstract'},
-    'switch': {type: 'standalone ui widget', supportNameFromContents: true},
-    'tab': {type: 'standalone ui widget', supportNameFromContents: true},
-    'table': {type: 'document structure'},
-    'tablist': {type: 'composite ui widget'},
-    'tabpanel': {type: 'standalone ui widget'},
-    'term': {type: 'document structure'},
-    'textbox': {type: 'standalone ui widget'},
-    'timer': {type: ['live region', 'standalone ui widget']},
-    'toolbar': {type: 'document structure'},
-    'tooltip': {type: 'standalone ui widget', supportNameFromContents: true},
-    'tree': {type: 'composite ui widget', supportNameFromContents: true},
-    'treegrid': {type: 'composite ui widget'},
-    'treeitem': {type: 'standalone ui widget', supportNameFromContents: true},
-    'widget': {type: 'abstract'},
-    'window': {type: 'abstract'}
+    'alert': { type: ['live region', 'standalone ui widget'] },
+    'alertdialog': { type: 'standalone ui widget' },
+    'application': { type: 'document structure' },
+    'article': { type: 'document structure' },
+    'banner': { type: 'landmark' },
+    'button': { type: 'standalone ui widget', supportNameFromContents: true, supportedStatesProperties: ['aria-expanded', 'aria-pressed'] },
+    'checkbox': { type: 'standalone ui widget', supportNameFromContents: true },
+    'cell': { type: 'document structure', supportNameFromContents: true },
+    'columnheader': { type: 'document structure', supportNameFromContents: true },
+    'combobox': { type: 'composite ui widget' },
+    'command': { type: 'abstract' },
+    'complementary': { type: 'landmark' },
+    'composite': { type: 'abstract' },
+    'contentinfo': { type: 'landmark' },
+    'definition': { type: 'document structure' },
+    'dialog': { type: 'standalone ui widget' },
+    'directory': { type: 'document structure' },
+    'document': { type: 'document structure' },
+    'feed': { type: 'document structure' },
+    'figure': { type: 'document structure' },
+    'form': { type: 'landmark' },
+    'grid': { type: 'composite ui widget' },
+    'gridcell': { type: 'standalone ui widget', supportNameFromContents: true },
+    'group': { type: 'document structure' },
+    'heading': { type: 'document structure', supportNameFromContents: true, requiredStatesProperties: 'aria-level', supportedStatesProperties: 'aria-expanded' },
+    'img': { type: 'document structure' },
+    'input': { type: 'abstract' },
+    'landmark': { type: 'abstract' },
+    'link': { type: 'standalone ui widget', supportNameFromContents: true },
+    'list': { type: 'document structure' },
+    'listbox': { type: 'composite ui widget' },
+    'listitem': { type: 'document structure' },
+    'log': { type: ['live region', 'standalone ui widget'] },
+    'main': { type: 'landmark' },
+    'marquee': { type: ['live region', 'standalone ui widget'] },
+    'math': { type: 'document structure' },
+    'menu': { type: 'composite ui widget' },
+    'menubar': { type: 'composite ui widget' },
+    'menuitem': { type: 'standalone ui widget', supportNameFromContents: true },
+    'menuitemcheckbox': { type: 'standalone ui widget', supportNameFromContents: true },
+    'menuitemradio': { type: 'standalone ui widget', supportNameFromContents: true },
+    'navigation': { type: 'landmark' },
+    'none': { type: 'document structure', supportNameFromAuthors: false },
+    'note': { type: 'document structure' },
+    'option': { type: 'standalone ui widget', supportNameFromContents: true },
+    'presentation': { type: 'document structure', supportNameFromAuthors: false },
+    'progressbar': { type: 'standalone ui widget' },
+    'radio': { type: 'standalone ui widget', supportNameFromContents: true },
+    'radiogroup': { type: 'composite ui widget' },
+    'range': { type: 'abstract' },
+    'region': { type: ['landmark', 'document structure'] },
+    'roletype': { type: 'abstract' },
+    'row': { type: 'document structure', supportNameFromContents: true },
+    'rowgroup': { type: 'document structure', supportNameFromContents: true },
+    'rowheader': { type: 'document structure', supportNameFromContents: true },
+    'scrollbar': { type: 'standalone ui widget' },
+    'search': { type: 'landmark' },
+    'searchbox': { type: 'standalone ui widget' },
+    'section': { type: 'abstract' },
+    'sectionhead': { type: 'abstract' },
+    'select': { type: 'abstract' },
+    'separator': { type: 'document structure' },
+    'slider': { type: 'standalone ui widget' },
+    'spinbutton': { type: 'standalone ui widget' },
+    'status': { type: ['live region', 'standalone ui widget'] },
+    'structure': { type: 'abstract' },
+    'switch': { type: 'standalone ui widget', supportNameFromContents: true },
+    'tab': { type: 'standalone ui widget', supportNameFromContents: true },
+    'table': { type: 'document structure' },
+    'tablist': { type: 'composite ui widget' },
+    'tabpanel': { type: 'standalone ui widget' },
+    'term': { type: 'document structure' },
+    'textbox': { type: 'standalone ui widget' },
+    'timer': { type: ['live region', 'standalone ui widget'] },
+    'toolbar': { type: 'document structure' },
+    'tooltip': { type: 'standalone ui widget', supportNameFromContents: true },
+    'tree': { type: 'composite ui widget', supportNameFromContents: true },
+    'treegrid': { type: 'composite ui widget' },
+    'treeitem': { type: 'standalone ui widget', supportNameFromContents: true },
+    'widget': { type: 'abstract' },
+    'window': { type: 'abstract' }
 };
 
 var ariastatesproperties = {
-    'aria-activedescendant': {type: 'relationship'}, // id reference
-    'aria-atomic': {type: 'live region', global: true, default: 'false', values: ['false', 'true']},
-    'aria-autocomplete': {type: 'widget', default: 'none', values: ['both', 'inline', 'list', 'none']},
-    'aria-busy': {type: 'live region', global: true, default: 'false', values: ['false', 'true']},
-    'aria-checked': {type: 'widget', default: 'undefined', values: ['false', 'mixed', 'true', 'undefined']},
-    'aria-colcount': {type: 'relationship'}, // integer
-    'aria-colindex': {type: 'relationship'}, // integer
-    'aria-colspan': {type: 'relationship'}, // integer
-    'aria-controls': {type: 'relationship', global: true}, // id reference list
-    'aria-current': {
-        global: true,
-        default: 'false',
-        values: ['date', 'false', 'location', 'page', 'step', 'time', 'true']
-    },
-    'aria-describedby': {type: 'relationship', global: true}, // id reference list
-    'aria-details': {type: 'relationship', global: true}, // id reference
-    'aria-disabled': {type: 'widget', global: true, default: 'false', values: ['false', 'true']},
-    'aria-dropeffect': {
-        type: 'drag-and-drop',
-        global: true,
-        default: 'none',
-        values: ['copy', 'execute', 'link', 'move', 'none', 'popup']
-    },
-    'aria-errormessage': {type: ['relationship', 'widget'], global: true}, // id reference
-    'aria-expanded': {type: 'widget', default: 'undefined', values: ['false', 'true', 'undefined']},
-    'aria-flowto': {type: 'relationship', global: true}, // id reference list
-    'aria-grabbed': {
-        type: 'drag-and-drop',
-        global: true,
-        default: 'undefined',
-        values: ['false', 'true', 'undefined'],
-        deprecated: true
-    },
-    'aria-haspopup': {
-        type: 'widget',
-        global: true,
-        default: 'false',
-        values: ['dialog', 'false', 'grid', 'listbox', 'menu', 'tree', 'true']
-    },
-    'aria-hidden': {type: 'widget', global: true, default: 'undefined', values: ['false', 'true', 'undefined']},
-    'aria-invalid': {type: 'widget', global: true, default: 'false', values: ['false', 'grammar', 'spelling', 'true']},
-    'aria-keyshortcuts': {global: true}, // string
-    'aria-label': {type: 'widget', global: true}, // string
-    'aria-labelledby': {type: 'relationship', global: true}, // id reference list
-    'aria-level': {type: 'widget'}, // integer (1 or +)
-    'aria-live': {type: 'live region', global: true, default: 'off', values: ['assertive', 'off', 'polite']},
-    'aria-modal': {type: 'widget', default: 'false', values: ['false', 'true']},
-    'aria-multiline': {type: 'widget', default: 'false', values: ['false', 'true']},
-    'aria-multiselectable': {type: 'widget', default: 'false', values: ['false', 'true']},
-    'aria-orientation': {type: 'widget', default: 'undefined', values: ['horizontal', 'undefined', 'vertical']},
-    'aria-owns': {type: 'relationship', global: true}, // id reference list
-    'aria-placeholder': {type: 'widget'}, // string
-    'aria-posinset': {type: 'relationship'}, // integer
-    'aria-pressed': {type: 'widget', default: 'undefined', values: ['false', 'mixed', 'true', 'undefined']},
-    'aria-readonly': {type: 'widget', default: 'false', values: ['false', 'true']},
-    'aria-relevant': {
-        type: 'live region',
-        global: true,
-        values: ['additions', 'all', 'removals', 'text'],
-        tokenlist: true
-    },
-    'aria-required': {type: 'widget', default: 'false', values: ['false', 'true']},
-    'aria-roledescription': {global: true}, // string
-    'aria-rowcount': {type: 'relationship'}, // integer
-    'aria-rowindex': {type: 'relationship'}, // integer
-    'aria-rowspan': {type: 'relationship'}, // integer
-    'aria-selected': {type: 'widget', default: 'undefined', values: ['false', 'true', 'undefined']},
-    'aria-setsize': {type: 'relationship'}, // integer
-    'aria-sort': {type: 'widget', default: 'none', values: ['ascending', 'descending', 'other', 'none']},
-    'aria-valuemax': {type: 'widget'}, // number
-    'aria-valuemin': {type: 'widget'}, // number
-    'aria-valuenow': {type: 'widget'}, // number
-    'aria-valuetext': {type: 'widget'} // string
+    'aria-activedescendant': { type: 'relationship' }, // id reference
+    'aria-atomic': { type: 'live region', global: true, default: 'false', values: ['false', 'true'] },
+    'aria-autocomplete': { type: 'widget', default: 'none', values: ['both', 'inline', 'list', 'none'] },
+    'aria-busy': { type: 'live region', global: true, default: 'false', values: ['false', 'true'] },
+    'aria-checked': { type: 'widget', default: 'undefined', values: ['false', 'mixed', 'true', 'undefined'] },
+    'aria-colcount': { type: 'relationship' }, // integer
+    'aria-colindex': { type: 'relationship' }, // integer
+    'aria-colspan': { type: 'relationship' }, // integer
+    'aria-controls': { type: 'relationship', global: true }, // id reference list
+    'aria-current': { global: true, default: 'false', values: ['date', 'false', 'location', 'page', 'step', 'time', 'true'] },
+    'aria-describedby': { type: 'relationship', global: true }, // id reference list
+    'aria-details': { type: 'relationship', global: true }, // id reference
+    'aria-disabled': { type: 'widget', global: true, default: 'false', values: ['false', 'true'] },
+    'aria-dropeffect': { type: 'drag-and-drop', global: true, default: 'none', values: ['copy', 'execute', 'link', 'move', 'none', 'popup'] },
+    'aria-errormessage': { type: ['relationship', 'widget'], global: true }, // id reference
+    'aria-expanded': { type: 'widget', default: 'undefined', values: ['false', 'true', 'undefined'] },
+    'aria-flowto': { type: 'relationship', global: true }, // id reference list
+    'aria-grabbed': { type: 'drag-and-drop', global: true, default: 'undefined', values: ['false', 'true', 'undefined'], deprecated: true },
+    'aria-haspopup': { type: 'widget', global: true, default: 'false', values: ['dialog', 'false', 'grid', 'listbox', 'menu', 'tree', 'true'] },
+    'aria-hidden': { type: 'widget', global: true, default: 'undefined', values: ['false', 'true', 'undefined'] },
+    'aria-invalid': { type: 'widget', global: true, default: 'false', values: ['false', 'grammar', 'spelling', 'true'] },
+    'aria-keyshortcuts': { global: true }, // string
+    'aria-label': { type: 'widget', global: true }, // string
+    'aria-labelledby': { type: 'relationship', global: true }, // id reference list
+    'aria-level': { type: 'widget' }, // integer (1 or +)
+    'aria-live': { type: 'live region', global: true, default: 'off', values: ['assertive', 'off', 'polite'] },
+    'aria-modal': { type: 'widget', default: 'false', values: ['false', 'true'] },
+    'aria-multiline': { type: 'widget', default: 'false', values: ['false', 'true'] },
+    'aria-multiselectable': { type: 'widget', default: 'false', values: ['false', 'true'] },
+    'aria-orientation': { type: 'widget', default: 'undefined', values: ['horizontal', 'undefined', 'vertical'] },
+    'aria-owns': { type: 'relationship', global: true }, // id reference list
+    'aria-placeholder': { type: 'widget' }, // string
+    'aria-posinset': { type: 'relationship' }, // integer
+    'aria-pressed': { type: 'widget', default: 'undefined', values: ['false', 'mixed', 'true', 'undefined'] },
+    'aria-readonly': { type: 'widget', default: 'false', values: ['false', 'true'] },
+    'aria-relevant': { type: 'live region', global: true, values: ['additions', 'all', 'removals', 'text'], tokenlist: true },
+    'aria-required': { type: 'widget', default: 'false', values: ['false', 'true'] },
+    'aria-roledescription': { global: true }, // string
+    'aria-rowcount': { type: 'relationship' }, // integer
+    'aria-rowindex': { type: 'relationship' }, // integer
+    'aria-rowspan': { type: 'relationship' }, // integer
+    'aria-selected': { type: 'widget', default: 'undefined', values: ['false', 'true', 'undefined'] },
+    'aria-setsize': { type: 'relationship' }, // integer
+    'aria-sort': { type: 'widget', default: 'none', values: ['ascending', 'descending', 'other', 'none'] },
+    'aria-valuemax': { type: 'widget' }, // number
+    'aria-valuemin': { type: 'widget' }, // number
+    'aria-valuenow': { type: 'widget' }, // number
+    'aria-valuetext': { type: 'widget' } // string
 };
 
 if (!HTMLElement.prototype.hasOwnProperty('availableARIASemantics')) {
@@ -177,7 +143,8 @@ if (!HTMLElement.prototype.hasOwnProperty('availableARIASemantics')) {
                 case 'a':
                     if (this.hasAttribute('href')) {
                         selectors.push('[role="button"]', '[role="checkbox"]', '[role="menuitem"]', '[role="menuitemcheckbox"]', '[role="menuitemradio"]', '[role="option"]', '[role="radio"]', '[role="switch"]', '[role="tab"]', '[role="treeitem"]');
-                    } else {
+                    }
+                    else {
                         for (var ariarole in ariaroles) {
                             selectors.push('[role="' + ariarole + '"]');
                         }
@@ -243,7 +210,8 @@ if (!HTMLElement.prototype.hasOwnProperty('availableARIASemantics')) {
                 case 'button':
                     if (this.getAttribute('type') == 'menu') { // Invalid Type.
                         selectors.push('[role="link"]', '[role="menuitem"]', '[role="menuitemcheckbox"]', '[role="menuitemradio"]', '[role="radio"]');
-                    } else {
+                    }
+                    else {
                         selectors.push('[role="checkbox"]', '[role="link"]', '[role="menuitem"]', '[role="menuitemcheckbox"]', '[role="menuitemradio"]', '[role="radio"]', '[role="switch"]', '[role="tab"]');
                     }
                     break;
@@ -282,7 +250,8 @@ if (!HTMLElement.prototype.hasOwnProperty('availableARIASemantics')) {
                 case 'img':
                     if (this.getAttribute('alt') == '') {
                         selectors.push('[role="none"]', '[role="presentation"]');
-                    } else {
+                    }
+                    else {
                         for (var ariarole in ariaroles) {
                             selectors.push('[role="' + ariarole + '"]');
                         }
@@ -411,24 +380,32 @@ if (!HTMLElement.prototype.hasOwnProperty('implicitARIASemantic')) {
                     var inputtype = this.hasAttribute('type') ? (['button', 'checkbox', 'color', 'date', 'datetime', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week'].indexOf(this.getAttribute('type')) > -1 ? this.getAttribute('type') : 'text') : 'text';
                     if (['button', 'image', 'reset', 'submit'].indexOf(inputtype) > -1) {
                         selector = '[role="button"]';
-                    } else if (inputtype == 'checkbox') {
+                    }
+                    else if (inputtype == 'checkbox') {
                         selector = '[role="checkbox"]';
-                    } else if (['email', 'tel', 'text', 'url'].indexOf(inputtype) > -1) {
+                    }
+                    else if (['email', 'tel', 'text', 'url'].indexOf(inputtype) > -1) {
                         if (!this.hasAttribute('list')) {
                             selector = '[role="textbox"]';
-                        } else {
+                        }
+                        else {
                             selector = '[role="combobox"]';
                         }
-                    } else if (inputtype == 'number') {
+                    }
+                    else if (inputtype == 'number') {
                         selector = '[role="spinbutton"]';
-                    } else if (inputtype == 'radio') {
+                    }
+                    else if (inputtype == 'radio') {
                         selector = '[role="radio"]';
-                    } else if (inputtype == 'range') {
+                    }
+                    else if (inputtype == 'range') {
                         selector = '[role="slider"]';
-                    } else if (inputtype == 'search') {
+                    }
+                    else if (inputtype == 'search') {
                         if (!this.hasAttribute('list')) {
                             selector = '[role="searchbox"]';
-                        } else {
+                        }
+                        else {
                             selector = '[role="combobox"]';
                         }
                     }
@@ -514,10 +491,11 @@ if (!HTMLElement.prototype.hasOwnProperty('implicitARIASemantic')) {
                 case 'th':
                     if (this.getAttribute('scope') == 'col') {
                         selector = '[role="columnheader"]';
-                    } else if (this.getAttribute('scope') == 'row') {
-                        selector = '[role="rowheader"];'
-                    } else if (this.hasAttribute('id')) {
                     }
+                    else if (this.getAttribute('scope') == 'row') {
+                        selector = '[role="rowheader"];'
+                    }
+                    else if (this.hasAttribute('id')) { }
                     break;
                 case 'tr':
                     selector = '[role="row"]';
@@ -575,59 +553,43 @@ if (!Element.prototype.hasOwnProperty('implicitARIASemantic')) {
 }
 
 if (!HTMLElement.prototype.hasOwnProperty('explicitARIASemantic')) {
-    Object.defineProperty(HTMLElement.prototype, 'explicitARIASemantic', {
-        get: function () {
-            return '';
-        }
-    });
+    Object.defineProperty(HTMLElement.prototype, 'explicitARIASemantic', { get: function () { return ''; } });
 }
 
-HTMLUnknownElement.prototype.isARIARoleAllowedOnMe = function (role) {
-    return '';
-};
-HTMLUnknownElement.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) {
-    return '';
-};
-Element.prototype.isARIARoleAllowedOnMe = function (role) {
-    return '';
-};
-Element.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) {
-    return '';
-};
-HTMLElement.prototype.isARIARoleAllowedOnMe = function (role) {
-    return this.availableARIASemantics.indexOf('[role="' + role + '"]') > -1;
-};
-HTMLElement.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) {
-    return '';
-};
+HTMLUnknownElement.prototype.isARIARoleAllowedOnMe = function (role) { return ''; };
+HTMLUnknownElement.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) { return ''; };
+Element.prototype.isARIARoleAllowedOnMe = function (role) { return ''; };
+Element.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) { return ''; };
+HTMLElement.prototype.isARIARoleAllowedOnMe = function (role) { return this.availableARIASemantics.indexOf('[role="' + role + '"]') > -1; };
+HTMLElement.prototype.isARIAStatePropertyAllowedOnMe = function (stateproperty) { return ''; };
 
 /* ARIA */
 
 /*
-    Accessible Name and Description Computation 1.1
-    W3C Recommendation 18 December 2018
-    https://www.w3.org/TR/accname-1.1/
+Accessible Name and Description Computation 1.1
+W3C Recommendation 18 December 2018
+https://www.w3.org/TR/accname-1.1/
 */
 
 /*
-    Current Missing Implementations :
-    * CSS Visibility Property.
-    * Multiple-Selection Listboxes.
-    Current Imperfect Implementations :
-    * Replaced Elements (+ CSS Content).
-    * Control Embedded in Label (+ Checkboxes & Radios Embedded in Label).
-    * Checkbox & Radio in Native Textboxes...
-    * SVG (multiple titles & use elements).
-    * Output (in native "textboxes").
-    * Native Password Controls (i.e. (Incorrectly) Used as Custom Checkbox Controls).
-    * Labels for Native Controls (Multiple Labels + Labels for Some Controls like Buttons).
-    * Aria-owns Property (Partially Supported - Only for Custom Listboxes).
-    * Data (Separated Files).
+Current Missing Implementations :
+* CSS Visibility Property.
+* Multiple-Selection Listboxes.
+Current Imperfect Implementations :
+* Replaced Elements (+ CSS Content).
+* Control Embedded in Label (+ Checkboxes & Radios Embedded in Label).
+* Checkbox & Radio in Native Textboxes...
+* SVG (multiple titles & use elements).
+* Output (in native "textboxes").
+* Native Password Controls (i.e. (Incorrectly) Used as Custom Checkbox Controls).
+* Labels for Native Controls (Multiple Labels + Labels for Some Controls like Buttons).
+* Aria-owns Property (Partially Supported - Only for Custom Listboxes).
+* Data (Separated Files).
 */
 
 // accessibleName.
 var getAccessibleName = function () {
-    // Data.
+// Data.
     var ARIA = {
         nameFromContentSupported: '[role="button"], [role="cell"], [role="checkbox"], [role="columnheader"], [role="gridcell"], [role="heading"], [role="link"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="radio"], [role="row"], [role="rowgroup"], [role="rowheader"], [role="switch"], [role="tab"], [role="tooltip"], [role="treeitem"]'
     };
@@ -643,18 +605,18 @@ var getAccessibleName = function () {
         customranges: '[role="progressbar"], [role="scrollbar"], [role="slider"], [role="spinbutton"]'
     };
     var replacedElements = ['audio', 'canvas', 'embed', 'iframe', 'img', 'input', 'object', 'video'];
-    // Step 1 : Initialize - Set the total accumulated text to the empty string ("").
+// Step 1 : Initialize - Set the total accumulated text to the empty string ("").
     var result = '';
-    // Step 2 : Compute the text alternative for the current node.
+// Step 2 : Compute the text alternative for the current node.
     var accessibleNameWithAriaLabelledBy = false;
     if (this.hasAttribute('data-labelbytraversal') || this.isNotExposedDueTo.length == 0) {
         // 2-A (condition failed) : The current node is not hidden or is directly referenced by aria-labelledby.
         if (this.hasAttribute('aria-labelledby') && !this.hasAttribute('data-labelbytraversal') && !this.hasAttribute('data-controlembeddedinlabel')) {
             /*
-                2-B :
-                * The current node has an aria-labelledby attribute that contains at least one valid IDREF.
-                * The current node is not already part of an aria-labelledby traversal.
-            */
+			2-B :
+			* The current node has an aria-labelledby attribute that contains at least one valid IDREF.
+			* The current node is not already part of an aria-labelledby traversal.
+		*/
             var labelledby = this.getAttribute('aria-labelledby');
             if (labelledby.trim().length > 0) {
                 labelledby = labelledby.split(' ');
@@ -689,10 +651,10 @@ var getAccessibleName = function () {
         if (!this.hasAttribute('data-controlembeddedinlabel')) {
             if (this.hasAttribute('aria-label')) {
                 /*
-                    2-C (condition success) :
-                    * The current node has an aria-label attribute whose value is not the empty string (when trimmed of white space or not).
-                    * If traversal of the current node is due to recursion and the current node is an embedded control as defined in step 2E, ignore aria-label and skip to rule 2E.
-                */
+				2-C (condition success) :
+				* The current node has an aria-label attribute whose value is not the empty string (when trimmed of white space or not).
+				* If traversal of the current node is due to recursion and the current node is an embedded control as defined in step 2E, ignore aria-label and skip to rule 2E.
+			*/
                 var label = this.getAttribute('aria-label');
                 if (label.trim() != '') {
                     accessibleNameWithAriaLabel = true;
@@ -703,9 +665,9 @@ var getAccessibleName = function () {
         if (accessibleNameWithAriaLabel == false) {
             if (this.hasAttribute('data-controlembeddedinlabel')) {
                 /*
-                    2-C (condition failed) : The traversal of the current node is due to recursion and the current node is an embedded control.
-                    2-E : The current node is a control embedded within the label (e.g. the label element in HTML or any element directly referenced by aria-labelledby) for another widget.
-                */
+				2-C (condition failed) : The traversal of the current node is due to recursion and the current node is an embedded control.
+				2-E : The current node is a control embedded within the label (e.g. the label element in HTML or any element directly referenced by aria-labelledby) for another widget.
+			*/
                 this.removeAttribute('data-controlembeddedinlabel');
                 if (this.matches(controls.nativetextboxes)) {
                     // If the embedded control has role textbox, return its value.
@@ -716,16 +678,20 @@ var getAccessibleName = function () {
                             resulttmp.push('\u2022');
                         }
                         result = resulttmp.join('\u00AD');
-                    } else {
+                    }
+                    else {
                         result = this.value;
                     }
-                } else if (this.matches(controls.customtextboxes)) {
+                }
+                else if (this.matches(controls.customtextboxes)) {
                     // If the embedded control has role textbox, return its value.
                     result = this.textContent;
-                } else if (this.matches(controls.nativebuttons + ',' + controls.custombuttons)) {
+                }
+                else if (this.matches(controls.nativebuttons + ',' + controls.custombuttons)) {
                     // If the embedded control has role menu button, return the text alternative of the button.
                     result = this.accessibleName;
-                } else if (this.matches(controls.customcomboboxes)) {
+                }
+                else if (this.matches(controls.customcomboboxes)) {
                     // If the embedded control has role combobox or listbox, return the text alternative of the chosen option.
                     if (this.matches(controls.nativetextboxes)) {
                         if (this.matches('input[type="password"]')) {
@@ -735,26 +701,32 @@ var getAccessibleName = function () {
                                 resulttmp.push('\u2022');
                             }
                             result = resulttmp.join('\u00AD');
-                        } else {
+                        }
+                        else {
                             result = this.value;
                         }
-                    } else {
+                    }
+                    else {
                         result = this.textContent;
                     }
-                } else if (this.matches(controls.nativelistboxes)) {
+                }
+                else if (this.matches(controls.nativelistboxes)) {
                     // If the embedded control has role combobox or listbox, return the text alternative of the chosen option.
                     if (this.hasAttribute('multiple')) {
 
-                    } else {
+                    }
+                    else {
                         if (this.selectedIndex > -1) {
                             result = this.options[this.selectedIndex].accessibleName;
                         }
                     }
-                } else if (this.matches(controls.customlistboxes)) {
+                }
+                else if (this.matches(controls.customlistboxes)) {
                     // If the embedded control has role combobox or listbox, return the text alternative of the chosen option.
                     if (this.getAttribute('aria-multiselectable') == 'true') {
 
-                    } else {
+                    }
+                    else {
                         var option = this.querySelector('[role="option"][aria-selected]');
                         if (!option && this.hasAttribute('aria-owns')) {
                             var owns = this.getAttribute('aria-owns');
@@ -771,7 +743,8 @@ var getAccessibleName = function () {
                                     for (var i = 0; i < nodes.length; i++) {
                                         if (nodes[i].matches('[role="option"][aria-selected]')) {
                                             option = nodes[i];
-                                        } else {
+                                        }
+                                        else {
                                             option = nodes[i].querySelector('[role="option"][aria-selected]');
                                         }
                                         if (option) {
@@ -785,51 +758,77 @@ var getAccessibleName = function () {
                             result = option.accessibleName;
                         }
                     }
-                } else if (this.matches(controls.nativeranges + ',' + controls.customranges)) {
+                }
+                else if (this.matches(controls.nativeranges + ',' + controls.customranges)) {
                     // If the embedded control has role range (e.g., a spinbutton or slider).
                     if (this.hasAttribute('aria-valuetext')) {
                         result = this.getAttribute('aria-valuetext');
-                    } else if (this.hasAttribute('aria-valuenow')) {
+                    }
+                    else if (this.hasAttribute('aria-valuenow')) {
                         result = this.getAttribute('aria-valuenow');
-                    } else if (this.matches(controls.nativeranges)) {
-                        result = this.value;
+                    }
+                    else if (this.matches(controls.nativeranges)) {
+                        if (this.value) {
+                            result = this.value;
+                        }
+                        else {
+                            result = '';
+                        }
                     }
                 }
-            } else {
+            }
+            else {
                 /*
-                    D : Otherwise, if the current node's native markup provides an attribute (e.g. title) or element (e.g. HTML label)
-                    that defines a text alternative, return that alternative in the form of a flat string as defined by the host language,
-                    unless the element is marked as presentational (role="presentation" or role="none").
-                    Comment: For example, in HTML, the img element's alt attribute defines a text alternative string, and the label element provides text for the referenced form element. In SVG2, the desc and title elements provide a description of their parent element.
-                */
-                if (this.matches('area, img') && !this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on area & img with alt="text".
-                    if (this.hasAttribute('alt')) {
-                        result = this.getAttribute('alt');
-                    } else if (this.hasAttribute('title')) {
-                        /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
-                        result = this.getAttribute('title');
+				D : Otherwise, if the current node's native markup provides an attribute (e.g. title) or element (e.g. HTML label)
+				that defines a text alternative, return that alternative in the form of a flat string as defined by the host language,
+				unless the element is marked as presentational (role="presentation" or role="none").
+				Comment: For example, in HTML, the img element's alt attribute defines a text alternative string, and the label element provides text for the referenced form element. In SVG2, the desc and title elements provide a description of their parent element.
+			*/
+                if (this.matches('area, img')) {
+                    if (!this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on area & img with alt="text".
+                        if (this.hasAttribute('alt')) {
+                            result = this.getAttribute('alt');
+                        }
+                        else if (this.hasAttribute('title')) {
+                            /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
+                            result = this.getAttribute('title');
+                        }
                     }
-                } else if (this.matches('svg') && !this.matches('[role="none"], [role="presentation"]')) {
+                }
+                else if (this.matches('svg') && !this.matches('[role="none"], [role="presentation"]')) {
                     var title = this.querySelector('title');
                     if (title && title.parentNode == this) {
                         result = title.textContent;
                     }
-                } else if (this.matches(controls.nativebuttons) && !this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on button, input[type="button"], input[type="image"], input[type="reset"], input[type="submit"].
+                }
+                else if (this.matches(controls.nativebuttons) && !this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on button, input[type="button"], input[type="image"], input[type="reset"], input[type="submit"].
                     if (this.matches('input[type="image"]')) {
                         if (this.hasAttribute('alt')) {
                             result = this.getAttribute('alt');
-                        } else if (this.hasAttribute('title')) {
+                        }
+                        else if (this.hasAttribute('title')) {
                             /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
                             result = this.getAttribute('title');
                         }
-                    } else {
+                    }
+                    else {
                         var parentcssbeforecontent = '';
                         var parentcssaftercontent = '';
                         if (replacedElements.indexOf(this.tagName.toLowerCase()) == -1) {
                             parentcssbeforecontent = window.getComputedStyle(this, '::before').getPropertyValue('content');
-                            parentcssbeforecontent = parentcssbeforecontent == 'none' ? '' : parentcssbeforecontent.substring(1, parentcssbeforecontent.length - 1);
+                            if (!(/^url\(/.test(parentcssbeforecontent))) {
+                                parentcssbeforecontent = parentcssbeforecontent == 'none' ? '' : parentcssbeforecontent.substring(1, parentcssbeforecontent.length - 1);
+                            }
+                            else {
+                                parentcssbeforecontent = '';
+                            }
                             parentcssaftercontent = window.getComputedStyle(this, '::after').getPropertyValue('content');
-                            parentcssaftercontent = parentcssaftercontent == 'none' ? '' : parentcssaftercontent.substring(1, parentcssaftercontent.length - 1);
+                            if (!(/^url\(/.test(parentcssaftercontent))) {
+                                parentcssaftercontent = parentcssaftercontent == 'none' ? '' : parentcssaftercontent.substring(1, parentcssaftercontent.length - 1);
+                            }
+                            else {
+                                parentcssaftercontent = '';
+                            }
                         }
                         result = parentcssbeforecontent;
                         if (this.matches('button')) {
@@ -838,15 +837,26 @@ var getAccessibleName = function () {
                                 if (nodes[i].nodeType == Node.TEXT_NODE) {
                                     // 2-G : The current node is a Text node, return its textual contents.
                                     result += nodes[i].nodeValue;
-                                } else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
+                                }
+                                else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
                                     // 2-H : The current node is a descendant of an element whose Accessible Name is being computed, and contains descendants, proceed to 2F.i.
                                     var cssbeforecontent = '';
                                     var cssaftercontent = '';
                                     if (replacedElements.indexOf(nodes[i].tagName.toLowerCase()) == -1) {
                                         cssbeforecontent = window.getComputedStyle(nodes[i], '::before').getPropertyValue('content');
-                                        cssbeforecontent = cssbeforecontent == 'none' ? '' : cssbeforecontent.substring(1, cssbeforecontent.length - 1);
+                                        if (!(/^url\(/.test(cssbeforecontent))) {
+                                            cssbeforecontent = cssbeforecontent == 'none' ? '' : cssbeforecontent.substring(1, cssbeforecontent.length - 1);
+                                        }
+                                        else {
+                                            cssbeforecontent = '';
+                                        }
                                         cssaftercontent = window.getComputedStyle(nodes[i], '::after').getPropertyValue('content');
-                                        cssaftercontent = cssaftercontent == 'none' ? '' : cssaftercontent.substring(1, cssaftercontent.length - 1);
+                                        if (!(/^url\(/.test(cssaftercontent))) {
+                                            cssaftercontent += cssaftercontent == 'none' ? '' : cssaftercontent.substring(1, cssaftercontent.length - 1);
+                                        }
+                                        else {
+                                            cssaftercontent = '';
+                                        }
                                     }
                                     if (this.matches('[data-labelbytraversal="true"]')) {
                                         nodes[i].setAttribute('data-labelbytraversal', 'true');
@@ -854,7 +864,8 @@ var getAccessibleName = function () {
                                     result += cssbeforecontent + nodes[i].accessibleName + cssaftercontent;
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             result += this.value;
                         }
                         result += parentcssaftercontent;
@@ -863,14 +874,16 @@ var getAccessibleName = function () {
                             result = this.getAttribute('title');
                         }
                     }
-                } else if (this.matches(controls.nativelistboxes + ',' + controls.nativeranges + ',' + controls.nativetextboxes) && !this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on...
+                }
+                else if (this.matches(controls.nativelistboxes + ',' + controls.nativeranges + ',' + controls.nativetextboxes) && !this.matches('[role="none"], [role="presentation"]')) { // COMMENT : Not allowed on...
                     var labels = this.labels;
                     for (var i = 0; i < labels.length; i++) {
                         if (!labels[i].matches('[role="none"], [role="presentation"]')) {
                             result += labels[i].accessibleName;
                         }
                     }
-                } else if (this.matches('fieldset, table') && !this.matches('[role="none"], [role="presentation"]')) {
+                }
+                else if (this.matches('fieldset, table') && !this.matches('[role="none"], [role="presentation"]')) {
                     var elementname = this.firstElementChild;
                     if (elementname && !elementname.matches('[role="none"], [role="presentation"]')) {
                         if (elementname.matches('fieldset legend, table caption')) {
@@ -881,9 +894,11 @@ var getAccessibleName = function () {
                         /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
                         result = this.getAttribute('title');
                     }
-                } else if (this.matches('iframe[title]') && !this.matches('[role="none"], [role="presentation"]')) {
+                }
+                else if (this.matches('iframe[title]') && !this.matches('[role="none"], [role="presentation"]')) {
                     result = this.getAttribute('title');
-                } else if (!this.hasAttribute('role') || this.matches(ARIA.nameFromContentSupported)) { // Name from Content (TODO : implement it in ARIA).
+                }
+                else if ((!this.hasAttribute('role') || this.matches('[role="none"], [role="presentation"]')) || this.matches(ARIA.nameFromContentSupported)) { // Name from Content (TODO : implement it in ARIA).
                     var controlsselectors = [];
                     for (var specificcontrols in controls) {
                         controlsselectors.push(controls[specificcontrols]);
@@ -894,24 +909,45 @@ var getAccessibleName = function () {
                     var parentcssaftercontent = '';
                     if (replacedElements.indexOf(this.tagName.toLowerCase()) == -1) {
                         parentcssbeforecontent = window.getComputedStyle(this, '::before').getPropertyValue('content');
-                        parentcssbeforecontent = parentcssbeforecontent == 'none' ? '' : parentcssbeforecontent.substring(1, parentcssbeforecontent.length - 1);
+                        if (!(/^url\(/.test(parentcssbeforecontent))) {
+                            parentcssbeforecontent = parentcssbeforecontent == 'none' ? '' : parentcssbeforecontent.substring(1, parentcssbeforecontent.length - 1);
+                        }
+                        else {
+                            parentcssbeforecontent = '';
+                        }
                         parentcssaftercontent = window.getComputedStyle(this, '::after').getPropertyValue('content');
-                        parentcssaftercontent = parentcssaftercontent == 'none' ? '' : parentcssaftercontent.substring(1, parentcssaftercontent.length - 1);
+                        if (!(/^url\(/.test(parentcssaftercontent))) {
+                            parentcssaftercontent = parentcssaftercontent == 'none' ? '' : parentcssaftercontent.substring(1, parentcssaftercontent.length - 1);
+                        }
+                        else {
+                            parentcssaftercontent = '';
+                        }
                     }
                     result = parentcssbeforecontent;
                     for (var i = 0; i < nodes.length; i++) {
                         if (nodes[i].nodeType == Node.TEXT_NODE) {
                             // 2-G : The current node is a Text node, return its textual contents.
                             result += nodes[i].nodeValue;
-                        } else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
+                        }
+                        else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
                             // 2-H : The current node is a descendant of an element whose Accessible Name is being computed, and contains descendants, proceed to 2F.i.
                             var cssbeforecontent = '';
                             var cssaftercontent = '';
                             if (replacedElements.indexOf(nodes[i].tagName.toLowerCase()) == -1) {
                                 cssbeforecontent = window.getComputedStyle(nodes[i], '::before').getPropertyValue('content');
-                                cssbeforecontent = cssbeforecontent == 'none' ? '' : cssbeforecontent.substring(1, cssbeforecontent.length - 1);
+                                if (!(/^url\(/.test(cssbeforecontent))) {
+                                    cssbeforecontent = cssbeforecontent == 'none' ? '' : cssbeforecontent.substring(1, cssbeforecontent.length - 1);
+                                }
+                                else {
+                                    cssbeforecontent = '';
+                                }
                                 cssaftercontent = window.getComputedStyle(nodes[i], '::after').getPropertyValue('content');
-                                cssaftercontent = cssaftercontent == 'none' ? '' : cssaftercontent.substring(1, cssaftercontent.length - 1);
+                                if (!(/^url\(/.test(cssaftercontent))) {
+                                    cssaftercontent = cssaftercontent == 'none' ? '' : cssaftercontent.substring(1, cssaftercontent.length - 1);
+                                }
+                                else {
+                                    cssaftercontent = '';
+                                }
                             }
                             if (nodes[i].matches(controlsselectors)) {
                                 nodes[i].setAttribute('data-controlembeddedinlabel', 'true');
@@ -933,23 +969,20 @@ var getAccessibleName = function () {
     }
     this.removeAttribute('data-labelbytraversal');
     this.removeAttribute('data-controlembeddedinlabel');
-    // 2-A (condition success) : The current node is hidden and is not directly referenced by aria-labelledby.
-    // 2-B, 2-C, 2-D, 2-E, 2-F, 2-G, 2-H and 2-I : Otherwise...
+// 2-A (condition success) : The current node is hidden and is not directly referenced by aria-labelledby.
+// 2-B, 2-C, 2-D, 2-E, 2-F, 2-G, 2-H and 2-I : Otherwise...
     return result.trim();
 };
-if (!SVGElement.prototype.hasOwnProperty('accessibleName')) Object.defineProperty(SVGElement.prototype, 'accessibleName', {get: getAccessibleName});
-if (!HTMLElement.prototype.hasOwnProperty('accessibleName')) Object.defineProperty(HTMLElement.prototype, 'accessibleName', {get: getAccessibleName});
+if (!SVGElement.prototype.hasOwnProperty('accessibleName')) Object.defineProperty(SVGElement.prototype, 'accessibleName', { get: getAccessibleName });
+if (!HTMLElement.prototype.hasOwnProperty('accessibleName')) Object.defineProperty(HTMLElement.prototype, 'accessibleName', { get: getAccessibleName });
 
 // hasAccessibleName.
-var hasAccessibleName = function () {
-    return this.accessibleName != '';
-};
+var hasAccessibleName = function () { return this.accessibleName != ''; };
 if (!('hasAccessibleName' in SVGElement.prototype)) SVGElement.prototype.hasAccessibleName = hasAccessibleName;
 if (!('hasAccessibleName' in HTMLElement.prototype)) HTMLElement.prototype.hasAccessibleName = hasAccessibleName;
 
 // getAccessibleNameImplementation.
-var getAccessibleNameImplementation = function () {
-};
+var getAccessibleNameImplementation = function () {};
 if (!('getAccessibleNameImplementation' in SVGElement.prototype)) SVGElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
 if (!('getAccessibleNameImplementation' in HTMLElement.prototype)) HTMLElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
 
@@ -1023,7 +1056,7 @@ function loadTanaguruTests() {
     tags = tags.sort(function (a, b) {
         return a.name.localeCompare(b.name);
     });
-    var result = {tags: tags, tests: window.tanaguru.tests};
+    var result = { tags: tags, tests: window.tanaguru.tests };
     window.tanaguru = undefined;
     return result;
 }
@@ -1044,147 +1077,13 @@ function manageOutput(element) {
             fakeelement.innerHTML = '[...]';
         }
     }
-    let xpath = getXPath(element)
-    return {
-        status: status,
-        outer: fakeelement.outerHTML,
-        cssSelector: getUniqueSelector(xpath),
-        xpath: xpath,
-        role: {implicit: implicitARIASemantic, explicit: explicitARIASemantic},
-        accessibleName: accessibleName,
-        canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith,
-        isNotVisibleDueTo: isNotVisibleDueTo,
-        isNotExposedDueTo: isNotExposedDueTo
-    };
+    return { status: status, outer: fakeelement.outerHTML, xpath: getXPath(element), role: { implicit: implicitARIASemantic, explicit: explicitARIASemantic }, accessibleName: accessibleName, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isNotVisibleDueTo: isNotVisibleDueTo, isNotExposedDueTo: isNotExposedDueTo };
 }
 
 function createTanaguruTag(tag, status) {
     if (!window.tanaguru.tags[tag]) {
-        window.tanaguru.tags[tag] = {
-            id: tag,
-            name: 'tag' + tag.charAt(0).toUpperCase() + tag.slice(1),
-            status: status,
-            nbfailures: 0
-        };
+        window.tanaguru.tags[tag] = { id: tag, name: chrome.i18n.getMessage('tag' + tag.charAt(0).toUpperCase() + tag.slice(1)), status: status, nbfailures: 0 };
     }
-}
-
-const specialCharRegex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-
-function getUniqueSelector(xpath) {
-    var prog, match, result, nav, tag, attr, nth, nodes, css, node_css = '', csses = [], xindex = 0, position = 0;
-    xpath = xpath.replace(/contains\s*\(\s*concat\(["']\s+["']\s*,\s*@class\s*,\s*["']\s+["']\)\s*,\s*["']\s+([a-zA-Z0-9-_]+)\s+["']\)/gi, '@class="$1"');
-    if (typeof xpath == 'undefined' || (
-        xpath.replace(/[\s-_=]/g, '') === '' ||
-        xpath.length !== xpath.replace(/[-_\w:.]+\(\)\s*=|=\s*[-_\w:.]+\(\)|\sor\s|\sand\s|\[(?:[^\/\]]+[\/\[]\/?.+)+\]|starts-with\(|\[.*last\(\)\s*[-\+<>=].+\]|number\(\)|not\(|count\(|text\(|first\(|normalize-space|[^\/]following-sibling|concat\(|descendant::|parent::|self::|child::|/gi, '').length)) {
-        throw new XPathException('Invalid or unsupported XPath: ' + xpath);
-    }
-    var xpatharr = xpath.split('|');
-    while (xpatharr[xindex]) {
-        prog = new RegExp(validation_re, 'gi');
-        css = [];
-        while (nodes = prog.exec(xpatharr[xindex])) {
-            if (!nodes && position === 0) {
-                throw new XPathException('Invalid or unsupported XPath: ' + xpath);
-            }
-            match = {
-                node: nodes[5],
-                idvalue: nodes[12] || nodes[3],
-                nav: nodes[4],
-                tag: nodes[5],
-                matched: nodes[7],
-                mattr: nodes[10] || nodes[14],
-                mvalue: nodes[12] || nodes[16],
-                contained: nodes[13],
-                cattr: nodes[14],
-                cvalue: nodes[16],
-                nth: nodes[18]
-            };
-            if (position != 0 && match['nav']) {
-                if (~match['nav'].indexOf('following-sibling::')) nav = ' + ';
-                else nav = (match['nav'] == '//') ? ' ' : ' > ';
-            } else {
-                nav = '';
-            }
-            tag = (match['tag'] === '*') ? '' : (match['tag'] || '');
-            if (match['contained']) {
-                if (match['cattr'].indexOf('@') === 0) {
-                    attr = '[' + match['cattr'].replace(/^@/, '') + '*=' + match['cvalue'] + ']';
-                } else {
-                    throw new XPathException('Invalid or unsupported XPath attribute: ' + match['cattr']);
-                }
-            } else if (match['matched']) {
-                switch (match['mattr']) {
-                    case '@id':
-                        attr = '#' + match['mvalue'].replace(/^\s+|\s+$/, '').replace(/\s/g, '#');
-                        break;
-                    case '@class':
-                        attr = '.' + match['mvalue'].replace(/^\s+|\s+$/, '').replace(/\s/g, '.');
-                        break;
-                    case 'text()':
-                    case '.':
-                        throw new XPathException('Invalid or unsupported XPath attribute: ' + match['mattr']);
-                    default:
-                        if (match['mattr'].indexOf('@') !== 0) {
-                            throw new XPathException('Invalid or unsupported XPath attribute: ' + match['mattr']);
-                        }
-                        if (match['mvalue'].indexOf(' ') !== -1) {
-                            match['mvalue'] = '\"' + match['mvalue'].replace(/^\s+|\s+$/, '') + '\"';
-                        }
-                        attr = '[' + match['mattr'].replace('@', '') + '=' + match['mvalue'] + ']';
-                        break;
-                }
-            } else if (match['idvalue']) {
-                attr = '#' + match['idvalue'].replace(/\s/, '#');
-            } else {
-                attr = '';
-            }
-            if (match['nth']) {
-                if (match['nth'].indexOf('last') === -1) {
-                    if (isNaN(parseInt(match['nth'], 10))) {
-                        throw new XPathException('Invalid or unsupported XPath attribute: ' + match['nth']);
-                    }
-                    nth = parseInt(match['nth'], 10) !== 1 ? ':nth-of-type(' + match['nth'] + ')' : ':first-of-type';
-                } else {
-                    nth = ':last-of-type';
-                }
-            } else {
-                nth = '';
-            }
-            node_css = nav + tag + attr + nth;
-            css.push(node_css);
-            position++;
-        }
-        result = css.join('');
-        if (result === '') {
-            throw new XPathException('Invalid or unsupported XPath: ' + match['node']);
-        }
-        csses.push(result);
-        xindex++;
-    }
-    return csses.join(', ');
-}
-
-var sub_regexes = {
-    "tag": "([a-zA-Z][a-zA-Z0-9]{0,10}|\\*)",
-    "attribute": "[.a-zA-Z_:][-\\w:.]*(\\(\\))?)",
-    "value": "\\s*[\\w/:][-/\\w\\s,:;.]*"
-};
-var validation_re = "(?P<node>" + "(" + "^id\\([\"\\']?(?P<idvalue>%(value)s)[\"\\']?\\)" + "|" + "(?P<nav>//?(?:following-sibling::)?)(?P<tag>%(tag)s)" + "(\\[(" + "(?P<matched>(?P<mattr>@?%(attribute)s=[\"\\'](?P<mvalue>%(value)s))[\"\\']" + "|" + "(?P<contained>contains\\((?P<cattr>@?%(attribute)s,\\s*[\"\\'](?P<cvalue>%(value)s)[\"\\']\\))" + ")\\])?" + "(\\[\\s*(?P<nth>\\d|last\\(\\s*\\))\\s*\\])?" + ")" + ")";
-for (var prop in sub_regexes) {
-    validation_re = validation_re.replace(new RegExp('%\\(' + prop + '\\)s', 'gi'), sub_regexes[prop]);
-}
-
-validation_re = validation_re.replace(/\?P<node>|\?P<idvalue>|\?P<nav>|\?P<tag>|\?P<matched>|\?P<mattr>|\?P<mvalue>|\?P<contained>|\?P<cattr>|\?P<cvalue>|\?P<nth>/gi, '');
-
-function XPathException(message) {
-    this.message = message;
-    this.name = "[XPathException]";
-}
-
-function XPathException(message) {
-    this.message = message;
-    this.name = "[XPathException]";
 }
 
 function createTanaguruTest(test) {
@@ -1195,7 +1094,8 @@ function createTanaguruTest(test) {
             for (var i = 0; i < test.tags.length; i++) {
                 createTanaguruTag(test.tags[i], test.status);
             }
-        } else {
+        }
+        else {
             createTanaguruTag('others', test.status);
         }
         // Chargement du résultat.
@@ -1223,41 +1123,48 @@ function createTanaguruTest(test) {
         }
         addResultSet("Nouvelle syntaxe d'écriture des tests", result);
         // Intégrer chaque résultat dans window.tanaguru.tests.
-    } else if (test.hasOwnProperty('query') && test.query.constructor == String) {
+    }
+    else if ((test.hasOwnProperty('query') && test.query.constructor == String) || test.hasOwnProperty('contrast')) {
         // Sélection des éléments.
-        var elements = document.querySelectorAll(test.query);
-        if (elements) {
+        var elements = test.hasOwnProperty('contrast') ? textNodeList[test.contrast] : document.querySelectorAll(test.query);
+
+        if (elements && elements.length > 0) {
             // Statut du test par défaut.
-            var status = 'cantTell';
+            var status = 'inapplicable';
+
             // Initialisation des tags.
             initTanaguru();
             if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
                 for (var i = 0; i < test.tags.length; i++) {
                     createTanaguruTag(test.tags[i], status);
                 }
-            } else {
+            }
+            else {
                 createTanaguruTag('others', status);
             }
+
             // Gestion du compteur d'éléments testés (avant filtre).
             var counter = null;
             if (test.hasOwnProperty('counter') && test.counter == 'beforefilter') {
                 counter = elements.length;
             }
+
             // Filtre additionnel sur la sélection d'éléments.
             if (test.hasOwnProperty('filter')) {
                 if (test.filter.constructor == Function) {
                     elements = Array.from(elements);
-                    elements = elements.filter((e) => {
-                        return test.filter(e, HTML)
-                    });
-                } else {
+                    elements = elements.filter(test.filter);
+                }
+                else {
                     // Erreur : valeur de la propriété filter.
                 }
             }
+
             // Gestion du compteur d'éléments testés (après filtre).
             if (test.hasOwnProperty('counter') && test.counter == 'afterfilter') {
                 counter = elements.length;
             }
+
             // Calcul du statut du test.
             if (test.hasOwnProperty('expectedNbElements')) {
                 if (Number.isInteger(test.expectedNbElements)) {
@@ -1265,17 +1172,20 @@ function createTanaguruTest(test) {
                     for (var i = 0; i < elements.length; i++) {
                         elements[i].status = status;
                     }
-                } else if (test.expectedNbElements.constructor == Object && (test.expectedNbElements.hasOwnProperty('min') || test.expectedNbElements.hasOwnProperty('max'))) {
+                }
+                else if (test.expectedNbElements.constructor == Object && (test.expectedNbElements.hasOwnProperty('min') || test.expectedNbElements.hasOwnProperty('max'))) {
                     var min = test.expectedNbElements.hasOwnProperty('min') && Number.isInteger(test.expectedNbElements.min) ? test.expectedNbElements.min : 0;
                     var max = test.expectedNbElements.hasOwnProperty('max') && Number.isInteger(test.expectedNbElements.max) ? test.expectedNbElements.max : null;
                     status = elements.length >= min && (max == null || elements.length <= max) ? 'passed' : 'failed';
                     for (var i = 0; i < elements.length; i++) {
                         elements[i].status = status;
                     }
-                } else {
+                }
+                else {
                     // Erreur : valeur de la propriété expectedNbElements.
                 }
-            } else {
+            }
+            else {
                 if (elements.length == 0) {
                     status = 'inapplicable'; // Voir si le statut "Non applicable" n'est possible que dans le cas d'un nombre d'éléments à vérifier.
                 }
@@ -1287,11 +1197,12 @@ function createTanaguruTest(test) {
                 inapplicable: 1,
                 untested: 0
             };
+
             // Traitement par collection.
             var failedincollection = null;
             if (test.hasOwnProperty('analyzeElements')) {
                 if (test.analyzeElements.constructor == Function) {
-                    test.analyzeElements(elements, HTML);
+                    test.analyzeElements(elements);
                     // On modifie le statut du test selon les statuts d'items.
                     for (var e = 0; e < elements.length; e++) {
                         if (elements[e].status == 'failed') {
@@ -1304,6 +1215,7 @@ function createTanaguruTest(test) {
                     }
                 }
             }
+
             // Mises à jour des tags (statut du tag et nombre de résultats en erreur).
             if (test.hasOwnProperty('tags') && test.tags.constructor == Array) {
                 for (var i = 0; i < test.tags.length; i++) {
@@ -1314,7 +1226,8 @@ function createTanaguruTest(test) {
                         window.tanaguru.tags[test.tags[i]].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
                     }
                 }
-            } else {
+            }
+            else {
                 if (statuspriority[window.tanaguru.tags['others'].status] < statuspriority[status]) {
                     window.tanaguru.tags['others'].status = status;
                 }
@@ -1322,11 +1235,35 @@ function createTanaguruTest(test) {
                     window.tanaguru.tags['others'].nbfailures += failedincollection ? failedincollection : (elements.length > 0 ? elements.length : 1);
                 }
             }
+
             // Chargement du résultat.
             var outputelements = [];
-            for (var i = 0; i < elements.length; i++) {
-                outputelements.push(manageOutput(elements[i]));
+            if(!test.hasOwnProperty('contrast')) {
+                for (var i = 0; i < elements.length; i++) {
+                    outputelements.push(manageOutput(elements[i]));
+                }
             }
+
+            if(test.hasOwnProperty('contrast')) {
+                for (var i = 0; i < elements.length; i++) {
+                    var node = elements[i].node;
+                    var accessibleName = node.accessibleName;
+                    var implicitARIASemantic = node.implicitARIASemantic;
+                    var explicitARIASemantic = node.explicitARIASemantic;
+                    var canBeReachedUsingKeyboardWith = node.canBeReachedUsingKeyboardWith;
+                    var isNotExposedDueTo = node.isNotExposedDueTo;
+
+                    elements[i].role.implicit = implicitARIASemantic;
+                    elements[i].role.explicit = explicitARIASemantic;
+                    elements[i].accessibleName = accessibleName;
+                    elements[i].canBeReachedUsingKeyboardWith = canBeReachedUsingKeyboardWith;
+                    elements[i].isNotExposedDueTo = isNotExposedDueTo;
+                    delete elements[i].node;
+                }
+
+                outputelements = elements;
+            }
+
             var result = {
                 name: test.name,
                 type: status,
@@ -1358,9 +1295,11 @@ function createTanaguruTest(test) {
             if (failedincollection) {
                 result.failedincollection = failedincollection;
             }
+
             addResultSet("Nouvelle syntaxe d'écriture des tests", result);
             // Intégrer chaque résultat dans window.tanaguru.tests.
-        } else {
+        }
+        else {
             // Erreur : valeur de la propriété query.
         }
     }
@@ -1417,373 +1356,112 @@ var htmlData = {
     date: 20181018,
     url: 'https://www.w3.org/TR/html53/',
     elementsCategorization: {
-        'the document element': {id: 'the-root-element', url: 'https://www.w3.org/TR/html53/semantics.html'},
-        'document metadata': {id: 'document-metadata', url: 'https://www.w3.org/TR/html53/document-metadata.html'},
-        'sections': {id: 'sections', url: 'https://www.w3.org/TR/html53/sections.html'},
-        'grouping content': {id: 'grouping-content', url: 'https://www.w3.org/TR/html53/grouping-content.html'},
-        'text-level semantics': {
-            id: 'textlevel-semantics',
-            url: 'https://www.w3.org/TR/html53/textlevel-semantics.html'
-        },
-        'edits': {id: 'edits', url: 'https://www.w3.org/TR/html53/edits.html'},
-        'embedded content': {
-            id: 'semantics-embedded-content',
-            url: 'https://www.w3.org/TR/html53/semantics-embedded-content.html'
-        },
-        'tabular data': {id: 'tabular-data', url: 'https://www.w3.org/TR/html53/tabular-data.html'},
-        'forms': {id: 'sec-forms', url: 'https://www.w3.org/TR/html53/sec-forms.html'},
-        'interactive elements': {
-            id: 'interactive-elements',
-            url: 'https://www.w3.org/TR/html53/interactive-elements.html'
-        },
-        'scripting': {id: 'semantics-scripting', url: 'https://www.w3.org/TR/html53/semantics-scripting.html'}
+        'the document element': { id: 'the-root-element', url: 'https://www.w3.org/TR/html53/semantics.html' },
+        'document metadata': { id: 'document-metadata', url: 'https://www.w3.org/TR/html53/document-metadata.html' },
+        'sections': { id: 'sections', url: 'https://www.w3.org/TR/html53/sections.html' },
+        'grouping content': { id:'grouping-content', url: 'https://www.w3.org/TR/html53/grouping-content.html' },
+        'text-level semantics': { id: 'textlevel-semantics', url: 'https://www.w3.org/TR/html53/textlevel-semantics.html' },
+        'edits': { id: 'edits', url: 'https://www.w3.org/TR/html53/edits.html' },
+        'embedded content': { id: 'semantics-embedded-content', url: 'https://www.w3.org/TR/html53/semantics-embedded-content.html' },
+        'tabular data': { id: 'tabular-data', url: 'https://www.w3.org/TR/html53/tabular-data.html' },
+        'forms': { id: 'sec-forms', url: 'https://www.w3.org/TR/html53/sec-forms.html' },
+        'interactive elements': { id: 'interactive-elements', url: 'https://www.w3.org/TR/html53/interactive-elements.html' },
+        'scripting': { id: 'semantics-scripting', url: 'https://www.w3.org/TR/html53/semantics-scripting.html' }
     },
     elements: {
-        'html': {id: 'the-html-element', category: 'the document element', DOMInterface: 'HTMLHtmlElement'},
-        'head': {id: 'the-head-element', category: 'document metadata', DOMInterface: 'HTMLHeadElement'},
-        'title': {id: 'the-title-element', category: 'document metadata', DOMInterface: 'HTMLTitleElement'},
-        'base': {id: 'the-base-element', category: 'document metadata', DOMInterface: 'HTMLBaseElement'},
-        'link': {
-            id: 'the-link-element',
-            category: 'document metadata',
-            implicitAriaRole: 'link',
-            DOMInterface: 'HTMLLinkElement'
-        },
-        'meta': {id: 'the-meta-element', category: 'document metadata', DOMInterface: 'HTMLMetaElement'},
-        'style': {id: 'the-style-element', category: 'document metadata', DOMInterface: 'HTMLStyleElement'},
-        'body': {
-            id: 'the-body-element',
-            category: 'sections',
-            implicitAriaRole: 'document',
-            DOMInterface: 'HTMLBodyElement'
-        },
-        'article': {
-            id: 'the-article-element',
-            category: 'sections',
-            implicitAriaRole: 'article',
-            DOMInterface: 'HTMLElement'
-        },
-        'section': {
-            id: 'the-section-element',
-            category: 'sections',
-            implicitAriaRole: 'region',
-            DOMInterface: 'HTMLElement'
-        },
-        'nav': {
-            id: 'the-nav-element',
-            category: 'sections',
-            implicitAriaRole: 'navigation',
-            DOMInterface: 'HTMLElement'
-        },
-        'aside': {
-            id: 'the-aside-element',
-            category: 'sections',
-            implicitAriaRole: 'complementary',
-            DOMInterface: 'HTMLElement'
-        },
-        'h1': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'h2': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'h3': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'h4': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'h5': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'h6': {
-            id: 'the-h1-h2-h3-h4-h5-and-h6-elements',
-            category: 'sections',
-            implicitAriaRole: 'heading',
-            DOMInterface: 'HTMLHeadingElement'
-        },
-        'header': {
-            id: 'the-header-element',
-            category: 'sections',
-            implicitAriaRole: 'banner',
-            DOMInterface: 'HTMLElement'
-        },
-        'footer': {
-            id: 'the-footer-element',
-            category: 'sections',
-            implicitAriaRole: 'contentinfo',
-            DOMInterface: 'HTMLElement'
-        },
-        'p': {
-            id: 'the-p-element',
-            category: 'grouping content',
-            implicitAriaRole: 'paragraph',
-            DOMInterface: 'HTMLParagraphElement'
-        },
-        'address': {id: 'the-address-element', category: 'grouping content', DOMInterface: 'HTMLElement'},
-        'hr': {
-            id: 'the-hr-element',
-            category: 'grouping content',
-            implicitAriaRole: 'separator',
-            DOMInterface: 'HTMLHRElement'
-        },
-        'pre': {id: 'the-pre-element', category: 'grouping content', DOMInterface: 'HTMLPreElement'},
-        'blockquote': {
-            id: 'the-blockquote-element',
-            category: 'grouping content',
-            implicitAriaRole: 'blockquote',
-            DOMInterface: 'HTMLQuoteElement'
-        },
-        'ol': {
-            id: 'the-ol-element',
-            category: 'grouping content',
-            implicitAriaRole: 'list',
-            DOMInterface: 'HTMLOListElement'
-        },
-        'ul': {
-            id: 'the-ul-element',
-            category: 'grouping content',
-            implicitAriaRole: 'list',
-            DOMInterface: 'HTMLUListElement'
-        },
-        'li': {
-            id: 'the-li-element',
-            category: 'grouping content',
-            implicitAriaRole: 'listitem',
-            DOMInterface: 'HTMLLIElement'
-        },
-        'dl': {id: 'the-dl-element', category: 'grouping content', DOMInterface: 'HTMLDListElement'},
-        'dt': {id: 'the-dt-element', category: 'grouping content', DOMInterface: 'HTMLElement'},
-        'dd': {id: 'the-dd-element', category: 'grouping content', DOMInterface: 'HTMLElement'},
-        'figure': {
-            id: 'the-figure-element',
-            category: 'grouping content',
-            implicitAriaRole: 'figure',
-            DOMInterface: 'HTMLElement'
-        },
-        'figcaption': {
-            id: 'the-figcaption-element',
-            category: 'grouping content',
-            implicitAriaRole: 'caption',
-            DOMInterface: 'HTMLElement'
-        },
-        'main': {
-            id: 'the-main-element',
-            category: 'grouping content',
-            implicitAriaRole: 'main',
-            DOMInterface: 'HTMLElement'
-        },
-        'div': {
-            id: 'the-div-element',
-            category: 'grouping content',
-            implicitAriaRole: 'generic',
-            DOMInterface: 'HTMLDivElement'
-        },
-        'a': {
-            id: 'the-a-element',
-            category: 'text-level semantics',
-            focusable: 'a[href]',
-            implicitAriaRole: {'[href]': 'link'},
-            DOMInterface: 'HTMLAnchorElement'
-        },
-        'em': {
-            id: 'the-em-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'emphasis',
-            DOMInterface: 'HTMLElement'
-        },
-        'strong': {
-            id: 'the-strong-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'strong',
-            DOMInterface: 'HTMLElement'
-        },
-        'small': {id: 'the-small-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        's': {id: 'the-s-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'cite': {id: 'the-cite-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'q': {id: 'the-q-element', category: 'text-level semantics', DOMInterface: 'HTMLQuoteElement'},
-        'dfn': {
-            id: 'the-dfn-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'term',
-            DOMInterface: 'HTMLElement'
-        },
-        'abbr': {id: 'the-abbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'ruby': {id: 'the-ruby-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'rb': {id: 'the-rb-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'rt': {id: 'the-rt-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'rtc': {id: 'the-rtc-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'rp': {id: 'the-rp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'data': {id: 'the-data-element', category: 'text-level semantics', DOMInterface: 'HTMLDataElement'},
-        'time': {
-            id: 'the-time-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'time',
-            DOMInterface: 'HTMLTimeElement'
-        },
-        'code': {
-            id: 'the-code-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'code',
-            DOMInterface: 'HTMLElement'
-        },
-        'var': {id: 'the-var-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'samp': {id: 'the-samp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'kbd': {id: 'the-kbd-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'sub': {
-            id: 'the-sub-and-sup-elements',
-            category: 'text-level semantics',
-            implicitAriaRole: 'subscript',
-            DOMInterface: 'HTMLElement'
-        },
-        'sup': {
-            id: 'the-sub-and-sup-elements',
-            category: 'text-level semantics',
-            implicitAriaRole: 'superscript',
-            DOMInterface: 'HTMLElement'
-        },
-        'i': {id: 'the-i-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'b': {id: 'the-b-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'u': {id: 'the-u-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'mark': {id: 'the-mark-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'bdi': {id: 'the-bdi-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'bdo': {id: 'the-bdo-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'span': {
-            id: 'the-span-element',
-            category: 'text-level semantics',
-            implicitAriaRole: 'generic',
-            DOMInterface: 'HTMLSpanElement'
-        },
-        'br': {id: 'the-br-element', category: 'text-level semantics', DOMInterface: 'HTMLBRElement'},
-        'wbr': {id: 'the-wbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement'},
-        'ins': {
-            id: 'the-ins-element',
-            category: 'edits',
-            implicitAriaRole: 'insertion',
-            DOMInterface: 'HTMLModElement'
-        },
-        'del': {id: 'the-del-element', category: 'edits', implicitAriaRole: 'deletion', DOMInterface: 'HTMLModElement'},
-        'picture': {id: 'the-picture-element', category: 'embedded content', DOMInterface: 'HTMLPictureElement'},
-        'source': {id: 'the-source-element', category: 'embedded content', DOMInterface: 'HTMLSourceElement'},
-        'img': {
-            id: 'the-img-element',
-            category: 'embedded content',
-            implicitAriaRole: {'[alt=""]': ['none', 'presentation'], '[alt]:not([alt=""])': 'img'},
-            DOMInterface: 'HTMLImageElement'
-        },
-        'iframe': {
-            id: 'the-iframe-element',
-            category: 'embedded content',
-            focusable: true,
-            DOMInterface: 'HTMLIFrameElement'
-        },
-        'embed': {
-            id: 'the-embed-element',
-            category: 'embedded content',
-            focusable: true,
-            DOMInterface: 'HTMLEmbedElement'
-        },
-        'object': {
-            id: 'the-object-element',
-            category: 'embedded content',
-            focusable: true,
-            DOMInterface: 'HTMLObjectElement'
-        },
-        'param': {id: 'the-param-element', category: 'embedded content', DOMInterface: 'HTMLParamElement'},
-        'video': {
-            id: 'the-video-element',
-            category: 'embedded content',
-            focusable: true,
-            DOMInterface: 'HTMLVideoElement'
-        },
-        'audio': {
-            id: 'the-audio-element',
-            category: 'embedded content',
-            focusable: true,
-            DOMInterface: 'HTMLAudioElement'
-        },
-        'track': {id: 'the-track-element', category: 'embedded content', DOMInterface: 'HTMLTrackElement'},
-        'map': {id: 'the-map-element', category: 'embedded content', DOMInterface: 'HTMLMapElement'},
-        'area': {
-            id: 'the-area-element',
-            category: 'embedded content',
-            focusable: 'area[href]',
-            implicitAriaRole: {'href': 'link'},
-            DOMInterface: 'HTMLAreaElement'
-        },
-        'table': {
-            id: 'the-table-element',
-            category: 'tabular data',
-            implicitAriaRole: 'table',
-            DOMInterface: 'HTMLTableElement'
-        },
-        'caption': {
-            id: 'the-caption-element',
-            category: 'tabular data',
-            implicitAriaRole: 'caption',
-            DOMInterface: 'HTMLTableCaptionElement'
-        },
-        'colgroup': {id: 'the-colgroup-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement'},
-        'col': {id: 'the-col-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement'},
-        'tbody': {
-            id: 'the-tbody-element',
-            category: 'tabular data',
-            implicitAriaRole: 'rowgroup',
-            DOMInterface: 'HTMLTableSectionElement'
-        },
-        'thead': {
-            id: 'the-thead-element',
-            category: 'tabular data',
-            implicitAriaRole: 'rowgroup',
-            DOMInterface: 'HTMLTableSectionElement'
-        },
-        'tfoot': {
-            id: 'the-tfoot-element',
-            category: 'tabular data',
-            implicitAriaRole: 'rowgroup',
-            DOMInterface: 'HTMLTableSectionElement'
-        },
-        'tr': {
-            id: 'the-tr-element',
-            category: 'tabular data',
-            implicitAriaRole: 'row',
-            DOMInterface: 'HTMLTableRowElement'
-        },
-        'td': {
-            id: 'the-td-element',
-            category: 'tabular data',
-            implicitAriaRole: 'cell',
-            DOMInterface: 'HTMLTableDataCellElement'
-        },
-        'th': {
-            id: 'the-th-element',
-            category: 'tabular data',
-            implicitAriaRole: {
-                '[scope="col"]': 'columnheader',
-                '[scope="row"]': 'rowheader',
-                'th:not([scope])': ['columnheader', 'rowheader']
-            },
-            DOMInterface: 'HTMLTableHeaderCellElement'
-        },
-        'form': {id: 'the-form-element', category: 'forms', implicitAriaRole: 'form', DOMInterface: 'HTMLFormElement'},
-        'label': {id: 'the-label-element', category: 'forms', DOMInterface: 'HTMLLabelElement'},
-        'input': {
-            id: 'the-input-element', category: 'forms', focusable: 'input:not([disabled])', implicitAriaRole: {
+        'html': { id: 'the-html-element', category: 'the document element', DOMInterface: 'HTMLHtmlElement' },
+        'head': { id: 'the-head-element', category: 'document metadata', DOMInterface: 'HTMLHeadElement' },
+        'title': { id: 'the-title-element', category: 'document metadata', DOMInterface: 'HTMLTitleElement' },
+        'base': { id: 'the-base-element', category: 'document metadata', DOMInterface: 'HTMLBaseElement' },
+        'link': { id: 'the-link-element', category: 'document metadata', implicitAriaRole: 'link', DOMInterface: 'HTMLLinkElement' },
+        'meta': { id: 'the-meta-element', category: 'document metadata', DOMInterface: 'HTMLMetaElement' },
+        'style': { id: 'the-style-element', category: 'document metadata', DOMInterface: 'HTMLStyleElement' },
+        'body': { id: 'the-body-element', category: 'sections', implicitAriaRole: 'document', DOMInterface: 'HTMLBodyElement' },
+        'article': { id: 'the-article-element', category: 'sections', implicitAriaRole: 'article', DOMInterface: 'HTMLElement' },
+        'section': { id: 'the-section-element', category: 'sections', implicitAriaRole: 'region', DOMInterface: 'HTMLElement' },
+        'nav': { id: 'the-nav-element', category: 'sections', implicitAriaRole: 'navigation', DOMInterface: 'HTMLElement' },
+        'aside': { id: 'the-aside-element', category: 'sections', implicitAriaRole: 'complementary', DOMInterface: 'HTMLElement' },
+        'h1': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'h2': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'h3': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'h4': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'h5': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'h6': { id: 'the-h1-h2-h3-h4-h5-and-h6-elements', category: 'sections', implicitAriaRole: 'heading', DOMInterface: 'HTMLHeadingElement' },
+        'header': { id: 'the-header-element', category: 'sections', implicitAriaRole: 'banner', DOMInterface: 'HTMLElement' },
+        'footer': { id: 'the-footer-element', category: 'sections', implicitAriaRole: 'contentinfo', DOMInterface: 'HTMLElement' },
+        'p': { id: 'the-p-element', category: 'grouping content', implicitAriaRole: 'paragraph', DOMInterface: 'HTMLParagraphElement' },
+        'address': { id: 'the-address-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+        'hr': { id: 'the-hr-element', category: 'grouping content', implicitAriaRole: 'separator', DOMInterface: 'HTMLHRElement' },
+        'pre': { id: 'the-pre-element', category: 'grouping content', DOMInterface: 'HTMLPreElement' },
+        'blockquote': { id: 'the-blockquote-element', category: 'grouping content', implicitAriaRole: 'blockquote', DOMInterface: 'HTMLQuoteElement' },
+        'ol': { id: 'the-ol-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLOListElement' },
+        'ul': { id: 'the-ul-element', category: 'grouping content', implicitAriaRole: 'list', DOMInterface: 'HTMLUListElement' },
+        'li': { id: 'the-li-element', category: 'grouping content', implicitAriaRole: 'listitem', DOMInterface: 'HTMLLIElement' },
+        'dl': { id: 'the-dl-element', category: 'grouping content', DOMInterface: 'HTMLDListElement' },
+        'dt': { id: 'the-dt-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+        'dd': { id: 'the-dd-element', category: 'grouping content', DOMInterface: 'HTMLElement' },
+        'figure': { id: 'the-figure-element', category: 'grouping content', implicitAriaRole: 'figure', DOMInterface: 'HTMLElement' },
+        'figcaption': { id: 'the-figcaption-element', category: 'grouping content', implicitAriaRole: 'caption', DOMInterface: 'HTMLElement' },
+        'main': { id: 'the-main-element', category: 'grouping content', implicitAriaRole: 'main', DOMInterface: 'HTMLElement' },
+        'div': { id: 'the-div-element', category: 'grouping content', implicitAriaRole: 'generic', DOMInterface: 'HTMLDivElement' },
+        'a': { id: 'the-a-element', category: 'text-level semantics', focusable: 'a[href]', implicitAriaRole: { '[href]': 'link' }, DOMInterface: 'HTMLAnchorElement' },
+        'em': { id: 'the-em-element', category: 'text-level semantics', implicitAriaRole: 'emphasis', DOMInterface: 'HTMLElement' },
+        'strong': { id: 'the-strong-element', category: 'text-level semantics', implicitAriaRole: 'strong', DOMInterface: 'HTMLElement' },
+        'small': { id: 'the-small-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        's': { id: 'the-s-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'cite': { id: 'the-cite-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'q': { id: 'the-q-element', category: 'text-level semantics', DOMInterface: 'HTMLQuoteElement' },
+        'dfn': { id: 'the-dfn-element', category: 'text-level semantics', implicitAriaRole: 'term', DOMInterface: 'HTMLElement' },
+        'abbr': { id: 'the-abbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'ruby': { id: 'the-ruby-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'rb': { id: 'the-rb-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'rt': { id: 'the-rt-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'rtc': { id: 'the-rtc-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'rp': { id: 'the-rp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'data': { id: 'the-data-element', category: 'text-level semantics', DOMInterface: 'HTMLDataElement' },
+        'time': { id: 'the-time-element', category: 'text-level semantics', implicitAriaRole: 'time', DOMInterface: 'HTMLTimeElement' },
+        'code': { id: 'the-code-element', category: 'text-level semantics', implicitAriaRole: 'code', DOMInterface: 'HTMLElement' },
+        'var': { id: 'the-var-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'samp': { id: 'the-samp-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'kbd': { id: 'the-kbd-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'sub': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'subscript', DOMInterface: 'HTMLElement' },
+        'sup': { id: 'the-sub-and-sup-elements', category: 'text-level semantics', implicitAriaRole: 'superscript', DOMInterface: 'HTMLElement' },
+        'i': { id: 'the-i-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'b': { id: 'the-b-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'u': { id: 'the-u-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'mark': { id: 'the-mark-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'bdi': { id: 'the-bdi-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'bdo': { id: 'the-bdo-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'span': { id: 'the-span-element', category: 'text-level semantics', implicitAriaRole: 'generic', DOMInterface: 'HTMLSpanElement' },
+        'br': { id: 'the-br-element', category: 'text-level semantics', DOMInterface: 'HTMLBRElement' },
+        'wbr': { id: 'the-wbr-element', category: 'text-level semantics', DOMInterface: 'HTMLElement' },
+        'ins': { id: 'the-ins-element', category: 'edits', implicitAriaRole: 'insertion', DOMInterface: 'HTMLModElement' },
+        'del': { id: 'the-del-element', category: 'edits', implicitAriaRole: 'deletion', DOMInterface: 'HTMLModElement' },
+        'picture': { id: 'the-picture-element', category: 'embedded content', DOMInterface: 'HTMLPictureElement' },
+        'source': { id: 'the-source-element', category: 'embedded content', DOMInterface: 'HTMLSourceElement' },
+        'img': { id: 'the-img-element', category: 'embedded content', implicitAriaRole: { '[alt=""]': ['none', 'presentation'], '[alt]:not([alt=""])': 'img' }, DOMInterface: 'HTMLImageElement' },
+        'iframe': { id: 'the-iframe-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLIFrameElement' },
+        'embed': { id: 'the-embed-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLEmbedElement' },
+        'object': { id: 'the-object-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLObjectElement' },
+        'param': { id: 'the-param-element', category: 'embedded content', DOMInterface: 'HTMLParamElement' },
+        'video': { id: 'the-video-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLVideoElement' },
+        'audio': { id: 'the-audio-element', category: 'embedded content', focusable: true, DOMInterface: 'HTMLAudioElement' },
+        'track': { id: 'the-track-element', category: 'embedded content', DOMInterface: 'HTMLTrackElement' },
+        'map': { id: 'the-map-element', category: 'embedded content', DOMInterface: 'HTMLMapElement' },
+        'area': { id: 'the-area-element', category: 'embedded content', focusable: 'area[href]', implicitAriaRole: { 'href': 'link' }, DOMInterface: 'HTMLAreaElement' },
+        'table': { id: 'the-table-element', category: 'tabular data', implicitAriaRole: 'table', DOMInterface: 'HTMLTableElement' },
+        'caption': { id: 'the-caption-element', category: 'tabular data', implicitAriaRole: 'caption', DOMInterface: 'HTMLTableCaptionElement' },
+        'colgroup': { id: 'the-colgroup-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
+        'col': { id: 'the-col-element', category: 'tabular data', DOMInterface: 'HTMLTableColElement' },
+        'tbody': { id: 'the-tbody-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+        'thead': { id: 'the-thead-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+        'tfoot': { id: 'the-tfoot-element', category: 'tabular data', implicitAriaRole: 'rowgroup', DOMInterface: 'HTMLTableSectionElement' },
+        'tr': { id: 'the-tr-element', category: 'tabular data', implicitAriaRole: 'row', DOMInterface: 'HTMLTableRowElement' },
+        'td': { id: 'the-td-element', category: 'tabular data', implicitAriaRole: 'cell', DOMInterface: 'HTMLTableDataCellElement' },
+        'th': { id: 'the-th-element', category: 'tabular data', implicitAriaRole: { '[scope="col"]': 'columnheader', '[scope="row"]': 'rowheader', 'th:not([scope])': ['columnheader', 'rowheader'] }, DOMInterface: 'HTMLTableHeaderCellElement' },
+        'form': { id: 'the-form-element', category: 'forms', implicitAriaRole: 'form', DOMInterface: 'HTMLFormElement' },
+        'label': { id: 'the-label-element', category: 'forms', DOMInterface: 'HTMLLabelElement' },
+        'input': { id: 'the-input-element', category: 'forms', focusable: 'input:not([disabled])', implicitAriaRole: {
                 'input:not([type]):not([list])': 'textbox',
                 '[type="text"]:not([list])': 'textbox',
                 'input[list]:not([type])': 'combobox',
@@ -1804,94 +1482,29 @@ var htmlData = {
                 '[type="image"]': 'button',
                 '[type="reset"]': 'button',
                 '[type="button"]': 'button'
-            }, DOMInterface: 'HTMLInputElement'
-        },
-        'button': {
-            id: 'the-button-element',
-            category: 'forms',
-            focusable: 'button:not([disabled])',
-            implicitAriaRole: 'button',
-            DOMInterface: 'HTMLButtonElement'
-        },
-        'select': {
-            id: 'the-select-element', category: 'forms', focusable: 'select:not([disabled])', implicitAriaRole: {
+            }, DOMInterface: 'HTMLInputElement' },
+        'button': { id: 'the-button-element', category: 'forms', focusable: 'button:not([disabled])', implicitAriaRole: 'button', DOMInterface: 'HTMLButtonElement' },
+        'select': { id: 'the-select-element', category: 'forms', focusable: 'select:not([disabled])', implicitAriaRole: {
                 'select:not([multiple]):not([size])': 'combobox',
                 'select[multiple]': 'listbox',
-                'select[size]:not([multiple])': {
-                    type: 'integer',
-                    attribute: 'size',
-                    greaterthan: 1,
-                    role: ['combobox', 'listbox']
-                }
-            }, DOMInterface: 'HTMLSelectElement'
-        },
-        'datalist': {
-            id: 'the-datalist-element',
-            category: 'forms',
-            implicitAriaRole: 'listbox',
-            DOMInterface: 'HTMLDataListElement'
-        },
-        'optgroup': {
-            id: 'the-optgroup-element',
-            category: 'forms',
-            implicitAriaRole: 'group',
-            DOMInterface: 'HTMLOptGroupElement'
-        },
-        'option': {
-            id: 'the-option-element',
-            category: 'forms',
-            implicitAriaRole: 'option',
-            DOMInterface: 'HTMLOptionElement'
-        },
-        'textarea': {
-            id: 'the-textarea-element',
-            category: 'forms',
-            focusable: 'textarea:not([disabled])',
-            implicitAriaRole: 'textbox',
-            DOMInterface: 'HTMLTextAreaElement'
-        },
-        'output': {
-            id: 'the-output-element',
-            category: 'forms',
-            implicitAriaRole: 'status',
-            DOMInterface: 'HTMLOutputElement'
-        },
-        'progress': {
-            id: 'the-progress-element',
-            category: 'forms',
-            implicitAriaRole: 'progressbar',
-            DOMInterface: 'HTMLProgressElement'
-        },
-        'meter': {id: 'the-meter-element', category: 'forms', DOMInterface: 'HTMLMeterElement'},
-        'fieldset': {
-            id: 'the-fieldset-element',
-            category: 'forms',
-            implicitAriaRole: 'group',
-            DOMInterface: 'HTMLFieldSetElement'
-        },
-        'legend': {id: 'the-legend-element', category: 'forms', DOMInterface: 'HTMLLegendElement'},
-        'details': {
-            id: 'the-details-element',
-            category: 'interactive elements',
-            implicitAriaRole: 'group',
-            DOMInterface: 'HTMLDetailsElement'
-        },
-        'summary': {
-            id: 'the-summary-element',
-            category: 'interactive elements',
-            implicitAriaRole: 'button',
-            DOMInterface: 'HTMLElement'
-        },
-        'dialog': {
-            id: 'the-dialog-element',
-            category: 'interactive elements',
-            implicitAriaRole: 'dialog',
-            DOMInterface: 'HTMLDialogElement'
-        },
-        'script': {id: 'the-script-element', category: 'scripting', DOMInterface: 'HTMLScriptElement'},
-        'noscript': {id: 'the-noscript-element', category: 'scripting', DOMInterface: 'HTMLElement'},
-        'template': {id: 'the-template-element', category: 'scripting', DOMInterface: 'HTMLTemplateElement'},
-        'canvas': {id: 'the-canvas-element', category: 'scripting', DOMInterface: 'HTMLCanvasElement'}
+                'select[size]:not([multiple])': { type: 'integer', attribute: 'size', greaterthan: 1, role: ['combobox', 'listbox'] }
+            }, DOMInterface: 'HTMLSelectElement' },
+        'datalist': { id: 'the-datalist-element', category: 'forms', implicitAriaRole: 'listbox', DOMInterface: 'HTMLDataListElement' },
+        'optgroup': { id: 'the-optgroup-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLOptGroupElement' },
+        'option': { id: 'the-option-element', category: 'forms', implicitAriaRole: 'option', DOMInterface: 'HTMLOptionElement' },
+        'textarea': { id: 'the-textarea-element', category: 'forms', focusable: 'textarea:not([disabled])', implicitAriaRole: 'textbox', DOMInterface: 'HTMLTextAreaElement' },
+        'output': { id: 'the-output-element', category: 'forms', implicitAriaRole: 'status', DOMInterface: 'HTMLOutputElement' },
+        'progress': { id: 'the-progress-element', category: 'forms', implicitAriaRole: 'progressbar', DOMInterface: 'HTMLProgressElement' },
+        'meter': { id: 'the-meter-element', category: 'forms', DOMInterface: 'HTMLMeterElement' },
+        'fieldset': { id: 'the-fieldset-element', category: 'forms', implicitAriaRole: 'group', DOMInterface: 'HTMLFieldSetElement' },
+        'legend': { id: 'the-legend-element', category: 'forms', DOMInterface: 'HTMLLegendElement' },
+        'details': { id: 'the-details-element', category: 'interactive elements', implicitAriaRole: 'group', DOMInterface: 'HTMLDetailsElement' },
+        'summary': { id: 'the-summary-element', category: 'interactive elements', implicitAriaRole: 'button', DOMInterface: 'HTMLElement' },
+        'dialog': { id: 'the-dialog-element', category: 'interactive elements', implicitAriaRole: 'dialog', DOMInterface: 'HTMLDialogElement' },
+        'script': { id: 'the-script-element', category: 'scripting', DOMInterface: 'HTMLScriptElement' },
+        'noscript': { id: 'the-noscript-element', category: 'scripting', DOMInterface: 'HTMLElement' },
+        'template': { id: 'the-template-element', category: 'scripting', DOMInterface: 'HTMLTemplateElement' },
+        'canvas': { id: 'the-canvas-element', category: 'scripting', DOMInterface: 'HTMLCanvasElement' }
     }
 };
 
@@ -1928,11 +1541,13 @@ var getImplicitAriaRole = function () {
                                     if (/^(0|[1-9]\d*)$/.test(attributeValue)) {
                                         result = parseInt(attributeValue) > implicitAriaRole[selector].greaterthan;
                                         result = implicitAriaRole[selector].role[result ? 1 : 0];
-                                    } else {
+                                    }
+                                    else {
                                         result = implicitAriaRole[selector].role[0];
                                     }
                                 }
-                            } else {
+                            }
+                            else {
                                 result = implicitAriaRole[selector];
                             }
                             break;
@@ -1941,10 +1556,12 @@ var getImplicitAriaRole = function () {
                     break;
             }
             return result;
-        } else {
+        }
+        else {
             return null;
         }
-    } else {
+    }
+    else {
         return undefined;
     }
 };
@@ -1963,47 +1580,36 @@ if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getIm
 var languages = {
     fileDate: '2020-05-12',
     data: {
-        'en': {description: 'English', added: '2005-10-16', suppressScript: 'Latn'},
-        'cmn': {description: 'Mandarin Chinese', added: '2009-07-29', macrolanguage: 'zh'},
-        'hi': {description: 'Hindi', added: '2005-10-16', suppressScript: 'Deva'},
-        'es': {description: ['Spanish', 'Castilian'], added: '2005-10-16', suppressScript: 'Latn'},
-        'fr': {description: 'French', added: '2005-10-16', suppressScript: 'Latn'},
-        'ar': {description: 'Arabic', added: '2005-10-16', suppressScript: 'Arab', scope: 'macrolanguage'},
-        'bn': {description: ['Bengali', 'Bangla'], added: '2005-10-16', suppressScript: 'Beng'},
-        'ru': {description: 'Russian', added: '2005-10-16', suppressScript: 'Cyrl'},
-        'pt': {description: 'Portuguese', added: '2005-10-16', suppressScript: 'Latn'},
-        'id': {description: 'Indonesian', added: '2005-10-16', suppressScript: 'Latn', macrolanguage: 'ms'},
-        'ur': {description: 'Urdu', added: '2005-10-16', suppressScript: 'Arab'},
-        'de': {description: 'German', added: '2005-10-16', suppressScript: 'Latn'},
-        'ja': {description: 'Japanese', added: '2005-10-16', suppressScript: 'Jpan'},
-        'sw': {
-            description: 'Swahili (macrolanguage)',
-            added: '2005-10-16',
-            suppressScript: 'Latn',
-            scope: 'macrolanguage'
-        },
-        'mr': {description: 'Marathi', added: '2005-10-16', suppressScript: 'Deva'},
-        'te': {description: 'Telugu', added: '2005-10-16', suppressScript: 'Telu'},
-        'tr': {description: 'Turkish', added: '2005-10-16', suppressScript: 'Latn'},
-        'yue': {description: ['Yue Chinese', 'Cantonese'], added: '2009-07-29', macrolanguage: 'zh'},
-        'ta': {description: 'Tamil', added: '2005-10-16', suppressScript: 'Taml'},
-        'pa': {description: ['Panjabi', 'Punjabi'], added: '2005-10-16', suppressScript: 'Guru'},
-        'wuu': {description: 'Wu Chinese', added: '2009-07-29', macrolanguage: 'zh'},
-        'ko': {description: 'Korean', added: '2005-10-16', suppressScript: 'Kore'},
-        'vi': {description: 'Vietnamese', added: '2005-10-16', suppressScript: 'Latn'},
-        'ha': {description: 'Hausa', added: '2005-10-16'},
-        'jv': {description: 'Javanese', added: '2005-10-16'},
-        'arz': {
-            description: 'Egyptian Arabic',
-            added: '2009-07-29',
-            preferredValue: 'arz',
-            prefix: 'ar',
-            macrolanguage: 'ar'
-        },
-        'it': {description: 'Italian', added: '2005-10-16', suppressScript: 'Latn'},
-        'th': {description: 'Thai', added: '2005-10-16', suppressScript: 'Thai'},
-        'gu': {description: 'Gujarati', added: '2005-10-16', suppressScript: 'Gujr'},
-        'kn': {description: 'Kannada', added: '2005-10-16', suppressScript: 'Knda'}
+        'en': { description: 'English', added:'2005-10-16', suppressScript: 'Latn' },
+        'cmn': { description: 'Mandarin Chinese', added:'2009-07-29', macrolanguage: 'zh' },
+        'hi': { description: 'Hindi', added:'2005-10-16', suppressScript: 'Deva' },
+        'es': { description: ['Spanish', 'Castilian'], added:'2005-10-16', suppressScript: 'Latn' },
+        'fr': { description: 'French', added:'2005-10-16', suppressScript: 'Latn' },
+        'ar': { description: 'Arabic', added:'2005-10-16', suppressScript: 'Arab', scope: 'macrolanguage' },
+        'bn': { description: ['Bengali', 'Bangla'], added:'2005-10-16', suppressScript: 'Beng' },
+        'ru': { description: 'Russian', added:'2005-10-16', suppressScript: 'Cyrl' },
+        'pt': { description: 'Portuguese', added:'2005-10-16', suppressScript: 'Latn' },
+        'id': { description: 'Indonesian', added:'2005-10-16', suppressScript: 'Latn', macrolanguage: 'ms' },
+        'ur': { description: 'Urdu', added:'2005-10-16', suppressScript: 'Arab' },
+        'de': { description: 'German', added:'2005-10-16', suppressScript: 'Latn' },
+        'ja': { description: 'Japanese', added:'2005-10-16', suppressScript: 'Jpan' },
+        'sw': { description: 'Swahili (macrolanguage)', added:'2005-10-16', suppressScript: 'Latn', scope: 'macrolanguage' },
+        'mr': { description: 'Marathi', added:'2005-10-16', suppressScript: 'Deva' },
+        'te': { description: 'Telugu', added:'2005-10-16', suppressScript: 'Telu' },
+        'tr': { description: 'Turkish', added:'2005-10-16', suppressScript: 'Latn' },
+        'yue': { description: ['Yue Chinese', 'Cantonese'], added:'2009-07-29', macrolanguage: 'zh' },
+        'ta': { description: 'Tamil', added:'2005-10-16', suppressScript: 'Taml' },
+        'pa': { description: ['Panjabi', 'Punjabi'], added:'2005-10-16', suppressScript: 'Guru' },
+        'wuu': { description: 'Wu Chinese', added:'2009-07-29', macrolanguage: 'zh' },
+        'ko': { description: 'Korean', added:'2005-10-16', suppressScript: 'Kore' },
+        'vi': { description: 'Vietnamese', added:'2005-10-16', suppressScript: 'Latn' },
+        'ha': { description: 'Hausa', added:'2005-10-16' },
+        'jv': { description: 'Javanese', added:'2005-10-16' },
+        'arz': { description: 'Egyptian Arabic', added:'2009-07-29', preferredValue: 'arz', prefix: 'ar', macrolanguage: 'ar' },
+        'it': { description: 'Italian', added:'2005-10-16', suppressScript: 'Latn' },
+        'th': { description: 'Thai', added:'2005-10-16', suppressScript: 'Thai' },
+        'gu': { description: 'Gujarati', added:'2005-10-16', suppressScript: 'Gujr' },
+        'kn': { description: 'Kannada', added:'2005-10-16', suppressScript: 'Knda' }
     }
 };
 
@@ -2017,7 +1623,8 @@ var hasValidLanguageCode = function () {
             computedlang = computedlang[0];
         }
         return languages.data.hasOwnProperty(computedlang);
-    } else {
+    }
+    else {
         return false;
     }
 };
@@ -2046,18 +1653,18 @@ var ariaData = {
         states: 'https://www.w3.org/TR/wai-aria-1.2/#{{state}}'
     },
     rolesCategorization: {
-        'abstract roles': {id: 'abstract_roles', name: 'Abstract Roles'},
-        'widget roles': {id: 'widget_roles', name: 'Widget Roles'},
-        'document structure roles': {id: 'document_structure_roles', name: 'Document Structure Roles'},
-        'landmark roles': {id: 'landmark_roles', name: 'Landmark Roles'},
-        'live region roles': {id: 'live_region_roles', name: 'Live Region Roles'},
-        'window roles': {id: 'window_roles', name: 'Window Roles'}
+        'abstract roles': { id: 'abstract_roles', name: 'Abstract Roles' },
+        'widget roles': { id: 'widget_roles', name: 'Widget Roles' },
+        'document structure roles': { id: 'document_structure_roles', name: 'Document Structure Roles' },
+        'landmark roles': { id: 'landmark_roles', name: 'Landmark Roles' },
+        'live region roles': { id: 'live_region_roles', name: 'Live Region Roles' },
+        'window roles': { id: 'window_roles', name: 'Window Roles' }
     },
     attributesCategorization: {
-        'widget attributes': {id: 'attrs_widgets', name: 'Widget Attributes'},
-        'live region attributes': {id: 'attrs_liveregions', name: 'Live Region Attributes'},
-        'drag-and-drop attributes': {id: 'attrs_dragdrop', name: 'Drag-and-Drop Attributes'},
-        'relationship attributes': {id: 'attrs_relationships', name: 'Relationship Attributes'}
+        'widget attributes': { id: 'attrs_widgets', name: 'Widget Attributes' },
+        'live region attributes': { id: 'attrs_liveregions', name: 'Live Region Attributes' },
+        'drag-and-drop attributes': { id: 'attrs_dragdrop', name: 'Drag-and-Drop Attributes' },
+        'relationship attributes': { id: 'attrs_relationships', name: 'Relationship Attributes' }
     },
     roles: {
         'alert': {
@@ -2066,7 +1673,7 @@ var ariaData = {
             superclassRoles: 'section',
             subclassRoles: 'alertdialog',
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-live': 'assertive', 'aria-atomic': 'true'}]
+            implicitValueForRole: [{ 'aria-live': 'assertive', 'aria-atomic': 'true' }]
         },
         'alertdialog': {
             category: 'window roles',
@@ -2174,7 +1781,7 @@ var ariaData = {
             supportedStatesProperties: ['aria-activedescendant', 'aria-autocomplete', 'aria-errormessage', 'aria-haspopup', 'aria-invalid', 'aria-readonly', 'aria-required'],
             nameFrom: 'author',
             accessibleNameRequired: true,
-            implicitValueForRole: [{'aria-expanded': 'false'}, {'aria-haspopup': 'listbox'}]
+            implicitValueForRole: [{ 'aria-expanded': 'false' }, { 'aria-haspopup': 'listbox' }]
         },
         'command': {
             isAbstract: true,
@@ -2322,7 +1929,7 @@ var ariaData = {
             requiredStatesProperties: ['aria-level'],
             nameFrom: ['contents', 'author'],
             accessibleNameRequired: true,
-            implicitValueForRole: [{'aria-level': '2'}]
+            implicitValueForRole: [{ 'aria-level': '2' }]
         },
         'img': {
             category: 'document structure roles',
@@ -2387,7 +1994,7 @@ var ariaData = {
             supportedStatesProperties: ['aria-errormessage', 'aria-expanded', 'aria-invalid', 'aria-multiselectable', 'aria-readonly', 'aria-required'],
             nameFrom: 'author',
             accessibleNameRequired: true,
-            implicitValueForRole: [{'aria-orientation': 'vertical'}],
+            implicitValueForRole: [{ 'aria-orientation': 'vertical' }],
             focusable: true
         },
         'listitem': {
@@ -2405,7 +2012,7 @@ var ariaData = {
             description: 'A type of live region where new information is added in meaningful order and old information may disappear. See related marquee.',
             superclassRoles: 'section',
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-live': 'polite'}]
+            implicitValueForRole: [{ 'aria-live': 'polite' }]
         },
         'main': {
             category: 'landmark roles',
@@ -2435,7 +2042,7 @@ var ariaData = {
             relatedConcepts: 'list',
             requiredOwnedElements: ['group > menuitem', 'group > menuitemradio', 'group > menuitemcheckbox', 'menuitem', 'menuitemcheckbox', 'menuitemradio'],
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-orientation': 'vertical'}],
+            implicitValueForRole: [{ 'aria-orientation': 'vertical' }],
             focusable: true
         },
         'menubar': {
@@ -2445,7 +2052,7 @@ var ariaData = {
             subclassRoles: 'toolbar',
             requiredOwnedElements: ['group > menuitem', 'group > menuitemradio', 'group > menuitemcheckbox', 'menuitem', 'menuitemcheckbox', 'menuitemradio'],
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-orientation': 'horizontal'}],
+            implicitValueForRole: [{ 'aria-orientation': 'horizontal' }],
             focusable: true
         },
         'menuitem': {
@@ -2527,7 +2134,7 @@ var ariaData = {
             nameFrom: ['contents', 'author'],
             accessibleNameRequired: true,
             childrenPresentational: true,
-            implicitValueForRole: [{'aria-selected': 'false'}]
+            implicitValueForRole: [{ 'aria-selected': 'false' }]
         },
         'paragraph': {
             category: 'document structure roles',
@@ -2640,7 +2247,7 @@ var ariaData = {
             nameFrom: 'author',
             accessibleNameRequired: false,
             childrenPresentational: true,
-            implicitValueForRole: [{'aria-orientation': 'vertical'}, {'aria-valuemin': '0'}, {'aria-valuemax': '100'}]
+            implicitValueForRole: [{ 'aria-orientation': 'vertical' }, { 'aria-valuemin': '0' }, { 'aria-valuemax': '100' }]
         },
         'search': {
             category: 'landmark roles',
@@ -2690,7 +2297,7 @@ var ariaData = {
                     supportedStatesProperties: 'aria-orientation',
                     nameFrom: 'author',
                     childrenPresentational: true,
-                    implicitValueForRole: [{'aria-orientation': 'horizontal'}]
+                    implicitValueForRole: [{ 'aria-orientation': 'horizontal' }]
                 }, {
                     category: 'widget roles',
                     superclassRoles: 'widget',
@@ -2698,7 +2305,7 @@ var ariaData = {
                     supportedStatesProperties: ['aria-disabled', 'aria-orientation', 'aria-valuemax', 'aria-valuemin', 'aria-valuetext'],
                     nameFrom: 'author',
                     childrenPresentational: true,
-                    implicitValueForRole: [{'aria-orientation': 'horizontal'}, {'aria-valuemin': '0'}, {'aria-valuemax': '100'}]
+                    implicitValueForRole: [{ 'aria-orientation': 'horizontal' }, { 'aria-valuemin': '0' }, { 'aria-valuemax': '100' }]
                 }
             ]
         },
@@ -2711,7 +2318,7 @@ var ariaData = {
             nameFrom: 'author',
             accessibleNameRequired: true,
             childrenPresentational: true,
-            implicitValueForRole: [{'aria-orientation': 'horizontal'}, {'aria-valuemin': '0'}, {'aria-valuemax': '100'}]
+            implicitValueForRole: [{ 'aria-orientation': 'horizontal' }, { 'aria-valuemin': '0' }, { 'aria-valuemax': '100' }]
         },
         'spinbutton': {
             category: 'widget roles',
@@ -2720,7 +2327,7 @@ var ariaData = {
             supportedStatesProperties: ['aria-errormessage', 'aria-invalid', 'aria-readonly', 'aria-required', 'aria-valuemax', 'aria-valuemin', 'aria-valuenow', 'aria-valuetext'],
             nameFrom: 'author',
             accessibleNameRequired: true,
-            implicitValueForRole: [{'aria-valuenow': '0'}]
+            implicitValueForRole: [{ 'aria-valuenow': '0' }]
         },
         'status': {
             category: 'live region roles',
@@ -2728,7 +2335,7 @@ var ariaData = {
             superclassRoles: 'section',
             subclassRoles: ['progressbar', 'timer'],
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-live': 'polite'}, {'aria-atomic': 'true'}]
+            implicitValueForRole: [{ 'aria-live': 'polite' }, { 'aria-atomic': 'true' }]
         },
         'strong': {
             category: 'document structure',
@@ -2779,7 +2386,7 @@ var ariaData = {
             supportedStatesProperties: ['aria-disabled', 'aria-expanded', 'aria-haspopup', 'aria-posinset', 'aria-selected', 'aria-setsize'],
             nameFrom: ['contents', 'author'],
             childrenPresentational: true,
-            implicitValueForRole: [{'aria-selected': 'false'}]
+            implicitValueForRole: [{ 'aria-selected': 'false' }]
         },
         'table': {
             category: 'document structure roles',
@@ -2799,7 +2406,7 @@ var ariaData = {
             requiredOwnedElements: 'tab',
             supportedStatesProperties: ['aria-level', 'aria-multiselectable', 'aria-orientation'],
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-orientation': 'horizontal'}],
+            implicitValueForRole: [{ 'aria-orientation': 'horizontal' }],
             focusable: true
         },
         'tabpanel': {
@@ -2846,7 +2453,7 @@ var ariaData = {
             relatedConcepts: 'menubar',
             supportedStatesProperties: 'aria-orientation',
             nameFrom: 'author',
-            implicitValueForRole: [{'aria-orientation': 'horizontal'}]
+            implicitValueForRole: [{ 'aria-orientation': 'horizontal' }]
         },
         'tooltip': {
             category: 'document structure roles',
@@ -2864,7 +2471,7 @@ var ariaData = {
             supportedStatesProperties: ['aria-errormessage', 'aria-invalid', 'aria-multiselectable', 'aria-required'],
             nameFrom: 'author',
             accessibleNameRequired: true,
-            implicitValueForRole: [{'aria-orientation': 'vertical'}],
+            implicitValueForRole: [{ 'aria-orientation': 'vertical' }],
             focusable: true
         },
         'treegrid': {
@@ -2909,7 +2516,7 @@ var ariaData = {
             description: 'Identifies the currently active element when DOM focus is on a composite widget, combobox, textbox, group, or application.',
             usedInRoles: ['application', 'combobox', 'composite', 'group', 'textbox'],
             inheritsIntoRoles: ['grid', 'listbox', 'menu', 'menubar', 'radiogroup', 'row', 'searchbox', 'select', 'spinbutton', 'tablist', 'toolbar', 'tree', 'treegrid'],
-            value: {attribute: 'id'}
+            value: { attribute: 'id' }
         },
         'aria-atomic': {
             global: true,
@@ -2932,28 +2539,28 @@ var ariaData = {
             description: 'Defines the total number of columns in a table, grid, or treegrid. See related aria-colindex.',
             usedInRoles: ['table'],
             inheritsIntoRoles: ['grid', 'treegrid'],
-            value: {type: 'integer'}
+            value: { type: 'integer' }
         },
         'aria-colindex': {
             category: 'relationship attributes',
             description: "Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid. See related aria-colcount and aria-colspan.",
             usedInRoles: ['cell', 'row'],
             inheritsIntoRoles: ['columnheader', 'gridcell', 'rowheader'],
-            value: {type: 'integer'}
+            value: { type: 'integer' }
         },
         'aria-colspan': {
             category: 'relationship attributes',
             description: 'Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid. See related aria-colindex and aria-rowspan.',
             usedInRoles: ['cell'],
             inheritsIntoRoles: ['columnheader', 'gridcell', 'rowheader'],
-            value: {type: 'integer'}
+            value: { type: 'integer' }
         },
         'aria-controls': {
             global: true,
             category: 'relationship attributes',
             description: 'Identifies the element (or elements) whose contents or presence are controlled by the current element. See related aria-owns.',
             usedInRoles: '*',
-            value: {attribute: 'id', multiple: true}
+            value: { attribute: 'id', multiple: true }
         },
         'aria-describedby': {
             global: true,
@@ -2961,14 +2568,14 @@ var ariaData = {
             description: 'Identifies the element (or elements) that describes the object. See related aria-labelledby.',
             relatedHTMLConcepts: ['<label>', '<th headers="id">', '<th scope="col">', '<th scope="row">', '<td headers="id">'],
             usedInRoles: '*',
-            value: {attribute: 'id', multiple: true}
+            value: { attribute: 'id', multiple: true }
         },
         'aria-details': {
             global: true,
             category: 'relationship attributes',
             description: 'Identifies the element that provides a detailed, extended description for the object. See related aria-describedby.',
             usedInRoles: '*',
-            value: {attribute: 'id'}
+            value: { attribute: 'id' }
         },
         'aria-dropeffect': {
             isDeprecated: true,
@@ -2985,14 +2592,14 @@ var ariaData = {
             description: 'Identifies the element that provides an error message for an object. See related aria-invalid and aria-describedby.',
             usedInRoles: ['application', 'checkbox', 'combobox', 'gridcell', 'listbox', 'radiogroup', 'slider', 'spinbutton', 'textbox', 'tree'],
             inheritsIntoRoles: ['columnheader', 'menuitemcheckbox', 'menuitemradio', 'rowheader', 'searchbox', 'switch', 'treegrid'],
-            value: {attribute: 'id'}
+            value: { attribute: 'id' }
         },
         'aria-flowto': {
             global: true,
             category: 'relationship attributes',
             description: "Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order.",
             usedInRoles: '*',
-            value: {attribute: 'id', multiple: true}
+            value: { attribute: 'id', multiple: true }
         },
         'aria-haspopup': {
             category: 'widget attributes',
@@ -3007,7 +2614,7 @@ var ariaData = {
             global: true,
             description: 'Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element.',
             usedInRoles: '*',
-            value: {type: 'string'}
+            value: { type: 'string' }
         },
         'aria-label': {
             global: true,
@@ -3016,7 +2623,7 @@ var ariaData = {
             description: 'Defines a string value that labels the current element. See related aria-labelledby.',
             relatedHTMLConcepts: '@title',
             usedInRoles: '*',
-            value: {type: 'string'}
+            value: { type: 'string' }
         },
         'aria-labelledby': {
             global: true,
@@ -3024,14 +2631,14 @@ var ariaData = {
             description: 'Identifies the element (or elements) that labels the current element. See related aria-describedby.',
             relatedHTMLConcepts: '<label>',
             usedInRoles: '*',
-            value: {attribute: 'id', multiple: true}
+            value: { attribute: 'id', multiple: true }
         },
         'aria-level': {
             category: 'widget attributes',
             description: 'Defines the hierarchical level of an element within a structure.',
             usedInRoles: ['heading', 'listitem', 'row', 'tablist'],
             inheritsIntoRoles: 'treeitem',
-            value: {type: 'integer', min: 1}
+            value: { type: 'integer', min: 1 }
         },
         'aria-live': {
             global: true,
@@ -3077,7 +2684,7 @@ var ariaData = {
             global: true,
             category: 'relationship attributes',
             usedInRoles: '*',
-            value: {attribute: 'id', multiple: true}
+            value: { attribute: 'id', multiple: true }
         },
         'aria-placeholder': {
             translatable: true,
@@ -3086,14 +2693,14 @@ var ariaData = {
             relatedHTMLConcepts: '@placeholder',
             usedInRoles: ['textbox'],
             inheritsIntoRoles: 'searchbox',
-            value: {type: 'string'}
+            value: { type: 'string' }
         },
         'aria-posinset': {
             category: 'relationship attributes',
             description: "Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-setsize.",
             usedInRoles: ['article', 'listitem', 'menuitem', 'option', 'radio', 'row', 'tab'],
             inheritsIntoRoles: ['menuitemcheckbox', 'menuitemradio', 'treeitem'],
-            value: {type: 'integer', min: 1, max: 'aria-setsize'}
+            value: { type: 'integer', min: 1, max: 'aria-setsize' }
         },
         'aria-readonly': {
             category: 'widget attributes',
@@ -3127,35 +2734,35 @@ var ariaData = {
             translatable: true,
             description: 'Defines a human-readable, author-localized description for the role of an element.',
             usedInRoles: '*',
-            value: {type: 'string'}
+            value: { type: 'string' }
         },
         'aria-rowcount': {
             category: 'relationship attributes',
             description: 'Defines the total number of rows in a table, grid, or treegrid. See related aria-rowindex.',
             usedInRoles: ['table'],
             inheritsIntoRoles: ['grid', 'treegrid'],
-            value: {type: 'integer', unknown: -1}
+            value: { type: 'integer', unknown: -1 }
         },
         'aria-rowindex': {
             category: 'relationship attributes',
             description: "Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid. See related aria-rowcount and aria-rowspan.",
             usedInRoles: ['cell', 'row'],
             inheritsIntoRoles: ['columnheader', 'gridcell', 'rowheader'],
-            value: {type: 'integer', min: 1}
+            value: { type: 'integer', min: 1 }
         },
         'aria-rowspan': {
             category: 'relationship attributes',
             description: 'Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid. See related aria-rowindex and aria-colspan.',
             usedInRoles: ['cell'],
             inheritsIntoRoles: ['columnheader', 'gridcell', 'rowheader'],
-            value: {type: 'integer', min: 0}
+            value: { type: 'integer', min: 0 }
         },
         'aria-setsize': {
             category: 'relationship attributes',
             description: 'Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-posinset.',
             usedInRoles: ['article', 'listitem', 'menuitem', 'option', 'radio', 'row', 'tab'],
             inheritsIntoRoles: ['menuitemcheckbox', 'menuitemradio', 'treeitem'],
-            value: {type: 'integer', unknown: -1}
+            value: { type: 'integer', unknown: -1 }
         },
         'aria-sort': {
             category: 'widget attributes',
@@ -3170,7 +2777,7 @@ var ariaData = {
             relatedHTMLConcepts: '<input type="range" max="number">',
             usedInRoles: ['meter', 'range', 'scrollbar', 'separator', 'slider', 'spinbutton'],
             inheritsIntoRoles: 'progressbar',
-            value: {type: 'number'}
+            value: { type: 'number' }
         },
         'aria-valuemin': {
             category: 'widget attributes',
@@ -3178,7 +2785,7 @@ var ariaData = {
             relatedHTMLConcepts: '<input type="range" min="number">',
             usedInRoles: ['meter', 'range', 'scrollbar', 'separator', 'slider', 'spinbutton'],
             inheritsIntoRoles: 'progressbar',
-            value: {type: 'number'}
+            value: { type: 'number' }
         },
         'aria-valuenow': {
             category: 'widget attributes',
@@ -3186,7 +2793,7 @@ var ariaData = {
             relatedHTMLConcepts: '<input type="range" value="number">',
             usedInRoles: ['meter', 'range', 'scrollbar', 'separator', 'slider', 'spinbutton'],
             inheritsIntoRoles: 'progressbar',
-            value: {type: 'number', min: 'aria-valuemin', max: 'aria-valuemax'}
+            value: { type: 'number', min: 'aria-valuemin', max: 'aria-valuemax' }
         },
         'aria-valuetext': {
             translatable: true,
@@ -3194,7 +2801,7 @@ var ariaData = {
             description: 'Defines the human readable text alternative of aria-valuenow for a range widget.',
             usedInRoles: ['range', 'separator', 'spinbutton'],
             inheritsIntoRoles: ['meter', 'progressbar', 'scrollbar', 'slider'],
-            value: {type: 'string'}
+            value: { type: 'string' }
         }
     },
     states: {
@@ -3333,16 +2940,17 @@ var ARIA = {
                 }
                 if (roleData.hasOwnProperty('requiredContextRole')) {
                     for (var i = 0; i < roleData.requiredContextRole.length; i++) {
-                        this.requiredContextRoles.push(new ARIA.Role(roleData.requiredContextRole[i], {getData: true}));
+                        this.requiredContextRoles.push(new ARIA.Role(roleData.requiredContextRole[i], { getData: true }));
                     }
                 }
             }
         };
         this.getRequiredContextRoles = function () {
-            if (this.isValid({ignoreAbstract: true})) {
+            if (this.isValid({ ignoreAbstract: true })) {
                 this.setRequiredContextRoles();
                 return this.requiredContextRoles;
-            } else {
+            }
+            else {
                 return undefined;
             }
         };
@@ -3355,16 +2963,17 @@ var ARIA = {
                 }
                 if (roleData.hasOwnProperty('requiredStatesProperties')) {
                     for (var i = 0; i < roleData.requiredStatesProperties.length; i++) {
-                        this.statesProperties.push(new ARIA.StateProperty(roleData.requiredStatesProperties[i], {getData: true}));
+                        this.statesProperties.push(new ARIA.StateProperty(roleData.requiredStatesProperties[i], { getData: true }));
                     }
                 }
             }
         };
         this.getRequiredStatesProperties = function () {
-            if (this.isValid({ignoreAbstract: true})) {
+            if (this.isValid({ ignoreAbstract: true })) {
                 this.setRequiredStatesProperties();
                 return this.statesProperties;
-            } else {
+            }
+            else {
                 return undefined;
             }
         };
@@ -3377,16 +2986,17 @@ var ARIA = {
                 }
                 if (roleData.hasOwnProperty('prohibitedStatesProperties')) {
                     for (var i = 0; i < roleData.prohibitedStatesProperties.length; i++) {
-                        this.prohibitedStatesProperties.push(new ARIA.StateProperty(roleData.prohibitedStatesProperties[i], {getData: true}));
+                        this.prohibitedStatesProperties.push(new ARIA.StateProperty(roleData.prohibitedStatesProperties[i], { getData: true }));
                     }
                 }
             }
         };
         this.getProhibitedStatesProperties = function () {
-            if (this.isValid({ignoreAbstract: true})) {
+            if (this.isValid({ ignoreAbstract: true })) {
                 this.setProhibitedStatesProperties();
                 return this.prohibitedStatesProperties;
-            } else {
+            }
+            else {
                 return undefined;
             }
         };
@@ -3394,7 +3004,7 @@ var ARIA = {
             if (arguments[1].hasOwnProperty('focusable') && arguments[1].focusable) {
                 this.focusable = arguments[1].focusable;
             }
-            if (arguments[1].hasOwnProperty('getData') && this.isValid({ignoreAbstract: true})) {
+            if (arguments[1].hasOwnProperty('getData') && this.isValid({ ignoreAbstract: true })) {
                 this.setRequiredContextRoles();
                 this.setRequiredStatesProperties();
                 this.setProhibitedStatesProperties();
@@ -3415,10 +3025,11 @@ var ARIA = {
         };
         this.isAllowedInRole = function (role) {
             if (this.isValid()) {
-                var role = new ARIA.Role(role, {getData: true});
+                var role = new ARIA.Role(role, { getData: true });
                 var prohibitedStatesProperties = role.getProhibitedStatesProperties();
                 return this.canBeUsedInRole(role.role) || prohibitedStatesProperties.indexOf(this.stateProperty) > -1;
-            } else {
+            }
+            else {
                 return undefined;
             }
         },
@@ -3432,7 +3043,8 @@ var ARIA = {
             if (this.isValid()) {
                 this.setUsedInRoles();
                 return this.usedInRoles == '*' || this.usedInRoles.includes(role);
-            } else {
+            }
+            else {
                 return undefined;
             }
         };
@@ -3470,13 +3082,15 @@ var ARIA = {
                                     error = error.replace('{{values}}', this.values.join(' / '));
                                     errors.push(error);
                                 }
-                            } else {
+                            }
+                            else {
                                 var error = ARIA.Errors.TokensValueSyntax;
                                 error = error.replace('{{attribute}}', this.stateProperty);
                                 error = error.replace('{{values}}', this.values.join(' / '));
                                 errors.push(error);
                             }
-                        } else {
+                        }
+                        else {
                             result = /^[a-z]+$/.test(value);
                             if (result) {
                                 result = this.values.includes(value);
@@ -3486,14 +3100,16 @@ var ARIA = {
                                     error = error.replace('{{values}}', this.values.join(' / '));
                                     errors.push(error);
                                 }
-                            } else {
+                            }
+                            else {
                                 var error = ARIA.Errors.SingleValueSyntax;
                                 error = error.replace('{{attribute}}', this.stateProperty);
                                 error = error.replace('{{values}}', this.values.join(' / '));
                                 errors.push(error);
                             }
                         }
-                    } else if (this.values.hasOwnProperty('attribute') && this.values.attribute == 'id') {
+                    }
+                    else if (this.values.hasOwnProperty('attribute') && this.values.attribute == 'id') {
                         if (this.values.multiple) {
                             result = /^\S+(\s\S+)*$/.test(value);
                             if (!result) {
@@ -3501,7 +3117,8 @@ var ARIA = {
                                 error = error.replace('{{attribute}}', this.stateProperty);
                                 errors.push(error);
                             }
-                        } else {
+                        }
+                        else {
                             result = /^\S+$/.test(value);
                             if (!result) {
                                 var error = ARIA.Errors.SingleIdValueSyntax;
@@ -3509,7 +3126,8 @@ var ARIA = {
                                 errors.push(error);
                             }
                         }
-                    } else {
+                    }
+                    else {
                         switch (this.values.type) {
                             case 'integer':
                                 if (/^(-|\+)?(0|[1-9]\d*)$/.test(value)) {
@@ -3535,7 +3153,8 @@ var ARIA = {
                                             }
                                         }
                                     }
-                                } else {
+                                }
+                                else {
                                     var error = ARIA.Errors.IsNotAnInteger;
                                     error = error.replace('{{attribute}}', this.stateProperty);
                                     errors.push(error);
@@ -3565,7 +3184,8 @@ var ARIA = {
                                             }
                                         }
                                     }
-                                } else {
+                                }
+                                else {
                                     var error = ARIA.Errors.IsNaN;
                                     error = error.replace('{{attribute}}', this.stateProperty);
                                     errors.push(error);
@@ -3576,14 +3196,16 @@ var ARIA = {
                                 break;
                         }
                     }
-                } else {
+                }
+                else {
                     errors.push(ARIA.Errors.EmptyValueNotAllowed.replace('{{attribute}}', this.stateProperty));
                 }
                 if (errors.length > 0) {
                     // console.log('Méthode ARIA : ' + errors);
                 }
                 return result;
-            } else {
+            }
+            else {
                 return undefined;
             }
         };
@@ -3639,10 +3261,12 @@ var getComputedAriaRole = function () {
                         }
                     }
                     return computedRole;
-                } else {
+                }
+                else {
                     return this.getImplicitAriaRole();
                 }
-            } else {
+            }
+            else {
                 role = new ARIA.Role(role);
                 if (role.isValid()) {
                     if (role.role == 'presentation' || role.role == 'none') {
@@ -3651,14 +3275,17 @@ var getComputedAriaRole = function () {
                         }
                     }
                     return role.role;
-                } else {
+                }
+                else {
                     return this.getImplicitAriaRole();
                 }
             }
-        } else {
+        }
+        else {
             return this.getImplicitAriaRole();
         }
-    } else {
+    }
+    else {
         return this.getImplicitAriaRole();
     }
 };
@@ -3679,11 +3306,13 @@ var hasValidRole = function () {
                 }
             }
             return result;
-        } else {
+        }
+        else {
             role = new ARIA.Role(role);
             return role.isValid();
         }
-    } else {
+    }
+    else {
         return false;
     }
 };
@@ -3755,7 +3384,8 @@ var hasAriaAttributesWithInvalidValues = function () {
                                 }
                             }
                         }
-                    } else if (values.hasOwnProperty('attribute')) {
+                    }
+                    else if (values.hasOwnProperty('attribute')) {
                         if (values.attribute == 'id') {
                             if (values.multiple) {
                                 var mode = 'strict';
@@ -3775,7 +3405,8 @@ var hasAriaAttributesWithInvalidValues = function () {
                                     if (notFoundElements.length > 0) {
                                         errors.push(ARIA.Errors.TokensIdValueElements.replace('{{attribute}}', attribute.name));
                                     }
-                                } else {
+                                }
+                                else {
                                     var foundElement = false;
                                     for (var j = 0; j < ids.length; j++) {
                                         if (document.getElementById(ids[j])) {
@@ -3787,7 +3418,8 @@ var hasAriaAttributesWithInvalidValues = function () {
                                         errors.push(ARIA.Errors.TokensIdValueElements.replace('{{attribute}}', attribute.name));
                                     }
                                 }
-                            } else {
+                            }
+                            else {
                                 if (!document.getElementById(attribute.value)) {
                                     errors.push(ARIA.Errors.SingleIdValueElement.replace('{{attribute}}', attribute.name));
                                 }
@@ -3795,9 +3427,11 @@ var hasAriaAttributesWithInvalidValues = function () {
                         }
                     }
                 }
-            } else if (isValidValue == undefined) {
+            }
+            else if (isValidValue == undefined) {
                 errors.push(ARIA.Errors.InvalidStateProperty.replace('{{attribute}}', attribute.name));
-            } else {
+            }
+            else {
                 result = true;
             }
         }
@@ -3837,7 +3471,8 @@ var isNotExposedDueTo = function () {
     var result = [];
     if (this.getAttribute('aria-hidden') == 'true') {
         result.push('aria:hidden');
-    } else {
+    }
+    else {
         var ariahiddenfound = false;
         var pt = this.parentNode;
         while (pt && pt.nodeType == 1) {
@@ -3858,7 +3493,8 @@ var isNotExposedDueTo = function () {
         if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
             result.push('css:visibility');
         }
-    } else {
+    }
+    else {
         var pt = this.parentNode;
         if (pt && pt.matches('map')) {
             var ptexposition = pt.isNotExposedDueTo;
@@ -3868,13 +3504,16 @@ var isNotExposedDueTo = function () {
                     if (img.isNotExposedDueTo.length > 0) {
                         result.push('html:imagenotexposed');
                     }
-                } else {
+                }
+                else {
                     result.push('parent-html:noimage');
                 }
-            } else {
+            }
+            else {
                 result.push('parent-html:noname');
             }
-        } else {
+        }
+        else {
             result.push('parent-html:unknown');
         }
     }
@@ -3885,9 +3524,9 @@ var isNotExposedDueTo = function () {
     return result;
 };
 
-if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotExposedDueTo', {get: isNotExposedDueTo});
+if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 //if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
-if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', {get: isNotExposedDueTo});
+if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 
 var isNotVisibleDueTo = function () {
     var result = [];
@@ -3896,7 +3535,8 @@ var isNotVisibleDueTo = function () {
     }
     if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
         result.push('css:display');
-    } else {
+    }
+    else {
         var parent = this.parentNode;
         while (parent && parent.nodeType == 1) {
             if (window.getComputedStyle(parent, null).getPropertyValue('display') == 'none') {
@@ -3915,9 +3555,9 @@ var isNotVisibleDueTo = function () {
     return result;
 };
 
-if (!HTMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotVisibleDueTo', {get: isNotVisibleDueTo});
+if (!HTMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
 //if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
-if (!SVGElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotVisibleDueTo', {get: isNotVisibleDueTo});
+if (!SVGElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
 
 if (!SVGElement.prototype.hasOwnProperty('canBeReachedUsingKeyboardWith')) {
     Object.defineProperty(SVGElement.prototype, 'canBeReachedUsingKeyboardWith', {

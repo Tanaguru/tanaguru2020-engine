@@ -29,3 +29,4 @@
 - Add a parameter on createUser endpoint to create a contract
 - Upgrade logging
 - Fix audit and user deletion
+- Support contrast from webext engine

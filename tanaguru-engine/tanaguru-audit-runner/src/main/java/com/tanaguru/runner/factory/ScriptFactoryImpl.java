@@ -41,6 +41,10 @@ public class ScriptFactoryImpl implements ScriptFactory {
                 strb.append(",\ndescription:\"").append(tanaguruTest.getDescription()).append("\"");
             }
 
+            if(tanaguruTest.getContrast() != null){
+                strb.append(",\ncontrast:\"").append(tanaguruTest.getContrast()).append("\"");
+            }
+
             if (tanaguruTest.getFilter() != null) {
                 strb.append(",\nfilter:").append("new Function('item', 'HTML', `return ").append(tanaguruTest.getFilter()).append("(item, HTML)`)");
             }
