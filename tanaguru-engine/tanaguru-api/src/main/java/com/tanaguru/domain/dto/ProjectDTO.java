@@ -8,7 +8,7 @@ public class ProjectDTO {
 
     @NotNull
     @NotEmpty
-    @Size(max = 30, min = 3)
+    @Size(max = 50, min = 3)
     private String name;
 
     private long contractId;
