@@ -16,7 +16,6 @@
 
 ## 1.0.3
 
-- Multiple files for upload audit
 - Fix contract modification : could change owner to get multiple contract on 1 user
 - Admin and SuperAdmin can unlock/lock users
 - Translation of the mail sent when the user is blocked
@@ -30,4 +29,3 @@
 - Add statistics page for super-admin and config key (statistics.fixedDelay)
 - Upgrade logging
 - Fix audit and user deletion
-- Support contrast from webext engine
