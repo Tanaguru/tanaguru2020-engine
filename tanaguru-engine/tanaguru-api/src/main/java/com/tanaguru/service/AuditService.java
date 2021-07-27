@@ -1,11 +1,14 @@
 package com.tanaguru.service;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.project.Project;
+import org.json.JSONObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
-import org.json.JSONObject;
 
 
 /**
@@ -23,12 +26,29 @@ public interface AuditService {
     void log(Audit audit, EAuditLogLevel level, String message);
 
     /**
-     * Find all @see Audit for a giver @see Project
+     * Find all @see Audit for a given @see Project
      *
      * @param project The given @see Project
      * @return An @see Audit list
      */
     Collection<Audit> findAllByProject(Project project);
+
+    /**
+     * Find all @see Audit for a given @see Project and for a given type
+     *
+     * @param project The given @see Project
+     * @return An @see Audit list
+     */
+    Page<Audit> findAllByProjectAndType(Project project, EAuditType type, Pageable pageable);
+    
+    /**
+     * Find page of @see Audit for a given @see Project
+     *
+     * @param project The given @see Project
+     * @param pageable Pageable
+     * @return An @see Audit list
+     */
+    org.springframework.data.domain.Page<Audit> findAllByProject(Project project, Pageable pageable);
 
     /**
      *

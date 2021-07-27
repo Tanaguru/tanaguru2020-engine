@@ -1,11 +1,12 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.user.Attempt;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
-import com.tanaguru.repository.ContractRepository;
+import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.AppRoleService;
@@ -14,14 +15,16 @@ import com.tanaguru.service.MailService;
 import com.tanaguru.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import javax.transaction.Transactional;
 
 
 /**
@@ -33,11 +36,13 @@ public class UserServiceImpl implements UserService {
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
-    private final ContractRepository contractRepository;
     private final ContractUserRepository contractUserRepository;
     private final AppRoleService appRoleService;
     private final ContractService contractService;
     private final MailService mailService;
+    private final MessageService messageService;
+    private final UserFactory userFactory;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private static final int FIRST_STEP_ATTEMPTS = 3;
     private static final int SECOND_STEP_ATTEMPTS = 5;
@@ -45,20 +50,21 @@ public class UserServiceImpl implements UserService {
     private static final int FIRST_ATTEMPT_TIME = 300000; //5min
     private static final int SECOND_ATTEMPT_TIME = 43200000;  //12h
     private static final String ADMIN_MAIL = "support@tanaguru.com";
-    private static final String ATTEMPTS_MAIL_SUBJECT_ADMIN = "Blocage d'un compte utilisateur";
-    private static final String ATTEMPTS_MAIL_SUBJECT_USER = "Blocage de votre compte utilisateur";
 
     public UserServiceImpl(UserRepository userRepository,
-                           ContractRepository contractRepository,
                            ContractUserRepository contractUserRepository,
                            AppRoleService appRoleService,
-                           ContractService contractService, MailService mailService) {
+                           ContractService contractService, MailService mailService,
+                           MessageService messageService, UserFactory userFactory,
+                           BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
-        this.contractRepository = contractRepository;
         this.contractUserRepository = contractUserRepository;
         this.appRoleService = appRoleService;
         this.contractService = contractService;
         this.mailService = mailService;
+        this.messageService = messageService;
+        this.userFactory = userFactory;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public boolean checkUsernameIsUsed(String username) {
@@ -69,8 +75,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
+    public User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract) {
+        if (checkUsernameIsUsed(username)) {
+            throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
+        }
+
+        if (checkEmailIsUsed(email)) {
+            throw new CustomInvalidEntityException(CustomError.EMAIL_ALREADY_EXISTS);
+        }
+
+        if (password == null || password.isEmpty()) {
+            throw new CustomInvalidEntityException(CustomError.INVALID_PASSWORD);
+        }
+
+
+        User user = userFactory.createUser(username, email, bCryptPasswordEncoder.encode(password), appRole, enabled);
+        if (createContract) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, 1);
+            contractService.createContract(user, user.getUsername(), 0, 0, true, calendar.getTime());
+        }
+        return user;
+    }
+
+
     public User modifyUser(User from, User to) {
-        if (!from.getUsername().equals(to.getUsername()) &&  checkUsernameIsUsed(to.getUsername())) {
+        if (!from.getUsername().equals(to.getUsername()) && checkUsernameIsUsed(to.getUsername())) {
             throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
         } else {
             LOGGER.info("[User {}] set username to {}", from.getId(), to.getUsername());
@@ -86,7 +116,12 @@ public class UserServiceImpl implements UserService {
 
         from.setEnabled(to.isEnabled());
 
-        if(to.getAppRole() != null){
+        if (!from.isAccountNonLocked() && to.isAccountNonLocked()) {
+            from.setAttempts(new ArrayList<Attempt>());
+        }
+        from.setAccountNonLocked(to.isAccountNonLocked());
+
+        if (to.getAppRole() != null) {
             from.setAppRole(to.getAppRole());
         }
 
@@ -94,20 +129,23 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(User user) {
-        for (ContractAppUser contractUser : contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)) {
-            contractService.deleteContract(contractUser.getContract());
-        }
+        contractUserRepository.findAllByUserAndContractRole_Name_Owner(user)
+                .stream()
+                .map(ContractAppUser::getContract)
+                .forEach(contractService::deleteContract);
 
+        contractUserRepository.deleteAllByUser(user);
         userRepository.delete(user);
         LOGGER.info("[User {}] deleted", user.getId());
     }
 
-    public boolean hasAuthority(User user, String authority){
+    public boolean hasAuthority(User user, String authority) {
         return appRoleService.getAppAuthorityByAppRole(user.getAppRole().getName()).contains(authority);
     }
 
     /**
      * Update the fails attempts of the user
+     *
      * @param user
      * @param ip
      */
@@ -121,66 +159,66 @@ public class UserServiceImpl implements UserService {
             attempt.setLastModified(new Date());
             attempts.add(attempt);
             user.setAttempts(attempts);
-            userRepository.save(user);     
+            userRepository.save(user);
         } else {
             //update attempts +1
-            Attempt lastAttempt = attempts.get(attempts.size()-1);
+            Attempt lastAttempt = attempts.get(attempts.size() - 1);
             Attempt currentAttempt = new Attempt();
-            currentAttempt.setNumber(lastAttempt.getNumber()+1);
+            currentAttempt.setNumber(lastAttempt.getNumber() + 1);
             currentAttempt.setIp(ip);
             currentAttempt.setLastModified(new Date());
             attempts.add(currentAttempt);
             user.setAttempts(attempts);
             userRepository.save(user);
 
-            switch(attempts.get(attempts.size()-1).getNumber()) {
+            switch (attempts.get(attempts.size() - 1).getNumber()) {
 
-            case FIRST_STEP_ATTEMPTS: 
-                blockAccount(user, attempts,FIRST_ATTEMPT_TIME);
-                break;
+                case FIRST_STEP_ATTEMPTS:
+                    blockAccount(user, attempts, FIRST_ATTEMPT_TIME);
+                    break;
 
-            case SECOND_STEP_ATTEMPTS:
-                blockAccount(user, attempts,SECOND_ATTEMPT_TIME);
-                break;
+                case SECOND_STEP_ATTEMPTS:
+                    blockAccount(user, attempts, SECOND_ATTEMPT_TIME);
+                    break;
 
-            case MAX_ATTEMPTS:
-                //locked user definitely
-                blockAccount(user, attempts,0);
-                //send mail to super admin with list of attempts
-                DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG);
-                StringBuilder builder = new StringBuilder();
-                builder.append("Multiples tentatives de connexions sur le compte : ")
-                        .append(user.getEmail()).append("\nNom d'utilisateur : ")
-                        .append(user.getUsername()).append("\nID utilisateur : ")
-                        .append(user.getId());
-                for(Attempt attempt : attempts) {
-                    builder.append("\n\nTentative numéro ")
-                            .append(attempt.getNumber()).append(" | IP : ")
-                            .append(attempt.getIp()).append(" | Dernier accés : ")
-                            .append(longDateFormat.format(attempt.getLastModified()));
-                    if( attempt.getBlockedUntil() != null ){
-                        builder.append(" | Bloqué jusqu'à : ")
-                                .append(longDateFormat.format(attempt.getBlockedUntil()));
+                case MAX_ATTEMPTS:
+                    //block user definitely
+                    blockAccount(user, attempts, 0);
+                    //send mail to super admin with list of attempts
+                    DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(messageService.getMessage("mail.block.user.attempts.email"))
+                            .append(user.getEmail()).append("\n" + messageService.getMessage("mail.block.user.attempts.username"))
+                            .append(user.getUsername()).append("\n" + messageService.getMessage("mail.block.user.attempts.userid"))
+                            .append(user.getId());
+                    for (Attempt attempt : attempts) {
+                        builder.append("\n\n" + messageService.getMessage("mail.block.user.attempts.number"))
+                                .append(attempt.getNumber()).append(" | IP : ")
+                                .append(attempt.getIp()).append(" | " + messageService.getMessage("mail.block.user.attempts.lastAttempt"))
+                                .append(longDateFormat.format(attempt.getLastModified()));
+                        if (attempt.getBlockedUntil() != null) {
+                            builder.append(" | " + messageService.getMessage("mail.block.user.attempts.until"))
+                                    .append(longDateFormat.format(attempt.getBlockedUntil()));
+                        }
                     }
-                }
-                try {
-                    if(sendAdminMail) {
-                        mailService.sendSimpleMessage(ADMIN_MAIL,ATTEMPTS_MAIL_SUBJECT_ADMIN, builder.toString());
-                        LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
+                    try {
+                        if (sendAdminMail) {
+                            mailService.sendSimpleMessage(ADMIN_MAIL, messageService.getMessage("mail.block.user.attempts.adminSubject"), builder.toString());
+                            LOGGER.info("[User {}] account blocking email sent to admin", user.getId());
+                        }
+                    } catch (MailException e) {
+                        LOGGER.error("[User {}] Unable to send the account blocking email to admin", user.getId());
                     }
-                }catch(MailException e) {
-                    LOGGER.error("[User {}] Unable to send the account blocking email to admin", user.getId());
-                }
-                try {
-                    mailService.sendSimpleMessage(user.getEmail(), ATTEMPTS_MAIL_SUBJECT_USER, builder.toString());
-                    LOGGER.info("[User {}] account blocking email sent to user", user.getId());
-                }catch(MailException e) {
-                    LOGGER.error("[User {}] Unable to send the account blocking email to user", user.getId());
-                }
-                
-                break;
+                    try {
+                        mailService.sendSimpleMessage(user.getEmail(), messageService.getMessage("mail.block.user.attempts.subject"), builder.toString());
+                        LOGGER.info("[User {}] account blocking email sent to user", user.getId());
+                    } catch (MailException e) {
+                        LOGGER.error("[User {}] Unable to send the account blocking email to user", user.getId());
+                    }
 
-            default: //Do nothing
+                    break;
+
+                default: //Do nothing
             }
         }
     }
@@ -188,45 +226,52 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Block the account of the user during duration time set
+     *
      * @param user
      * @param attempts attempts of the user
      * @param duration blocking time
      */
     private void blockAccount(User user, ArrayList<Attempt> attempts, int duration) {
+        LOGGER.info("[User {}] block account with {} attempts for {} ", user.getId(), attempts.size(), duration);
         user.setAccountNonLocked(false);
-        if(duration != 0) {
-            attempts.get(attempts.size()-1).setBlockedUntil(currentDateAdd(duration));
+        if (duration != 0) {
+            attempts.get(attempts.size() - 1).setBlockedUntil(currentDateAdd(duration));
         }
         userRepository.save(user);
     }
 
     /**
      * Reset the attempts of the user
+     *
      * @param user
      */
     public void resetFailAttempts(User user) {
+        LOGGER.info("[User {}] reset authentication attempts ", user.getId());
         user.setAttempts(new ArrayList<Attempt>());
-        userRepository.save(user);    
+        userRepository.save(user);
     }
 
     /**
      * Set accountNonLocked to true for the user
+     *
      * @param user
      */
     public void unlock(User user) {
+        LOGGER.info("[User {}] unlock ", user.getId());
+        user.setEnabled(true);
         user.setAccountNonLocked(true);
         userRepository.save(user);
     }
 
     /**
-     * Return the current date plus milliseconds 
+     * Return the current date plus milliseconds
+     *
      * @param miliseconds
      * @return
      */
     private Date currentDateAdd(int miliseconds) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MILLISECOND, miliseconds);
-        Date addMilliSeconds = calendar.getTime();
-        return addMilliSeconds;
+        return calendar.getTime();
     }
 }

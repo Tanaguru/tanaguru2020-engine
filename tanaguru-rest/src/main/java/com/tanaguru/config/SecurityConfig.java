@@ -1,11 +1,13 @@
 package com.tanaguru.config;
 
 import com.tanaguru.handler.LimitLoginAuthenticationProvider;
-import com.tanaguru.security.*;
+import com.tanaguru.security.Http401UnauthorizedEntryPoint;
+import com.tanaguru.security.JwtRequestFilter;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,6 +27,7 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
         securedEnabled = true,
         jsr250Enabled = true)
 @EnableWebSecurity
+@EnableScheduling
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TanaguruUserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -55,20 +58,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-        .csrf().disable()
-        .authorizeRequests()
-        .antMatchers("/logout").permitAll()
-        .antMatchers("/users/forgot-password/**").permitAll()
-        .antMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**").permitAll()
-        .and().exceptionHandling().
-        authenticationEntryPoint(authenticationEntryPoint)
-        .and().sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/logout").permitAll()
+                .antMatchers("/users/forgot-password/**").permitAll()
+                .antMatchers("/v2/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**").permitAll()
+                .and().exceptionHandling().
+                authenticationEntryPoint(authenticationEntryPoint)
+                .and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
@@ -85,7 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public LimitLoginAuthenticationProvider myAuthProvider() throws Exception{
+    public LimitLoginAuthenticationProvider myAuthProvider() throws Exception {
         limitLoginAuthenticationProvider.setPasswordEncoder(this.bCryptPasswordEncoder);
         limitLoginAuthenticationProvider.setUserDetailsService(this.userDetailsService);
         return limitLoginAuthenticationProvider;

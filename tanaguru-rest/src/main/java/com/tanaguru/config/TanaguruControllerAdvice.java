@@ -1,10 +1,11 @@
 package com.tanaguru.config;
 
 import com.tanaguru.domain.dto.ErrorDTO;
+import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
-
+import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -68,6 +69,13 @@ public class TanaguruControllerAdvice {
     @ExceptionHandler(CustomInvalidEntityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorDTO customInvalidEntityError(CustomInvalidEntityException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(CustomIllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ErrorDTO customInvalidEntityError(CustomIllegalStateException ex) {
         return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
     

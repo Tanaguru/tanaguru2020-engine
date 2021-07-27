@@ -6,6 +6,8 @@ import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.contract.ContractRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.Date;
@@ -80,13 +82,21 @@ public interface ContractService {
     void deleteContract(Contract contract);
 
     /**
+     * Get all @see Contract for a given @see User and containing the name
+     *
+     * @param user The given @see User
+     * @return A list of @see Contract
+     */
+    Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable);
+
+    /**
      * Get all @see Contract for a given @see User
      *
      * @param user The given @see User
      * @return A list of @see Contract
      */
-    Collection<Contract> findByUser(User user);
-
+    Page<Contract> findByUser(User user, Pageable pageable);
+    
     /**
      * Find all contracts an @see User owns
      *

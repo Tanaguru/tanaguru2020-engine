@@ -1,9 +1,9 @@
 package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
-import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.service.PageService;
@@ -12,12 +12,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +25,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-
-import javax.persistence.EntityNotFoundException;
 
 /**
  * @author rcharre
@@ -130,9 +128,13 @@ public class PageController {
             @PathVariable long id,
             @PathVariable(required = false) @ApiParam(required = false) String shareCode,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean isAsc,
+            @RequestParam(defaultValue = "") String name) {
         if(tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
-            return pageRepository.findAllByAudit_Id(id, PageRequest.of(page, size));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+            return pageRepository.findByNameContainingIgnoreCaseAndAudit_Id(name, id, pageRequest);
         }else{
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_PAGES_FOR_AUDIT, id );
         }

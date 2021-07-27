@@ -1,33 +1,23 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.EAuditLogLevel;
-import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.domain.entity.audit.AuditLog;
-import com.tanaguru.domain.entity.audit.AuditReference;
-import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.constant.EAuditType;
+import com.tanaguru.domain.entity.audit.*;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.*;
-import com.tanaguru.service.AuditActService;
-import com.tanaguru.service.AuditLogService;
-import com.tanaguru.service.AuditParameterService;
-import com.tanaguru.service.AuditService;
-import com.tanaguru.service.PageService;
-import com.tanaguru.service.TestHierarchyResultService;
-import com.tanaguru.service.TestHierarchyService;
-
+import com.tanaguru.service.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -50,6 +40,7 @@ public class AuditServiceImpl implements AuditService {
     private final PageService pageService;
     private final TestHierarchyService testHierarchyService;
     private final AuditAuditParameterValueRepository auditAuditParameterValueRepository;
+    private final TestHierarchyRepository testHierarchyRepository;
     
     @Autowired
     public AuditServiceImpl(
@@ -62,7 +53,7 @@ public class AuditServiceImpl implements AuditService {
             AuditRepository auditRepository,
             PageService pageService,
             TestHierarchyResultService testHierarchyResultService,
-            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository) {
+            TestHierarchyService testHierarchyService, AuditAuditParameterValueRepository auditAuditParameterValueRepository, TestHierarchyRepository testHierarchyRepository) {
         this.actRepository = actRepository;
         this.auditActService = auditActService;
         this.auditLogRepository = auditLogRepository;
@@ -73,6 +64,7 @@ public class AuditServiceImpl implements AuditService {
         this.pageService = pageService;
         this.testHierarchyService = testHierarchyService;
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
+        this.testHierarchyRepository = testHierarchyRepository;
     }
 
     public Collection<Audit> findAllByProject(Project project) {
@@ -81,8 +73,16 @@ public class AuditServiceImpl implements AuditService {
                 .collect(Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<Audit> findAllByProject(Project project, Pageable pageable) {
+        Collection<Audit> audits = actRepository.findAllByProject(project).stream()
+                .map((Act::getAudit))
+                .collect(Collectors.toList());
+        return new PageImpl<>(new ArrayList<>(audits), pageable, audits.size());
+
+    }
+
     public void deleteAuditByProject(Project project) {
-        LOGGER.debug("[Project {}] Delete all audits", project.getId());
+        LOGGER.info("[Project {}] Delete all audits", project.getId());
         for (Act act : project.getActs()) {
             deleteAudit(act.getAudit());
         }
@@ -105,22 +105,30 @@ public class AuditServiceImpl implements AuditService {
     public void deleteAudit(Audit audit){
         audit = auditRepository.findById(audit.getId())
                 .orElseThrow(CustomEntityNotFoundException::new);
+
         LOGGER.info("[Audit " + audit.getId() + "] delete act");
-        actRepository.findByAudit(audit).ifPresent(actRepository::delete);
+        actRepository.findByAudit(audit)
+                .ifPresent(actRepository::delete);
+
         LOGGER.info("[Audit " + audit.getId() + "] delete content");
         pageService.deletePageByAudit(audit);
 
         LOGGER.info("[Audit " + audit.getId() + "] delete parameters");
         deleteAuditParameterByAudit(audit);
 
-        Collection<TestHierarchy> auditReferences = audit.getAuditReferences()
-                .stream().map(AuditReference::getTestHierarchy).collect(Collectors.toList());
-        auditRepository.deleteById(audit.getId());
-        for(TestHierarchy reference : auditReferences){
-            if(reference.isDeleted() && !auditReferenceRepository.existsByTestHierarchy(reference)){
-                testHierarchyService.deleteReference(reference);
-            }
-        }
+        Collection<TestHierarchy> auditReferences = audit.getAuditReferences().stream()
+                .map(AuditReference::getTestHierarchy)
+                .collect(Collectors.toList());
+
+        LOGGER.info("[Audit {}] delete", audit.getId());
+        auditRepository.delete(audit);
+        auditReferences.stream()
+                .filter(testHierarchy ->
+                                testHierarchy.isDeleted() &&
+                                !auditReferenceRepository.existsByTestHierarchy(testHierarchy) &&
+                                testHierarchyRepository.findById(testHierarchy.getId()).isPresent()
+                        )
+                .forEach(testHierarchyService::deleteReference);
     }
 
     public void deleteAuditParameterByAudit(Audit audit){
@@ -133,6 +141,7 @@ public class AuditServiceImpl implements AuditService {
      * @return json object
      */
     public JSONObject toJson(Audit audit) {
+        LOGGER.info("[Audit {}] export to json", audit.getId());
         JSONObject jsonAuditObject = new JSONObject();
         jsonAuditObject.put("auditLogs", auditLogService.toJson(audit).get("auditLogs"));
         jsonAuditObject.put("act", auditActService.toJson(audit));
@@ -142,5 +151,11 @@ public class AuditServiceImpl implements AuditService {
             jsonAuditObject.append("pages", pageService.toJson(page));
         }
         return jsonAuditObject;
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Audit> findAllByProjectAndType(Project project, EAuditType type,
+            Pageable pageable) {
+        return actRepository.findAllAuditByProjectAndAudit_Type(project, type, pageable);
     }
 }

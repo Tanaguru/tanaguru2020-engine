@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>tanaguru2020</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-api</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-audit-runner</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -63,8 +63,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-version}</version>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
 

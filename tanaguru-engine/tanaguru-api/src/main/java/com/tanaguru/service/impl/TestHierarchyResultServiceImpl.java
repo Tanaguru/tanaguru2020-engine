@@ -11,7 +11,6 @@ import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
 import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
 import com.tanaguru.service.TestHierarchyResultService;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service

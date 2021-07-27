@@ -5,10 +5,10 @@ import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditReference;
+import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.factory.AuditFactory;
@@ -102,7 +102,7 @@ public class AuditFactoryImpl implements AuditFactory {
         }
 
         auditService.log(audit, EAuditLogLevel.INFO, "Audit created for scope " + auditType);
-        LOGGER.info("[Audit {}] Created for scope [{}]", audit.getId(), auditType);
+        LOGGER.info("[Audit {}] Created for scope {}", audit.getId(), auditType);
         return audit;
     }
 
@@ -123,7 +123,7 @@ public class AuditFactoryImpl implements AuditFactory {
 
         audit.setParameters(auditAuditParameterValues);
 
-        LOGGER.info("[Audit {}] Created for scope [{}] from audit {}", audit.getId(), audit.getType(), from.getId());
+        LOGGER.info("[Audit {}] Created for scope {} from audit {}", audit.getId(), audit.getType(), from.getId());
         return audit;
     }
 }

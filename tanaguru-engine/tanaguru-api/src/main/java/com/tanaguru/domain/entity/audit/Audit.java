@@ -1,20 +1,13 @@
 package com.tanaguru.domain.entity.audit;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.parameter.AuditAuditParameterValue;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
-import org.hibernate.annotations.*;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Collection;
@@ -205,5 +198,14 @@ public class Audit implements Serializable {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof Audit)){
+            return false;
+        }
+        Audit audit = (Audit) o;
+        return audit.getId() == getId();
     }
 }

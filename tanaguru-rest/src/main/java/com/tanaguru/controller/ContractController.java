@@ -1,28 +1,33 @@
 package com.tanaguru.controller;
 
-import com.tanaguru.domain.constant.CustomError;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.constant.ContractAuthorityName;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.dto.ContractDTO;
 import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.contract.ContractAuthority;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
-import com.tanaguru.repository.*;
+import com.tanaguru.repository.ContractRepository;
+import com.tanaguru.repository.ContractUserRepository;
+import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -61,12 +66,17 @@ public class ContractController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllWithAuthorities() {
-        return contractService.getRoleAuthorities(
-                    tanaguruUserDetailsService.getCurrentUser().getAppRole().getName())
-                .contains(ContractAuthorityName.SHOW_CONTRACT) ?
-                contractRepository.findAll() :
-                findAllOwnedOrCurrentUserIsMemberOf();
+    Page<Contract> findAllWithAuthorities(
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "") String name
+    ) {
+
+        return contractService.getRoleAuthorities(tanaguruUserDetailsService.getCurrentUser().getAppRole().getName())
+            .contains(ContractAuthorityName.SHOW_CONTRACT) ?
+                contractRepository.findByNameContainingIgnoreCase(name, PageRequest.of(page, size, Sort.by(sortBy))) :
+                findAllByNameOwnedOrCurrentUserIsMemberOf(page, size, sortBy, name);
     }
 
     /**
@@ -86,18 +96,23 @@ public class ContractController {
     @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_USER)")
     @GetMapping(value = "/by-user/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllByUser(@PathVariable long id) {
+    Page<Contract> findAllByUser(@PathVariable long id,
+                                 @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+                                 @RequestParam(defaultValue = "10") @ApiParam(required = false) int size) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id ));
-        Collection<Contract> userContracts = contractService.findByUser(user);
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, id));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Contract> userContracts = contractService.findByUser(user, pageable);
         if (!contractService.hasOverrideAuthority(user, ContractAuthorityName.SHOW_CONTRACT)) {
-            userContracts = userContracts.stream().filter(contract ->
+            List<Contract> contracts = userContracts.stream().filter(contract ->
                     contractService.hasAuthority(
                             user,
                             ContractAuthorityName.SHOW_CONTRACT,
                             contract,
                             false)
             ).collect(Collectors.toList());
+            userContracts = new PageImpl<>(contracts, pageable, contracts.size());
         }
 
         return userContracts;
@@ -116,9 +131,15 @@ public class ContractController {
     @PreAuthorize("@tanaguruUserDetailsServiceImpl.getCurrentUser() != null")
     @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
-    Collection<Contract> findAllOwnedOrCurrentUserIsMemberOf() {
-        return contractService.findByUser(
-                tanaguruUserDetailsService.getCurrentUser());
+    Page<Contract> findAllByNameOwnedOrCurrentUserIsMemberOf(
+            @RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "10") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "") String name) {
+        return contractService.findByUserAndContractName(
+                name,
+                tanaguruUserDetailsService.getCurrentUser(),
+                PageRequest.of(page, size, Sort.by(sortBy)));
     }
 
     /**
@@ -182,7 +203,7 @@ public class ContractController {
     public @ResponseBody
     Contract findById(@PathVariable long id) {
         return contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
     }
 
     /**
@@ -206,14 +227,14 @@ public class ContractController {
     public @ResponseBody
     Collection<String> findAuthoritiesByContractId(@PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
 
         User currentUser = tanaguruUserDetailsService.getCurrentUser();
 
         Collection<String> contractAuthorities = contractUserRepository.findByContractAndUser(contract, currentUser)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, currentUser.getId(),contract.getId() ))
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, currentUser.getId(), contract.getId()))
                 .getContractRole().getAuthorities().stream()
-                    .map((ContractAuthority::getName))
+                .map((ContractAuthority::getName))
                 .collect(Collectors.toList());
 
         //Add override authorities
@@ -245,13 +266,13 @@ public class ContractController {
     public @ResponseBody
     Contract createContract(@RequestBody @Valid ContractDTO contract) {
         User owner = userRepository.findById(contract.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contract.getOwnerId() ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contract.getOwnerId()));
 
         //TODO REMOVE LIMITATION
         Collection<Contract> owned = contractService.findByOwner(owner);
-        if(owned.size()>0){
+        if (owned.size() > 0) {
             throw new CustomInvalidEntityException(CustomError.CANNOT_CREATE_MULTIPLE_USER_CONTRACT);
-        }else{
+        } else {
             return contractService.createContract(
                     owner,
                     contract.getName(),
@@ -270,6 +291,7 @@ public class ContractController {
             notes = "User must have MODIFY_CONTRACT authority"
                     + "\nIf contract not found exception raise : CONTRACT_NOT_FOUND with contract id"
                     + "\nOr if user not found exception raise : USER_NOT_FOUND with user id"
+                    + "\nOr if owned already has a contract : USER_ALREADY_HAS_CONTRACT"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid parameters"),
@@ -283,10 +305,20 @@ public class ContractController {
     public @ResponseBody
     Contract modifyContract(@RequestBody @Valid ContractDTO contractDto, @PathVariable long id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id));
+
+        ContractAppUser currentOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         User owner = userRepository.findById(contractDto.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId() ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId()));
+
+        // limit to 1 contract
+        if (owner.getId() != currentOwner.getUser().getId()) {
+            Collection<Contract> contracts = contractService.findByOwner(owner);
+            if (contracts.size() > 0) {
+                throw new CustomInvalidEntityException(CustomError.USER_ALREADY_HAS_CONTRACT);
+            }
+        }
 
         return contractService.modifyContract(
                 contract,
@@ -318,15 +350,16 @@ public class ContractController {
     public @ResponseBody
     void deleteContract(@PathVariable long id) {
         contractService.deleteContract(
-          contractRepository.findById(id)
-            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id ))
+                contractRepository.findById(id)
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, id))
         );
     }
 
 
     /**
      * Add an @see User to a @see Contract
-     * @param userId The @see User id to add
+     *
+     * @param userId     The @see User id to add
      * @param contractId The @see targeted contract id
      */
     @ApiOperation(
@@ -347,17 +380,18 @@ public class ContractController {
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).INVITE_MEMBER, " +
                     "#contractId)")
     @PutMapping(value = "/{contractId}/add-member/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ContractAppUser addMember(@PathVariable long contractId, @PathVariable long userId){
+    public ContractAppUser addMember(@PathVariable long contractId, @PathVariable long userId) {
         return contractService.addMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId )));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId)));
     }
 
     /**
      * Delete a @see ContractAppUser
-     * @param userId The @see User id to remove from @see Contract
+     *
+     * @param userId     The @see User id to remove from @see Contract
      * @param contractId The @see Contract id to remove the @see User from
      */
     @ApiOperation(
@@ -378,12 +412,12 @@ public class ContractController {
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).REMOVE_MEMBER, " +
                     "#contractId)")
     @PutMapping(value = "/{contractId}/remove-member/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void removeMember(@PathVariable long contractId, @PathVariable long userId){
+    public void removeMember(@PathVariable long contractId, @PathVariable long userId) {
         contractService.removeMember(
                 contractRepository.findById(contractId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId )),
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId)),
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
         );
     }
 
@@ -413,29 +447,29 @@ public class ContractController {
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).PROMOTE_MEMBER, " +
                     "#contractId)")
     @PutMapping(value = "/{contractId}/promote-member/{userId}/to/{contractRole}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ContractAppUser promoteMember(@PathVariable long contractId, @PathVariable long userId, @PathVariable EContractRole contractRole){
+    public ContractAppUser promoteMember(@PathVariable long contractId, @PathVariable long userId, @PathVariable EContractRole contractRole) {
         User current = tanaguruUserDetailsService.getCurrentUser();
-        if(current.getId() == userId){
+        if (current.getId() == userId) {
             throw new CustomForbiddenException(CustomError.CANNOT_PROMOTE_YOURSELF);
         }
 
-        if(contractService.getContractRole(contractRole).isHidden()){
+        if (contractService.getContractRole(contractRole).isHidden()) {
             throw new CustomInvalidEntityException(CustomError.PROJECT_CANNOT_PROMOTE_USER);
         }
 
-        Contract contract =  contractRepository.findById(contractId)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId ));
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CONTRACT_NOT_FOUND, contractId));
 
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
-        if(owner.getUser().getId() == userId){
+        if (owner.getUser().getId() == userId) {
             throw new CustomInvalidEntityException(CustomError.CANNOT_PROMOTE_CONTRACT_OWNER);
         }
 
         ContractAppUser target = contractUserRepository.findByContractAndUser(
                 contract,
                 userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId ))
-        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId , contractId ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, userId))
+        ).orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND_FOR_PROJECT, userId, contractId));
 
         target.setContractRole(contractService.getContractRole(contractRole));
         return contractUserRepository.save(target);

@@ -2,7 +2,10 @@ package com.tanaguru.domain.dto;
 
 import com.tanaguru.domain.constant.EAppRole;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class UserDTO {
     private long id;
@@ -20,7 +23,7 @@ public class UserDTO {
     private EAppRole appRole;
 
     private boolean isEnabled = false;
-    
+
     private boolean accountNonLocked = true;
 
     public long getId() {
@@ -70,12 +73,12 @@ public class UserDTO {
     public void setAppRole(EAppRole appRole) {
         this.appRole = appRole;
     }
-    
+
     public boolean isAccountNonLocked() {
-    	return accountNonLocked;
+        return accountNonLocked;
     }
-    
+
     public void setAccountNonLocked(boolean accountNonLocked) {
-    	this.accountNonLocked = accountNonLocked;
+        this.accountNonLocked = accountNonLocked;
     }
 }

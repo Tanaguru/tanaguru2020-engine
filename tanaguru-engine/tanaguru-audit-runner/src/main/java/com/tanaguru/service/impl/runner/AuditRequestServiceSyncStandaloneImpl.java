@@ -4,7 +4,6 @@ import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
-import com.tanaguru.domain.entity.pageresult.ElementResult;
 import com.tanaguru.repository.*;
 import com.tanaguru.runner.AuditRunner;
 import com.tanaguru.runner.factory.AuditRunnerFactory;
@@ -13,16 +12,15 @@ import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import com.tanaguru.service.impl.MessageService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import javax.transaction.Transactional;
 
 import javax.annotation.PreDestroy;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -55,7 +53,8 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository) {
 
         super(pageRepository,
                 auditRepository,
@@ -69,20 +68,21 @@ public class AuditRequestServiceSyncStandaloneImpl extends AbstractAuditRunnerSe
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository,
+                projectUserRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 
     public void runAudit(Audit audit) {
-        Optional<AuditRunner> auditRunnerOptional = auditRunnerFactory.create(audit);
-        if (auditRunnerOptional.isPresent()) {
-            AuditRunner auditRunner = auditRunnerOptional.get();
+        try {
+            AuditRunner auditRunner = auditRunnerFactory.create(audit);
             auditRunner.addListener(this);
             this.currentRunner = auditRunner;
             auditRunner.run();
-        }else{
+        } catch (Exception e) {
             audit.setStatus(EAuditStatus.ERROR);
             audit = auditRepository.save(audit);
+            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to start audit : " + e.getMessage());
             LOGGER.error("[Audit {}] Unable to start audit", audit.getId());
         }
     }

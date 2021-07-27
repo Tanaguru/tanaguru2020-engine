@@ -3,8 +3,8 @@ package com.tanaguru.runner.factory;
 import com.tanaguru.config.PropertyConfig;
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.factory.TanaguruCrawlerControllerFactory;
-import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.BrowserName;
+import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAuditLogLevel;
 import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.entity.audit.*;
@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 @Transactional
 @Component
 public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerFactoryImpl.class);
 
     private final TanaguruDriverFactory tanaguruDriverFactory;
@@ -41,6 +40,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ResourceRepository resourceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final AuditReferenceRepository auditReferenceRepository;
+    private final ScriptFactory scriptFactory;
 
     private final String coreScript;
     private static final String CHROME = "chrome";
@@ -53,7 +53,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             AuditService auditService,
             ScenarioRepository scenarioRepository,
             ResourceRepository resourceRepository,
-            TanaguruTestRepository tanaguruTestRepository, AuditReferenceRepository auditReferenceRepository, String coreScript) {
+            TanaguruTestRepository tanaguruTestRepository, AuditReferenceRepository auditReferenceRepository, ScriptFactory scriptFactory, String coreScript) {
 
         this.tanaguruDriverFactory = tanaguruDriverFactory;
         this.tanaguruCrawlerControllerFactory = tanaguruCrawlerControllerFactory;
@@ -62,12 +62,12 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         this.resourceRepository = resourceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.auditReferenceRepository = auditReferenceRepository;
+        this.scriptFactory = scriptFactory;
         this.coreScript = coreScript;
     }
 
     @Override
-    public Optional<AuditRunner> create(Audit audit) {
-        Optional<AuditRunner> result = Optional.empty();
+    public AuditRunner create(Audit audit) throws Exception {
         Collection<AuditReference> references = auditReferenceRepository.findAllByAudit(audit);
         Collection<TanaguruTest> tanaguruTests = tanaguruTestRepository.findDistinctByTestHierarchies_ReferenceInAndIsDeletedIsFalse(
                 references.stream().map(AuditReference::getTestHierarchy)
@@ -80,18 +80,15 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         String basicAuthLogin = parameterStringMap.get(EAuditParameter.BASICAUTH_LOGIN).getValue();
         String basicAuthPassword = parameterStringMap.get(EAuditParameter.BASICAUTH_PASSWORD).getValue();
         String webdriverBrowser = parameterStringMap.get(EAuditParameter.WEBDRIVER_BROWSER).getValue();
-        BrowserName browserName = null;
-        switch(webdriverBrowser) {
-        	case CHROME:
-        		browserName = BrowserName.CHROME;
-        		break;
-        	case FIREFOX:
-        		browserName = BrowserName.FIREFOX;
-        		break;
-        	default:
-        		browserName = BrowserName.FIREFOX;    
+        BrowserName browserName;
+        switch (webdriverBrowser) {
+            case CHROME:
+                browserName = BrowserName.CHROME;
+                break;
+            case FIREFOX:
+            default:
+                browserName = BrowserName.FIREFOX;
         }
-
         boolean enableScreenShot = Boolean.parseBoolean(parameterStringMap.get(EAuditParameter.ENABLE_SCREENSHOT).getValue());
 
         basicAuthLogin =
@@ -100,14 +97,17 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         AESEncrypt.decrypt(basicAuthLogin, PropertyConfig.cryptoKey);
         basicAuthPassword =
                 basicAuthPassword.isEmpty() ?
-                    basicAuthPassword :
-                    AESEncrypt.decrypt(basicAuthPassword, PropertyConfig.cryptoKey);
+                        basicAuthPassword :
+                        AESEncrypt.decrypt(basicAuthPassword, PropertyConfig.cryptoKey);
 
         Collection<Integer> resolutions =
                 Arrays.stream(parameterStringMap.get(EAuditParameter.WEBDRIVER_RESOLUTIONS).getValue()
-                .split(";"))
-                .map(Integer::parseInt).collect(Collectors.toList());
+                        .split(";"))
+                        .map(Integer::parseInt).collect(Collectors.toList());
 
+        RemoteWebDriver tanaguruDriver = tanaguruDriverFactory.create(browserName);
+
+        AuditRunner result = null;
         switch (audit.getType()) {
             case PAGE:
                 Collection<String> urls = new ArrayList<>(
@@ -124,7 +124,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        tanaguruDriver);
                 break;
 
             case SITE:
@@ -141,13 +141,13 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        tanaguruDriver);
                 break;
 
             case SCENARIO:
                 long scenarioId = Long.parseLong(parameterStringMap.get(EAuditParameter.SCENARIO_ID).getValue());
                 Scenario scenario = scenarioRepository.findById(scenarioId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, scenarioId ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.SCENARIO_NOT_FOUND, scenarioId));
 
                 result = createSeleneseRunner(
                         tanaguruTests,
@@ -159,12 +159,12 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        tanaguruDriver);
                 break;
             case UPLOAD:
                 long resourceId = Long.parseLong(parameterStringMap.get(EAuditParameter.DOM_ID).getValue());
                 Resource resource = resourceRepository.findById(resourceId)
-                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, resourceId ));
+                        .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.RESOURCE_NOT_FOUND, resourceId));
                 result = createFileRunner(
                         tanaguruTests,
                         audit,
@@ -175,7 +175,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                         basicAuthLogin,
                         basicAuthPassword,
                         enableScreenShot,
-                        browserName);
+                        tanaguruDriver);
                 break;
             default:
                 auditService.log(audit, EAuditLogLevel.ERROR, audit.getType() + " audit type not handled");
@@ -185,7 +185,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     }
 
 
-    public Optional<AuditRunner> createPageRunner(
+    public AuditRunner createPageRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit, Collection<String> urls,
             long waitTime,
@@ -194,32 +194,22 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
-        Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
+            RemoteWebDriver tanaguruDriver) {
 
-        if (tanaguruDriver.isPresent()) {
-            result = Optional.of(new AuditRunnerPage(
-                    tanaguruTests,
-                    audit,
-                    urls,
-                    tanaguruDriver.get(),
-                    coreScript,
-                    waitTime,
-                    resolutions,
-                    basicAuthUrl,
-                    basicAuthLogin,
-                    basicAuthPassword,
-                    enableScreenShot)
-            );
-        } else {
-            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create page audit runner");
-            LOGGER.error("[Audit {}] Unable to create page audit runner", audit.getId());
-        }
-        return result;
+        return new AuditRunnerPage(
+                audit,
+                urls,
+                tanaguruDriver,
+                scriptFactory.create(coreScript, tanaguruTests),
+                waitTime,
+                resolutions,
+                basicAuthUrl,
+                basicAuthLogin,
+                basicAuthPassword,
+                enableScreenShot);
     }
 
-    public Optional<AuditRunner> createSeleneseRunner(
+    public AuditRunner createSeleneseRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             String scenario,
@@ -229,32 +219,22 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
-        Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
+            RemoteWebDriver tanaguruDriver) {
 
-        if (tanaguruDriver.isPresent()) {
-            result = Optional.of(new AuditRunnerSelenese(
-                    tanaguruTests,
-                    audit,
-                    scenario,
-                    tanaguruDriver.get(),
-                    coreScript,
-                    waitTime,
-                    resolutions,
-                    basicAuthUrl,
-                    basicAuthLogin,
-                    basicAuthPassword,
-                    enableScreenShot)
-            );
-        } else {
-            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create scenario audit runner");
-            LOGGER.error("[Audit {}] Unable to create selenese audit runner", audit.getId());
-        }
-        return result;
+        return new AuditRunnerSelenese(
+                audit,
+                scenario,
+                tanaguruDriver,
+                scriptFactory.create(coreScript, tanaguruTests),
+                waitTime,
+                resolutions,
+                basicAuthUrl,
+                basicAuthLogin,
+                basicAuthPassword,
+                enableScreenShot);
     }
 
-    public Optional<AuditRunner> createSiteRunner(
+    public AuditRunner createSiteRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             Collection<String> seeds,
@@ -264,11 +244,10 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
-        Optional<AuditRunner> result = Optional.empty();
+            RemoteWebDriver tanaguruDriver) throws Exception {
+
         Map<EAuditParameter, AuditParameterValue> auditParameterValueMap = audit.getParametersAsMap();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
-        Optional<TanaguruCrawlerController> tanaguruCrawlerController = tanaguruCrawlerControllerFactory.create(
+        TanaguruCrawlerController tanaguruCrawlerController = tanaguruCrawlerControllerFactory.create(
                 seeds,
                 Long.parseLong(auditParameterValueMap.get(EAuditParameter.CRAWLER_MAX_DURATION).getValue()),
                 auditParameterValueMap.get(EAuditParameter.CRAWLER_INCLUSION_REGEX).getValue(),
@@ -280,29 +259,20 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                 basicAuthPassword
         );
 
-        if (tanaguruDriver.isPresent() && tanaguruCrawlerController.isPresent()) {
-            result = Optional.of(new AuditRunnerSite(
-                    tanaguruTests,
-                    audit,
-                    tanaguruCrawlerController.get(),
-                    tanaguruDriver.get(),
-                    coreScript,
-                    waitTime,
-                    resolutions,
-                    basicAuthUrl,
-                    basicAuthLogin,
-                    basicAuthPassword,
-                    enableScreenShot)
-            );
-        } else {
-            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create site audit runner");
-            LOGGER.error("[Audit {}] Unable to create site audit runner", audit.getId());
-        }
-
-        return result;
+        return new AuditRunnerSite(
+                audit,
+                tanaguruCrawlerController,
+                tanaguruDriver,
+                scriptFactory.create(coreScript, tanaguruTests),
+                waitTime,
+                resolutions,
+                basicAuthUrl,
+                basicAuthLogin,
+                basicAuthPassword,
+                enableScreenShot);
     }
 
-    public Optional<AuditRunner> createFileRunner(
+    public AuditRunner createFileRunner(
             Collection<TanaguruTest> tanaguruTests,
             Audit audit,
             String content,
@@ -312,28 +282,18 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             String basicAuthLogin,
             String basicAuthPassword,
             boolean enableScreenShot,
-            BrowserName browserName) {
-        Optional<AuditRunner> result = Optional.empty();
-        Optional<RemoteWebDriver> tanaguruDriver = tanaguruDriverFactory.create(browserName);
+            RemoteWebDriver tanaguruDriver) {
 
-        if (tanaguruDriver.isPresent()) {
-            result = Optional.of(new AuditRunnerFile(
-                    tanaguruTests,
-                    audit,
-                    content,
-                    tanaguruDriver.get(),
-                    coreScript,
-                    waitTime,
-                    resolutions,
-                    basicAuthUrl,
-                    basicAuthLogin,
-                    basicAuthPassword,
-                    enableScreenShot)
-            );
-        } else {
-            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to create file audit runner");
-            LOGGER.error("[Audit {}] Unable to create file audit runner", audit.getId());
-        }
-        return result;
+        return new AuditRunnerFile(
+                audit,
+                content,
+                tanaguruDriver,
+                scriptFactory.create(coreScript, tanaguruTests),
+                waitTime,
+                resolutions,
+                basicAuthUrl,
+                basicAuthLogin,
+                basicAuthPassword,
+                enableScreenShot);
     }
 }

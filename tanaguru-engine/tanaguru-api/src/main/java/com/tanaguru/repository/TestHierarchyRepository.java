@@ -1,8 +1,10 @@
 package com.tanaguru.repository;
 
+import com.tanaguru.domain.dto.TestHierarchyDTO;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
-import org.aspectj.weaver.ast.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -25,7 +27,7 @@ public interface TestHierarchyRepository extends JpaRepository<TestHierarchy, Lo
 
     Collection<TestHierarchy> findByReferenceAndTanaguruTestsContains(TestHierarchy testHierarchy, TanaguruTest tanaguruTest);
 
-    Collection<TestHierarchy> findAllByParentIsNull();
+    Page<TestHierarchyDTO> findAllByParentIsNull(Pageable pageable);
 
     Optional<TestHierarchy> findByIdAndIsDeletedIsFalseAndParentIsNull(Long id);
 
@@ -34,6 +36,7 @@ public interface TestHierarchyRepository extends JpaRepository<TestHierarchy, Lo
      * @return All non deleted @see TestHierarchy
      */
     Collection<TestHierarchy> findAllByParentIsNullAndIsDeletedIsFalse();
+    Page<TestHierarchy> findAllByParentIsNullAndIsDeletedIsFalse(Pageable pageable);
     
     Collection<TestHierarchy> findAllByReferenceId(Long reference_id);
 

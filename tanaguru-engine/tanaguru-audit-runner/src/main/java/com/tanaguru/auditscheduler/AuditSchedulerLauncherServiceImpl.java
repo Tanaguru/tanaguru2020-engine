@@ -14,7 +14,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Transactional

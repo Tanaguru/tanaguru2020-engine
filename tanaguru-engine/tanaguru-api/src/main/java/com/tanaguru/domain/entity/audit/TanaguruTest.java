@@ -1,9 +1,6 @@
 package com.tanaguru.domain.entity.audit;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -12,7 +9,6 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * @author rcharre
@@ -32,6 +28,9 @@ public class TanaguruTest implements Serializable {
 
     @Column
     private String description;
+
+    @Column
+    private String contrast;
 
     @Column
     private String query;
@@ -139,6 +138,14 @@ public class TanaguruTest implements Serializable {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public String getContrast() {
+        return contrast;
+    }
+
+    public void setContrast(String contrast) {
+        this.contrast = contrast;
     }
 }
 

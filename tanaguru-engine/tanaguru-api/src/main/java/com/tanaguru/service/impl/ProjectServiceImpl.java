@@ -17,9 +17,16 @@ import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.*;
+import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +37,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ProjectServiceImpl implements ProjectService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectServiceImpl.class);
+
     private final AppRoleRepository appRoleRepository;
     private final ProjectRepository projectRepository;
     private final ProjectUserRepository projectUserRepository;
@@ -37,6 +46,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ActRepository actRepository;
     private final ContractUserRepository contractUserRepository;
     private final AuditService auditService;
+    private final AsyncAuditService asyncAuditService;
 
     private Map<EProjectRole, ProjectRole> projectRoleMap = new EnumMap<>(EProjectRole.class);
     private Map<EProjectRole, Collection<String>> projectRoleAuthorityMap = new EnumMap<>(EProjectRole.class);
@@ -46,7 +56,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectServiceImpl(
             AppRoleRepository appRoleRepository, ProjectRepository projectRepository,
             ProjectUserRepository projectUserRepository,
-            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService) {
+            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService, AsyncAuditService asyncAuditService) {
         this.appRoleRepository = appRoleRepository;
         this.projectRepository = projectRepository;
         this.projectUserRepository = projectUserRepository;
@@ -54,10 +64,12 @@ public class ProjectServiceImpl implements ProjectService {
         this.actRepository = actRepository;
         this.contractUserRepository = contractUserRepository;
         this.auditService = auditService;
+        this.asyncAuditService = asyncAuditService;
     }
 
     @PostConstruct
     public void initMap() {
+        LOGGER.debug("Initialize project role authorities map");
         for (ProjectRole projectRole : projectRoleRepository.findAll()) {
             Collection<String> authorities = projectRole.getAuthorities()
                     .stream()
@@ -76,7 +88,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         for (EProjectRole projectRole : EProjectRole.values()) {
             projectRoleMap.put(projectRole, projectRoleRepository.findByName(projectRole)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_ROLE_NOT_FOUND, projectRole.toString() )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_ROLE_NOT_FOUND, projectRole.toString())));
         }
     }
 
@@ -117,6 +129,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project createProject(Contract contract, String name, String domain) {
+        LOGGER.info("Create project {} for contract {}", name, contract.getId());
         Project project = new Project();
         project.setContract(contract);
         project.setName(name);
@@ -140,6 +153,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Page<Project> findPageByContractAndUser(Contract contract, User user, Pageable pageable) {
+        Page<ProjectAppUser> appUsers = projectUserRepository.findAllByProject_ContractAndContractAppUser_User(contract, user, pageable);
+        List<Project> projects = appUsers.toList()
+                .stream().map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(projects, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), appUsers.getTotalElements());
+    }
+
+    @Override
     public Collection<Project> findAllByUserMemberOfNotOwner(User user) {
         return projectUserRepository.findAllByContractAppUser_User(user)
                 .stream()
@@ -148,7 +170,23 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public Collection<String> getUserAuthoritiesOnProject(User user, Project project){
+    @Override
+    public Page<Project> findPageByUserMemberOfNotOwner(User user, String search, Pageable pageable) {
+        Page<ProjectAppUser> projects = projectUserRepository.findSharedWith(user, search, pageable);
+        List<Project> projectsList = projects.toList()
+                .stream()
+                .filter(projectAppUser -> projectAppUser.getContractAppUser().getContractRole().getName() != EContractRole.CONTRACT_OWNER)
+                .map(ProjectAppUser::getProject)
+                .collect(Collectors.toList());
+        return new PageImpl<>(
+                projectsList,
+                pageable,
+                projects.getTotalElements()
+        );
+
+    }
+
+    public Collection<String> getUserAuthoritiesOnProject(User user, Project project) {
         ContractAppUser owner = contractUserRepository.findByContractAndContractRoleName_Owner(project.getContract());
 
         Collection<String> projectAuthorities =
@@ -175,9 +213,9 @@ public class ProjectServiceImpl implements ProjectService {
         if (!result) {
             //Check if the user is the contract owner
             ContractAppUser target = contractUserRepository.findByContractAndContractRoleName_Owner(project.getContract());
-            if(user.getId() == target.getUser().getId()){
+            if (user.getId() == target.getUser().getId()) {
                 result = true;
-            }else{
+            } else {
                 Optional<ProjectAppUser> projectAppUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user);
                 result = projectAppUser.isPresent() &&
                         getRoleAuthorities(projectAppUser.get().getProjectRole().getName())
@@ -187,35 +225,48 @@ public class ProjectServiceImpl implements ProjectService {
         return result;
     }
 
-    public ProjectAppUser addMember(Project project, User user){
-        if(!projectUserRepository.findByProjectAndContractAppUser_User(project, user).isPresent()){
+    public ProjectAppUser addMember(Project project, User user) {
+        if (!projectUserRepository.findByProjectAndContractAppUser_User(project, user).isPresent()) {
             ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(project.getContract(), user)
-                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, String.valueOf(user.getId()) , String.valueOf(project.getContract().getId()) ));
+                    .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_CONTRACT, String.valueOf(user.getId()), String.valueOf(project.getContract().getId())));
             ProjectAppUser projectAppUser = new ProjectAppUser();
             projectAppUser.setContractAppUser(contractAppUser);
             projectAppUser.setProject(project);
             projectAppUser.setProjectRole(getProjectRole(EProjectRole.PROJECT_GUEST));
+            LOGGER.info("[Project {}] Add user {}", project.getId(), projectAppUser.getContractAppUser().getUser().getId());
             return projectUserRepository.save(projectAppUser);
-        }else{
+        } else {
             return null;
         }
     }
 
-    public void removeMember(Project project, User user){
+    public void removeMember(Project project, User user) {
         ProjectAppUser projectAppUser = projectUserRepository.findByProjectAndContractAppUser_User(project, user)
-                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()) , String.valueOf(project.getId()) ));
+                .orElseThrow(() -> new CustomInvalidEntityException(CustomError.USER_NOT_FOUND_FOR_PROJECT, String.valueOf(user.getId()), String.valueOf(project.getId())));
+        LOGGER.info("[Project {}] remove user {}", project.getId(), projectAppUser.getContractAppUser().getUser().getId());
         projectUserRepository.delete(projectAppUser);
     }
 
-    public void deleteByContract(Contract contract){
-        for(Project project : contract.getProjects()){
-            deleteProject(project);
-        }
+    public void deleteByContract(Contract contract) {
+        LOGGER.info("Delete all projects for contract {}", contract.getId());
+        contract.getProjects()
+                .forEach(this::deleteProject);
     }
 
-    public void deleteProject(Project project){
-        auditService.deleteAuditByProject(project);
+    public void deleteProject(Project project) {
+        LOGGER.info("[Project {}] delete", project.getId());
+        actRepository.deleteAllByProject(project);
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
+
+        auditService.findAllByProject(project)
+                .forEach(asyncAuditService::deleteAudit);
+    }
+
+    public Project modifyProject(Project project, String name, String domain) {
+        LOGGER.info("[Project {}] modify", project.getId());
+        project.setName(name);
+        project.setDomain(domain);
+        return projectRepository.save(project);
     }
 }

@@ -4,7 +4,6 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditScheduler;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.project.Project;
-import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.repository.ActRepository;
 import com.tanaguru.service.AuditRunnerService;

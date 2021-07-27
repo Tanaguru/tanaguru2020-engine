@@ -1,14 +1,11 @@
 package com.tanaguru.runner.factory;
 
-import com.tanaguru.domain.constant.BrowserName;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.runner.AuditRunner;
-import org.openqa.selenium.Dimension;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * @author rcharre
@@ -20,7 +17,7 @@ public interface AuditRunnerFactory {
      * @param audit The given @see Audit
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> create(Audit audit);
+    AuditRunner create(Audit audit) throws Exception;
 
     /**
      * Create an @see AuditRunner from an @see Audit and an url list
@@ -33,10 +30,10 @@ public interface AuditRunnerFactory {
      * @param basicAuthLogin    Basic authentication login
      * @param basicAuthPassword Basic authentication password
      * @param enableScreeShot   True to enable webdriver to take screenshot
-     * @param webdriverType		The given driver type browser
+     * @param tanaguruDriver    The webdriver
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createPageRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> urls, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    AuditRunner createPageRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> urls, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, RemoteWebDriver tanaguruDriver);
 
     /**
      * Create an @see AuditRunner from an @see Audit and an seeds list
@@ -49,9 +46,10 @@ public interface AuditRunnerFactory {
      * @param basicAuthLogin    Basic authentication login
      * @param basicAuthPassword Basic authentication password
      * @param enableScreeShot   True to enable webdriver to take screenshot
+     * @param tanaguruDriver    The webdriver
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createSiteRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> seeds, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    AuditRunner createSiteRunner(Collection<TanaguruTest> references, Audit audit, Collection<String> seeds, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, RemoteWebDriver tanaguruDriver) throws Exception;
 
     /**
      * Create an @see AuditRunner from an @see Audit and a selenese scenario
@@ -64,9 +62,10 @@ public interface AuditRunnerFactory {
      * @param basicAuthLogin    Basic authentication login
      * @param basicAuthPassword Basic authentication password
      * @param enableScreeShot   True to enable webdriver to take screenshot
+     * @param tanaguruDriver    The webdriver
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createSeleneseRunner(Collection<TanaguruTest> references, Audit audit, String scenario, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    AuditRunner createSeleneseRunner(Collection<TanaguruTest> references, Audit audit, String scenario, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, RemoteWebDriver tanaguruDriver);
 
     /**
      * Create an @see AuditRunner from an Audit and html page
@@ -79,7 +78,8 @@ public interface AuditRunnerFactory {
      * @param basicAuthLogin    Basic authentication login
      * @param basicAuthPassword Basic authentication password
      * @param enableScreeShot   True to enable webdriver to take screenshot
+     * @param tanaguruDriver    The webdriver
      * @return An @see AuditRunner
      */
-    Optional<AuditRunner> createFileRunner(Collection<TanaguruTest> references, Audit audit, String content, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, BrowserName browserName);
+    AuditRunner createFileRunner(Collection<TanaguruTest> references, Audit audit, String content, long waitTime, Collection<Integer> resolutions, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, boolean enableScreeShot, RemoteWebDriver tanaguruDriver);
 }

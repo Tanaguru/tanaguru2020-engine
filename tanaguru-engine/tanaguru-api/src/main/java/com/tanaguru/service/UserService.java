@@ -1,9 +1,6 @@
 package com.tanaguru.service;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
-import com.tanaguru.domain.entity.membership.user.Attempt;
+import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 
 public interface UserService {
@@ -23,6 +20,18 @@ public interface UserService {
      * @return True if the username is already used
      */
     boolean checkUsernameIsUsed(String username);
+
+    /**
+     *
+     * @param username The username
+     * @param email The email
+     * @param password The password
+     * @param appRole The approle
+     * @param enabled Is the user enabled
+     * @param createContract Application auto create a contract
+     * @return The new user
+     */
+    User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract);
 
     /**
      * Modify a @see User

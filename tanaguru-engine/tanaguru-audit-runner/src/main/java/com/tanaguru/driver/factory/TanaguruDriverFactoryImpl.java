@@ -1,24 +1,24 @@
 package com.tanaguru.driver.factory;
 
+import com.tanaguru.domain.constant.BrowserName;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import com.tanaguru.domain.constant.BrowserName;
+
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -77,46 +77,43 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
     }
 
     @Override
-    public Optional<RemoteWebDriver> create(BrowserName browserName) {
-    	Optional<RemoteWebDriver> result = Optional.empty();
-    	RemoteWebDriver remoteWebDriver = null;
-    	switch (browserName) {
-        case CHROME:
-        	ChromeOptions chromeOptions = new ChromeOptions();
-        	setChromePreferences(chromeOptions);
-        	remoteWebDriver = new ChromeDriver(chromeOptions);
-        	remoteWebDriver.manage().deleteAllCookies();
-        	
-        	result = Optional.of(remoteWebDriver);
-            break;
+    public RemoteWebDriver create(BrowserName browserName) {
+        RemoteWebDriver remoteWebDriver = null;
+        try{
+            switch (browserName) {
+                case CHROME:
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    setChromePreferences(chromeOptions);
+                    remoteWebDriver = new ChromeDriver(chromeOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
+                    break;
 
-        case FIREFOX:
-        	FirefoxOptions firefoxOptions = new FirefoxOptions();
-            FirefoxProfile firefoxProfile = createFirefoxProfile();
+                case FIREFOX:
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    FirefoxProfile firefoxProfile = createFirefoxProfile();
 
-            firefoxOptions.setBinary(firefoxBinaryPath);
-            firefoxOptions.setHeadless(true);
-            firefoxOptions.setProfile(firefoxProfile);
-            remoteWebDriver = new FirefoxDriver(firefoxOptions);
-            remoteWebDriver.manage().deleteAllCookies();
+                    firefoxOptions.setBinary(firefoxBinaryPath);
+                    firefoxOptions.setHeadless(true);
+                    firefoxOptions.setProfile(firefoxProfile);
+                    remoteWebDriver = new FirefoxDriver(firefoxOptions);
+                    remoteWebDriver.manage().deleteAllCookies();
+                    break;
 
-            result = Optional.of(remoteWebDriver);
-            break;
-
-        default:
-            LOGGER.error("Browser type not handled : "+browserName);
-    	}
-    		
-    	try { 
-    		remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
-    		remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+                default:
+                    LOGGER.error("Browser type not handled : " + browserName);
+            }
+            remoteWebDriver.manage().timeouts().implicitlyWait(implicitlyWait, TimeUnit.SECONDS);
+            remoteWebDriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
             remoteWebDriver.manage().timeouts().setScriptTimeout(scriptTimeout, TimeUnit.SECONDS);
-    	}catch (IllegalStateException e){
-            LOGGER.error("[Webdriver] Could not create webdriver with error :\n" + e.getMessage());
+
+        }catch (Exception e){
+            if(remoteWebDriver != null){
+                remoteWebDriver.quit();
+            }
+            throw e;
         }
-    	
-    	return result;
-            
+
+    	return remoteWebDriver;
     }
     
     private void setChromePreferences(ChromeOptions options) {
@@ -130,7 +127,7 @@ public class TanaguruDriverFactoryImpl implements TanaguruDriverFactory {
         options.addArguments("--user-agent=tanaguru");
         options.addArguments("--disable-component-update");
         options.addArguments("--ignore-certificate-errors");
-        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        HashMap<String, Object> chromePrefs = new HashMap<>();
         chromePrefs.put("profile.block_third_party_cookies", true);
         chromePrefs.put("download.default_directory", "/dev/null");
         options.setExperimentalOption("prefs", chromePrefs);

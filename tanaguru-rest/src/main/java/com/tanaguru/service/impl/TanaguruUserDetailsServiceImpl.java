@@ -1,12 +1,12 @@
 package com.tanaguru.service.impl;
 
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
+import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +92,23 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(CustomError.USER_NOT_FOUND.toString()));
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                user.isAccountNonLocked(),
+                user.getAppRole().getAuthorities().stream()
+                        .map(appAuthority ->
+                                new SimpleGrantedAuthority(appAuthority.getName())
+                        ).collect(Collectors.toList())
+        );
+    }
+    
+    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(CustomError.EMAIL_NOT_FOUND.toString()));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

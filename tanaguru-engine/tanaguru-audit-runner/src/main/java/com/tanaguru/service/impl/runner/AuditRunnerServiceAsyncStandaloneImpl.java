@@ -11,7 +11,6 @@ import com.tanaguru.service.AuditService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.ResultAnalyzerService;
 import com.tanaguru.service.impl.MessageService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import javax.transaction.Transactional;
 
 import javax.annotation.PreDestroy;
+import javax.transaction.Transactional;
 import java.util.*;
 
 /**
@@ -50,7 +49,6 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
     public AuditRunnerServiceAsyncStandaloneImpl(
             PageRepository pageRepository,
             AuditRepository auditRepository,
-            AuditRunnerFactory auditRunnerFactory,
             AuditService auditService,
             PageContentRepository pageContentRepository,
             TestResultRepository testResultRepository,
@@ -61,7 +59,10 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
             MailService mailService,
             MessageService messageService,
             ActRepository actRepository,
-            ContractUserRepository contractUserRepository) {
+            ContractUserRepository contractUserRepository,
+            ProjectUserRepository projectUserRepository,
+            AuditRunnerFactory auditRunnerFactory
+    ) {
         super(pageRepository,
                 auditRepository,
                 auditService,
@@ -74,7 +75,7 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
                 mailService,
                 messageService,
                 actRepository,
-                contractUserRepository);
+                contractUserRepository, projectUserRepository);
         this.auditRunnerFactory = auditRunnerFactory;
     }
 
@@ -111,15 +112,14 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
      * @param audit the audit request
      */
     private void auditThread(Audit audit) {
-        Optional<AuditRunner> auditRunnerOptional = auditRunnerFactory.create(audit);
-
-        if(auditRunnerOptional.isPresent()){
-            AuditRunner auditRunner = auditRunnerOptional.get();
+        try{
+            AuditRunner auditRunner = auditRunnerFactory.create(audit);
             auditRunner.addListener(this);
             Thread runnerThread = new Thread(auditRunner);
             concurrentAuditRunnerMap.put(auditRunner, runnerThread);
             runnerThread.start();
-        }else{
+        } catch (Exception e) {
+            auditService.log(audit, EAuditLogLevel.ERROR, "Unable to start audit : " + e.getMessage());
             audit.setStatus(EAuditStatus.ERROR);
             audit = auditRepository.save(audit);
             LOGGER.error("[Audit {}] Unable to start audit", audit.getId());
@@ -141,22 +141,45 @@ public class AuditRunnerServiceAsyncStandaloneImpl extends AbstractAuditRunnerSe
         }
     }
 
+    @Override
+    public void stopAudit(Audit audit){
+        concurrentAuditRunnerMap.keySet()
+                .stream().filter(auditRunner -> auditRunner.getAudit().getId() == audit.getId())
+                .findFirst()
+                .ifPresentOrElse(
+                        auditRunner -> {
+                            LOGGER.warn("[Audit {}] Interrupting audit", auditRunner.getAudit().getId());
+                            auditService.log(audit, EAuditLogLevel.WARNING, "Audit Interrupted by server");
+                            auditRunner.interrupt();
+                        },
+                        () -> {
+                            auditService.log(audit, EAuditLogLevel.ERROR, "No runner found on server set audit status to error");
+                            audit.setStatus(EAuditStatus.ERROR);
+                        }
+                );
+    }
+
     /**
      * Hooks kill event, cleans audit that will not be launched
      */
     @PreDestroy
-    private void cleanRunningAudits() {
+    private void cleanRunningAudits() throws InterruptedException {
         synchronized (waitingRequests) {
             for (Audit audit : waitingRequests) {
-                auditService.log(audit, EAuditLogLevel.ERROR, "Audit Interrupted by server");
+                auditService.log(audit, EAuditLogLevel.WARNING, "Audit Interrupted by server");
+                waitingRequests.remove(audit);
             }
         }
 
         synchronized (concurrentAuditRunnerMap) {
             for (AuditRunner runner : concurrentAuditRunnerMap.keySet()) {
                 LOGGER.warn("[Audit {}] Interrupting audit", runner.getAudit().getId());
-                auditService.log(runner.getAudit(), EAuditLogLevel.ERROR, "Audit Interrupted by server");
-                concurrentAuditRunnerMap.get(runner).interrupt();
+                auditService.log(runner.getAudit(), EAuditLogLevel.WARNING, "Audit Interrupted by server");
+                runner.interrupt();
+            }
+
+            for (AuditRunner runner : concurrentAuditRunnerMap.keySet()) {
+                concurrentAuditRunnerMap.get(runner).join();
             }
         }
     }

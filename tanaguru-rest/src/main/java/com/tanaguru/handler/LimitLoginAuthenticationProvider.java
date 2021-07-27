@@ -1,9 +1,9 @@
 package com.tanaguru.handler;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
+import com.tanaguru.domain.entity.membership.user.Attempt;
+import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.repository.UserRepository;
+import com.tanaguru.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import com.tanaguru.domain.entity.membership.user.Attempt;
-import com.tanaguru.domain.entity.membership.user.User;
-import com.tanaguru.repository.UserRepository;
-import com.tanaguru.service.UserService;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider {
@@ -33,7 +34,9 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
     private final HttpServletRequest request;
 
     @Autowired
-    public LimitLoginAuthenticationProvider(UserService userService, UserRepository userRepository, HttpServletRequest request) {
+    public LimitLoginAuthenticationProvider(UserService userService, 
+    		UserRepository userRepository, 
+    		HttpServletRequest request) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.request = request;
@@ -76,10 +79,12 @@ public class LimitLoginAuthenticationProvider extends DaoAuthenticationProvider 
                     }
                 }else {
                     error = "User account is locked - Username : "+ authentication.getName();
+                    LOGGER.info(error);
                     throw new LockedException(error);
                 }
             }else {
                 error = "User account is locked - Username : "+ authentication.getName();
+                LOGGER.info(error);
                 throw new LockedException(error);
             }
         }

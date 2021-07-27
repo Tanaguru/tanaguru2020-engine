@@ -12,5 +12,6 @@ public enum EAuditStatus {
     PENDING_CONSOLIDATION,
     CONSOLIDATING,
     DONE,
-    ERROR
+    ERROR,
+    STOPPED
 }

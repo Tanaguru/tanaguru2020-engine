@@ -9,7 +9,6 @@ import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.service.TestHierarchyService;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +108,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     }
 
     private TestHierarchy importTestHierarchy(JsonTestHierarchy jsonTestHierarchy, TestHierarchy parent) {
+
         TestHierarchy testHierarchy = new TestHierarchy();
         testHierarchy.setName(jsonTestHierarchy.getName());
         testHierarchy.setRank(jsonTestHierarchy.getRank());
@@ -133,6 +133,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     }
 
     public void deleteReference(TestHierarchy reference) {
+        LOGGER.info("[Reference {}] delete", reference.getId());
         if (auditReferenceRepository.existsByTestHierarchy(reference)) {
             tagDeletedWithChild(reference);
             LOGGER.info("[Reference " + reference.getId() + "] tagged deleted");
@@ -144,15 +145,16 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     }
 
     public void tagDeletedWithChild(TestHierarchy testHierarchy) {
+        LOGGER.info("[Test hierarchy {}] tag for deleting", testHierarchy.getId());
         testHierarchy.setDeleted(true);
-        for (TestHierarchy child : testHierarchy.getChildren()) {
-            tagDeletedWithChild(child);
-        }
+        testHierarchy.getChildren()
+                .forEach(this::tagDeletedWithChild);
         testHierarchyRepository.save(testHierarchy);
     }
 
     /**
      * Return a json object with the information of the test hierarchy
+     *
      * @param testHierarchy
      * @return json object
      */

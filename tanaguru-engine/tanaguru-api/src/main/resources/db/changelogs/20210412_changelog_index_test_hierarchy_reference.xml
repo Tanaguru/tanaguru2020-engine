@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="create_test_result_page_reference" author="rcharre">
+        <createIndex tableName="test_hierarchy" indexName="index_test_hierarchy_reference_id">
+            <column name="reference_id" />
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="test_hierarchy" indexName="index_test_hierarchy_reference_id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,11 +1,7 @@
 package com.tanaguru.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
-import com.tanaguru.domain.entity.audit.TestHierarchy;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.Collection;
 
 public class TanaguruTestDTO {

@@ -9,11 +9,10 @@ import com.tanaguru.domain.entity.audit.parameter.AuditParameter;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterFamily;
 import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.domain.entity.membership.project.Project;
+import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Map;
-
-import org.json.JSONObject;
 
 /**
  * @author rcharre

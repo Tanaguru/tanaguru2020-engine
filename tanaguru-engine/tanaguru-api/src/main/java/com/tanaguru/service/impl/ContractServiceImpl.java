@@ -12,14 +12,17 @@ import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidArgumentException;
-import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.ContractRepository;
 import com.tanaguru.repository.ContractRoleRepository;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ContractServiceImpl implements ContractService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
+
     private final AppRoleRepository appRoleRepository;
     private final ContractRepository contractRepository;
     private final ContractRoleRepository contractRoleRepository;
@@ -75,6 +80,7 @@ public class ContractServiceImpl implements ContractService {
 
     @PostConstruct
     public void initMap() {
+        LOGGER.debug("Initialize contract role authorities map");
         for (ContractRole contractRole : contractRoleRepository.findAll()) {
             Collection<String> authorities = contractRole.getAuthorities()
                     .stream()
@@ -93,13 +99,16 @@ public class ContractServiceImpl implements ContractService {
 
         for (EContractRole contractRole : EContractRole.values()) {
             contractRoleMap.put(contractRole, contractRoleRepository.findByName(contractRole)
-                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_CONTRACT_ROLE, contractRole.toString() )));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.CANNOT_FIND_CONTRACT_ROLE, contractRole.toString())));
         }
     }
 
-    public Collection<Contract> findByUser(User user) {
-        return contractUserRepository.findAllByUser(user)
-                .stream().map((ContractAppUser::getContract)).collect(Collectors.toList());
+    public Page<Contract> findByUserAndContractName(String contractName, User user, Pageable pageable) {
+        return contractRepository.findAllByName_AndContractAppUsers_User(contractName, user, pageable);
+    }
+
+    public Page<Contract> findByUser(User user, Pageable pageable) {
+        return contractRepository.findAllByContractAppUsers_User(user, pageable);
     }
 
     public Collection<Contract> findByOwner(User user) {
@@ -136,6 +145,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     public Contract createContract(User owner, String name, int auditLimit, int projectLimit, boolean restrictDomain, Date contractEnd) {
+        LOGGER.info("Create contract {} for with owner {}", name, owner.getId());
         Contract contract = new Contract();
         contract.setAuditLimit(auditLimit);
         contract.setProjectLimit(projectLimit);
@@ -155,6 +165,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     public Contract modifyContract(Contract contract, User owner, String name, int auditLimit, int projectLimit, Date contractEnd, boolean isRestrictDomain) {
+        LOGGER.info("[Contract {}] modify", contract.getId());
         contract.setAuditLimit(auditLimit);
         contract.setProjectLimit(projectLimit);
         contract.setDateEnd(contractEnd);
@@ -166,11 +177,11 @@ public class ContractServiceImpl implements ContractService {
         ContractAppUser contractOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         //Change owner
-        if(contractOwner.getUser().getId() != owner.getId()){
+        if (contractOwner.getUser().getId() != owner.getId()) {
             ContractAppUser newOwner = contractUserRepository.findByContractAndUser(contract, owner)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId()) ));
+                    .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(owner.getId())));
 
-            if(newOwner != null){
+            if (newOwner != null) {
                 newOwner.setContractRole(getContractRole(EContractRole.CONTRACT_OWNER));
                 contractOwner.setContractRole(getContractRole(EContractRole.CONTRACT_MANAGER));
                 contractUserRepository.save(contractOwner);
@@ -180,31 +191,38 @@ public class ContractServiceImpl implements ContractService {
         return contract;
     }
 
-    public void deleteContract(Contract contract){
+    public void deleteContract(Contract contract) {
+        LOGGER.info("[Contract {}] delete", contract.getId());
         projectService.deleteByContract(contract);
         contractUserRepository.deleteAllByContract(contract);
         contractRepository.deleteById(contract.getId());
     }
 
-    public ContractAppUser addMember(Contract contract, User user){
-        if(contractUserRepository.findByContractAndUser(contract, user).isEmpty()){
+    public ContractAppUser addMember(Contract contract, User user) {
+        LOGGER.info("[Contract {}] add user {}", contract.getId(), user.getId());
+        if (contractUserRepository.findByContractAndUser(contract, user).isEmpty()) {
             ContractAppUser contractAppUser = new ContractAppUser();
             contractAppUser.setUser(user);
             contractAppUser.setContract(contract);
             contractAppUser.setContractRole(getContractRole(EContractRole.CONTRACT_GUEST));
             return contractUserRepository.save(contractAppUser);
-        }else{
+        } else {
             return null;
         }
     }
 
 
-    public void removeMember(Contract contract, User user){
+    public void removeMember(Contract contract, User user) {
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(user.getId()) ));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_CURRENT_MEMBER_CONTRACT, String.valueOf(user.getId())));
 
-        if(contractAppUser.getContractRole().getName() == EContractRole.CONTRACT_OWNER){
+        if (contractAppUser.getContractRole().getName() == EContractRole.CONTRACT_OWNER) {
             throw new CustomInvalidArgumentException(CustomError.CANNOT_DELETE_CONTRACT_OWNER, String.valueOf(user.getId()));
+        }
+
+        Collection<Project> projects = projectService.findAllByContractAndUser(contract, user);
+        for (Project project : projects) {
+            projectService.removeMember(project, user);
         }
         contractUserRepository.delete(contractAppUser);
     }

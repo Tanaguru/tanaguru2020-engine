@@ -12,4 +12,10 @@ public interface AuditRunnerService {
      * @param audit
      */
     void runAudit(Audit audit);
+
+    /**
+     * Stop a running audit
+     * @param audit
+     */
+    void stopAudit(Audit audit);
 }
