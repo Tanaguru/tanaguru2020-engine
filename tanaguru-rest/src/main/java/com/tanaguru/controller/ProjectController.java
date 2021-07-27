@@ -354,7 +354,7 @@ public class ProjectController {
     @PreAuthorize(
             "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnContract(" +
                     "T(com.tanaguru.domain.constant.ContractAuthorityName).CREATE_PROJECT, " +
-                    "#project.getContractId())")
+                    "#projectDto.getContractId())")
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Project modifyProject(@RequestBody @Valid ProjectDTO projectDto, @PathVariable long id) {
