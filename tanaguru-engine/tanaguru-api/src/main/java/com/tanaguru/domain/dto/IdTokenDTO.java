@@ -31,11 +31,10 @@ public class IdTokenDTO {
 				this.payload = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[1])), PayloadDTO.class);
 				this.joseHeader = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[0])), JoseHeaderDTO.class);
 			} catch (JsonProcessingException e) {
-			    LOGGER.error("Id Token malformed : payload or joseHeader decode Base64");
 				throw e;
 			}
 		}else {
-			LOGGER.error("Id Token malformed : 3 parts not presents");
+			LOGGER.error("Id Token malformed");
 		} 
 	}
 	
