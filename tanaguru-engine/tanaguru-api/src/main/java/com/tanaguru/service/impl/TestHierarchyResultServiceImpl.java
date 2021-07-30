@@ -19,10 +19,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +40,9 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     private final PageRepository pageRepository;
 
     @Autowired
-    public TestHierarchyResultServiceImpl(TestHierarchyResultRepository testHierarchyResultRepository, PageRepository pageRepository) {
+    public TestHierarchyResultServiceImpl(
+            TestHierarchyResultRepository testHierarchyResultRepository, 
+            PageRepository pageRepository) {
         this.testHierarchyResultRepository = testHierarchyResultRepository;
         this.pageRepository = pageRepository;
     }
@@ -153,4 +160,96 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         results.put("status", testHierarchyResult.getStatus());
         return results;
     }
+    
+    /**
+     * Return a map with test hierarchy code in key and result of the test in value
+     * @param audit the audit
+     * @param testHierarchyResult the reference test hierarchy
+     * @return map<string, string> with test hierarchy code in key and result of the test in value
+     */
+    @Override
+    public Map<String,String> getTestResultByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy) {
+        Map<String, String> mapResult = new TreeMap<String, String>();
+        Map<String, List<String>> testCodeWithResultAllPage = new HashMap<String, List<String>>();
+        Collection<Page> pages = audit.getPages();
+        for(Page page : pages) {
+            Collection<TestHierarchyResult> thResult = page.getTestHierarchyResults();
+            for(TestHierarchyResult thR : thResult) {
+                if(thR.getTestHierarchy().getReference().equals(testHierarchy)) {
+                    String code = thR.getTestHierarchy().getCode();
+                    String statut = thR.getStatus();
+                    if(testCodeWithResultAllPage.containsKey(code)) {
+                        testCodeWithResultAllPage.get(code).add(statut);
+                    }else {
+                        ArrayList<String> allStatus = new ArrayList<String>();
+                        allStatus.add(thR.getStatus());
+                        testCodeWithResultAllPage.put(code, allStatus);
+                    }
+                }
+            }
+        }
+        for(String key : testCodeWithResultAllPage.keySet()) {
+            String statut = getGlobalStatut(testCodeWithResultAllPage.get(key));
+            mapResult.put(key, statut);
+        }
+        return mapResult;
+    }
+    
+    /**
+     * Calculate the final result from a list of test result
+     * @param allStatus intermediate result
+     * @return status final result
+     */
+    private String getGlobalStatut(List<String> allStatus){
+        String testStatus = "";
+        boolean untested = true;
+        boolean inapplicable = true;
+        boolean failed = false;
+        boolean cantTell = false;
+        boolean passed = false;
+        for(String statut : allStatus) {
+            //if for one page the test is failed -> global test failed 
+            if(statut.equals("failed")){
+                failed = true;
+            }
+            if(failed){
+                testStatus = "failed";
+            }else{
+                //if for one page the test is cantTell -> global test cantTell 
+                if(statut.equals("cantTell")){
+                    cantTell = true;
+                }
+                if(cantTell){
+                    testStatus = "cantTell";
+                }else{
+                    //if the test is passed for one page -> global test passed 
+                    if(statut.equals("passed")){
+                        passed = true;
+                    }
+                    if(passed){
+                        testStatus = "passed";
+                    }else{
+                        //if the test is inapplicable for each page -> global test inapplicable 
+                        if(!statut.equals("inapplicable")){
+                            inapplicable = false;
+                        }
+                        
+                        if(inapplicable){
+                            testStatus = "inapplicable";
+                        }else{
+                            //if the test is untested for each page -> global test untested 
+                            if(!statut.equals("untested")){
+                                untested = false;
+                            }
+                            if(untested){
+                                testStatus = "untested";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return testStatus;
+    }
+    
 }

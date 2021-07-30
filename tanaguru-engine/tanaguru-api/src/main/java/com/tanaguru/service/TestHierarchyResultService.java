@@ -6,6 +6,9 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
+
+import java.util.Map;
+
 import org.json.JSONObject;
 import org.springframework.data.domain.Pageable;
 
@@ -22,4 +25,6 @@ public interface TestHierarchyResultService {
     JSONObject toJson(TestHierarchyResult testHierarchyResult);
 
     void deleteTestHierarchyResultByPage(Page page);
+    
+    Map<String, String> getTestResultByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy);
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -345,5 +346,38 @@ public class TestHierarchyResultController {
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
 
         return testHierarchyResultService.getAuditSynthesisForTestHierarchy(audit, testHierarchy, PageRequest.of(page, size));
+    }
+    
+    @ApiOperation(
+            value = "Get result of the test hierarchy for all the pages of a given Audit id and reference id",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode. Warning, this function is resource heavy"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
+                    + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error"
+                    + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
+                    + "\nTest hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
+    })
+    @GetMapping("/global-test-result-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}")
+    public @ResponseBody
+    Map<String, String> getTestResultByAuditAndTestHierarchy(
+            @PathVariable long auditId,
+            @PathVariable long referenceId,
+            @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
+        Audit audit = auditRepository.findById(auditId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
+
+        if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId() );
+        }
+
+        TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
+        
+        return testHierarchyResultService.getTestResultByAuditAndTestHierarchy(audit, testHierarchy);
     }
 }
