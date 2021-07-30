@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 public class UserDTO {
     private long id;
 
-    @Size(min = 4, max = 30)
+    @Size(min = 4, max = 100)
     @NotBlank
     private String username;
 
