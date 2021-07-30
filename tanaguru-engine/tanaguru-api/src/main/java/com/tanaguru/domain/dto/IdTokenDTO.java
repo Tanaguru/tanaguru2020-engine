@@ -36,7 +36,6 @@ public class IdTokenDTO {
 				throw new CustomInvalidArgumentException(CustomError.SSO_JSON_PROCESSING_PAYLOAD_JOSEHEADER, e.getMessage());
 			}
 		}else {
-			LOGGER.error("Id Token malformed");
 			throw new CustomInvalidArgumentException(CustomError.SSO_ID_TOKEN_MALFORMED);
 		} 
 	}
