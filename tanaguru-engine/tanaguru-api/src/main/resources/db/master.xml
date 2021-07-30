@@ -33,5 +33,6 @@
     <include file="db/changelogs/20210607_changelog_updateUsers_appRole.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210722_changelog_tanaguru_test_contrast.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210722_changelog_updateProject.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210730_changelog_updateUser.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

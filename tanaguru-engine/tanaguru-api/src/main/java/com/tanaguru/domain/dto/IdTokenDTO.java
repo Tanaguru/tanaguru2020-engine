@@ -28,13 +28,16 @@ public class IdTokenDTO {
 		if(parts.length == 3) {
 			this.signature = parts[2];
 			try {
+			    System.out.println("Payload : "+ new String(Base64.getDecoder().decode(parts[1])));
+			    System.out.println("JoseHeader : "+ new String(Base64.getDecoder().decode(parts[0])));
 				this.payload = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[1])), PayloadDTO.class);
 				this.joseHeader = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[0])), JoseHeaderDTO.class);
 			} catch (JsonProcessingException e) {
+			    LOGGER.error("Id Token malformed : payload or joseHeader decode Base64");
 				throw e;
 			}
 		}else {
-			LOGGER.error("Id Token malformed");
+			LOGGER.error("Id Token malformed : 3 parts not presents");
 		} 
 	}
 	
