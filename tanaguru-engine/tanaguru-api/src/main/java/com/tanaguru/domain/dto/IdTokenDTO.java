@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.service.impl.UserServiceImpl;
 
 public class IdTokenDTO {
@@ -21,7 +23,7 @@ public class IdTokenDTO {
 	
 	private String signature;
 
-	public IdTokenDTO(String idTokenEncoded) throws JsonProcessingException {
+	public IdTokenDTO(String idTokenEncoded) {
 		ObjectMapper objectMapper = new ObjectMapper();
 	    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		String[] parts = idTokenEncoded.split(Pattern.quote("."));
@@ -31,10 +33,10 @@ public class IdTokenDTO {
 				this.payload = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[1])), PayloadDTO.class);
 				this.joseHeader = objectMapper.readValue(new String(Base64.getDecoder().decode(parts[0])), JoseHeaderDTO.class);
 			} catch (JsonProcessingException e) {
-				throw e;
+				throw new CustomInvalidArgumentException(CustomError.SSO_JSON_PROCESSING_PAYLOAD_JOSEHEADER, e.getMessage());
 			}
 		}else {
-			LOGGER.error("Id Token malformed");
+			throw new CustomInvalidArgumentException(CustomError.SSO_ID_TOKEN_MALFORMED);
 		} 
 	}
 	
