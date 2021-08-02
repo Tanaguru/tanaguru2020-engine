@@ -2,6 +2,7 @@ package com.tanaguru.config;
 
 import com.tanaguru.domain.dto.ErrorDTO;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
@@ -84,5 +85,12 @@ public class TanaguruControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     ErrorDTO userBlocked(LockedException ex) {
         return new ErrorDTO(ex.getMessage());
+    }
+    
+    @ResponseBody
+    @ExceptionHandler(CustomInvalidArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ErrorDTO customInvalidArgumentError(CustomInvalidArgumentException ex) {
+        return new ErrorDTO(ex.getMessage(), ex.getContent());
     }
 }
