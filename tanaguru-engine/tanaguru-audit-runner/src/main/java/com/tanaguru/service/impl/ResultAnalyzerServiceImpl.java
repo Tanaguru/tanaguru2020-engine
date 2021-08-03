@@ -163,6 +163,10 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
         Collection<TestResult> testResults = new ArrayList<>();
         for (TanaguruTest tanaguruTest : testHierarchy.getTanaguruTests()) {
             TestResult testResult = testResultByTestId.get(tanaguruTest.getId());
+            if(testResult == null){
+                LOGGER.warn("[Test {}] Missing result", tanaguruTest.getId());
+                continue;
+            }
             switch (testResult.getStatus()) {
                 case TestStatusName.STATUS_FAILED:
                     testHierarchyResult.setNbTestFailed(testHierarchyResult.getNbTestFailed() + 1);

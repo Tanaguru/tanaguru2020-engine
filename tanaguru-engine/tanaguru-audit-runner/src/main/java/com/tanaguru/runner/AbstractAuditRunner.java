@@ -96,8 +96,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
             this.runImpl();
         } catch (Exception e) {
-            LOGGER.error("Error during run : " + e.getMessage());
-            auditLog(EAuditLogLevel.ERROR, "Error during run : " + e.getMessage());
+            e.printStackTrace();
+            auditLog(EAuditLogLevel.ERROR, "Tanaguru encountered an issue, please contact an administrator of the platform.");
         }
 
         try {
