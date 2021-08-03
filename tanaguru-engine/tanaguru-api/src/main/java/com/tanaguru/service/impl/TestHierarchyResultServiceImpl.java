@@ -174,19 +174,20 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         Collection<Page> pages = audit.getPages();
         for(Page page : pages) {
             Collection<TestHierarchyResult> thResults = page.getTestHierarchyResults();
-            for(TestHierarchyResult thResult : thResults) {
-                if(thResult.getTestHierarchy().getReference().equals(testHierarchy)) {
-                    String code = thResult.getTestHierarchy().getCode();
-                    String statut = thResult.getStatus();
-                    if(testCodeWithStatusAllPage.containsKey(code)) {
-                        testCodeWithStatusAllPage.get(code).add(statut);
-                    }else {
-                        ArrayList<String> allStatus = new ArrayList<String>();
-                        allStatus.add(thResult.getStatus());
-                        testCodeWithStatusAllPage.put(code, allStatus);
-                    }
+            thResults.stream()
+            .filter(th -> th.getTestHierarchy().getReference().equals(testHierarchy))
+            .forEach(th -> {
+                String code = th.getTestHierarchy().getCode();
+                String statut = th.getStatus();
+                if(testCodeWithStatusAllPage.containsKey(code)) {
+                    testCodeWithStatusAllPage.get(code).add(statut);
+                }else {
+                    ArrayList<String> allStatus = new ArrayList<String>();
+                    allStatus.add(th.getStatus());
+                    testCodeWithStatusAllPage.put(code, allStatus);
                 }
-            }
+                
+            });
         }
         for(String code : testCodeWithStatusAllPage.keySet()) {
             String status = getGlobalStatus(testCodeWithStatusAllPage.get(code));
@@ -209,40 +210,40 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         boolean passed = false;
         for(String statut : allStatus) {
             //if for one page the test is failed -> global test failed 
-            if(statut.equals("failed")){
+            if(statut.equals(TestStatusName.STATUS_FAILED)){
                 failed = true;
             }
             if(failed){
-                testStatus = "failed";
+                testStatus = TestStatusName.STATUS_FAILED;
             }else{
                 //if for one page the test is cantTell -> global test cantTell 
-                if(statut.equals("cantTell")){
+                if(statut.equals(TestStatusName.STATUS_CANT_TELL)){
                     cantTell = true;
                 }
                 if(cantTell){
-                    testStatus = "cantTell";
+                    testStatus = TestStatusName.STATUS_CANT_TELL;
                 }else{
                     //if the test is passed for one page -> global test passed 
-                    if(statut.equals("passed")){
+                    if(statut.equals(TestStatusName.STATUS_SUCCESS)){
                         passed = true;
                     }
                     if(passed){
-                        testStatus = "passed";
+                        testStatus = TestStatusName.STATUS_SUCCESS;
                     }else{
                         //if the test is inapplicable for each page -> global test inapplicable 
-                        if(!statut.equals("inapplicable")){
+                        if(!statut.equals(TestStatusName.STATUS_INAPPLICABLE)){
                             inapplicable = false;
                         }
                         
                         if(inapplicable){
-                            testStatus = "inapplicable";
+                            testStatus = TestStatusName.STATUS_INAPPLICABLE;
                         }else{
                             //if the test is untested for each page -> global test untested 
-                            if(!statut.equals("untested")){
+                            if(!statut.equals(TestStatusName.STATUS_NOT_TESTED)){
                                 untested = false;
                             }
                             if(untested){
-                                testStatus = "untested";
+                                testStatus = TestStatusName.STATUS_NOT_TESTED;
                             }
                         }
                     }
