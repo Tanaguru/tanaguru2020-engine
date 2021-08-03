@@ -158,35 +158,27 @@ public class ElementResult implements Serializable {
         this.tag = tag;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getSize() {
+    public int getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(int size) {
         this.size = size;
     }
 
-    public String getWeight() {
+    public int getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(int weight) {
         this.weight = weight;
     }
 
-    public String getRatio() {
+    public float getRatio() {
         return ratio;
     }
 
-    public void setRatio(String ratio) {
+    public void setRatio(float ratio) {
         this.ratio = ratio;
     }
 }
