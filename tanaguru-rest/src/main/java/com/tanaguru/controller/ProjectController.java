@@ -358,8 +358,6 @@ public class ProjectController {
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Project modifyProject(@RequestBody @Valid ProjectDTO projectDto, @PathVariable long id) {
-        User user = tanaguruUserDetailsService.getCurrentUser();
-
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
 
@@ -373,7 +371,7 @@ public class ProjectController {
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, projectDto.getDomain());
         }
 
-        return projectService.modifyProject(project, project.getName(), projectDto.getDomain());
+        return projectService.modifyProject(project, projectDto.getName(), projectDto.getDomain());
     }
 
     @ApiOperation(
