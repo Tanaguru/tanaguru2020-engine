@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -170,24 +171,13 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     @Override
     public Map<String,String> getTestStatusByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy) {
         Map<String, String> mapResult = new TreeMap<String, String>();
-        Map<String, List<String>> testCodeWithStatusAllPage = new HashMap<String, List<String>>();
+        Map<String, Set<String>> testCodeWithStatusAllPage = new HashMap<String, Set<String>>();
         Collection<Page> pages = audit.getPages();
         for(Page page : pages) {
             Collection<TestHierarchyResult> thResults = page.getTestHierarchyResults();
             thResults.stream()
             .filter(th -> th.getTestHierarchy().getReference().equals(testHierarchy))
-            .forEach(th -> {
-                String code = th.getTestHierarchy().getCode();
-                String statut = th.getStatus();
-                if(testCodeWithStatusAllPage.containsKey(code)) {
-                    testCodeWithStatusAllPage.get(code).add(statut);
-                }else {
-                    ArrayList<String> allStatus = new ArrayList<String>();
-                    allStatus.add(th.getStatus());
-                    testCodeWithStatusAllPage.put(code, allStatus);
-                }
-                
-            });
+            .forEach(th -> this.addInMapTestHierarchyCodeAndStatus(testCodeWithStatusAllPage, th.getTestHierarchy().getCode(), th.getStatus()));
         }
         for(String code : testCodeWithStatusAllPage.keySet()) {
             String status = getGlobalStatus(testCodeWithStatusAllPage.get(code));
@@ -197,60 +187,38 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     }
     
     /**
+     * Add in the map passed in param the code of the test hierarchy and it status
+     * @param map containing test hierarchy code and it status
+     * @param code to add
+     * @param status to add
+     */
+    private void addInMapTestHierarchyCodeAndStatus(Map<String, Set<String>> map, String code, String status) {
+        if(map.containsKey(code)) {
+            map.get(code).add(status);
+        }else {
+            Set<String> allStatus = new HashSet<String>();
+            allStatus.add(status);
+            map.put(code, allStatus);
+        }
+    }
+    
+    /**
      * Calculate the final status from a list of test status
      * @param allStatus intermediate status
      * @return status final status
      */
-    private String getGlobalStatus(List<String> allStatus){
-        String testStatus = "";
-        boolean untested = true;
-        boolean inapplicable = true;
-        boolean failed = false;
-        boolean cantTell = false;
-        boolean passed = false;
-        for(String statut : allStatus) {
-            //if for one page the test is failed -> global test failed 
-            if(statut.equals(TestStatusName.STATUS_FAILED)){
-                failed = true;
-            }
-            if(failed){
-                testStatus = TestStatusName.STATUS_FAILED;
-            }else{
-                //if for one page the test is cantTell -> global test cantTell 
-                if(statut.equals(TestStatusName.STATUS_CANT_TELL)){
-                    cantTell = true;
-                }
-                if(cantTell){
-                    testStatus = TestStatusName.STATUS_CANT_TELL;
-                }else{
-                    //if the test is passed for one page -> global test passed 
-                    if(statut.equals(TestStatusName.STATUS_SUCCESS)){
-                        passed = true;
-                    }
-                    if(passed){
-                        testStatus = TestStatusName.STATUS_SUCCESS;
-                    }else{
-                        //if the test is inapplicable for each page -> global test inapplicable 
-                        if(!statut.equals(TestStatusName.STATUS_INAPPLICABLE)){
-                            inapplicable = false;
-                        }
-                        
-                        if(inapplicable){
-                            testStatus = TestStatusName.STATUS_INAPPLICABLE;
-                        }else{
-                            //if the test is untested for each page -> global test untested 
-                            if(!statut.equals(TestStatusName.STATUS_NOT_TESTED)){
-                                untested = false;
-                            }
-                            if(untested){
-                                testStatus = TestStatusName.STATUS_NOT_TESTED;
-                            }
-                        }
-                    }
-                }
-            }
+    private String getGlobalStatus(Set<String> allStatus){
+        if(allStatus.contains(TestStatusName.STATUS_FAILED)) {
+            return TestStatusName.STATUS_FAILED;
+        }else if(allStatus.contains(TestStatusName.STATUS_CANT_TELL)){
+            return TestStatusName.STATUS_CANT_TELL;
+        }else if(allStatus.contains(TestStatusName.STATUS_SUCCESS)) {
+            return TestStatusName.STATUS_SUCCESS;
+        }else if(allStatus.contains(TestStatusName.STATUS_INAPPLICABLE) && !allStatus.contains(TestStatusName.STATUS_NOT_TESTED)){
+            return TestStatusName.STATUS_INAPPLICABLE;
+        }else {
+            return TestStatusName.STATUS_NOT_TESTED;
         }
-        return testStatus;
     }
     
 }
