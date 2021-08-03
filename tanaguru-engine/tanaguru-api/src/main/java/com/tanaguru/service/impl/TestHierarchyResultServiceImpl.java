@@ -162,45 +162,45 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     }
     
     /**
-     * Return a map with test hierarchy code in key and result of the test in value
+     * Return a map with test hierarchy code in key and status of the test in value
      * @param audit the audit
      * @param testHierarchyResult the reference test hierarchy
-     * @return map<string, string> with test hierarchy code in key and result of the test in value
+     * @return map<string, string> with test hierarchy code in key and status of the test in value
      */
     @Override
-    public Map<String,String> getTestResultByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy) {
+    public Map<String,String> getTestStatusByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy) {
         Map<String, String> mapResult = new TreeMap<String, String>();
-        Map<String, List<String>> testCodeWithResultAllPage = new HashMap<String, List<String>>();
+        Map<String, List<String>> testCodeWithStatusAllPage = new HashMap<String, List<String>>();
         Collection<Page> pages = audit.getPages();
         for(Page page : pages) {
-            Collection<TestHierarchyResult> thResult = page.getTestHierarchyResults();
-            for(TestHierarchyResult thR : thResult) {
-                if(thR.getTestHierarchy().getReference().equals(testHierarchy)) {
-                    String code = thR.getTestHierarchy().getCode();
-                    String statut = thR.getStatus();
-                    if(testCodeWithResultAllPage.containsKey(code)) {
-                        testCodeWithResultAllPage.get(code).add(statut);
+            Collection<TestHierarchyResult> thResults = page.getTestHierarchyResults();
+            for(TestHierarchyResult thResult : thResults) {
+                if(thResult.getTestHierarchy().getReference().equals(testHierarchy)) {
+                    String code = thResult.getTestHierarchy().getCode();
+                    String statut = thResult.getStatus();
+                    if(testCodeWithStatusAllPage.containsKey(code)) {
+                        testCodeWithStatusAllPage.get(code).add(statut);
                     }else {
                         ArrayList<String> allStatus = new ArrayList<String>();
-                        allStatus.add(thR.getStatus());
-                        testCodeWithResultAllPage.put(code, allStatus);
+                        allStatus.add(thResult.getStatus());
+                        testCodeWithStatusAllPage.put(code, allStatus);
                     }
                 }
             }
         }
-        for(String key : testCodeWithResultAllPage.keySet()) {
-            String statut = getGlobalStatut(testCodeWithResultAllPage.get(key));
-            mapResult.put(key, statut);
+        for(String code : testCodeWithStatusAllPage.keySet()) {
+            String status = getGlobalStatus(testCodeWithStatusAllPage.get(code));
+            mapResult.put(code, status);
         }
         return mapResult;
     }
     
     /**
-     * Calculate the final result from a list of test result
-     * @param allStatus intermediate result
-     * @return status final result
+     * Calculate the final status from a list of test status
+     * @param allStatus intermediate status
+     * @return status final status
      */
-    private String getGlobalStatut(List<String> allStatus){
+    private String getGlobalStatus(List<String> allStatus){
         String testStatus = "";
         boolean untested = true;
         boolean inapplicable = true;

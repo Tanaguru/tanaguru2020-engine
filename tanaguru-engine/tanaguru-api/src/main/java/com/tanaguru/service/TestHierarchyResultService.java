@@ -26,5 +26,5 @@ public interface TestHierarchyResultService {
 
     void deleteTestHierarchyResultByPage(Page page);
     
-    Map<String, String> getTestResultByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy);
+    Map<String, String> getTestStatusByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy);
 }

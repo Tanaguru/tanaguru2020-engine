@@ -350,7 +350,7 @@ public class TestHierarchyResultController {
     
     @ApiOperation(
             value = "Get result of the test hierarchy for all the pages of a given Audit id and reference id",
-            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode. Warning, this function is resource heavy"
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
                     + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
                     + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id"
                     + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
@@ -364,7 +364,7 @@ public class TestHierarchyResultController {
     })
     @GetMapping("/global-test-result-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}")
     public @ResponseBody
-    Map<String, String> getTestResultByAuditAndTestHierarchy(
+    Map<String, String> getTestStatusByAuditAndTestHierarchy(
             @PathVariable long auditId,
             @PathVariable long referenceId,
             @ApiParam(required = false) @PathVariable(required = false) String sharecode) {
@@ -378,6 +378,6 @@ public class TestHierarchyResultController {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
         
-        return testHierarchyResultService.getTestResultByAuditAndTestHierarchy(audit, testHierarchy);
+        return testHierarchyResultService.getTestStatusByAuditAndTestHierarchy(audit, testHierarchy);
     }
 }
