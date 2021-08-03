@@ -7,10 +7,10 @@
 
 	<changeSet author="rcharre" id="update_element_result">
 	    <addColumn tableName="element_result">
-			<column name="tag" type="varchar(30)"/>
-			<column name="size" type="int" defaultValue="-1"/>
-			<column name="weight" type="int" defaultValue="-1"/>
-			<column name="ratio" type="decimal" defaultValue="-1"/>
+			<column name="tag" type="text"/>
+			<column name="size" type="text"/>
+			<column name="weight" type="text"/>
+			<column name="ratio" type="text"/>
 		</addColumn>
 
 		<rollback>

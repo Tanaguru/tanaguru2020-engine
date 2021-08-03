@@ -62,7 +62,7 @@ public class ElementResult implements Serializable {
     private String tag;
 
     @Column
-    private int size = -1;
+    private String size;
 
     @Column
     private int weight = -1;
@@ -158,11 +158,11 @@ public class ElementResult implements Serializable {
         this.tag = tag;
     }
 
-    public int getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
