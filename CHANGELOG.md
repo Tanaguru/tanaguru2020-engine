@@ -29,3 +29,6 @@
 - Add statistics page for super-admin and config key (statistics.fixedDelay)
 - Upgrade logging
 - Fix audit and user deletion
+
+## 1.0.4
+- Fix modify project
