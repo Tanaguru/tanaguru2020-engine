@@ -349,7 +349,7 @@ public class TestHierarchyResultController {
     }
     
     @ApiOperation(
-            value = "Get result of the test hierarchy for all the pages of a given Audit id and reference id",
+            value = "Get status of the test hierarchy for all the pages of a given Audit id and reference id",
             notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
                     + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
                     + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id"
@@ -362,7 +362,7 @@ public class TestHierarchyResultController {
                     + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
                     + "\nTest hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
     })
-    @GetMapping("/global-test-result-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}")
+    @GetMapping("/global-test-status-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}")
     public @ResponseBody
     Map<String, String> getTestStatusByAuditAndTestHierarchy(
             @PathVariable long auditId,
