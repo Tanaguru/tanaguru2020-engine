@@ -25,6 +25,10 @@ public class UserDTO {
     private boolean isEnabled = false;
 
     private boolean accountNonLocked = true;
+    
+    private String firstname;
+    
+    private String lastname;
 
     public long getId() {
         return id;
@@ -81,4 +85,21 @@ public class UserDTO {
     public void setAccountNonLocked(boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+    
 }

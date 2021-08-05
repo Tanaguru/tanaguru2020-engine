@@ -271,7 +271,9 @@ public class UserController {
                 user.getPassword(),
                 approle,
                 user.isEnabled(),
-                createContract));
+                createContract,
+                null,
+                null));
     }
 
     /**

@@ -31,7 +31,7 @@ public interface UserService {
      * @param createContract Application auto create a contract
      * @return The new user
      */
-    User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract);
+    User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract, String firstName, String lastName);
 
     /**
      * Modify a @see User

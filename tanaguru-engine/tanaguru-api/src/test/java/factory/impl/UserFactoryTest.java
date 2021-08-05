@@ -35,7 +35,7 @@ public class UserFactoryTest {
     @Test(expected = CustomEntityNotFoundException.class)
     public void createUserTest_RoleNotFound() {
         Mockito.when(appRoleService.getAppRole(EAppRole.ADMIN)).thenReturn(Optional.empty());
-        userFactory.createUser("test", "test@test.com", "test", EAppRole.ADMIN, false);
+        userFactory.createUser("test", "test@test.com", "test", EAppRole.ADMIN, false,null,null);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class UserFactoryTest {
         Mockito.when(appRoleService.getAppRole(EAppRole.ADMIN)).thenReturn(Optional.of(appRole));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
 
-        User userRes = userFactory.createUser("test", "test@test.com", "test", EAppRole.ADMIN, false);
+        User userRes = userFactory.createUser("test", "test@test.com", "test", EAppRole.ADMIN, false, null, null);
         Assert.assertEquals(userRes.getEmail(), "test@test.com");
         Assert.assertEquals(userRes.getPassword(), "test");
         Assert.assertEquals(userRes.getUsername(), "test");

@@ -67,6 +67,10 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn
     private AppRole appRole;
+    
+    private String firstname;
+    
+    private String lastname;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -169,4 +173,21 @@ public class User implements Serializable {
     public void setAttempts(Collection<Attempt> attempts) {
         this.attempts = attempts;
     }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+    
 }

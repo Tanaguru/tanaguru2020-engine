@@ -75,7 +75,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract) {
+    public User createUser(
+            String username, 
+            String email, 
+            String password, 
+            EAppRole appRole, 
+            boolean enabled, boolean 
+            createContract,
+            String firstName, 
+            String lastName) {
         if (checkUsernameIsUsed(username)) {
             throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
         }
@@ -89,7 +97,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        User user = userFactory.createUser(username, email, bCryptPasswordEncoder.encode(password), appRole, enabled);
+        User user = userFactory.createUser(username, email, bCryptPasswordEncoder.encode(password), appRole, enabled, firstName, lastName);
         if (createContract) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, 1);
