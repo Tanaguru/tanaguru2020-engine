@@ -11,6 +11,7 @@ import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
@@ -329,7 +330,11 @@ public class AuditController {
         if (new Date().after(project.getContract().getDateEnd())) {
             throw new CustomForbiddenException(CustomError.CONTRACT_DATE_PASSED);
         }
-
+        
+        if(!projectService.projectAcceptThisAuditType(auditCommand.getType(), project)) {
+            throw new CustomInvalidArgumentException(CustomError.AUDIT_TYPE_NOT_ACCEPTED_BY_PROJECT);
+        }
+        
         TestHierarchy main = null;
         ArrayList<TestHierarchy> references = new ArrayList<>();
         for (Long referenceId : auditCommand.getReferences()) {

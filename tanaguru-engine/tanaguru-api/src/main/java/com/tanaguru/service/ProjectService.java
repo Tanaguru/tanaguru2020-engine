@@ -1,6 +1,7 @@
 package com.tanaguru.service;
 
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.contract.Contract;
@@ -129,4 +130,6 @@ public interface ProjectService {
      * @return The modified project
      */
     Project modifyProject(Project project, String name, String domain);
+    
+    boolean projectAcceptThisAuditType(EAuditType auditType, Project project);
 }
