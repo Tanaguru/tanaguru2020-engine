@@ -2,6 +2,8 @@ package com.tanaguru.repository;
 
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +33,6 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     
     @Query("select a from Audit a")
     Stream<Audit> getAll();
+    
+    Page<Audit> findAllByIsPrivateIsFalseAndDeletedIsFalse(Pageable pageable);
 }
