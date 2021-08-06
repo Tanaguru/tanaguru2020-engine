@@ -34,5 +34,5 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     @Query("select a from Audit a")
     Stream<Audit> getAll();
     
-    Page<Audit> findAllByIsPrivateIsFalse(Pageable pageable);
+    Page<Audit> findAllByIsPrivateIsFalseAndDeletedIsFalse(Pageable pageable);
 }
