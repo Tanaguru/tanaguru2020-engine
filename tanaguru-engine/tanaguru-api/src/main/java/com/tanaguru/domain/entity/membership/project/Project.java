@@ -48,6 +48,18 @@ public class Project implements Serializable {
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Scenario> scenarios;
 
+    @Column
+    private boolean allowPageAudit = true;
+    
+    @Column
+    private boolean allowSiteAudit = true;
+    
+    @Column
+    private boolean allowScenarioAudit = true;
+    
+    @Column
+    private boolean allowUploadAudit = true;
+    
     public long getId() {
         return id;
     }
@@ -111,4 +123,37 @@ public class Project implements Serializable {
     public void setDomain(String domain) {
         this.domain = domain;
     }
+
+    public boolean isAllowPageAudit() {
+        return allowPageAudit;
+    }
+
+    public void setAllowPageAudit(boolean allowPageAudit) {
+        this.allowPageAudit = allowPageAudit;
+    }
+
+    public boolean isAllowSiteAudit() {
+        return allowSiteAudit;
+    }
+
+    public void setAllowSiteAudit(boolean allowSiteAudit) {
+        this.allowSiteAudit = allowSiteAudit;
+    }
+
+    public boolean isAllowScenarioAudit() {
+        return allowScenarioAudit;
+    }
+
+    public void setAllowScenarioAudit(boolean allowScenarioAudit) {
+        this.allowScenarioAudit = allowScenarioAudit;
+    }
+
+    public boolean isAllowUploadAudit() {
+        return allowUploadAudit;
+    }
+
+    public void setAllowUploadAudit(boolean allowUploadAudit) {
+        this.allowUploadAudit = allowUploadAudit;
+    }
+    
 }

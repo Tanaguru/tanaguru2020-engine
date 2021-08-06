@@ -68,8 +68,10 @@ public class User implements Serializable {
     @JoinColumn
     private AppRole appRole;
     
+    @Column
     private String firstname;
     
+    @Column
     private String lastname;
 
     @Type(type = "jsonb")

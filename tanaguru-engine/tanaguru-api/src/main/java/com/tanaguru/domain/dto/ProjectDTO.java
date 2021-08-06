@@ -14,6 +14,14 @@ public class ProjectDTO {
     private long contractId;
 
     private String domain;
+    
+    private boolean allowPageAudit;
+    
+    private boolean allowSiteAudit;
+    
+    private boolean allowScenarioAudit;
+    
+    private boolean allowUploadAudit;
 
     public String getName() {
         return name;
@@ -38,4 +46,37 @@ public class ProjectDTO {
     public void setDomain(String domain) {
         this.domain = domain;
     }
+
+    public boolean isAllowPageAudit() {
+        return allowPageAudit;
+    }
+
+    public void setAllowPageAudit(boolean allowPageAudit) {
+        this.allowPageAudit = allowPageAudit;
+    }
+
+    public boolean isAllowSiteAudit() {
+        return allowSiteAudit;
+    }
+
+    public void setAllowSiteAudit(boolean allowSiteAudit) {
+        this.allowSiteAudit = allowSiteAudit;
+    }
+
+    public boolean isAllowScenarioAudit() {
+        return allowScenarioAudit;
+    }
+
+    public void setAllowScenarioAudit(boolean allowScenarioAudit) {
+        this.allowScenarioAudit = allowScenarioAudit;
+    }
+
+    public boolean isAllowUploadAudit() {
+        return allowUploadAudit;
+    }
+
+    public void setAllowUploadAudit(boolean allowUploadAudit) {
+        this.allowUploadAudit = allowUploadAudit;
+    }
+    
 }

@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface ProjectService {
-    Project createProject(Contract contract, String name, String domain);
+    Project createProject(Contract contract, String name, String domain, boolean allowPageAudit, boolean allowSiteAudit, boolean allowScenarioAudit, boolean allowUploadAudit);
 
     /**
      * Find authorities for a given @see EProjectRole

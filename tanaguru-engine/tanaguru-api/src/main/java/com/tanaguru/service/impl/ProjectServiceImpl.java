@@ -128,12 +128,23 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRoleMap.get(projectRole);
     }
 
-    public Project createProject(Contract contract, String name, String domain) {
+    public Project createProject(
+            Contract contract, 
+            String name, 
+            String domain, 
+            boolean allowPageAudit, 
+            boolean allowSiteAudit,
+            boolean allowScenarioAudit,
+            boolean allowUploadAudit) {
         LOGGER.info("Create project {} for contract {}", name, contract.getId());
         Project project = new Project();
         project.setContract(contract);
         project.setName(name);
         project.setDomain(domain);
+        project.setAllowPageAudit(allowPageAudit);
+        project.setAllowSiteAudit(allowSiteAudit);
+        project.setAllowScenarioAudit(allowScenarioAudit);
+        project.setAllowUploadAudit(allowUploadAudit);
         return projectRepository.save(project);
     }
 
