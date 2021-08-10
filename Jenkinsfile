@@ -17,6 +17,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "MAIL_PORT=" + props['MAIL_PORT'] + "\n" +
              "MAIL_USERNAME=" + props['MAIL_USERNAME'] + "\n" +
              "MAIL_PASSWORD=" + props['MAIL_PASSWORD'] + "\n" +
+             "MAIL_TTLS_ENABLED=false\n" +
+             "MAIL_SMTP_AUTH=false\n" +
              "CRYPTO_KEY=" + props['CRYPTO_KEY'] + "\n" +
              "PASSWORD_TOKEN_VALIDITY=" + props['PASSWORD_TOKEN_VALIDITY'] + "\n" +
              "AUDITRUNNER_PROXY_EXCLUSION_URLS=" + props['AUDITRUNNER_PROXY_EXCLUSION_URLS'] + "\n" +
