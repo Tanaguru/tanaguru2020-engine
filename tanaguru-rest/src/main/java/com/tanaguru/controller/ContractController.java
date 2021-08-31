@@ -279,7 +279,8 @@ public class ContractController {
                     contract.getAuditLimit(),
                     contract.getProjectLimit(),
                     contract.isRestrictDomain(),
-                    contract.getDateEnd());
+                    contract.getDateEnd(),
+                    true);
         }
     }
 

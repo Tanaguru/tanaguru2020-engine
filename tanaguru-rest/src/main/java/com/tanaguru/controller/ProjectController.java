@@ -321,7 +321,11 @@ public class ProjectController {
                         !UrlHelper.isValid(project.getDomain()))) {
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
         }
-
+        
+        if(!contract.isAllowCreateProject()) {
+            throw new CustomInvalidEntityException(CustomError.CANNOT_CREATE_PROJECT_FOR_THIS_CONTRACT);
+        }
+        
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
                 .orElseGet(() -> contractUserRepository.findByContractAndContractRoleName_Owner(contract));

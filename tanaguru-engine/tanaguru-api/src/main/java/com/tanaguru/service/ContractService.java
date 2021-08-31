@@ -60,7 +60,7 @@ public interface ContractService {
      * @param contractEnd The end date of the contract
      * @return The new @see Contract
      */
-    Contract createContract(User owner, String name, int auditLimit, int projectLimit, boolean restrictDomain, Date contractEnd);
+    Contract createContract(User owner, String name, int auditLimit, int projectLimit, boolean restrictDomain, Date contractEnd, boolean allowCreateProject);
 
     /**
      *

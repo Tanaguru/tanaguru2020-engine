@@ -35,6 +35,7 @@
     <include file="db/changelogs/20210722_changelog_updateProject.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210730_changelog_updateUser.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210803_changelog_updateElementResult.xml" relativeToChangelogFile="false"/>
-    <include file="db/changelogs/20210805_changelog_updateUserAttributes.xml" relativeToChangelogFile="false"/>
-    <include file="db/changelogs/20210806_changelog_updateProject.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210805_changelog_updateUsers_firstName_lastName.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210806_changelog_updateProject_allowAuditType.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210831_changelog_updateContract_allowCreateProject.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

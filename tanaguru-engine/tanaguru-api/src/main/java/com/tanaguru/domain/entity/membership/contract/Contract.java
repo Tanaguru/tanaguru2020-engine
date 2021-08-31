@@ -46,6 +46,9 @@ public class Contract implements Serializable {
     @OneToMany(mappedBy = "contract")
     private Collection<ContractAppUser> contractAppUsers;
 
+    @Column
+    private boolean allowCreateProject = true;
+    
     public long getId() {
         return id;
     }
@@ -117,4 +120,13 @@ public class Contract implements Serializable {
     public void setRestrictDomain(boolean restrictDomain) {
         this.restrictDomain = restrictDomain;
     }
+
+    public boolean isAllowCreateProject() {
+        return allowCreateProject;
+    }
+
+    public void setAllowCreateProject(boolean allowCreateProject) {
+        this.allowCreateProject = allowCreateProject;
+    }
+    
 }
