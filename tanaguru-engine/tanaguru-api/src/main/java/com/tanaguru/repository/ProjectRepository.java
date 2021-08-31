@@ -48,4 +48,5 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("select p from Project p")
     Stream<Project> getAll();
   
+    Collection<Project> findAllByDomain(@Param("domain") String domain);
 }
