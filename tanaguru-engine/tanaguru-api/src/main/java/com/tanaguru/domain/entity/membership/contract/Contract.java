@@ -49,6 +49,9 @@ public class Contract implements Serializable {
     @Column
     private boolean allowCreateProject = true;
     
+    @Column
+    private boolean allowModifyProject = true;
+    
     public long getId() {
         return id;
     }
@@ -127,6 +130,14 @@ public class Contract implements Serializable {
 
     public void setAllowCreateProject(boolean allowCreateProject) {
         this.allowCreateProject = allowCreateProject;
+    }
+
+    public boolean isAllowModifyProject() {
+        return allowModifyProject;
+    }
+
+    public void setAllowModifyProject(boolean allowModifyProject) {
+        this.allowModifyProject = allowModifyProject;
     }
     
 }

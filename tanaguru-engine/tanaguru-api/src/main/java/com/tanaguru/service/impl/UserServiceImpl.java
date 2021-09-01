@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
         if (createContract) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, 1);
-            contractService.createContract(user, user.getUsername(), 0, 0, true, calendar.getTime(),true);
+            contractService.createContract(user, user.getUsername(), 0, 0, true, calendar.getTime(), true, true);
         }
         return user;
     }
