@@ -6,8 +6,8 @@
     
     <changeSet id="update_contract_allow_create_project" author="lpedrau">
         <addColumn tableName="contract">
-            <column name="allow_create_project" type="boolean"/>
-            <column name="allow_modify_project" type="boolean"/>
+            <column name="allow_create_project" type="boolean" defaultValueBoolean="true"/>
+            <column name="allow_modify_project" type="boolean" defaultValueBoolean="true"/>
         </addColumn>
         <rollback>
             <dropColumn tableName="contract" columnName="allowCreateContract"/>

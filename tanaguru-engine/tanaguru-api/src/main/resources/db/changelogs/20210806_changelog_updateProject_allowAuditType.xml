@@ -6,10 +6,10 @@
     
     <changeSet id="update_project_allow_audit_type" author="lpedrau">
         <addColumn tableName="project">
-            <column name="allow_page_audit" type="boolean"/>
-            <column name="allow_site_audit" type="boolean"/>
-            <column name="allow_upload_audit" type="boolean"/>
-            <column name="allow_scenario_audit" type="boolean"/>
+            <column name="allow_page_audit" type="boolean" defaultValueBoolean="true"/>
+            <column name="allow_site_audit" type="boolean" defaultValueBoolean="true"/>
+            <column name="allow_upload_audit" type="boolean" defaultValueBoolean="true"/>
+            <column name="allow_scenario_audit" type="boolean" defaultValueBoolean="true"/>
         </addColumn>
         <rollback>
             <dropColumn tableName="project" columnName="allowPageAudit"/>
