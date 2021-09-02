@@ -321,12 +321,16 @@ public class ProjectController {
                         !UrlHelper.isValid(project.getDomain()))) {
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
         }
-
+        
+        if(!contract.isAllowCreateProject()) {
+            throw new CustomInvalidEntityException(CustomError.CANNOT_CREATE_PROJECT_FOR_THIS_CONTRACT);
+        }
+        
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
                 .orElseGet(() -> contractUserRepository.findByContractAndContractRoleName_Owner(contract));
 
-        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain());
+        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain(), true, true, true, true);
         ProjectAppUser projectAppUser = new ProjectAppUser();
         projectAppUser.setProjectRole(projectService.getProjectRole(EProjectRole.PROJECT_MANAGER));
         projectAppUser.setContractAppUser(contractAppUser);
@@ -337,10 +341,9 @@ public class ProjectController {
     }
 
     @ApiOperation(
-            value = "Create a Project",
+            value = "Modify a Project",
             notes = "User must have CREATE_PROJECT authority on Contract"
                     + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
-                    + "\nIf project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number"
                     + "\nIf the project domain is invalid, exception raise : INVALID_DOMAIN with project domain"
     )
     @ApiResponses(value = {
@@ -348,7 +351,6 @@ public class ProjectController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
-                    + "\nProject limit for contract : PROJECT_LIMIT_FOR_CONTRACT error"
                     + "\nInvalid domain : INVALID_DOMAIN error")
     })
     @PreAuthorize(
@@ -362,7 +364,11 @@ public class ProjectController {
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
 
         Contract contract = project.getContract();
-
+        
+        if(!contract.isAllowModifyProject()) {
+            throw new CustomInvalidEntityException(CustomError.CANNOT_MODIFY_PROJECT_FOR_THIS_CONTRACT);
+        }
+        
         if ((contract.isRestrictDomain() &&
                 !projectDto.getDomain().isEmpty() &&
                 !UrlHelper.isValid(projectDto.getDomain())) ||

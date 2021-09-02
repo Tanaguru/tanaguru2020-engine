@@ -279,7 +279,9 @@ public class ContractController {
                     contract.getAuditLimit(),
                     contract.getProjectLimit(),
                     contract.isRestrictDomain(),
-                    contract.getDateEnd());
+                    contract.getDateEnd(),
+                    true,
+                    true);
         }
     }
 
@@ -310,8 +312,7 @@ public class ContractController {
         ContractAppUser currentOwner = contractUserRepository.findByContractAndContractRoleName_Owner(contract);
 
         User owner = userRepository.findById(contractDto.getOwnerId())
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId()));
-
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, contractDto.getOwnerId())); 
         // limit to 1 contract
         if (owner.getId() != currentOwner.getUser().getId()) {
             Collection<Contract> contracts = contractService.findByOwner(owner);

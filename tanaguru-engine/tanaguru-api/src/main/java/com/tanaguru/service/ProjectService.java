@@ -1,6 +1,7 @@
 package com.tanaguru.service;
 
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.contract.Contract;
@@ -15,7 +16,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface ProjectService {
-    Project createProject(Contract contract, String name, String domain);
+    Project createProject(Contract contract, String name, String domain, boolean allowPageAudit, boolean allowSiteAudit, boolean allowScenarioAudit, boolean allowUploadAudit);
 
     /**
      * Find authorities for a given @see EProjectRole
@@ -129,4 +130,6 @@ public interface ProjectService {
      * @return The modified project
      */
     Project modifyProject(Project project, String name, String domain);
+    
+    boolean projectAcceptThisAuditType(EAuditType auditType, Project project);
 }

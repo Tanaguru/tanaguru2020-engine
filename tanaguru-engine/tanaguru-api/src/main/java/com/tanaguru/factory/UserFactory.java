@@ -12,5 +12,5 @@ public interface UserFactory {
      * @param isEnabled True if the @see User is enabled
      * @return The new @see User
      */
-    User createUser(String username, String email, String password, EAppRole role, boolean isEnabled);
+    User createUser(String username, String email, String password, EAppRole role, boolean isEnabled, String firstName, String lastName);
 }

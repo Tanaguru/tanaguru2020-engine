@@ -27,7 +27,7 @@ public class UserFactoryImpl implements UserFactory {
         this.appRoleService = appRoleService;
     }
 
-    public User createUser(String username, String email, String password, EAppRole role, boolean isEnabled) {
+    public User createUser(String username, String email, String password, EAppRole role, boolean isEnabled, String firstName, String lastName) {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
@@ -36,7 +36,8 @@ public class UserFactoryImpl implements UserFactory {
         user.setDateCreation(new Date());
         user.setAppRole(appRoleService.getAppRole(role)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.APP_ROLE_NOT_FOUND, role.name() )));
-
+        user.setFirstname(firstName);
+        user.setLastname(lastName);
         user = userRepository.save(user);
         LOGGER.info("[User {}] Create with username {} and role {}", user.getId(), username, role);
 

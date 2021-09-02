@@ -2,6 +2,7 @@ package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.constant.EContractRole;
 import com.tanaguru.domain.constant.EProjectRole;
 import com.tanaguru.domain.entity.audit.Audit;
@@ -128,12 +129,23 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRoleMap.get(projectRole);
     }
 
-    public Project createProject(Contract contract, String name, String domain) {
+    public Project createProject(
+            Contract contract, 
+            String name, 
+            String domain, 
+            boolean allowPageAudit, 
+            boolean allowSiteAudit,
+            boolean allowScenarioAudit,
+            boolean allowUploadAudit) {
         LOGGER.info("Create project {} for contract {}", name, contract.getId());
         Project project = new Project();
         project.setContract(contract);
         project.setName(name);
         project.setDomain(domain);
+        project.setAllowPageAudit(allowPageAudit);
+        project.setAllowSiteAudit(allowSiteAudit);
+        project.setAllowScenarioAudit(allowScenarioAudit);
+        project.setAllowUploadAudit(allowUploadAudit);
         return projectRepository.save(project);
     }
 
@@ -268,5 +280,20 @@ public class ProjectServiceImpl implements ProjectService {
         project.setName(name);
         project.setDomain(domain);
         return projectRepository.save(project);
+    }
+
+    @Override
+    public boolean projectAcceptThisAuditType(EAuditType auditType, Project project) {
+        boolean projectAllowThisTypeOfAudit = false;
+        if(auditType.equals(EAuditType.PAGE)) {
+            projectAllowThisTypeOfAudit = project.isAllowPageAudit();
+        }else if(auditType.equals(EAuditType.SITE)) {
+            projectAllowThisTypeOfAudit = project.isAllowSiteAudit();
+        }else if(auditType.equals(EAuditType.SCENARIO)) {
+            projectAllowThisTypeOfAudit = project.isAllowScenarioAudit();
+        }else if(auditType.equals(EAuditType.UPLOAD)) {
+            projectAllowThisTypeOfAudit = project.isAllowUploadAudit();
+        }
+        return projectAllowThisTypeOfAudit;
     }
 }
