@@ -4,7 +4,7 @@
     "name": "Button has an empty accessible name.",
     "description": "This rule checks that each button element has a non-empty accessible name.",
     "query": "button:not([role]), [role=\"button\"], input[type=\"reset\"]:not([role]), input[type=\"submit\"]:not([role])",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tif (item.isNotExposedDueTo.length == 0 && !item.matches('input[type=\"reset\"]:not([aria-labelledby]):not([aria-label]):not([value]):not([title]), input[type=\"reset\"]:not([aria-labelledby]):not([aria-label]):not([value]):not([title])')) {\n\t\t\treturn !item.hasAccessibleName();\n\t\t}\n\t\treturn false;\n\t}",
     "tags": [
       "a11y",
@@ -14,7 +14,7 @@
       "act": [
         "97a4e1"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -34,7 +34,7 @@
       "act": [
         "97a4e1"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -44,7 +44,7 @@
     "name": "Form control has an empty accessible name.",
     "description": "This rule checks that each form field element has a non-empty accessible name.",
     "query": "input[type=\"checkbox\"]:not([role]), [role=\"checkbox\"], [role=\"switch\"], input[type=\"radio\"]:not([role]), [role=\"radio\"], select:not([role]), [role=\"combobox\"], input[type=\"search\"]:not([role]), [role=\"searchbox\"], input[type=\"range\"]:not([role]), [role=\"slider\"], input[type=\"number\"]:not([role]), [role=\"spinbutton\"], input:not([type]):not([role]), input[type=\"email\"]:not([role]), input[type=\"tel\"]:not([role]), input[type=\"text\"]:not([role]), input[type=\"url\"]:not([role]), textarea:not([role]), [contenteditable=\"true\"]:not([role]), [role=\"textbox\"], [role=\"listbox\"], [role=\"menuitemcheckbox\"], [role=\"menuitemradio\"]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn item.isNotExposedDueTo.length == 0 && !item.hasAccessibleName();\n\t}",
     "tags": [
       "a11y",
@@ -54,7 +54,7 @@
       "act": [
         "e086e5"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -74,7 +74,7 @@
       "act": [
         "e086e5"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -84,7 +84,7 @@
     "name": "Heading has an empty accessible name.",
     "description": "This rule checks that each heading has a non-empty accessible name.",
     "query": "h1:not([role]), h2:not([role]), h3:not([role]), h4:not([role]), h5:not([role]), h6:not([role]), [role=\"heading\"]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn item.isNotExposedDueTo.length == 0 && !item.hasAccessibleName();\n\t}",
     "tags": [
       "a11y",
@@ -94,7 +94,7 @@
       "act": [
         "ffd0e9"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1",
         "2.4.6"
       ]
@@ -118,7 +118,7 @@
       "act": [
         "ffd0e9"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1",
         "2.4.6"
       ]
@@ -132,7 +132,7 @@
     "name": "iframe element has an empty accessible name.",
     "description": "This rule checks that each iframe element has a non-empty accessible name.",
     "query": "iframe",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (!item.matches('[role]')) {\n\t\t\t\treturn !item.hasAccessibleName();\n\t\t\t}\n\t\t\telse if (item.matches('[role=\"none\"][tabindex=\"0\"], [role=\"presentation\"][tabindex=\"0\"]')) {\n\t\t\t\tvar role = item.getAttribute('role');\n\t\t\t\titem.removeAttribute('role');\n\t\t\t\tvar result = !item.hasAccessibleName();\n\t\t\t\titem.setAttribute('role', role);\n\t\t\t\treturn result;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
     "tags": [
       "a11y",
@@ -142,7 +142,7 @@
       "act": [
         "cae760"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -162,7 +162,7 @@
       "act": [
         "cae760"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.2"
       ]
     }
@@ -172,7 +172,7 @@
     "name": "Image button has an empty accessible name.",
     "description": "This rule checks that each image button element has a non-empty accessible name.",
     "query": "input[type=\"image\"]:not([role]), input[type=\"image\"][role=\"button\"]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn item.isNotExposedDueTo.length == 0 && !item.hasAccessibleName();\n\t}",
     "tags": [
       "a11y",
@@ -183,7 +183,7 @@
       "act": [
         "59796f"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.1.1",
         "4.1.2"
       ]
@@ -205,7 +205,7 @@
       "act": [
         "59796f"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.1.1",
         "4.1.2"
       ]
@@ -216,7 +216,7 @@
     "name": "Image has an empty accessible name.",
     "description": "This rule checks that each image either has a non-empty accessible name or is marked up as decorative.",
     "query": "img:not([role]), img[role=\"none\"][tabindex], img[role=\"presentation\"][tabindex], [role=\"img\"]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (item.matches('img[role=\"none\"][tabindex], img[role=\"presentation\"][tabindex]')) {\n\t\t\t\tvar tabindex = item.getAttribute('tabindex');\n\t\t\t\tif (tabindex != '-1' && tabindex.match(/^(0|[1-9]?[0-9]*)$/)) {\n\t\t\t\t\tvar role = item.getAttribute('role');\n\t\t\t\t\titem.removeAttribute('role');\n\t\t\t\t\tvar result = !item.hasAccessibleName();\n\t\t\t\t\titem.setAttribute('role', role);\n\t\t\t\t\treturn result;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if (item.matches('img:not([alt])') || (item.matches('img[alt]') && item.getAttribute('alt').length > 0) || !item.matches('img')) {\n\t\t\t\treturn !item.hasAccessibleName();\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
     "tags": [
       "a11y",
@@ -226,7 +226,7 @@
       "act": [
         "23a2a8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.1.1"
       ]
     }
@@ -246,7 +246,7 @@
       "act": [
         "23a2a8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.1.1"
       ]
     }
@@ -265,7 +265,7 @@
       "act": [
         "7d6734"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.1.1"
       ]
     },
@@ -276,7 +276,7 @@
     "name": "Link has an empty accessible name.",
     "description": "This rule checks that each link has a non-empty accessible name.",
     "query": "a[href]:not([role]), a[href][role=\"none\"]:not([tabindex=\"-1\"]), a[href][role=\"presentation\"]:not([tabindex=\"-1\"]), [role=\"link\"], map[name]:not([role]) > area[href]:not([role])",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (item.matches(':not([role]), [role=\"link\"]')) {\n\t\t\t\treturn !item.hasAccessibleName();\n\t\t\t}\n\t\t\telse if (item.matches('[role=\"none\"], [role=\"presentation\"]')) {\n\t\t\t\tif (!item.hasAttribute('tabindex') || item.getAttribute('tabindex').match(/^(0|[1-9]?[0-9]*)$/)) {\n\t\t\t\t\tvar role = item.getAttribute('role');\n\t\t\t\t\titem.removeAttribute('role');\n\t\t\t\t\tvar result = !item.hasAccessibleName();\n\t\t\t\t\titem.setAttribute('role', role);\n\t\t\t\t\treturn result;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
     "tags": [
       "a11y",
@@ -286,7 +286,7 @@
       "act": [
         "c487ae"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.4",
         "2.4.9",
         "4.1.2"
@@ -308,7 +308,7 @@
       "act": [
         "c487ae"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.4",
         "2.4.9",
         "4.1.2"
@@ -325,117 +325,13 @@
       "act": [
         "3ea0c8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "4.1.1"
       ]
     },
     "tags": [
       "a11y",
       "code"
-    ]
-  },
-  {
-    "lang": "en",
-    "name": "Attribute is not duplicated.",
-    "description": "This rule checks that HTML and SVG starting tags do not contain duplicated attributes.",
-    "status": "untested",
-    "ressources": {
-      "act": [
-        "e6952f"
-      ],
-      "wcag20": [
-        "4.1.1"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "code"
-    ],
-    "comment": "Duplicated attributes are removed by the user agent."
-  },
-  {
-    "lang": "en",
-    "name": "role attribute has an invalid value.",
-    "description": "This rule checks that each role attribute has a valid value.",
-    "query": "[role]",
-    "expectedNbElements": 0,
-    "filter": "function (item, HTML){\n\t\t//if (item instanceof MathMLElement) {\n\t\t//return false;\n\t\t//}\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (item.getAttribute('role').trim() == 0) {\n\t\t\t\treturn false;\n\t\t\t}\n\t\t\treturn !item.hasValidRole();\n\t\t}\n\t\treturn false;\n\t}",
-    "ressources": {
-      "act": [
-        "674b10"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "aria"
-    ]
-  },
-  {
-    "lang": "en",
-    "name": "role attribute has a valid value.",
-    "description": "This rule checks that each role attribute has a valid value.",
-    "query": "[role]",
-    "filter": "function (item, HTML){\n\t\t//if (item instanceof MathMLElement) {\n\t\t//return false;\n\t\t//}\n\t\treturn item.isNotExposedDueTo.length == 0 ? item.hasValidRole() : false;\n\t}",
-    "analyzeElements": "function (collection, HTML){\n\t\tfor (var i = 0; i < collection.length; i++) {\n\t\t\tcollection[i].status = 'passed';\n\t\t}\n\t}",
-    "ressources": {
-      "act": [
-        "674b10"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "aria"
-    ]
-  },
-  {
-    "lang": "en",
-    "name": "aria-* attribute is defined in WAI-ARIA.",
-    "description": "This rule checks that each aria-* attribute specified is defined in ARIA 1.2.",
-    "query": "*",
-    "filter": "function (item, HTML){\n\t\t//if (item instanceof MathMLElement) {\n\t\t//return false;\n\t\t//}\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\treturn Array.from(item.attributes).filter(function(attributeNode) {\n\t\t\t\treturn /^aria-.*$/.test(attributeNode.nodeName);\n\t\t\t}).length > 0;\n\t\t}\n\t\treturn false;\n\t}",
-    "analyzeElements": "function (collection, HTML){\n\t\tvar definedStatesProperties = ARIA.getAllStatesProperties('js');\n\t\tfor (var i = 0; i < collection.length; i++) {\n\t\t\tcollection[i].status = 'passed';\n\t\t\tvar attributes = Array.from(collection[i].attributes);\n\t\t\tfor (var a = 0; a < attributes.length; a++) {\n\t\t\t\tif (/^aria-.*$/.test(attributes[a].nodeName)) {\n\t\t\t\t\tif (definedStatesProperties.indexOf(attributes[a].nodeName) == -1) {\n\t\t\t\t\t\tcollection[i].status = 'failed';\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}",
-    "ressources": {
-      "act": [
-        "5f99a7"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "aria"
-    ]
-  },
-  {
-    "lang": "en",
-    "name": "ARIA state or property has an invalid value.",
-    "description": "This rule checks that each ARIA state or property has a valid value.",
-    "query": "*",
-    "expectedNbElements": 0,
-    "filter": "function (item, HTML){\n\t\t//if (item instanceof MathMLElement) {\n\t\t//return false;\n\t\t//}\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (Array.from(item.attributes).filter(function(attributeNode) { return /^aria-.*$/.test(attributeNode.nodeName); }).length > 0) {\n\t\t\t\treturn item.hasAriaAttributesWithInvalidValues({ permissive: true });\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
-    "ressources": {
-      "act": [
-        "6a7281"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "aria"
-    ]
-  },
-  {
-    "lang": "en",
-    "name": "ARIA state or property is not permitted.",
-    "description": "This rule checks that WAI-ARIA states or properties are allowed for the element they are specified on.",
-    "query": "*",
-    "expectedNbElements": 0,
-    "filter": "function (item, HTML){\n\t\t//if (item instanceof MathMLElement) {\n\t\t//return false;\n\t\t//}\n\t\tif (item.isNotExposedDueTo.length == 0) {\n\t\t\tif (Array.from(item.attributes).filter(function(attributeNode) { return /^aria-.*$/.test(attributeNode.nodeName); }).length > 0) {\n\t\t\t\treturn item.hasProhibitedAriaAttributes();\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
-    "ressources": {
-      "act": [
-        "5c01ea"
-      ]
-    },
-    "tags": [
-      "a11y",
-      "aria"
     ]
   },
   {
@@ -443,13 +339,13 @@
     "name": "Element with lang attribute has an invalid language tag.",
     "description": "This rule checks that a non-empty lang attribute of an element in the page body has a language tag with a known primary language subtag.",
     "query": "body [lang]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tvar lang = item.getAttribute('lang');\n\t\tif (lang != '') {\n\t\t\treturn lang.trim().length == 0 ? true : !item.hasValidLanguageCode();\n\t\t}\n\t\telse {\n\t\t\treturn false;\n\t\t}\n\t}",
     "ressources": {
       "act": [
         "de46e4"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.2"
       ]
     },
@@ -468,7 +364,7 @@
       "act": [
         "de46e4"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.2"
       ]
     },
@@ -481,13 +377,13 @@
     "lang": "en",
     "name": "HTML page doesn't have a lang attribute.",
     "description": "This rule checks that an HTML page has a non-empty lang attribute.",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "query": "html:not([lang])",
     "ressources": {
       "act": [
         "b5c3f8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -501,13 +397,13 @@
     "name": "HTML page has an empty lang attribute.",
     "description": "This rule checks that an HTML page has a non-empty lang attribute.",
     "query": "html[lang]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn item.getAttribute('lang').trim().length == 0;\n\t}",
     "ressources": {
       "act": [
         "b5c3f8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -526,7 +422,7 @@
       "act": [
         "b5c3f8"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -540,13 +436,13 @@
     "name": "HTML page lang and xml:lang attributes don't have matching values.",
     "description": "This rule checks that both lang and xml:lang attributes on the root element of a non-embedded HTML page, have the same primary language subtag.",
     "query": "html[lang][xml\\\\:lang]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn !item.hasValidLanguageCode || (item.getAttribute('xml:lang').trim().length > 0 && item.getAttribute('lang') != item.getAttribute('xml:lang'));\n\t}",
     "ressources": {
       "act": [
         "5b7ae0"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -566,7 +462,7 @@
       "act": [
         "5b7ae0"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -580,13 +476,13 @@
     "name": "HTML page language is invalid.",
     "description": "This rule checks that the lang attribute of the root element of a non-embedded HTML page has a language tag with a known primary language subtag.",
     "query": "html[lang]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\treturn item.getAttribute('lang').trim().length > 0 && !item.hasValidLanguageCode();\n\t}",
     "ressources": {
       "act": [
         "bf051a"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -605,7 +501,7 @@
       "act": [
         "bf051a"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "3.1.1"
       ]
     },
@@ -616,16 +512,15 @@
   },
   {
     "lang": "en",
-    "name": "HTML page has an non-empty title.",
+    "name": "HTML page has an empty title.",
     "description": "This rule checks that a non-embedded HTML page has a title.",
-    "query": "title",
-    "filter": "function (item, HTML){\n\t\treturn !item.matches('svg title');\n\t}",
-    "analyzeElements": "function (collection, HTML){\n\t\tif (collection.length > 0) {\n\t\t\tfor (var i = 0; i < collection.length; i++) {\n\t\t\t\tcollection[i].status = 'untested';\n\t\t\t}\n\t\t\tcollection[0].status = document.title.trim().length == 0 ? 'failed' : 'passed';\n\t\t}\n\t}",
+    "query": "*:not(svg) title",
+    "analyzeElements": "function (collection, HTML){\n\t\tif (collection.length > 0) {\n\t\t\tfor (var i = 0; i < collection.length; i++) {\n\t\t\t\tcollection[i].status = 'untested';\n\t\t\t}\n\t\t\tif (document.title == '') {\n\t\t\t\tcollection[0].status = 'failed';\n\t\t\t}\n\t\t}\n\t}",
     "ressources": {
       "act": [
         "2779a5"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.2"
       ]
     },
@@ -638,14 +533,13 @@
     "lang": "en",
     "name": "HTML page has a title.",
     "description": "This rule checks that a non-embedded HTML page has a title.",
-    "query": "title",
-    "filter": "function (item, HTML){\n\t\treturn !item.matches('svg title');\n\t}",
+    "query": "*:not(svg) title",
     "expectedNbElements": "{\"min\":1}",
     "ressources": {
       "act": [
         "2779a5"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.2"
       ]
     },
@@ -658,14 +552,12 @@
     "lang": "en",
     "name": "HTML page title is descriptive.",
     "description": "This rule checks that the first title in an HTML page describes the topic or purpose of that page.",
-    "query": "title",
-    "filter": "function (item, HTML){\n\t\treturn !item.matches('svg title');\n\t}",
-    "analyzeElements": "function (collection, HTML){\n\t\tif (collection.length > 0) {\n\t\t\tfor (var i = 0; i < collection.length; i++) {\n\t\t\t\tcollection[i].status = 'untested';\n\t\t\t}\n\t\t\tcollection[0].status = document.title.trim().length == 0 ? 'failed' : 'untested';\n\t\t}\n\t}",
+    "query": "*:not(svg) title",
     "ressources": {
       "act": [
         "c4a8a4"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.2"
       ]
     },
@@ -685,7 +577,7 @@
       "act": [
         "bc659a"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.2.1",
         "2.2.4",
         "3.2.5"
@@ -707,7 +599,7 @@
       "act": [
         "b4f0c3"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.4.4",
         "1.4.10"
       ]
@@ -726,7 +618,7 @@
       "act": [
         "b33eff"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.4"
       ]
     },
@@ -740,13 +632,13 @@
     "name": "Element with aria-hidden has no focusable content.",
     "description": "This rule checks that elements with an aria-hidden attribute do not contain focusable elements.",
     "query": "[aria-hidden=\"true\"]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tvar visibleState = item.isNotVisibleDueTo;\n\t\tif (visibleState.length == 0 || (visibleState.indexOf('css:display') == -1 && visibleState.indexOf('css:visibility') == -1)) {\n\t\t\tvar focusables = item.querySelectorAll(HTML.getFocusableElementsSelector());\n\t\t\tif (focusables.length == 0) {\n\t\t\t\tfocusables = [];\n\t\t\t\tvar elementsWithTabindex = item.querySelectorAll('[tabindex]');\n\t\t\t\tfor (var i = 0; i < elementsWithTabindex.length; i++) {\n\t\t\t\t\tif (/^[1-9]{1}\\d*$/.test(elementsWithTabindex[i].getAttribute('tabindex'))) {\n\t\t\t\t\t\tfocusables.push(elementsWithTabindex[i]);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn focusables.length > 0;\n\t\t}\n\t\telse {\n\t\t\treturn false;\n\t\t}\n\t}",
     "ressources": {
       "act": [
         "6cfa84"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1",
         "4.1.2"
       ]
@@ -765,7 +657,7 @@
       "act": [
         "80af7b"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.1.2"
       ]
     },
@@ -817,7 +709,7 @@
       "act": [
         "afw4f7"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.4.3",
         "1.4.6"
       ]
@@ -838,7 +730,7 @@
       "act": [
         "5effbb"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.4",
         "2.4.9"
       ]
@@ -854,13 +746,13 @@
     "name": "Headers attribute specified on a cell doesn't refer to cells in the same table element.",
     "description": "This rule checks that the headers attribute on a cell refer to other cells in the same table element.",
     "query": "table td[headers]",
-    "expectedNbElements": 0,
+    "expectedNbElements": "0",
     "filter": "function (item, HTML){\n\t\tvar headers = item.getAttribute('headers');\n\t\tif (/^.+(\\s.+)*$/.test(headers)) {\n\t\t\theaders = headers.split(' ');\n\t\t\tif (headers.length > 1) {\n\t\t\t\tvar result = false;\n\t\t\t\tfor (var i = 0; i < headers.length; i++) {\n\t\t\t\t\tvar th = document.querySelector('th[id=\"' + headers[i] + '\"]');\n\t\t\t\t\tresult = th ? !(th.closest('table') == item.closest('table')) : true;\n\t\t\t\t\tif (result) {\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\treturn result;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tvar th = document.querySelector('th[id=\"' + headers + '\"]');\n\t\t\t\treturn th ? !(th.closest('table') == item.closest('table')) : true;\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\treturn true;\n\t\t}\n\t}",
     "ressources": {
       "act": [
         "a25f45"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1"
       ]
     },
@@ -880,7 +772,7 @@
       "act": [
         "a25f45"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1"
       ]
     },
@@ -899,7 +791,7 @@
       "act": [
         "d0f69e"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.3.1"
       ]
     },
@@ -918,7 +810,7 @@
       "act": [
         "b49b2e"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "2.4.6"
       ]
     },
@@ -937,7 +829,7 @@
       "act": [
         "e7aa44"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.1"
       ]
     },
@@ -988,7 +880,7 @@
       "act": [
         "eac66b"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.2"
       ]
     },
@@ -1023,7 +915,7 @@
       "act": [
         "c5a4ea"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.3"
       ]
     },
@@ -1058,7 +950,7 @@
       "act": [
         "1ec09b"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.5"
       ]
     },
@@ -1077,7 +969,7 @@
       "act": [
         "1a02b0"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.8"
       ]
     },
@@ -1096,7 +988,7 @@
       "act": [
         "c3232f"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.1"
       ]
     },
@@ -1163,7 +1055,7 @@
       "act": [
         "80f0bf"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.4.2"
       ]
     },
@@ -1184,7 +1076,7 @@
         "80f0bf",
         "4c31df"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.4.2"
       ]
     },
@@ -1222,7 +1114,7 @@
       "act": [
         "f51b46"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.2"
       ]
     },
@@ -1242,7 +1134,7 @@
       "act": [
         "f51b46"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.2"
       ]
     },
@@ -1263,7 +1155,7 @@
         "f196ce",
         "ac7dc6"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.1",
         "1.2.3",
         "1.2.5",
@@ -1287,7 +1179,7 @@
         "f196ce",
         "ac7dc6"
       ],
-      "wcag20": [
+      "wcag20 - 23-09-2020": [
         "1.2.1",
         "1.2.3",
         "1.2.5",
