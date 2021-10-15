@@ -38,7 +38,7 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
 
             if (tanaguruTest.getDescription() != null) {
-                strb.append(",\ndescription:\"").append(tanaguruTest.getDescription()).append("\"");
+                strb.append(",\ndescription:`").append(tanaguruTest.getDescription()).append("`");
             }
 
             if(tanaguruTest.getContrast() != null){
@@ -54,6 +54,7 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
             strb.append("});");
         }
+        strb.append("\neList.forEach(e => removeDataTNG(e));");
         strb.append("\nreturn JSON.stringify(loadTanaguruTests());");
         return strb.toString();
     }
