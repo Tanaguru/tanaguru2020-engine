@@ -23,7 +23,11 @@ public class ScriptFactoryImpl implements ScriptFactory {
         for (TanaguruTest tanaguruTest : tanaguruTestList) {
             strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
             strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
-            strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
+            if(tanaguruTest.getQuery() != null && tanaguruTest.getQuery().startsWith("HTML")) {
+                strb.append(",\nquery:").append(tanaguruTest.getQuery());
+            }else {
+                strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
+            }
             strb.append(",\ntags:").append(gson.toJson(tanaguruTest.getTags()));
 
 
