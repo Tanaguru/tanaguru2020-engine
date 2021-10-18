@@ -2402,6 +2402,24 @@ var getImplicitAriaRole = function () {
 if (!('getImplicitAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
 if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
 
+
+var getImplicitAriaRoleCategory = function () {
+    if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
+        var elementData = htmlData.elements[this.tagName.toLowerCase()];
+        if (elementData.hasOwnProperty('category')) {
+            return elementData.category;
+        }
+        else {
+            return null;
+        }
+    }
+    else {
+        return undefined;
+    }
+};
+if (!('getImplicitAriaRoleCategory' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
+if (!('getImplicitAriaRoleCategory' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
+
 // TODO: fin HTML.
 
 // TODO: début Language.
