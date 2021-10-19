@@ -10,6 +10,8 @@ public class TanaguruTestDTO {
     private String name;
 
     private String description;
+    
+    private String status;
 
     private Collection<String> tags;
 
@@ -21,6 +23,7 @@ public class TanaguruTestDTO {
         this.name = tanaguruTest.getName();
         this.description = tanaguruTest.getDescription();
         this.tags = tanaguruTest.getTags();
+        this.status = tanaguruTest.getStatus();
     }
 
     public long getId() {
@@ -53,5 +56,13 @@ public class TanaguruTestDTO {
 
     public void setTags(Collection<String> tags) {
         this.tags = tags;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

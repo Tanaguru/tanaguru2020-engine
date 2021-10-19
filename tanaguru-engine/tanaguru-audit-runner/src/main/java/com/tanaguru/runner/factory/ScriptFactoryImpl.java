@@ -25,7 +25,7 @@ public class ScriptFactoryImpl implements ScriptFactory {
             strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
             if(tanaguruTest.getQuery() != null && tanaguruTest.getQuery().startsWith("HTML")) {
                 strb.append(",\nquery:").append(tanaguruTest.getQuery());
-            }else {
+            }else if(tanaguruTest.getQuery() != null){
                 strb.append(",\nquery:`").append(tanaguruTest.getQuery()).append("`");
             }
             strb.append(",\ntags:").append(gson.toJson(tanaguruTest.getTags()));
@@ -44,7 +44,11 @@ public class ScriptFactoryImpl implements ScriptFactory {
             if (tanaguruTest.getDescription() != null) {
                 strb.append(",\ndescription:`").append(tanaguruTest.getDescription()).append("`");
             }
-
+            
+            if (tanaguruTest.getStatus() != null) {
+                strb.append(",\nstatus:`").append(tanaguruTest.getStatus()).append("`");
+            }
+            
             if(tanaguruTest.getContrast() != null){
                 strb.append(",\ncontrast:\"").append(tanaguruTest.getContrast()).append("\"");
             }
