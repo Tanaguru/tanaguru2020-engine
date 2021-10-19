@@ -43,6 +43,9 @@ public class TanaguruTest implements Serializable {
 
     @Column
     private String analyzeElements;
+    
+    @Column
+    private String status;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -147,5 +150,14 @@ public class TanaguruTest implements Serializable {
     public void setContrast(String contrast) {
         this.contrast = contrast;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
 }
 
