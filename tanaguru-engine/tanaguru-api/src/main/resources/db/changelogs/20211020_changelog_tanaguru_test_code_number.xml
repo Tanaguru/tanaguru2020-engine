@@ -8,7 +8,7 @@
     <changeSet id="tanaguru_test_add_column_code_number" author="lpedrau">
         <addColumn tableName="tanaguru_test">
             <column name="code" type="varchar(30)" defaultValue="null"/>
-            <column name="number" type="bigint" defaultValue="null"/>
+            <column name="number" type="bigint"/>
         </addColumn>
 
         <rollback>
