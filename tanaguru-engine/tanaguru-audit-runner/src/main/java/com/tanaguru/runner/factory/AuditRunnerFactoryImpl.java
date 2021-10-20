@@ -69,7 +69,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     @Override
     public AuditRunner create(Audit audit) throws Exception {
         Collection<AuditReference> references = auditReferenceRepository.findAllByAudit(audit);
-        Collection<TanaguruTest> tanaguruTests = tanaguruTestRepository.findDistinctByTestHierarchies_ReferenceInAndIsDeletedIsFalse(
+        Collection<TanaguruTest> tanaguruTests = tanaguruTestRepository.findDistinctByTestHierarchies_ReferenceInAndIsDeletedIsFalseOrderByNumber(
                 references.stream().map(AuditReference::getTestHierarchy)
                         .collect(Collectors.toList()));
 
