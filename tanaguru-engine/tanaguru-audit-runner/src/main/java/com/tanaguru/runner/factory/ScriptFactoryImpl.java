@@ -45,6 +45,10 @@ public class ScriptFactoryImpl implements ScriptFactory {
                 strb.append(",\ndescription:`").append(tanaguruTest.getDescription()).append("`");
             }
             
+            if (tanaguruTest.getCode() != null) {
+                strb.append(",\ncode:`").append(tanaguruTest.getCode()).append("`");
+            }
+            
             if (tanaguruTest.getStatus() != null) {
                 strb.append(",\nstatus:`").append(tanaguruTest.getStatus()).append("`");
             }

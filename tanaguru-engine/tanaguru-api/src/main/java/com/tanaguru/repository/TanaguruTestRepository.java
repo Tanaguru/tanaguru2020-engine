@@ -17,7 +17,7 @@ public interface TanaguruTestRepository extends JpaRepository<TanaguruTest, Long
      * @param references the Collection of references
      * @return all non deleted tests for the collection
      */
-    Collection<TanaguruTest> findDistinctByTestHierarchies_ReferenceInAndIsDeletedIsFalse(Collection<TestHierarchy> references);
+    Collection<TanaguruTest> findDistinctByTestHierarchies_ReferenceInAndIsDeletedIsFalseOrderByNumber(Collection<TestHierarchy> references);
 
     /**
      * Find all tests for a collection of reference

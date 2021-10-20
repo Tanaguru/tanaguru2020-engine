@@ -39,4 +39,5 @@
     <include file="db/changelogs/20210806_changelog_updateProject_allowAuditType.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210831_changelog_updateContract_allowCreateProject_allowModifyProject.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211019_changelog_tanaguru_test_status.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211020_changelog_tanaguru_test_code_number.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

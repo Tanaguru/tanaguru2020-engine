@@ -24,6 +24,9 @@ public class TanaguruTest implements Serializable {
     private long id;
 
     @Column
+    private int number;
+    
+    @Column
     private String name;
 
     @Column
@@ -46,6 +49,9 @@ public class TanaguruTest implements Serializable {
     
     @Column
     private String status;
+    
+    @Column
+    private String code;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -157,6 +163,22 @@ public class TanaguruTest implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
     
 }
