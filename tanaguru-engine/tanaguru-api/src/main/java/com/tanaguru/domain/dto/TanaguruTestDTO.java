@@ -7,7 +7,7 @@ import java.util.Collection;
 public class TanaguruTestDTO {
     private long id;
 
-    private int number; 
+    private Integer number; 
     
     private String name;
 
@@ -72,11 +72,11 @@ public class TanaguruTestDTO {
         this.status = status;
     }
 
-    public int getNumber() {
+    public Integer getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(Integer number) {
         this.number = number;
     }
 
