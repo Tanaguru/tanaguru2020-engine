@@ -69,6 +69,19 @@ public class ElementResult implements Serializable {
 
     @Column
     private float ratio = -1;
+    
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private ElementValid valid;
+    
+    @Column
+    private String text;
+    
+    @Column
+    private String background;
+    
+    @Column
+    private String foreground;
 
     public String getAccessibleName() {
         return accessibleName;
@@ -181,4 +194,37 @@ public class ElementResult implements Serializable {
     public void setRatio(float ratio) {
         this.ratio = ratio;
     }
+
+    public ElementValid getValid() {
+        return valid;
+    }
+
+    public void setValid(ElementValid valid) {
+        this.valid = valid;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public String getForeground() {
+        return foreground;
+    }
+
+    public void setForeground(String foreground) {
+        this.foreground = foreground;
+    }
+    
 }
