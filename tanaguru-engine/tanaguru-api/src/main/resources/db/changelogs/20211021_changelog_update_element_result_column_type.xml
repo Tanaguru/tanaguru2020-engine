@@ -1,0 +1,17 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    
+    <changeSet id="update_element_result_column_types" author="lpedrau">
+        <modifyDataType tableName="element_result" columnName="text" newDataType="text"/>
+        <modifyDataType tableName="element_result" columnName="background" newDataType="text"/>
+        <modifyDataType tableName="element_result" columnName="foreground" newDataType="text"/>
+        <rollback>
+            <modifyDataType tableName="element_result" columnName="text" newDataType="varchar(300)"/>
+            <modifyDataType tableName="element_result" columnName="background" newDataType="varchar(50)"/>
+            <modifyDataType tableName="element_result" columnName="foreground" newDataType="varchar(50)"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
