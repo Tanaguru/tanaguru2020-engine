@@ -42,4 +42,5 @@
     <include file="db/changelogs/20211020_changelog_tanaguru_test_code_number.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211020_changelog_update_tanaguru_test_number.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211021_changelog_update_element_result_contrast.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211021_changelog_update_element_result_column_type.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
