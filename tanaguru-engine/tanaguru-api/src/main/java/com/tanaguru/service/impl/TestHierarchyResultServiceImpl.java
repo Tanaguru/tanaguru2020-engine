@@ -175,9 +175,12 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         Collection<Page> pages = audit.getPages();
         for(Page page : pages) {
             Collection<TestHierarchyResult> thResults = page.getTestHierarchyResults();
-            thResults.stream()
-            .filter(th -> th.getTestHierarchy().getReference().equals(testHierarchy))
-            .forEach(th -> this.addInMapTestHierarchyCodeAndStatus(testCodeWithStatusAllPage, th.getTestHierarchy().getCode(), th.getStatus()));
+            for(TestHierarchyResult th : thResults) {
+                TestHierarchy testH = th.getTestHierarchy();
+                if(testH != null && testH.getReference() != null && testH.getReference().equals(testHierarchy)) {
+                    this.addInMapTestHierarchyCodeAndStatus(testCodeWithStatusAllPage, th.getTestHierarchy().getCode(), th.getStatus());
+                }
+            }
         }
         for(String code : testCodeWithStatusAllPage.keySet()) {
             String status = getGlobalStatus(testCodeWithStatusAllPage.get(code));
