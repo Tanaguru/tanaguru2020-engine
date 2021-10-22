@@ -124,8 +124,12 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         if (firstHash != -1 && lastSlash != -1 && lastSlash < firstHash) {
             url = url.substring(0, firstHash);
         }
-
-        boolean alreadyVisited = visitedUrl.contains(url);
+        //warning http:// and http://www. same page
+        boolean alreadyVisited = false;
+        if(visitedUrl.contains(url) || visitedUrl.contains(url.replace("www.", "")) || visitedUrl.contains(url.replace("://", "://www."))){
+            alreadyVisited = true;
+        }
+        
 
         if (alreadyVisited) {
             if (auditIfAlreadyVisited) {
