@@ -6,12 +6,14 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.AuditReference;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.Webextention;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
+import com.tanaguru.repository.WebextentionRepository;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.TestHierarchyService;
 import io.swagger.annotations.ApiOperation;
@@ -42,15 +44,22 @@ public class TestHierarchyController {
     private final TanaguruUserDetailsService tanaguruUserDetailsService;
     private final TanaguruTestRepository tanaguruTestRepository;
     private final TestHierarchyService testHierarchyService;
+    private final WebextentionRepository webextentionRepository;
 
     @Autowired
     public TestHierarchyController(
-            TestHierarchyRepository testHierarchyRepository, AuditRepository auditRepository, TanaguruUserDetailsService tanaguruUserDetailsService, TanaguruTestRepository tanaguruTestRepository, TestHierarchyService testHierarchyService) {
+            TestHierarchyRepository testHierarchyRepository, 
+            AuditRepository auditRepository, 
+            TanaguruUserDetailsService tanaguruUserDetailsService, 
+            TanaguruTestRepository tanaguruTestRepository, 
+            TestHierarchyService testHierarchyService,
+            WebextentionRepository webextentionRepository) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.auditRepository = auditRepository;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
         this.tanaguruTestRepository = tanaguruTestRepository;
         this.testHierarchyService = testHierarchyService;
+        this.webextentionRepository = webextentionRepository;
     }
 
     /**
@@ -324,7 +333,10 @@ public class TestHierarchyController {
     void deleteReference(@PathVariable long id) {
         TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id));
-
+        Optional<Webextention> webextention = this.webextentionRepository.findByTestHierarchy(testHierarchy);
+        if(webextention.isPresent()) {
+            this.webextentionRepository.delete(webextention.get());
+        }
         testHierarchyService.deleteReference(testHierarchy);
     }
 
