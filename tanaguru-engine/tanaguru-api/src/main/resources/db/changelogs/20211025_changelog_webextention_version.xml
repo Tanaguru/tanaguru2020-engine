@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_webextention" author="lpedrau">
+        <createTable tableName="webextention">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="test_hierarchy_id" type="bigint"/>
+            <column name="version" type="text"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="webextention"
+                baseColumnNames="test_hierarchy_id"
+                constraintName="fk_webextention_test_hierarchy_id"
+                referencedTableName="test_hierarchy"
+                referencedColumnNames="id"/>
+                
+        <rollback>
+            <dropTable tableName="webextention"/>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="populate_webextention_version" author="lpedrau">
+	    <preConditions onFail="MARK_RAN">
+	        <sqlCheck expectedResult="0">
+	            SELECT COUNT(*) FROM webextention;
+	        </sqlCheck>
+	        <sqlCheck expectedResult="1">
+	            SELECT COUNT(*) FROM test_hierarchy WHERE id=1;
+	        </sqlCheck>
+	    </preConditions>
+	    <insert tableName="webextention">
+	      <column name="test_hierarchy_id" valueNumeric="1"/>
+	      <column name="version" value="1.4.0"/>
+	    </insert>
+	</changeSet>
+
+</databaseChangeLog>
