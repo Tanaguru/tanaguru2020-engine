@@ -62,7 +62,7 @@ public class WebextentionController {
     public @ResponseBody
     String getWebextentionVersion() {
         Optional<Webextention> webextention = this.webextentionRepository.findFirstByOrderByIdDesc();
-        return webextention.isEmpty() ? "" : webextention.get().getVersion();
+        return webextention.isEmpty() ? "0" : webextention.get().getVersion();
     }
     
     /**
