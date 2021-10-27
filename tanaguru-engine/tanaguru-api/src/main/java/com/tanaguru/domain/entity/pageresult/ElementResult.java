@@ -83,6 +83,9 @@ public class ElementResult implements Serializable {
     @Column
     private String foreground;
 
+    @Column
+    private String sourceCode;
+    
     public String getAccessibleName() {
         return accessibleName;
     }
@@ -225,6 +228,14 @@ public class ElementResult implements Serializable {
 
     public void setForeground(String foreground) {
         this.foreground = foreground;
+    }
+
+    public String getSourceCode() {
+        return sourceCode;
+    }
+
+    public void setSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
     }
     
 }
