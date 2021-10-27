@@ -1793,7 +1793,7 @@ function manageOutput(element) {
         }
     }
     
-    return { status: status, outer: e ? fakeelement.outerHTML : fakeelement, cssSelector: e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]};
+    return { status: status, sourceCode: e ? fakeelement.outerHTML : fakeelement, cssSelector: e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]};
 }
 
 function getUniqueSelector(xpath) {

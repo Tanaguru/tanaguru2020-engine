@@ -32,3 +32,11 @@
 
 ## 1.0.4
 - Fix modify project
+- Wcag updated with the latest version
+- Engine updated to work with the latest version of the rgaa
+- Correction of discrepancies between engine and web extension
+- Endpoint : web extension version used
+- Fix site audit : duplicate audited web page
+- Update management of contrast tests
+- Fix endpoint : global test result for all pages (synthesis page)
+- Fix endpoint : source code value added to the result test

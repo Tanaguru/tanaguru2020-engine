@@ -44,4 +44,5 @@
     <include file="db/changelogs/20211021_changelog_update_element_result_contrast.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211021_changelog_update_element_result_column_type.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211025_changelog_webextention_version.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211026_changelog_update_element_result_source_code.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
