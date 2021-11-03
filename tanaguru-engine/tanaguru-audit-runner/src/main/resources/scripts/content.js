@@ -115,7 +115,7 @@ function validContrast(size, weight, ratio) {
 			} else {
 				valid.target = 3;
 				if(ratio) {
-					valid.status = (ratio >= 3.1) ? 2 : 1;
+					valid.status = (ratio >= 3) ? 2 : 1;
 				}
 			}
 		}
@@ -1525,7 +1525,7 @@ var getAccessibleName = function () {
                             for (var i = 0; i < nodes.length; i++) {
                                 if (nodes[i].nodeType == Node.TEXT_NODE) {
                                     // 2-G : The current node is a Text node, return its textual contents.
-                                    result += nodes[i].nodeValue;
+                                    result += result.length === 0 ? nodes[i].nodeValue : ' '+nodes[i].nodeValue;
                                 }
                                 else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
                                     // 2-H : The current node is a descendant of an element whose Accessible Name is being computed, and contains descendants, proceed to 2F.i.
@@ -1545,14 +1545,14 @@ var getAccessibleName = function () {
                                     if (this.matches('[data-labelbytraversal="true"]')) {
                                         nodes[i].setAttribute('data-labelbytraversal', 'true');
                                     }
-                                    result += cssbeforecontent + nodes[i].accessibleName + cssaftercontent;
+                                    result += result.length === 0 ? cssbeforecontent + nodes[i].accessibleName + cssaftercontent : ' '+cssbeforecontent + nodes[i].accessibleName + cssaftercontent;
                                 }
                             }
                         }
                         else {
-                            result += this.value;
+                            result += result.length === 0 ? this.value : ' '+this.value;
                         }
-                        result += parentcssaftercontent;
+                        result += result.length === 0 ? parentcssaftercontent : ' '+parentcssaftercontent;
                         if (result.trim() == '' && this.hasAttribute('title')) {
                             /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
                             result = this.getAttribute('title');
@@ -1563,7 +1563,7 @@ var getAccessibleName = function () {
                     var labels = this.labels;
                     for (var i = 0; i < labels.length; i++) {
                         if (!labels[i].matches('[role="none"], [role="presentation"]')) {
-                            result += labels[i].accessibleName;
+                            result += result.length === 0 ? labels[i].accessibleName : ' '+labels[i].accessibleName;
                         }
                     }
 
@@ -1615,7 +1615,7 @@ var getAccessibleName = function () {
                     for (var i = 0; i < nodes.length; i++) {
                         if (nodes[i].nodeType == Node.TEXT_NODE) {
                             // 2-G : The current node is a Text node, return its textual contents.
-                            result += nodes[i].nodeValue;
+                            result += result.length === 0 ? nodes[i].nodeValue : ' '+nodes[i].nodeValue;
                         }
                         else if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].isNotExposedDueTo.length == 0) {
                             // 2-H : The current node is a descendant of an element whose Accessible Name is being computed, and contains descendants, proceed to 2F.i.
@@ -1643,10 +1643,10 @@ var getAccessibleName = function () {
                             if (this.matches('[data-labelbytraversal="true"]')) {
                                 nodes[i].setAttribute('data-labelbytraversal', 'true');
                             }
-                            result += cssbeforecontent + nodes[i].accessibleName + cssaftercontent;
+                            result += result.length === 0 ? cssbeforecontent + nodes[i].accessibleName + cssaftercontent : ' '+cssbeforecontent + nodes[i].accessibleName + cssaftercontent;
                         }
                     }
-                    result += parentcssaftercontent;
+                    result += result.length === 0 ? parentcssaftercontent : ' '+parentcssaftercontent;
                     if (result.trim() == '' && this.matches('a[href][title]')) {
                         /* 2-I : Otherwise, if the current node has a Tooltip attribute, return its value. */
                         result = this.getAttribute('title');
@@ -1736,6 +1736,15 @@ function addResultSet(name, data) {
     window.tanaguru.tests.push(data);
 }
 
+function filterTestsByStatus(statuses) {
+    if(statuses.length > 0) {
+        function matchFilters(test) {
+            return statuses.includes(test.type);
+        }
+        window.tanaguru.tests = window.tanaguru.tests.filter(matchFilters);
+    }
+}
+
 function loadTanaguruTests() {
     initTanaguru();
     var tags = [];
@@ -1774,7 +1783,7 @@ function manageOutput(element) {
         var e = null;
     } else {
         var canBeReachedUsingKeyboardWith = element.canBeReachedUsingKeyboardWith;
-        var isVisible = element.hasAttribute('data-tng-el-visible') ? element.getAttribute('data-tng-el-visible') === "true" : false;
+        var isVisible = element.getAttribute('data-tng-el-visible') === "true";
         var isNotExposedDueTo = element.hasAttribute('data-tng-notExposed') ? element.getAttribute('data-tng-notExposed') : '';
 
         var fakeelement = element.cloneNode(true);
@@ -1792,8 +1801,8 @@ function manageOutput(element) {
             }
         }
     }
-    
-    return { status: status, sourceCode: e ? fakeelement.outerHTML : fakeelement, cssSelector: e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]};
+
+	return { status: status, sourceCode: e ? fakeelement.outerHTML : fakeelement, cssSelector: e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]}
 }
 
 function getUniqueSelector(xpath) {
@@ -2006,7 +2015,7 @@ function createTanaguruTest(test) {
             }
 
             // Calcul du statut du test.
-            if (test.hasOwnProperty('expectedNbElements')) {
+            if (test.hasOwnProperty('expectedNbElements') && !test.hasOwnProperty('status')) {
                 if (Number.isInteger(test.expectedNbElements)) {
                     status = elements.length == test.expectedNbElements ? 'passed' : 'failed';
                     for (var i = 0; i < elements.length; i++) {
@@ -2040,7 +2049,7 @@ function createTanaguruTest(test) {
 
             // Traitement par collection.
             var failedincollection = 0;
-            if (test.hasOwnProperty('analyzeElements')) {
+            if (test.hasOwnProperty('analyzeElements') && !test.hasOwnProperty('status')) {
                 if (test.analyzeElements.constructor == Function) {
                     test.analyzeElements(elements);
                     // On modifie le statut du test selon les statuts d'items.
@@ -2399,10 +2408,6 @@ var getImplicitAriaRole = function () {
         return undefined;
     }
 };
-if (!('getImplicitAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
-if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
-
-
 var getImplicitAriaRoleCategory = function () {
     if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
         var elementData = htmlData.elements[this.tagName.toLowerCase()];
@@ -2417,6 +2422,10 @@ var getImplicitAriaRoleCategory = function () {
         return undefined;
     }
 };
+if (!('getImplicitAriaRoleCategory' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
+if (!('getImplicitAriaRoleCategory' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
+if (!('getImplicitAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
+if (!('getImplicitAriaRole' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRole = getImplicitAriaRole;
 if (!('getImplicitAriaRoleCategory' in HTMLElement.prototype)) HTMLElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
 if (!('getImplicitAriaRoleCategory' in SVGElement.prototype)) SVGElement.prototype.getImplicitAriaRoleCategory = getImplicitAriaRoleCategory;
 
@@ -4397,37 +4406,6 @@ var isNotExposedDueTo = function () {
     return result;
 };
 
-var isNotVisibleDueTo = function () {
-    var result = [];
-    if (!(!!(this.offsetWidth || this.offsetHeight || this.getClientRects().length))) {
-        result.push('css:other');
-    }
-    if (window.getComputedStyle(this, null).getPropertyValue('display') == 'none') {
-        result.push('css:display');
-    } else {
-        var parent = this.parentNode;
-        while (parent && parent.nodeType == 1) {
-            if (window.getComputedStyle(parent, null).getPropertyValue('display') == 'none') {
-                result.push('css:display');
-                break;
-            }
-            parent = parent.parentNode;
-        }
-    }
-    if (window.getComputedStyle(this, null).getPropertyValue('opacity') == '0') {
-        result.push('css:opacity');
-    }
-    if (window.getComputedStyle(this, null).getPropertyValue('visibility') == 'hidden') {
-        result.push('css:visibility');
-    }
-    return result;
-};
-
-if (!HTMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotVisibleDueTo', {get: isNotVisibleDueTo});
-//if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotVisibleDueTo', { get: isNotVisibleDueTo });
-if (!SVGElement.prototype.hasOwnProperty('isNotVisibleDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotVisibleDueTo', {get: isNotVisibleDueTo});
-
-
 if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(HTMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 //if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
@@ -4548,18 +4526,19 @@ function getDuplicateID() {
 function listAllEventListeners() {
     var allElements = Array.from(document.body.querySelectorAll('*'));
     allElements.push(document.body);
-
     var types = [];
-    for (let ev in window) {
-      if (/^on/.test(ev)) types[types.length] = ev;
+    for(let ev in window) {
+      if(/^on/.test(ev)) types[types.length] = ev;
+    //   console.log(ev);
+    //   else if(/^jQuery/.test(ev) && ev.events.length > 0) types[types.length] = ev;
     }
   
     let elements = [];
-    for (let i = 0; i < allElements.length; i++) {
+    for(let i = 0; i < allElements.length; i++) {
       var currentElement = allElements[i];
-      for (let j = 0; j < types.length; j++) {
+      for(let j = 0; j < types.length; j++) {
 
-        if (types[j] != 'onload' && typeof currentElement[types[j]] === 'function') {
+        if(types[j] != 'onload' && typeof currentElement[types[j]] === 'function') {
           elements.push(currentElement);
         }
       }
@@ -4567,37 +4546,71 @@ function listAllEventListeners() {
     return elements;
 }
 
-// Test-init.js
+listAllEventListeners();
+
+//INIT-TEST.js
+
 var statuses = ['failed', 'cantTell', 'passed'];
+var eList;
+var naList = [];
 
-var eList = document.body.querySelectorAll('*');
-eList.forEach(e => {
-    let elExposed = e.isNotExposedDueTo;
-    if(elExposed.length > 0) {
-        e.setAttribute('data-tng-el-exposed', false);
-        e.setAttribute('data-tng-notExposed', elExposed);
-
-        if(elExposed == 'css:display' || 'css:visibility') {
-            e.setAttribute('data-tng-el-visible', false);
-        }
-    } else {
-        e.setAttribute('data-tng-el-exposed', true);
-    }
-
-    if(!e.hasAttribute('data-tng-el-visible')) {
-        if(e.isVisible) {
-            e.setAttribute('data-tng-el-visible', true);
-        } else {
-            e.setAttribute('data-tng-el-visible', false);
-        }
-    }
+/**
+ * ? Define for each node of the page, if it is exposed, visible and has a [aria-*] attribute
+ * ! NEED FOR TESTS
+ */
+function addDataTng() {
+    eList = document.body.querySelectorAll('*');
+    eList.forEach(e => {
+        let elExposed = e.isNotExposedDueTo;
+        if(elExposed.length > 0) {
+            e.setAttribute('data-tng-el-exposed', false);
+            e.setAttribute('data-tng-notExposed', elExposed.join());
     
-    let attributesList = e.attributes;
-    for(let i = 0; i < attributesList.length; i++) {
-        if(attributesList[i].name.match(/^aria-.*$/)) {
-            e.setAttribute('data-tng-ariaAttribute', true);
+            if(elExposed == 'css:display' || 'css:visibility') {
+                e.setAttribute('data-tng-el-visible', false);
+            }
+        } else {
+            e.setAttribute('data-tng-el-exposed', true);
         }
-    }
-});
+    
+        if(!e.hasAttribute('data-tng-el-visible')) {
+            if(e.isVisible) {
+                e.setAttribute('data-tng-el-visible', true);
+            } else {
+                e.setAttribute('data-tng-el-visible', false);
+            }
+        }
+        
+        let attributesList = e.attributes;
+        for(let i = 0; i < attributesList.length; i++) {
+            if(attributesList[i].name.match(/^aria-.*$/)) {
+                e.setAttribute('data-tng-ariaAttribute', true);
+            }
+        }
+    });
+}
 
+/**
+ * ? Check if page has images, frames, media, tables, links & form fields
+ */
+function getNACat() {
+    if(!document.body.querySelector('img, [role="img]')) naList.push('images');
+    if(!document.body.querySelector('iframe:not([role="presentation"]), frame:not([role="presentation"])')) naList.push('frames');
+    if(!document.body.querySelector('video, audio, object[type^="video/"], object[type^="audio/"], object[type="application/ogg"], embed[type^="video/"], embed[type^="audio/"]')) naList.push('media');
+    if(!document.body.querySelector('table, [role="table]')) naList.push('tables');
+    if(!document.body.querySelector('a[href], [role="link"]')) naList.push('links');
+    if(!document.body.querySelector(
+        'input[type="text"]:not([role]), input[type="password"]:not([role]), input[type="search"]:not([role]), input[type="email"]:not([role]), input[type="number"]:not([role]), input[type="tel"]:not([role]), input[type="url"]:not([role]), textarea:not([role]), input[type="checkbox"]:not([role]), input[type="radio"]:not([role]), input[type="date"]:not([role]), input[type="range"]:not([role]), input[type="color"]:not([role]), input[type="time"]:not([role]), input[type="month"]:not([role]), input[type="week"]:not([role]), input[type="datetime-local"]:not([role]), select:not([role]), datalist:not([role]), input[type="file"]:not([role]), progress:not([role]), meter:not([role]), input:not([type]):not([role]), [role="progressbar"], [role="slider"], [role="spinbutton"], [role="textbox"], [role="listbox"], [role="searchbox"], [role="combobox"], [role="option"], [role="checkbox"], [role="radio"], [role="switch"], [contenteditable="true"]:not([role])'
+        )) naList.push('forms');
+}
+
+/**
+ * ? remove all [data-tng-*]
+ */
+function removeAllDataTNG() {
+    removeDataTNG(document.querySelector('html'));
+    eList.forEach(e => removeDataTNG(e));
+};
+
+addDataTng();
 var textNodeList = getTextNodeContrast();

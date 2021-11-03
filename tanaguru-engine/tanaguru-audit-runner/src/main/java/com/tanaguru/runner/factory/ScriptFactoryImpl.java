@@ -20,7 +20,29 @@ public class ScriptFactoryImpl implements ScriptFactory {
         Gson gson = new Gson();
         strb.append(coreScript);
         strb.append("\n");
+        strb.append("getNACat();\n");
         for (TanaguruTest tanaguruTest : tanaguruTestList) {
+            
+            boolean isFirst = true;
+            StringBuilder strbTags = new StringBuilder();
+            strbTags.append("[");
+            for(String tag : tanaguruTest.getTags()) {
+                if(isFirst) {
+                    strbTags.append("'"+tag+"'");
+                    isFirst = false;
+                }else {
+                    strbTags.append(",'"+tag+"'");
+                }
+                
+            }
+            strbTags.append("]");
+            strb.append("\nvar testStatusJS = null;");
+            strb.append("\nnaList.forEach(na => {\n"
+                    + "            if("+strbTags.toString()+".includes(na)) testStatusJS = 'inapplicable';\n"
+                    + "        }); ");
+            strb.append("\nif(testStatusJS == null){\n"
+                    + "    testStatusJS = '"+ tanaguruTest.getStatus()+"';"
+                    + "\n}");
             strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
             strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
             if(tanaguruTest.getQuery() != null && tanaguruTest.getQuery().startsWith("HTML")) {
@@ -50,7 +72,7 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
             
             if (tanaguruTest.getStatus() != null) {
-                strb.append(",\nstatus:`").append(tanaguruTest.getStatus()).append("`");
+                strb.append(",\nstatus:").append("testStatusJS").append("");
             }
             
             if(tanaguruTest.getContrast() != null){
@@ -66,7 +88,7 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
             strb.append("});");
         }
-        strb.append("\neList.forEach(e => removeDataTNG(e));");
+        strb.append("\nremoveAllDataTNG();");
         strb.append("\nreturn JSON.stringify(loadTanaguruTests());");
         return strb.toString();
     }
