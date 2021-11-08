@@ -30,6 +30,8 @@ public interface TestHierarchyRepository extends JpaRepository<TestHierarchy, Lo
     Page<TestHierarchyDTO> findAllByParentIsNull(Pageable pageable);
 
     Optional<TestHierarchy> findByIdAndIsDeletedIsFalseAndParentIsNull(Long id);
+    
+    Optional<TestHierarchy> findByIdAndParentIsNull(Long id);
 
     /**
      * Find all non deleted @see TestHierarchy
