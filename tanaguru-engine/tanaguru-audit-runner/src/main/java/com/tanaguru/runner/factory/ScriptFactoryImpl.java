@@ -80,11 +80,11 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
 
             if (tanaguruTest.getFilter() != null) {
-                strb.append(",\nfilter:").append("new Function('item', 'HTML', `return ").append(tanaguruTest.getFilter()).append("(item, HTML)`)");
+                strb.append(",\nfilter:").append(tanaguruTest.getFilter());
             }
 
             if (tanaguruTest.getAnalyzeElements() != null) {
-                strb.append(",\nanalyzeElements:").append("new Function('collection', 'HTML', `return ").append(tanaguruTest.getAnalyzeElements()).append("(collection, HTML)`)");
+                strb.append(",\nanalyzeElements:").append(tanaguruTest.getAnalyzeElements());
             }
             strb.append("});");
         }
