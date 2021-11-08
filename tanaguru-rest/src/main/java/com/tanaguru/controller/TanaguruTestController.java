@@ -67,7 +67,7 @@ public class TanaguruTestController {
     public @ResponseBody
     Collection<TanaguruTestDTO> getByReferenceId(
             @PathVariable long id) {
-        TestHierarchy reference = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(id)
+        TestHierarchy reference = testHierarchyRepository.findByIdAndParentIsNull(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, id ));
 
         return tanaguruTestRepository.findAllByTestHierarchies_ReferenceAndIsDeletedIsFalse(reference)
