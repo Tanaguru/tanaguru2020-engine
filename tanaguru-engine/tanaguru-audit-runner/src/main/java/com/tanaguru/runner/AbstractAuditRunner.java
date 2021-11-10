@@ -119,7 +119,9 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {
         int firstHash = url.indexOf('#');
         int lastSlash = url.lastIndexOf('/');
-
+        url = url.trim();
+        url = url.replace("\n","");
+                
         //Cut anchor but keep url for framework that use hash in url as Vue.js
         if (firstHash != -1 && lastSlash != -1 && lastSlash < firstHash) {
             url = url.substring(0, firstHash);
