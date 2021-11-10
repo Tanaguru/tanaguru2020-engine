@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class AuditRunnerSelenese extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerSelenese.class);
@@ -31,7 +32,7 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             Audit audit,
             String scenario,
             RemoteWebDriver driver,
-            String coreScript,
+            HashMap<String,String> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,

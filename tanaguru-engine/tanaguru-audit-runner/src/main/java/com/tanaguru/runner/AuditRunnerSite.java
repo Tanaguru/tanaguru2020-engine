@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCrawlerListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerSite.class);
@@ -19,7 +20,7 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
             Audit audit,
             TanaguruCrawlerController crawlerController,
             RemoteWebDriver driver,
-            String coreScript,
+            HashMap<String,String> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
