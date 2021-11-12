@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -345,7 +346,7 @@ public class TestHierarchyResultController {
         TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
 
-        return testHierarchyResultService.getAuditSynthesisForTestHierarchy(audit, testHierarchy, PageRequest.of(page, size));
+        return testHierarchyResultService.getAuditSynthesisForTestHierarchy(audit, testHierarchy, PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
     }
     
     @ApiOperation(
