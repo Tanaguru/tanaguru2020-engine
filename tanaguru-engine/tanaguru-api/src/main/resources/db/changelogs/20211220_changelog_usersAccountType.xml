@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_app_account_type" author="lpedrau">
+        <createTable tableName="app_account_type">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="name" type="varchar(30)"/>
+        </createTable>
+        <addPrimaryKey tableName="app_account_type" columnNames="id" constraintName="pk_app_account_type"/>
+        <addUniqueConstraint tableName="app_account_type" columnNames="name"/>
+        <rollback>
+            <dropTable tableName="app_account_type"/>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="populate_app_account_type" author="lpedrau">
+        <insert tableName="app_account_type">
+            <column name="name" value="DEFAULT"/>
+        </insert>
+        <insert tableName="app_account_type">
+            <column name="name" value="FREE"/>
+        </insert>
+        <insert tableName="app_account_type">
+            <column name="name" value="PREMIUM"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM app_account_type;
+            </sql>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="update_user_account_type" author="lpedrau">
+        <addColumn tableName="app_user">
+            <column name="app_account_type_id" type="bigint" defaultValue="1"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="app_user"
+                                 baseColumnNames="app_account_type_id"
+                                 constraintName="fk_app_user_app_account_type_id"
+                                 referencedTableName="app_account_type"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropColumn tableName="app_user" columnName="app_account_type_id"/>
+        </rollback>
+    </changeSet>
+    
+</databaseChangeLog>
