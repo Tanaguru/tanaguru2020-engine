@@ -73,6 +73,12 @@ public class User implements Serializable {
     
     @Column
     private String lastname;
+    
+    @NotNull
+    @Valid
+    @ManyToOne
+    @JoinColumn
+    private AppAccountType appAccountType;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -190,6 +196,14 @@ public class User implements Serializable {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public AppAccountType getAppAccountType() {
+        return appAccountType;
+    }
+
+    public void setAppAccountType(AppAccountType appAccountType) {
+        this.appAccountType = appAccountType;
     }
     
 }

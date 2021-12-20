@@ -1,5 +1,6 @@
 package com.tanaguru.service;
 
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 
@@ -31,7 +32,7 @@ public interface UserService {
      * @param createContract Application auto create a contract
      * @return The new user
      */
-    User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract, String firstName, String lastName);
+    User createUser(String username, String email, String password, EAppRole appRole, boolean enabled, boolean createContract, String firstName, String lastName, EAppAccountType appAccountType);
 
     /**
      * Modify a @see User

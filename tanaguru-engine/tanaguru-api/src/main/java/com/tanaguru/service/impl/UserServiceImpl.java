@@ -1,6 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.user.Attempt;
@@ -83,7 +84,8 @@ public class UserServiceImpl implements UserService {
             boolean enabled, 
             boolean createContract,
             String firstName, 
-            String lastName) {
+            String lastName,
+            EAppAccountType appAccountType) {
         if (checkUsernameIsUsed(username)) {
             throw new CustomInvalidEntityException(CustomError.USERNAME_ALREADY_EXISTS);
         }
@@ -97,7 +99,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        User user = userFactory.createUser(username, email, bCryptPasswordEncoder.encode(password), appRole, enabled, firstName, lastName);
+        User user = userFactory.createUser(username, email, bCryptPasswordEncoder.encode(password), appRole, enabled, firstName, lastName, appAccountType);
         if (createContract) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, 1);
