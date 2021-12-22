@@ -19,7 +19,7 @@ public class AuditRunnerPage extends AbstractAuditRunner {
             Audit audit,
             Collection<String> urls,
             RemoteWebDriver driver,
-            HashMap<String,String> coreScript,
+            HashMap<String,HashMap<String, StringBuilder>> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,

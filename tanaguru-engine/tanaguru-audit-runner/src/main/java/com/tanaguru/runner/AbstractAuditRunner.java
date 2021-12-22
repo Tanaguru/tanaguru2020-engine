@@ -42,7 +42,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private final boolean enableScreenShot;
     private final Gson gson = new Gson();
     private final long waitTime;
-    private final HashMap<String,String> coreScript;
+    private final HashMap<String,HashMap<String, StringBuilder>> coreScript;
 
     private boolean stop = false;
     private int currentRank = 1;
@@ -50,7 +50,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     public AbstractAuditRunner(
             Audit audit,
             RemoteWebDriver driver,
-            HashMap<String,String> coreScript,
+            HashMap<String,HashMap<String, StringBuilder>> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
@@ -166,12 +166,17 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             try {
                 String result = "";
                 ArrayList<JSONObject> objs = new ArrayList<>();
-                for(String key : coreScript.keySet()) {
-                    System.out.println("executing script for category : "+key);
-                    result = (String) tanaguruDriver.executeScript(coreScript.get(key));
-                    //System.out.println(result);
-                    objs.add(new JSONObject(result));
+                
+                for(String refKey : coreScript.keySet()) {
+                    System.out.println("executing for : "+refKey);
+                    for(String category : coreScript.get(refKey).keySet()) {
+                        System.out.println("category : "+category);
+                        StringBuilder script = coreScript.get(refKey).get(category);
+                        result = (String) tanaguruDriver.executeScript(script.toString());
+                        objs.add(new JSONObject(result));
+                    }
                 }
+                
                 JSONArray tests = new JSONArray();
                 JSONArray tags = new JSONArray();
                 for(JSONObject j : objs) {

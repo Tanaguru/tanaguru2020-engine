@@ -32,7 +32,7 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             Audit audit,
             String scenario,
             RemoteWebDriver driver,
-            HashMap<String,String> coreScript,
+            HashMap<String,HashMap<String, StringBuilder>> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,

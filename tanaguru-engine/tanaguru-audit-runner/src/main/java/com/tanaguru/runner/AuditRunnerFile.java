@@ -23,7 +23,7 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             Audit audit,
             String fileContent,
             RemoteWebDriver driver,
-            HashMap<String,String> coreScript,
+            HashMap<String,HashMap<String, StringBuilder>> coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
