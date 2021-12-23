@@ -304,7 +304,7 @@ window.getOpacity = function(element) {
  * @param {node} element 
  * @returns 
  */
- function getVisibility(element) {
+window.getVisibility = function(element) {
 	var opacity = element.hasAttribute('data-tng-opacity') ? element.getAttribute('data-tng-opacity') : getOpacity(element);
 	if(element.hasAttribute('data-tng-el-visible')) {
 		return element.getAttribute('data-tng-el-visible') === 'true' ? true : false;
@@ -390,7 +390,7 @@ window.getOpacity = function(element) {
  * @param {node} element 
  * @returns 
  */
- function checkStacking(element, parent) {
+window.checkStacking = function(element, parent) {
 	var position = window.getComputedStyle(element, null).getPropertyValue('position');
 
 	if(position !== 'static') {
