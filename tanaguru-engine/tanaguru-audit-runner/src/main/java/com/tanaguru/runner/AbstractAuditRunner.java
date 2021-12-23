@@ -165,32 +165,30 @@ public abstract class AbstractAuditRunner implements AuditRunner {
 
             try {
                 String result = "";
-                ArrayList<JSONObject> objs = new ArrayList<>();
+                ArrayList<JSONObject> results = new ArrayList<>();
                 
                 for(String refKey : coreScript.keySet()) {
-                    System.out.println("executing for : "+refKey);
                     for(String category : coreScript.get(refKey).keySet()) {
-                        System.out.println("category : "+category);
+                        auditLog(EAuditLogLevel.INFO, "Running tests - "+category+" - "+refKey);
                         StringBuilder script = coreScript.get(refKey).get(category);
                         result = (String) tanaguruDriver.executeScript(script.toString());
-                        objs.add(new JSONObject(result));
+                        results.add(new JSONObject(result));
                     }
                 }
                 
                 JSONArray tests = new JSONArray();
                 JSONArray tags = new JSONArray();
-                for(JSONObject j : objs) {
-                    for(Object test : j.getJSONArray("tests")) {
+                for(JSONObject res : results) {
+                    for(Object test : res.getJSONArray("tests")) {
                         tests.put(test);
                     }
-                    for(Object tag : j.getJSONArray("tags")) {
+                    for(Object tag : res.getJSONArray("tags")) {
                         tags.put(tag);
                     }
                 }
                 JSONObject finalRes = new JSONObject();
                 finalRes.put("tests", tests);
                 finalRes.put("tags", tags);
-                //System.out.println(finalRes.toString());
                 String source = tanaguruDriver.getPageSource();
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
                     tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(finalRes.toString(), WebextPageResult.class), screenshot, source);

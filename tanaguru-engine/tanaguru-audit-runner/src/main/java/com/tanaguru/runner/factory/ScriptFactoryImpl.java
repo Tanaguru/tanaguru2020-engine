@@ -32,12 +32,8 @@ public class ScriptFactoryImpl implements ScriptFactory {
      * @return the full script
      */
     public HashMap<String,HashMap<String, StringBuilder>> create(String coreScript, Collection<TanaguruTest> tanaguruTestList, Collection<AuditReference> references) {
-        HashMap<String,HashMap<String, StringBuilder>>  scriptsListByReference = new HashMap<String,HashMap<String, StringBuilder>>();
-        //1er reference coreScript for initialisation
-        HashMap<String, StringBuilder> init = new HashMap<String, StringBuilder>();
-        init.put("init", new StringBuilder(coreScript));
-        scriptsListByReference.put("Initialisation", init);
         
+        HashMap<String,HashMap<String, StringBuilder>>  scriptsListByReference = new HashMap<String,HashMap<String, StringBuilder>>();     
         for(AuditReference reference : references) {
             HashMap<String, StringBuilder> scriptsByCat = new HashMap<String, StringBuilder>();
             for (TanaguruTest tanaguruTest : tanaguruTestList) {
@@ -54,6 +50,9 @@ public class ScriptFactoryImpl implements ScriptFactory {
                         scriptsByCat.put(categoryName, script);
                     }else {
                         StringBuilder script = new StringBuilder();
+                        script.append(coreScript);
+                        //script.append("\n");
+                        //script.append("getNACat();\n");
                         script.append(createTngTestForScript(tanaguruTest));
                         scriptsByCat.put(categoryName, script);
                     }
