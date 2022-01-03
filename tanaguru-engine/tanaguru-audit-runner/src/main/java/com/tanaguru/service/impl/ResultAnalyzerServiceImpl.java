@@ -166,7 +166,7 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
         for (TanaguruTest tanaguruTest : testHierarchy.getTanaguruTests()) {
             TestResult testResult = testResultByTestId.get(tanaguruTest.getId());
             if(testResult == null){
-                //LOGGER.warn("[Test {}] Missing result", tanaguruTest.getId());
+                LOGGER.warn("[Test {}] Missing result", tanaguruTest.getId());
                 continue;
             }
             switch (testResult.getStatus()) {
