@@ -166,16 +166,38 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             try {
                 String result = "";
                 ArrayList<JSONObject> results = new ArrayList<>();
-                
+                //ArrayList<Thread> threads = new ArrayList<>();
+                //ArrayList<ScriptExecutor> executors = new ArrayList<>();
                 for(String refKey : coreScript.keySet()) {
                     for(String category : coreScript.get(refKey).keySet()) {
                         auditLog(EAuditLogLevel.INFO, "Running tests - "+category+" - "+refKey);
                         StringBuilder script = coreScript.get(refKey).get(category);
                         result = (String) tanaguruDriver.executeScript(script.toString());
                         results.add(new JSONObject(result));
+                        
+                        /**ScriptExecutor exec = new ScriptExecutor(script.toString(), this.tanaguruDriver);
+                        Thread thread = new Thread(exec);
+                        thread.setName(category);
+                        threads.add(thread);
+                        executors.add(exec);
+                        thread.start(); **/  
                     }
-                }
+                } 
                 
+                /**for(Thread thread : threads) {
+                    try {
+                        thread.join();
+                        System.out.println("Test done for thread : "+thread.getName());
+                        auditLog(EAuditLogLevel.INFO, "Tests done - "+thread.getName());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                     }
+                }
+                for(ScriptExecutor exec : executors) {
+                    results.add(new JSONObject(exec.getResult()));
+                }**/
+                
+                //si on garde faire une fonction a part pour plus de clarté
                 JSONArray tests = new JSONArray();
                 JSONArray tags = new JSONArray();
                 for(JSONObject res : results) {
