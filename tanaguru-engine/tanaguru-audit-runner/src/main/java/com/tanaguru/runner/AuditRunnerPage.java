@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
 
 public class AuditRunnerPage extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerPage.class);
@@ -19,7 +18,7 @@ public class AuditRunnerPage extends AbstractAuditRunner {
             Audit audit,
             Collection<String> urls,
             RemoteWebDriver driver,
-            HashMap<String,HashMap<String, StringBuilder>> coreScript,
+            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,

@@ -14,7 +14,7 @@
  * @param {string} color 
  * @returns 
  */
-window.getLuminance = function(color) {
+function getLuminance(color) {
 	// table of red, green and blue values in 8bit
 	var colorValues = color.substr(4, color.length - 1).split(',');
 
@@ -43,7 +43,7 @@ window.getLuminance = function(color) {
  * @param {array} bgColor 
  * @returns 
  */
-window.getRatio = function(textColor, bgColor) {
+function getRatio(textColor, bgColor) {
 
 	if(textColor && bgColor) {
 		var minRatio = 21;
@@ -79,7 +79,7 @@ window.getRatio = function(textColor, bgColor) {
  * @param {number} ratio 
  * @returns 
  */
-window.validContrast = function(size, weight, ratio) {
+function validContrast(size, weight, ratio) {
 	var valid = {
 		target: null,
 		status: 0 // 0: cant tell - 1: invalid - 2: valid
@@ -129,7 +129,7 @@ window.validContrast = function(size, weight, ratio) {
  * @param {string} value 
  * @returns 
  */
-window.getRGB = function(value) {
+function getRGB(value) {
 	// rgb(numbers, numbers, numbers) -> global
 	var regex = /rgb\((?:\d+, ?\d+, ?\d+\))/g;
 	return value.match(regex);
@@ -141,7 +141,7 @@ window.getRGB = function(value) {
  * @param {string} parent 
  * @returns 
  */
-window.getRGBA = function(value, parent, opacity) {
+function getRGBA(value, parent, opacity) {
 	// rgba(numbers, numbers, numbers, numbers) -> global
 	var regex = /rgba\((?:\d+, ?\d+, ?\d+, ?\d?[,.]?\d*\))/g;
 	var results = value.match(regex);
@@ -189,7 +189,7 @@ window.getRGBA = function(value, parent, opacity) {
  * @param pbg
  * @returns 
  */
-window.getBgColor = function(element, opacity, pbg) {
+function getBgColor(element, opacity, pbg) {
 	var bgColors = [];
 	var bgImage = window.getComputedStyle(element, null).getPropertyValue('background-image');
 	var bgColor = window.getComputedStyle(element, null).getPropertyValue('background-color');
@@ -267,7 +267,7 @@ window.getBgColor = function(element, opacity, pbg) {
  * @param {node} element 
  * @returns 
  */
-window.getOpacity = function(element) {
+function getOpacity(element) {
 	if(element.hasAttribute('data-tng-opacity')) {
 		return element.getAttribute('data-tng-opacity');
 	}
@@ -304,7 +304,7 @@ window.getOpacity = function(element) {
  * @param {node} element 
  * @returns 
  */
-window.getVisibility = function(element) {
+ function getVisibility(element) {
 	var opacity = element.hasAttribute('data-tng-opacity') ? element.getAttribute('data-tng-opacity') : getOpacity(element);
 	if(element.hasAttribute('data-tng-el-visible')) {
 		return element.getAttribute('data-tng-el-visible') === 'true' ? true : false;
@@ -390,7 +390,7 @@ window.getVisibility = function(element) {
  * @param {node} element 
  * @returns 
  */
-window.checkStacking = function(element, parent) {
+ function checkStacking(element, parent) {
 	var position = window.getComputedStyle(element, null).getPropertyValue('position');
 
 	if(position !== 'static') {
@@ -412,7 +412,7 @@ window.checkStacking = function(element, parent) {
  * @param {node} element 
  * @returns 
  */
-window.getBg = function(element) {
+function getBg(element) {
 
 	while(element && element.tagName != 'HTML') {
 		if(window.getComputedStyle(element, null).getPropertyValue('background-image') !== 'none' 
@@ -431,7 +431,7 @@ window.getBg = function(element) {
  * @param {node} element 
  * @returns 
  */
-window.getPosition = function(element) {
+function getPosition(element) {
 	// get DOMRect of element (size & position)
 	var rect = element.getBoundingClientRect(),
 	scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
@@ -450,7 +450,7 @@ window.getPosition = function(element) {
  * @param {node} element 
  * @returns 
  */
-window.getResults = function(element, opacity) {
+function getResults(element, opacity) {
 	var bg = getBg(element);
 	var position = bg ? checkStacking(element, bg) : null;
 	var bgOpacity = bg.hasAttribute('data-tng-opacity') ? bg.getAttribute('data-tng-opacity') : getOpacity(bg);
@@ -527,7 +527,7 @@ window.getResults = function(element, opacity) {
 	}
 }
 
-window.getTextNodeContrast = function() {
+function getTextNodeContrast() {
 	var bgBody = true;
 
 	if((!window.getComputedStyle(document.body, null).getPropertyValue('background-color') && !window.getComputedStyle(document.body, null).getPropertyValue('background') || window.getComputedStyle(document.body, null).getPropertyValue('background-color').match(/rgba\(0, 0, 0, 0\)/))) {
@@ -683,7 +683,7 @@ window.getTextNodeContrast = function() {
 
 // content script
 /* Extension du DOM. */
-window.ariaroles = {
+var ariaroles = {
     'alert': { type: ['live region', 'standalone ui widget'] },
     'alertdialog': { type: 'standalone ui widget' },
     'application': { type: 'document structure' },
@@ -767,7 +767,7 @@ window.ariaroles = {
     'window': { type: 'abstract' }
 };
 
-window.ariastatesproperties = {
+var ariastatesproperties = {
     'aria-activedescendant': { type: 'relationship' }, // id reference
     'aria-atomic': { type: 'live region', global: true, default: 'false', values: ['false', 'true'] },
     'aria-autocomplete': { type: 'widget', default: 'none', values: ['both', 'inline', 'list', 'none'] },
@@ -1272,7 +1272,7 @@ Current Imperfect Implementations :
 */
 
 // accessibleName.
-window.getAccessibleName = function () {
+var getAccessibleName = function () {
 // Data.
     var ARIA = {
         nameFromContentSupported: '[role="button"], [role="cell"], [role="checkbox"], [role="columnheader"], [role="gridcell"], [role="heading"], [role="link"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="radio"], [role="row"], [role="rowgroup"], [role="rowheader"], [role="switch"], [role="tab"], [role="tooltip"], [role="treeitem"]'
@@ -1665,17 +1665,17 @@ if (!SVGElement.prototype.hasOwnProperty('accessibleName')) Object.definePropert
 if (!HTMLElement.prototype.hasOwnProperty('accessibleName')) Object.defineProperty(HTMLElement.prototype, 'accessibleName', { get: getAccessibleName });
 
 // hasAccessibleName.
-window.hasAccessibleName = function () { return this.accessibleName != ''; };
+var hasAccessibleName = function () { return this.accessibleName != ''; };
 if (!('hasAccessibleName' in SVGElement.prototype)) SVGElement.prototype.hasAccessibleName = hasAccessibleName;
 if (!('hasAccessibleName' in HTMLElement.prototype)) HTMLElement.prototype.hasAccessibleName = hasAccessibleName;
 
 // getAccessibleNameImplementation.
-window.getAccessibleNameImplementation = function () {};
+var getAccessibleNameImplementation = function () {};
 if (!('getAccessibleNameImplementation' in SVGElement.prototype)) SVGElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
 if (!('getAccessibleNameImplementation' in HTMLElement.prototype)) HTMLElement.prototype.getAccessibleNameImplementation = getAccessibleNameImplementation;
 
 /* Gestion des tests. */
-window.getXPath = function(element) {
+function getXPath(element) {
     var position = 0;
     if (element.parentNode && element.parentNode.nodeType == 1) {
         var children = element.parentNode.children;
@@ -1692,7 +1692,7 @@ window.getXPath = function(element) {
     return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') ? '[@class="' + element.getAttribute('class') + '"]' : '');
 }
 
-window.addBooleanResult = function(name, data) {
+function addBooleanResult(name, data) {
     /*
 		addBooleanResult(browser.i18n.getMessage("msgHeadings"), {
 			name: { 'passed': 'Intitulé si C', 'failed': 'Intitulé si NC' },
@@ -1701,7 +1701,7 @@ window.addBooleanResult = function(name, data) {
 	*/
 }
 
-window.initTanaguru = function() {
+function initTanaguru() {
     if (!window.tanaguru) {
         window.tanaguru = {};
         window.tanaguru.tags = new Array();
@@ -1709,7 +1709,7 @@ window.initTanaguru = function() {
     }
 }
 
-window.addResultSet = function(name, data) {
+function addResultSet(name, data) {
     initTanaguru();
     /*
 	*** OLD VERSION ***
@@ -1736,7 +1736,7 @@ window.addResultSet = function(name, data) {
     window.tanaguru.tests.push(data);
 }
 
-window.filterTestsByStatus = function(statuses) {
+function filterTestsByStatus(statuses) {
     if(statuses.length > 0) {
         function matchFilters(test) {
             return statuses.includes(test.type);
@@ -1745,7 +1745,7 @@ window.filterTestsByStatus = function(statuses) {
     }
 }
 
-window.loadTanaguruTests = function() {
+function loadTanaguruTests() {
     initTanaguru();
     var tags = [];
     for (var tag in window.tanaguru.tags) {
@@ -1757,7 +1757,7 @@ window.loadTanaguruTests = function() {
     return result;
 }
 
-window.removeDataTNG = function(element) {
+function removeDataTNG(element) {
     let attr = element.attributes;
     let tngAttr = [];
     for(let i = 0; i < attr.length; i++) {
@@ -1770,7 +1770,7 @@ window.removeDataTNG = function(element) {
     });
 }
 
-window.manageOutput = function(element) {
+function manageOutput(element) {
     var status = element.status ? element.status : 'cantTell';
     element.status = undefined;
 
@@ -1805,7 +1805,7 @@ window.manageOutput = function(element) {
 	return { status: status, sourceCode: e ? fakeelement.outerHTML : fakeelement, cssSelector: e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]}
 }
 
-window.getUniqueSelector = function(xpath) {
+function getUniqueSelector(xpath) {
     var prog, match, result, nav, tag, attr, nth, nodes, css, node_css = '', csses = [], xindex = 0, position = 0;
     xpath = xpath.replace(/contains\s*\(\s*concat\(["']\s+["']\s*,\s*@class\s*,\s*["']\s+["']\)\s*,\s*["']\s+([a-zA-Z0-9-_]+)\s+["']\)/gi, '@class="$1"');
     if (typeof xpath == 'undefined' || (
@@ -1899,35 +1899,35 @@ window.getUniqueSelector = function(xpath) {
     return csses.join(', ');
 }
 
-window.sub_regexes = {
+var sub_regexes = {
     "tag": "([a-zA-Z][a-zA-Z0-9]{0,10}|\\*)",
     "attribute": "[.a-zA-Z_:][-\\w:.]*(\\(\\))?)",
     "value": "\\s*[\\w/:][-/\\w\\s,:;.]*"
 };
-window.validation_re = "(?P<node>" + "(" + "^id\\([\"\\']?(?P<idvalue>%(value)s)[\"\\']?\\)" + "|" + "(?P<nav>//?(?:following-sibling::)?)(?P<tag>%(tag)s)" + "(\\[(" + "(?P<matched>(?P<mattr>@?%(attribute)s=[\"\\'](?P<mvalue>%(value)s))[\"\\']" + "|" + "(?P<contained>contains\\((?P<cattr>@?%(attribute)s,\\s*[\"\\'](?P<cvalue>%(value)s)[\"\\']\\))" + ")\\])?" + "(\\[\\s*(?P<nth>\\d|last\\(\\s*\\))\\s*\\])?" + ")" + ")";
+var validation_re = "(?P<node>" + "(" + "^id\\([\"\\']?(?P<idvalue>%(value)s)[\"\\']?\\)" + "|" + "(?P<nav>//?(?:following-sibling::)?)(?P<tag>%(tag)s)" + "(\\[(" + "(?P<matched>(?P<mattr>@?%(attribute)s=[\"\\'](?P<mvalue>%(value)s))[\"\\']" + "|" + "(?P<contained>contains\\((?P<cattr>@?%(attribute)s,\\s*[\"\\'](?P<cvalue>%(value)s)[\"\\']\\))" + ")\\])?" + "(\\[\\s*(?P<nth>\\d|last\\(\\s*\\))\\s*\\])?" + ")" + ")";
 for (var prop in sub_regexes) {
     validation_re = validation_re.replace(new RegExp('%\\(' + prop + '\\)s', 'gi'), sub_regexes[prop]);
 }
 
 validation_re = validation_re.replace(/\?P<node>|\?P<idvalue>|\?P<nav>|\?P<tag>|\?P<matched>|\?P<mattr>|\?P<mvalue>|\?P<contained>|\?P<cattr>|\?P<cvalue>|\?P<nth>/gi, '');
 
-window.XPathException = function(message) {
+function XPathException(message) {
     this.message = message;
     this.name = "[XPathException]";
 }
 
-window.XPathException = function(message) {
+function XPathException(message) {
     this.message = message;
     this.name = "[XPathException]";
 }
 
-window.createTanaguruTag = function(tag, status) {
+function createTanaguruTag(tag, status) {
     if (!window.tanaguru.tags[tag]) {
         window.tanaguru.tags[tag] = { id: tag, status: status, nbfailures: 0 };
     }
 }
 
-window.createTanaguruTest = function(test) {
+function createTanaguruTest(test) {
     if (test.hasOwnProperty('status') && test.status == 'untested') { // Non testés mais référencés.
         // Initialisation des tags.
         initTanaguru();
@@ -2191,7 +2191,7 @@ Note, file updated with :
 * area is associated with link (added here).
 */
 //TODO mettre à jour les catégories et intégrer les types de contenus autorisés
-window.htmlData = {
+var htmlData = {
     version: 5.3,
     status: 'Working Draft (WD)',
     date: 20181018,
@@ -2349,7 +2349,7 @@ window.htmlData = {
     }
 };
 
-window.HTML = {
+var HTML = {
     getFocusableElementsSelector: function () {
         var elements = [];
         let htmlDataElLength = htmlData.elements.length;
@@ -2365,7 +2365,7 @@ window.HTML = {
     }
 };
 
-window.getImplicitAriaRole = function () {
+var getImplicitAriaRole = function () {
     if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
         var elementData = htmlData.elements[this.tagName.toLowerCase()];
         if (elementData.hasOwnProperty('implicitAriaRole')) {
@@ -2408,7 +2408,7 @@ window.getImplicitAriaRole = function () {
         return undefined;
     }
 };
-window.getImplicitAriaRoleCategory = function () {
+var getImplicitAriaRoleCategory = function () {
     if (htmlData.elements.hasOwnProperty(this.tagName.toLowerCase())) {
         var elementData = htmlData.elements[this.tagName.toLowerCase()];
         if (elementData.hasOwnProperty('category')) {
@@ -2438,7 +2438,7 @@ if (!('getImplicitAriaRoleCategory' in SVGElement.prototype)) SVGElement.prototy
     https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
     Note : only the 30 main languages in the world.
 */
-window.languages = {
+var languages = {
     fileDate: '2020-05-12',
     data: {
         'en': { description: 'English', added:'2005-10-16', suppressScript: 'Latn' },
@@ -2475,7 +2475,7 @@ window.languages = {
 };
 
 // hasValidLanguageCode.
-window.hasValidLanguageCode = function () {
+var hasValidLanguageCode = function () {
     var r = /^[a-z]{2,}(-[a-z]{2,})*$/i;
     var lang1 = this.hasAttribute('lang') ? this.getAttribute('lang') : null;
     var lang2 = this.hasAttribute('xml:lang') ? this.getAttribute('xml:lang') : null;
@@ -2520,7 +2520,7 @@ if (!('hasValidLanguageCode' in HTMLElement.prototype)) HTMLElement.prototype.ha
 	https://www.w3.org/TR/wai-aria-1.2/
 */
 
-window.ariaData = {
+var ariaData = {
     version: 1.2,
     status: 'Working Draft (WD)',
     date: 20191218,
@@ -3766,7 +3766,7 @@ window.ariaData = {
     }
 };
 
-window.ARIA = {
+var ARIA = {
     Errors: {
         EmptyValueNotAllowed: "La valeur de l'attribut {{attribute}} ne peut être vide.",
         InvalidStateProperty: "L'attribut {{attribute}} n'est pas défini dans WAI-ARIA.",
@@ -4119,7 +4119,7 @@ window.ARIA = {
     }
 };
 
-window.getComputedAriaRole = function () {
+var getComputedAriaRole = function () {
     if (this.hasAttribute('role')) {
         var role = this.getAttribute('role');
         if (role.trim().length > 0) {
@@ -4171,7 +4171,7 @@ window.getComputedAriaRole = function () {
 if (!('getComputedAriaRole' in HTMLElement.prototype)) HTMLElement.prototype.getComputedAriaRole = getComputedAriaRole;
 if (!('getComputedAriaRole' in SVGElement.prototype)) SVGElement.prototype.getComputedAriaRole = getComputedAriaRole;
 
-window.hasValidRole = function () {
+var hasValidRole = function () {
     var role = this.getAttribute('role');
     if (role.trim().length > 0) {
         role = role.split(' ');
@@ -4198,7 +4198,7 @@ window.hasValidRole = function () {
 if (!('hasValidRole' in HTMLElement.prototype)) HTMLElement.prototype.hasValidRole = hasValidRole;
 if (!('hasValidRole' in SVGElement.prototype)) SVGElement.prototype.hasValidRole = hasValidRole;
 
-window.hasInvalidAriaAttributes = function () {
+var hasInvalidAriaAttributes = function () {
     var result = false;
     for (var i = 0; i < this.attributes.length; i++) {
         var name = this.attributes[i].name;
@@ -4215,7 +4215,7 @@ window.hasInvalidAriaAttributes = function () {
 if (!('hasInvalidAriaAttributes' in HTMLElement.prototype)) HTMLElement.prototype.hasInvalidAriaAttributes = hasInvalidAriaAttributes;
 if (!('hasInvalidAriaAttributes' in SVGElement.prototype)) SVGElement.prototype.hasInvalidAriaAttributes = hasInvalidAriaAttributes;
 
-window.hasAriaAttributesWithInvalidValues = function () {
+var hasAriaAttributesWithInvalidValues = function () {
     var errors = [];
     var result = false;
     for (var i = 0; i < this.attributes.length; i++) {
@@ -4323,7 +4323,7 @@ window.hasAriaAttributesWithInvalidValues = function () {
 if (!('hasAriaAttributesWithInvalidValues' in HTMLElement.prototype)) HTMLElement.prototype.hasAriaAttributesWithInvalidValues = hasAriaAttributesWithInvalidValues;
 if (!('hasAriaAttributesWithInvalidValues' in SVGElement.prototype)) SVGElement.prototype.hasAriaAttributesWithInvalidValues = hasAriaAttributesWithInvalidValues;
 
-window.hasProhibitedAriaAttributes = function () {
+var hasProhibitedAriaAttributes = function () {
     var result = false;
     for (var i = 0; i < this.attributes.length; i++) {
         var attribute = this.attributes[i];
@@ -4346,7 +4346,7 @@ if (!('hasProhibitedAriaAttributes' in SVGElement.prototype)) SVGElement.prototy
 
 // TODO: début DOM Extension.
 
-window.isNotExposedDueTo = function () {
+var isNotExposedDueTo = function () {
     var result = [];
     if (this.getAttribute('aria-hidden') == 'true') {
         result.push('aria:hidden');
@@ -4410,7 +4410,7 @@ if (!HTMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.definePro
 //if (MathMLElement && !MathMLElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(MathMLElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 if (!SVGElement.prototype.hasOwnProperty('isNotExposedDueTo')) Object.defineProperty(SVGElement.prototype, 'isNotExposedDueTo', { get: isNotExposedDueTo });
 
-window.isVisible = function () {
+var isVisible = function () {
     return getVisibility(this);
 };
 
@@ -4473,7 +4473,7 @@ if (!HTMLElement.prototype.hasOwnProperty('canBeReachedUsingKeyboardWith')) {
 
 // TODO: fin DOM Extension.
 
-window.testsRessources = {
+var testsRessources = {
     'act': {
         lang: 'en',
         name: 'ACT Rules Community Group',
@@ -4490,7 +4490,7 @@ window.testsRessources = {
     }
 };
 
-window.getDuplicateID = function() {
+function getDuplicateID() {
     var nodelist = document.querySelectorAll('[id]:not([id=""])');
     var ids = [];
     var query = null;
@@ -4523,7 +4523,7 @@ window.getDuplicateID = function() {
 }
 
 //TODO recupérer les events appliqué via api
-window.listAllEventListeners = function() {
+function listAllEventListeners() {
     var allElements = Array.from(document.body.querySelectorAll('*'));
     allElements.push(document.body);
     var types = [];
@@ -4550,15 +4550,15 @@ listAllEventListeners();
 
 //INIT-TEST.js
 
-window.statuses = ['failed', 'cantTell', 'passed'];
-window.eList;
-window.naList = [];
+var statuses = ['failed', 'cantTell', 'passed'];
+var eList;
+var naList = [];
 
 /**
  * ? Define for each node of the page, if it is exposed, visible and has a [aria-*] attribute
  * ! NEED FOR TESTS
  */
-window.addDataTng = function() {
+function addDataTng() {
     eList = document.body.querySelectorAll('*');
     eList.forEach(e => {
         let elExposed = e.isNotExposedDueTo;
@@ -4593,7 +4593,7 @@ window.addDataTng = function() {
 /**
  * ? Check if page has images, frames, media, tables, links & form fields
  */
-window.getNACat = function() {
+function getNACat() {
     if(!document.body.querySelector('img, [role="img]')) naList.push('images');
     if(!document.body.querySelector('iframe:not([role="presentation"]), frame:not([role="presentation"])')) naList.push('frames');
     if(!document.body.querySelector('video, audio, object[type^="video/"], object[type^="audio/"], object[type="application/ogg"], embed[type^="video/"], embed[type^="audio/"]')) naList.push('media');
@@ -4607,10 +4607,10 @@ window.getNACat = function() {
 /**
  * ? remove all [data-tng-*]
  */
-window.removeAllDataTNG = function() {
+function removeAllDataTNG() {
     removeDataTNG(document.querySelector('html'));
     eList.forEach(e => removeDataTNG(e));
 };
 
 addDataTng();
-window.textNodeList = getTextNodeContrast();
+var textNodeList = getTextNodeContrast();

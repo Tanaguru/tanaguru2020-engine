@@ -8,8 +8,6 @@ import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
 import org.openqa.selenium.Dimension;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
@@ -22,7 +20,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.HashMap;
 
 public abstract class AbstractAuditRunner implements AuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuditRunner.class);
@@ -42,7 +39,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private final boolean enableScreenShot;
     private final Gson gson = new Gson();
     private final long waitTime;
-    private final HashMap<String,HashMap<String, StringBuilder>> coreScript;
+    private final String coreScript;
 
     private boolean stop = false;
     private int currentRank = 1;
@@ -50,7 +47,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     public AbstractAuditRunner(
             Audit audit,
             RemoteWebDriver driver,
-            HashMap<String,HashMap<String, StringBuilder>> coreScript,
+            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
@@ -166,38 +163,10 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
-                ArrayList<JSONObject> results = new ArrayList<>();
-                ArrayList<Thread> threads = new ArrayList<>();
-                ArrayList<ScriptExecutor> executors = new ArrayList<>();
-                for(String refKey : coreScript.keySet()) {
-                    for(String category : coreScript.get(refKey).keySet()) {
-                        StringBuilder script = coreScript.get(refKey).get(category);
-                        ScriptExecutor exec = new ScriptExecutor(script.toString(), this.tanaguruDriver);
-                        Thread thread = new Thread(exec);
-                        thread.setName(category);
-                        threads.add(thread);
-                        executors.add(exec);
-                        thread.start(); 
-                    }
-                } 
-                
-                for(Thread thread : threads) {
-                    try {
-                        thread.join();
-                        auditLog(EAuditLogLevel.INFO, thread.getName()+" : tests done.");
-                    } catch (InterruptedException e) {
-                        LOGGER.error(e.getMessage());
-                        auditLog(EAuditLogLevel.ERROR, "Thread failed for "+ thread.getName());
-                    }
-                }
-                for(ScriptExecutor exec : executors) {
-                    results.add(new JSONObject(exec.getResult()));
-                }
-                
-                String finalResult = getResultsOfAllThemes(results);
+                String result = (String) tanaguruDriver.executeScript(coreScript);
                 String source = tanaguruDriver.getPageSource();
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {
-                    tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(finalResult, WebextPageResult.class), screenshot, source);
+                    tanaguruDriverListener.onAuditNewPage(this, definiteName, url, currentRank, gson.fromJson(result, WebextPageResult.class), screenshot, source);
                 }
                 currentRank++;
             } catch (WebDriverException e) {
@@ -212,23 +181,6 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         }
     }
 
-    private String getResultsOfAllThemes(ArrayList<JSONObject> results) {
-        JSONArray tests = new JSONArray();
-        JSONArray tags = new JSONArray();
-        for(JSONObject res : results) {
-            for(Object test : res.getJSONArray("tests")) {
-                tests.put(test);
-            }
-            for(Object tag : res.getJSONArray("tags")) {
-                tags.put(tag);
-            }
-        }
-        JSONObject finalRes = new JSONObject();
-        finalRes.put("tests", tests);
-        finalRes.put("tags", tags);
-        return finalRes.toString();
-    }
-    
     private String takeScreenshot(Dimension resolution) throws IOException {
         BufferedImage screenshotImage = null;
         BufferedImage screenImage = ImageHelper.getFromByteArray(tanaguruDriver.getScreenshotAs(OutputType.BYTES));
