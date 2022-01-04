@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class AuditRunnerFile extends AbstractAuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunnerFile.class);
@@ -23,7 +22,7 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             Audit audit,
             String fileContent,
             RemoteWebDriver driver,
-            HashMap<String,HashMap<String, StringBuilder>> coreScript,
+            String coreScript,
             long waitTime,
             Collection<Integer> resolutions,
             String basicAuthUrl,
