@@ -136,7 +136,8 @@ public class ProjectServiceImpl implements ProjectService {
             boolean allowPageAudit, 
             boolean allowSiteAudit,
             boolean allowScenarioAudit,
-            boolean allowUploadAudit) {
+            boolean allowUploadAudit,
+            Boolean isTrial) {
         LOGGER.info("Create project {} for contract {}", name, contract.getId());
         Project project = new Project();
         project.setContract(contract);
@@ -146,6 +147,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setAllowSiteAudit(allowSiteAudit);
         project.setAllowScenarioAudit(allowScenarioAudit);
         project.setAllowUploadAudit(allowUploadAudit);
+        project.setTrial(isTrial);
         return projectRepository.save(project);
     }
 

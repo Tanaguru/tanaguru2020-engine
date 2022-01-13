@@ -330,7 +330,7 @@ public class ProjectController {
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
                 .orElseGet(() -> contractUserRepository.findByContractAndContractRoleName_Owner(contract));
 
-        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain(), true, true, true, true);
+        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain(), true, true, true, true, false);
         ProjectAppUser projectAppUser = new ProjectAppUser();
         projectAppUser.setProjectRole(projectService.getProjectRole(EProjectRole.PROJECT_MANAGER));
         projectAppUser.setContractAppUser(contractAppUser);

@@ -40,3 +40,4 @@
 - Update management of contrast tests
 - Fix endpoint : global test result for all pages (synthesis page)
 - Fix endpoint : source code value added to the result test
+- Demo project with specific domain : only one site audit allowed

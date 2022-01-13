@@ -333,6 +333,12 @@ public class AuditController {
         
         if(!projectService.projectAcceptThisAuditType(auditCommand.getType(), project)) {
             throw new CustomInvalidArgumentException(CustomError.AUDIT_TYPE_NOT_ACCEPTED_BY_PROJECT);
+        }else {
+            //projet perso de demo (domaine specifique) ne peut lancer qu'un seul audit de site
+            if(project.isTrial() && auditCommand.getType().equals(EAuditType.SITE)) {
+                project.setAllowSiteAudit(false);
+                projectRepository.save(project);
+            }
         }
         
         TestHierarchy main = null;

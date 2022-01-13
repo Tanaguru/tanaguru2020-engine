@@ -22,6 +22,8 @@ public class ProjectDTO {
     private boolean allowScenarioAudit;
     
     private boolean allowUploadAudit;
+    
+    private Boolean istrial;
 
     public String getName() {
         return name;
@@ -77,6 +79,14 @@ public class ProjectDTO {
 
     public void setAllowUploadAudit(boolean allowUploadAudit) {
         this.allowUploadAudit = allowUploadAudit;
+    }
+
+    public Boolean getIstrial() {
+        return istrial;
+    }
+
+    public void setIstrial(Boolean istrial) {
+        this.istrial = istrial;
     }
     
 }
