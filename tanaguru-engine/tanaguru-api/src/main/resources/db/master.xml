@@ -46,4 +46,5 @@
     <include file="db/changelogs/20211025_changelog_webextention_version.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211026_changelog_update_element_result_source_code.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20211220_changelog_usersAccountType.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220113_changelog_updateProjectsTrial.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

@@ -60,6 +60,9 @@ public class Project implements Serializable {
     @Column
     private boolean allowUploadAudit = true;
     
+    @Column
+    private Boolean istrial = false;
+    
     public long getId() {
         return id;
     }
@@ -154,6 +157,14 @@ public class Project implements Serializable {
 
     public void setAllowUploadAudit(boolean allowUploadAudit) {
         this.allowUploadAudit = allowUploadAudit;
+    }
+
+    public Boolean isTrial() {
+        return istrial;
+    }
+
+    public void setTrial(Boolean istrial) {
+        this.istrial = istrial;
     }
     
 }
