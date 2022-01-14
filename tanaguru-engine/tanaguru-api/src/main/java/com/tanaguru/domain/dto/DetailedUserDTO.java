@@ -18,6 +18,8 @@ public class DetailedUserDTO {
     private boolean accountNonLocked;
     
     private AppAccountType appAccountType;
+    
+    private boolean expired;
 
     public DetailedUserDTO() {
     }
@@ -29,10 +31,11 @@ public class DetailedUserDTO {
                 user.getAppRole(),
                 user.isEnabled(),
                 user.isAccountNonLocked(),
-                user.getAppAccountType());
+                user.getAppAccountType(),
+                user.isExpired());
     }
 
-    public DetailedUserDTO(long id, String username, String email, AppRole appRole, boolean isEnabled, boolean accountNonLocked, AppAccountType appAccountType) {
+    public DetailedUserDTO(long id, String username, String email, AppRole appRole, boolean isEnabled, boolean accountNonLocked, AppAccountType appAccountType, boolean expired) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -40,6 +43,7 @@ public class DetailedUserDTO {
         this.isEnabled = isEnabled;
         this.accountNonLocked = accountNonLocked;
         this.appAccountType = appAccountType;
+        this.expired = expired;
     }
 
 
@@ -103,4 +107,13 @@ public class DetailedUserDTO {
     public void setAppAccountType(AppAccountType appAccountType) {
         this.appAccountType = appAccountType;
     }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+    
 }
