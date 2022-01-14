@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="updateusers_expired" author="lpedrau">
+        <addColumn tableName="app_user">
+            <column name="expired" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+        <addNotNullConstraint tableName="app_user" columnName="expired" constraintName="notNull_user_expired"/>
+        <rollback>
+            <dropNotNullConstraint tableName="app_user" columnName="expired"/>
+            <dropColumn tableName="app_user" columnName="expired"/>
+        </rollback>
+    </changeSet>
+            
+</databaseChangeLog>

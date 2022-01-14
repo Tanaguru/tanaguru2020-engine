@@ -29,6 +29,8 @@ public class UserDTO {
     private String firstname;
     
     private String lastname;
+    
+    private boolean expired = false;
 
     public long getId() {
         return id;
@@ -100,6 +102,14 @@ public class UserDTO {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
     
 }

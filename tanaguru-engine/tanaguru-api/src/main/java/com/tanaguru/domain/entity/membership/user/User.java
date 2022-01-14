@@ -94,6 +94,11 @@ public class User implements Serializable {
     @JsonIgnore
     private Collection<Attempt> attempts = new ArrayList<>();
     
+    @JsonIgnore
+    @Column(nullable = false)
+    @NotNull
+    private boolean expired = false;
+    
     public long getId() {
         return id;
     }
@@ -204,6 +209,14 @@ public class User implements Serializable {
 
     public void setAppAccountType(AppAccountType appAccountType) {
         this.appAccountType = appAccountType;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
     
 }
