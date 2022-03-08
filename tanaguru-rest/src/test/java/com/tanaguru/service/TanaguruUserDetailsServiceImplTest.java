@@ -1,6 +1,8 @@
 package com.tanaguru.service;
 
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.entity.membership.user.AppAccountType;
 import com.tanaguru.domain.entity.membership.user.AppAuthority;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
@@ -46,7 +48,8 @@ public class TanaguruUserDetailsServiceImplTest {
     private Collection<String> authorities = Arrays.asList("testAuthority", "testAuthority2");
     private AppRole appRole;
     private User user;
-
+    private AppAccountType appAccountType;
+    
     @Before
     public void initEntities() {
         appRole = new AppRole();
@@ -66,6 +69,10 @@ public class TanaguruUserDetailsServiceImplTest {
         user.setEmail("testEmail@email.com");
         user.setAppRole(appRole);
         user.setPassword("test");
+        
+        appAccountType = new AppAccountType();
+        appAccountType.setName(EAppAccountType.DEFAULT);
+        user.setAppAccountType(appAccountType);
     }
 
     @Test(expected = UsernameNotFoundException.class)
