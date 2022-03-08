@@ -48,4 +48,6 @@
     <include file="db/changelogs/20211220_changelog_usersAccountType.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20220113_changelog_updateProjectsTrial.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20220114_changelog_updateUsers_expired.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220308_changelog_update_tanaguru_test_testStatus.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220308_changelog_update_tanaguru_test_node_mark_lang.xml" relativeToChangelogFile="false"/>    
 </databaseChangeLog>

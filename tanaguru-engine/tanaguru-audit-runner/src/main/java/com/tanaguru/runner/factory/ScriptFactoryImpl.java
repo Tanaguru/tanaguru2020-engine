@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import org.springframework.stereotype.Component;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Collection;
 
 @Component
@@ -20,30 +22,10 @@ public class ScriptFactoryImpl implements ScriptFactory {
         Gson gson = new Gson();
         strb.append(coreScript);
         strb.append("\n");
-        strb.append("getNACat();\n");
         for (TanaguruTest tanaguruTest : tanaguruTestList) {
             
-            boolean isFirst = true;
-            StringBuilder strbTags = new StringBuilder();
-            strbTags.append("[");
-            for(String tag : tanaguruTest.getTags()) {
-                if(isFirst) {
-                    strbTags.append("'"+tag+"'");
-                    isFirst = false;
-                }else {
-                    strbTags.append(",'"+tag+"'");
-                }
-                
-            }
-            strbTags.append("]");
-            strb.append("\nvar testStatusJS = null;");
-            strb.append("\nnaList.forEach(na => {\n"
-                    + "            if("+strbTags.toString()+".includes(na)) testStatusJS = 'inapplicable';\n"
-                    + "        }); ");
-            strb.append("\nif(testStatusJS == null){\n"
-                    + "    testStatusJS = '"+ tanaguruTest.getStatus()+"';"
-                    + "\n}");
             strb.append("\ncreateTanaguruTest({id:").append(tanaguruTest.getId());
+            strb.append(",\nlang:`").append(tanaguruTest.getLang()).append("`");
             strb.append(",\nname:`").append(tanaguruTest.getName()).append("`");
             if(tanaguruTest.getQuery() != null && tanaguruTest.getQuery().startsWith("HTML")) {
                 strb.append(",\nquery:").append(tanaguruTest.getQuery());
@@ -72,7 +54,11 @@ public class ScriptFactoryImpl implements ScriptFactory {
             }
             
             if (tanaguruTest.getStatus() != null) {
-                strb.append(",\nstatus:").append("testStatusJS").append("");
+                strb.append(",\nstatus:`").append(tanaguruTest.getStatus()).append("`");
+            }
+            
+            if (tanaguruTest.getTestStatus() != null) {
+                strb.append(",\ntestStatus:\"").append(tanaguruTest.getTestStatus()).append("\"");
             }
             
             if(tanaguruTest.getContrast() != null){
@@ -81,6 +67,14 @@ public class ScriptFactoryImpl implements ScriptFactory {
 
             if (tanaguruTest.getFilter() != null) {
                 strb.append(",\nfilter:").append(tanaguruTest.getFilter());
+            }
+            
+            if (tanaguruTest.getMark() != null) {
+                strb.append(",\nmark:").append(gson.toJson(tanaguruTest.getMark()));
+            }
+            
+            if (tanaguruTest.getNode() != null) {
+                strb.append(",\node:").append(tanaguruTest.getNode());
             }
 
             if (tanaguruTest.getAnalyzeElements() != null) {

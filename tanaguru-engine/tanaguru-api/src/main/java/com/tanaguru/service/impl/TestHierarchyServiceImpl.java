@@ -69,7 +69,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
             TestHierarchy actRef = importTestHierarchy(wcag, null);
             Webextention webext = new Webextention();
             webext.setTestHierarchy(actRef);
-            webext.setVersion("1.4.0");
+            webext.setVersion("4.0.0");
             this.webextentionRepository.save(webext);
             String actJson = StreamUtils.copyToString(
                     actTestsPath.getInputStream(),

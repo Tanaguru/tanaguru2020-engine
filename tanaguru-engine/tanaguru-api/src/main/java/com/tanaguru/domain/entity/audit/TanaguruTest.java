@@ -51,12 +51,24 @@ public class TanaguruTest implements Serializable {
     private String status;
     
     @Column
+    private String testStatus;
+    
+    @Column
+    private String lang;
+    
+    @Column
+    private String node;
+    
+    @Column
     private String code;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private Collection<String> tags;
-
+    
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private Mark mark;
 
     @JsonIgnore
     @ManyToMany(targetEntity = TestHierarchy.class, cascade = CascadeType.MERGE)
@@ -179,6 +191,38 @@ public class TanaguruTest implements Serializable {
 
     public void setNumber(Integer number) {
         this.number = number;
+    }
+
+    public String getTestStatus() {
+        return testStatus;
+    }
+
+    public void setTestStatus(String testStatus) {
+        this.testStatus = testStatus;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
+
+    public Mark getMark() {
+        return mark;
+    }
+
+    public void setMark(Mark mark) {
+        this.mark = mark;
     }
     
 }
