@@ -6,6 +6,7 @@ import com.tanaguru.domain.entity.membership.user.AppAccountType;
 import com.tanaguru.domain.entity.membership.user.AppAuthority;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.repository.AppAccountTypeRepository;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.impl.TanaguruUserDetailsServiceImpl;
@@ -38,6 +39,9 @@ public class TanaguruUserDetailsServiceImplTest {
 
     @Mock
     private AppRoleRepository appRoleRepository;
+    
+    @Mock
+    private AppAccountTypeRepository appAccountTypeRepository;
 
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -97,6 +101,7 @@ public class TanaguruUserDetailsServiceImplTest {
     public void setAdminUserTest_NotExists() {
         Mockito.when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());
         Mockito.when(appRoleRepository.findByName(EAppRole.SUPER_ADMIN)).thenReturn(Optional.of(appRole));
+        Mockito.when(appAccountTypeRepository.findByName(EAppAccountType.DEFAULT)).thenReturn(Optional.of(appAccountType));
         userDetailsService.setAdminUser();
         verify(appRoleRepository, times(1)).findByName(EAppRole.SUPER_ADMIN);
     }
