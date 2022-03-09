@@ -1,6 +1,7 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
@@ -45,9 +46,21 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     private final AppRoleRepository appRoleRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ActRepository actRepository;
+    private final AppAccountTypeRepository appAccountTypeRepository;
 
     @Autowired
-    public TanaguruUserDetailsServiceImpl(ContractService contractService, ProjectService projectService, ContractRepository contractRepository, ProjectRepository projectRepository, AuditService auditService, AuditRepository auditRepository, AuditSchedulerService auditSchedulerService, UserRepository userRepository, AppRoleRepository appRoleRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ActRepository actRepository) {
+    public TanaguruUserDetailsServiceImpl(ContractService contractService, 
+            ProjectService projectService, 
+            ContractRepository contractRepository, 
+            ProjectRepository projectRepository, 
+            AuditService auditService, 
+            AuditRepository auditRepository, 
+            AuditSchedulerService auditSchedulerService, 
+            UserRepository userRepository, 
+            AppRoleRepository appRoleRepository, 
+            BCryptPasswordEncoder bCryptPasswordEncoder, 
+            ActRepository actRepository,
+            AppAccountTypeRepository appAccountTypeRepository) {
         this.contractService = contractService;
         this.projectService = projectService;
         this.contractRepository = contractRepository;
@@ -59,6 +72,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
         this.appRoleRepository = appRoleRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.actRepository = actRepository;
+        this.appAccountTypeRepository = appAccountTypeRepository;
     }
 
     @PostConstruct
@@ -70,6 +84,8 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             newUser.setEnabled(true);
             newUser.setPassword(bCryptPasswordEncoder.encode("admin"));
             newUser.setAppRole(appRoleRepository.findByName(EAppRole.SUPER_ADMIN)
+                    .orElseThrow(() -> new CustomIllegalStateException()));
+            newUser.setAppAccountType(this.appAccountTypeRepository.findByName(EAppAccountType.DEFAULT)
                     .orElseThrow(() -> new CustomIllegalStateException()));
             return userRepository.save(newUser);
         });

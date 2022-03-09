@@ -1,9 +1,12 @@
 package com.tanaguru.service;
 
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
+import com.tanaguru.domain.entity.membership.user.AppAccountType;
 import com.tanaguru.domain.entity.membership.user.AppAuthority;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.repository.AppAccountTypeRepository;
 import com.tanaguru.repository.AppRoleRepository;
 import com.tanaguru.repository.UserRepository;
 import com.tanaguru.service.impl.TanaguruUserDetailsServiceImpl;
@@ -36,6 +39,9 @@ public class TanaguruUserDetailsServiceImplTest {
 
     @Mock
     private AppRoleRepository appRoleRepository;
+    
+    @Mock
+    private AppAccountTypeRepository appAccountTypeRepository;
 
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -46,7 +52,8 @@ public class TanaguruUserDetailsServiceImplTest {
     private Collection<String> authorities = Arrays.asList("testAuthority", "testAuthority2");
     private AppRole appRole;
     private User user;
-
+    private AppAccountType appAccountType;
+    
     @Before
     public void initEntities() {
         appRole = new AppRole();
@@ -66,6 +73,10 @@ public class TanaguruUserDetailsServiceImplTest {
         user.setEmail("testEmail@email.com");
         user.setAppRole(appRole);
         user.setPassword("test");
+        
+        appAccountType = new AppAccountType();
+        appAccountType.setName(EAppAccountType.DEFAULT);
+        user.setAppAccountType(appAccountType);
     }
 
     @Test(expected = UsernameNotFoundException.class)
@@ -90,6 +101,7 @@ public class TanaguruUserDetailsServiceImplTest {
     public void setAdminUserTest_NotExists() {
         Mockito.when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());
         Mockito.when(appRoleRepository.findByName(EAppRole.SUPER_ADMIN)).thenReturn(Optional.of(appRole));
+        Mockito.when(appAccountTypeRepository.findByName(EAppAccountType.DEFAULT)).thenReturn(Optional.of(appAccountType));
         userDetailsService.setAdminUser();
         verify(appRoleRepository, times(1)).findByName(EAppRole.SUPER_ADMIN);
     }
