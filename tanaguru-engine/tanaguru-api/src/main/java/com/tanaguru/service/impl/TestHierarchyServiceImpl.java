@@ -87,6 +87,8 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                 test.setAnalyzeElements(webextTest.getAnalyzeElements());
                 test.setDescription(webextTest.getDescription());
                 test.setFilter(webextTest.getFilter());
+                test.setNumber(webextTest.getNumber());
+                test.setStatus(webextTest.getStatus());
                 test = tanaguruTestRepository.save(test);
 
                 for (String referenceName : webextTest.getRessources().keySet()) {
