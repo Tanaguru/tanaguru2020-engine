@@ -1,0 +1,7628 @@
+= Api Documentation
+
+
+[[_overview]]
+== Overview
+Api Documentation
+
+
+=== Version information
+[%hardbreaks]
+__Version__ : 1.0
+
+
+=== License information
+[%hardbreaks]
+__License__ : Apache 2.0
+__License URL__ : http://www.apache.org/licenses/LICENSE-2.0
+__Terms of service__ : urn:tos
+
+
+=== URI scheme
+[%hardbreaks]
+__Host__ : localhost:9002
+__BasePath__ : /
+
+
+=== Tags
+
+* audit-controller : Audit Controller
+* audit-log-controller : Audit Log Controller
+* audit-parameter-controller : Audit Parameter Controller
+* audit-scheduler-controller : Audit Scheduler Controller
+* authentication-controller : Authentication Controller
+* basic-error-controller : Basic Error Controller
+* configuration-controller : Configuration Controller
+* contract-controller : Contract Controller
+* element-result-controller : Element Result Controller
+* operation-handler : Operation Handler
+* page-content-controller : Page Content Controller
+* page-controller : Page Controller
+* project-controller : Project Controller
+* resource-controller : Resource Controller
+* scenario-controller : Scenario Controller
+* stats-controller : Stats Controller
+* status-result-controller : Status Result Controller
+* tanaguru-test-controller : Tanaguru Test Controller
+* test-hierarchy-controller : Test Hierarchy Controller
+* test-hierarchy-result-controller : Test Hierarchy Result Controller
+* test-result-controller : Test Result Controller
+* user-controller : User Controller
+* web-mvc-links-handler : Web Mvc Links Handler
+* webextention-controller : Webextention Controller
+
+
+
+
+[[_paths]]
+== Paths
+
+[[_linksusingget]]
+=== links
+....
+GET /actuator
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< string, < string, <<_link,Link>> > map > map
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/vnd.spring-boot.actuator.v3+json`
+* `application/json`
+* `application/vnd.spring-boot.actuator.v2+json`
+
+
+==== Tags
+
+* web-mvc-links-handler
+
+
+[[_handleusingget_1]]
+=== handle
+....
+GET /actuator/health
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**body** +
+__optional__|body|< string, string > map
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|object
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/vnd.spring-boot.actuator.v3+json`
+* `application/json`
+* `application/vnd.spring-boot.actuator.v2+json`
+
+
+==== Tags
+
+* operation-handler
+
+
+[[_handleusingget]]
+=== handle
+....
+GET /actuator/health/**
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**body** +
+__optional__|body|< string, string > map
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|object
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/vnd.spring-boot.actuator.v3+json`
+* `application/json`
+* `application/vnd.spring-boot.actuator.v2+json`
+
+
+==== Tags
+
+* operation-handler
+
+
+[[_handleusingget_2]]
+=== handle
+....
+GET /actuator/info
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**body** +
+__optional__|body|< string, string > map
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|object
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/vnd.spring-boot.actuator.v3+json`
+* `application/json`
+* `application/vnd.spring-boot.actuator.v2+json`
+
+
+==== Tags
+
+* operation-handler
+
+
+[[_getauditlogbyauditfilteredusingget]]
+=== Get paginable AuditLog for a given Audit id filtered by date and/or level
+....
+GET /audit-logs/by-audit-filtered/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Path**|**shareCode** +
+__optional__|shareCode|string|
+|**Query**|**asc** +
+__optional__|asc|boolean|`"true"`
+|**Query**|**levels** +
+__required__|levels|< enum (INFO, WARNING, ERROR) > array(multi)|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_411aacd029beb69a3aa2a5418d04390e,Page«AuditLog»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-log-controller
+
+
+[[_getauditlogbyauditusingget]]
+=== Get paginable AuditLog for a given Audit id
+....
+GET /audit-logs/by-audit/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Path**|**shareCode** +
+__optional__|shareCode|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_411aacd029beb69a3aa2a5418d04390e,Page«AuditLog»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-log-controller
+
+
+[[_getlevelsusingget]]
+=== Get the different log levels
+....
+GET /audit-logs/levels
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< enum (INFO, WARNING, ERROR) > array
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-log-controller
+
+
+[[_getallauditparametersusingget]]
+=== Get all parameters
+....
+GET /audit-parameters/
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_auditparameter,AuditParameter>> > array
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-parameter-controller
+
+
+[[_getbyauditusingget]]
+=== Get parameters for a given Audit id
+....
+GET /audit-parameters/by-audit/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+ If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_auditparametervalue,AuditParameterValue>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-parameter-controller
+
+
+[[_getauditparametersusingget]]
+=== Get parameter by id
+....
+GET /audit-parameters/{id}
+....
+
+
+==== Description
+If audit parameters not found, exception raise : AUDIT_PARAMETERS_NOT_FOUND with audit parameters id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditparameter,AuditParameter>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Parameter not found : AUDIT_PARAMETERS_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-parameter-controller
+
+
+[[_createauditschedulerusingpost]]
+=== Create audit scheduler
+....
+POST /audit-schedulers/
+....
+
+
+==== Description
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**auditSchedulerDTO** +
+__required__|auditSchedulerDTO|<<_auditschedulerdto,AuditSchedulerDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditscheduler,AuditScheduler>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit scheduler not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-scheduler-controller
+
+
+[[_modifyauditschedulerusingput]]
+=== Modify audit scheduler
+....
+PUT /audit-schedulers/
+....
+
+
+==== Description
+If audit scheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with audit scheduler id
+ Or if user cannot modify audit associated with the scheduler, exception raise : CANNOT_MODIFY_AUDIT_ASSOCIATED_SCHEDULER
+ Or if user cannot access scheduler, exception raise : CANNOT_ACCESS_SCHEDULER with audit scheduler id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**auditSchedulerDTO** +
+__required__|auditSchedulerDTO|<<_auditschedulerdto,AuditSchedulerDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditscheduler,AuditScheduler>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit scheduler not found : AUDIT_SCHEDULER_NOT_FOUND error
+Cannot modify audit associated with the scheduler : CANNOT_MODIFY_AUDIT_ASSOCIATED_SCHEDULER error
+Cannot access scheduler : CANNOT_ACCESS_SCHEDULER error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-scheduler-controller
+
+
+[[_deleteauditschedulerusingdelete]]
+=== Delete audit scheduler
+....
+DELETE /audit-schedulers/{id}
+....
+
+
+==== Description
+If audit scheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with audit scheduler id
+ Or if user cannot access scheduler, exception raise: CANNOT_ACCESS_SCHEDULER with audit scheduler id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditscheduler,AuditScheduler>>
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit scheduler not found : AUDIT_SCHEDULER_NOT_FOUND error
+Cannot access scheduler : CANNOT_ACCESS_SCHEDULER error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-scheduler-controller
+
+
+[[_getbyidusingget]]
+=== Get audit scheduler by id
+....
+GET /audit-schedulers/{id}, {shareCode}
+....
+
+
+==== Description
+If audit scheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with audit scheduler id
+ Or if the current user doesn't have access to the scheduler, exception raise : CURRENT_USER_NO_ACCESS_SCHEDULER with audit scheduler id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditscheduler,AuditScheduler>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit scheduler not found : AUDIT_SCHEDULER_NOT_FOUND error
+Current user cannot access scheduler : CURRENT_USER_NO_ACCESS_SCHEDULER error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-scheduler-controller
+
+
+[[_getauditsbyprojectandtypeusingget]]
+=== Get all audits paginated for a given Project id and a given type
+....
+GET /audits/by-project-and-type-paginated/{id}/{type}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Path**|**type** +
+__required__|type|enum (SITE, PAGE, UPLOAD, SCENARIO)|
+|**Query**|**isAsc** +
+__optional__|isAsc|boolean|`"false"`
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`5`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"id"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_265fc65bf3b65e0bb70fe2df2b6a0387,Page«Audit»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_getauditsbyprojectusingget]]
+=== Get all audits for a given Project id
+....
+GET /audits/by-project/{id}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_audit,Audit>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_exportauditusingget]]
+=== Get a json file with the audit information
+....
+GET /audits/export/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_resource,Resource>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_getlastauditbyprojectusingget]]
+=== Get last Audit by project id
+....
+GET /audits/last-by-project/{id}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_audit,Audit>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_getlastauditbyprojectandaudittypeusingget]]
+=== Get last Audit by project id and audit type
+....
+GET /audits/last-by-project/{id}/{type}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**type** +
+__required__|type|enum (SITE, PAGE, UPLOAD, SCENARIO)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_audit,Audit>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_startauditusingpost]]
+=== Start an audit
+....
+POST /audits/start
+....
+
+
+==== Description
+User must have START_AUDIT authority on project
+If audit command doesn't contains main reference, exception raise : NO_MAIN_REFERENCE
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+If contract date passed, exception raise : CONTRACT_DATE_PASSED
+Or if reference test hierarchy not found, exception raise : NO_USABLE_REFERENCE with reference id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**auditCommand** +
+__required__|auditCommand|<<_auditcommanddto,AuditCommandDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_audit,Audit>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error
+No main reference : NO_MAIN_REFERENCE error
+Contract date passed : CONTRACT_DATE_PASSED error
+Test hierarchy reference not found : NO_USABLE_REFERENCE error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_deleteauditusingdelete]]
+=== Delete an audit by id
+....
+DELETE /audits/{id}
+....
+
+
+==== Description
+User must have DELETE_AUDIT authority on project
+If audit not found, exception raise: AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_hasscreenshotbyauditusingget]]
+=== Get the number of screenshot in Audit for a given id
+....
+GET /audits/{id}/has-screenshot/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_audit,Audit>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_stopauditusingpost]]
+=== Stop an audit
+....
+POST /audits/{id}/stop
+....
+
+
+==== Description
+User must have START_AUDIT authority on project
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters, CANNOT_STOP_FINISHED_AUDIT error|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|FORBIDDEN_STOP_AUDIT when forbidden for the current session|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_getauditusingget]]
+=== Get an Audit for a given id
+....
+GET /audits/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_audit,Audit>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* audit-controller
+
+
+[[_createauthenticationtokenusingpost]]
+=== createAuthenticationToken
+....
+POST /authentication/login
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**authenticationRequest** +
+__required__|authenticationRequest|<<_jwtrequest,JwtRequest>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_jwtresponse,JwtResponse>>
+|**201**|Created|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* authentication-controller
+
+
+[[_refreshtokenusingget]]
+=== refreshToken
+....
+GET /authentication/refresh-token
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_jwtresponse,JwtResponse>>
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* authentication-controller
+
+
+[[_getbrowsersenabledusingget]]
+=== Get browsers enabled
+....
+GET /config/browsers-enabled
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* configuration-controller
+
+
+[[_getengineversionusingget]]
+=== Get engine version
+....
+GET /config/engine-version
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* configuration-controller
+
+
+[[_getsessiondurationusingget]]
+=== Get session duration value
+....
+GET /config/session-duration
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|integer (int64)
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* configuration-controller
+
+
+[[_createcontractusingpost]]
+=== Create a contract for user
+....
+POST /contracts/
+....
+
+
+==== Description
+User must have CREATE_CONTRACT authority
+If user not found exception raise : USER_NOT_FOUND with user id
+Or if a user try to create multiple contract, exception raise : CANNOT_CREATE_MULTIPLE_USER_CONTRACT
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**contract** +
+__required__|contract|<<_contractdto,ContractDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_contract,Contract>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND error
+Cannot create multiple user contract : CANNOT_CREATE_MULTIPLE_USER_CONTRACT error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findallwithauthoritiesusingget]]
+=== Get all contracts current user has authority on (member or not)
+....
+GET /contracts/
+....
+
+
+==== Description
+User must be logged in
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**name** +
+__optional__|name|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"name"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_cd2329a62a48f99cee6d5d96f7111d18,Page«Contract»>>
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findallbyuserusingget]]
+=== Get Contracts for a given User
+....
+GET /contracts/by-user/{id}
+....
+
+
+==== Description
+User must have SHOW_USER authority
+If user not found exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_cd2329a62a48f99cee6d5d96f7111d18,Page«Contract»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND errpr|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findallbynameownedorcurrentuserismemberofusingget]]
+=== Get All contracts current user owns or is member of
+....
+GET /contracts/me
+....
+
+
+==== Description
+User must be logged in
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**name** +
+__optional__|name|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"name"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_cd2329a62a48f99cee6d5d96f7111d18,Page«Contract»>>
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findcurrentuserismemberofusingget]]
+=== Get All contracts current user is member of
+....
+GET /contracts/member-of
+....
+
+
+==== Description
+User must be logged in
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_contract,Contract>> > array
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findownedusingget]]
+=== Get All contracts current user owns
+....
+GET /contracts/owned
+....
+
+
+==== Description
+User must be logged in
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_contract,Contract>> > array
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_addmemberusingput]]
+=== Add a member to a contract
+....
+PUT /contracts/{contractId}/add-member/{userId}
+....
+
+
+==== Description
+User must have INVITE_MEMBER authority on contract
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+Or if user not found exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**contractId** +
+__required__|contractId|integer (int64)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_contractappuser,ContractAppUser>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_promotememberusingput]]
+=== Promote a member of a contract
+....
+PUT /contracts/{contractId}/promote-member/{userId}/to/{contractRole}
+....
+
+
+==== Description
+User must have PROMOTE_MEMBER authority on contract
+If user try to promote himself, exception raise : CANNOT_PROMOTE_YOURSELF
+Or if this project role cannot be used to promote a user, exception raise : PROJECT_CANNOT_PROMOTE_USER
+Or if contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+Or if user cannot promote contract owner, exception raise : CANNOT_PROMOTE_CONTRACT_OWNER
+Or if user not found, exception raise : USER_NOT_FOUND with user id
+Or if user is not found for project, exception raise : USER_NOT_FOUND_FOR_PROJECT with user id and project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**contractId** +
+__required__|contractId|integer (int64)
+|**Path**|**contractRole** +
+__required__|contractRole|enum (CONTRACT_OWNER, CONTRACT_USER, CONTRACT_MANAGER, CONTRACT_GUEST, CONTRACT_VISITOR)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_contractappuser,ContractAppUser>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+User try to promote himself : CANNOT_PROMOTE_YOURSELF error
+Project role cannot be used to promote a user : PROJECT_CANNOT_PROMOTE_USER error
+Cannot promote contract owner : CANNOT_PROMOTE_CONTRACT_OWNER error
+User not found : USER_NOT_FOUND error
+User not found for project : USER_NOT_FOUND_FOR_PROJECT error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_removememberusingput]]
+=== Remove a member of a contract
+....
+PUT /contracts/{contractId}/remove-member/{userId}
+....
+
+
+==== Description
+User must have REMOVE_MEMBER authority on contract
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+Or if user not found exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**contractId** +
+__required__|contractId|integer (int64)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findbyidusingget]]
+=== Get contracts by id
+....
+GET /contracts/{id}
+....
+
+
+==== Description
+User must have SHOW_CONTRACT authority
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_contract,Contract>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_modifycontractusingput]]
+=== Modify a contract
+....
+PUT /contracts/{id}
+....
+
+
+==== Description
+User must have MODIFY_CONTRACT authority
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+Or if user not found exception raise : USER_NOT_FOUND with user id
+Or if owned already has a contract : USER_ALREADY_HAS_CONTRACT
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Body**|**contractDto** +
+__required__|contractDto|<<_contractdto,ContractDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_contract,Contract>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_deletecontractusingdelete]]
+=== Delete a contract
+....
+DELETE /contracts/{id}
+....
+
+
+==== Description
+User must have DELETE_CONTRACT authorit
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_findauthoritiesbycontractidusingget]]
+=== Get contracts by user
+....
+GET /contracts/{id}/authorities
+....
+
+
+==== Description
+User must logged in
+If contract not found exception raise : CONTRACT_NOT_FOUND with contract id
+Or if user is not found for the contract, exception raise : USER_NOT_FOUND_FOR_CONTRACT with user id and contract id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< string > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+User not found for the contract : USER_NOT_FOUND_FOR_CONTRACT error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* contract-controller
+
+
+[[_getallelementresultbytestresultusingget]]
+=== Get all ElementResult for a given TestResult id
+....
+GET /element-results/by-test-result/{id}/{shareCode}
+....
+
+
+==== Description
+If test result not found, exception raise : TEST_RESULT_NOT_FOUND with test result id
+Or if user can't access element results for test, exception raise : CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST with test result id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Path**|**shareCode** +
+__optional__|shareCode|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_4a3a40dd9f1f78280e07c52be986d482,Page«ElementResult»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|TestResult not found : TEST_RESULT_NOT_FOUND error
+Cannot access element results for test : CANNOT_ACCESS_ELEMENT_RESULTS_FOR_TEST error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* element-result-controller
+
+
+[[_errorhtmlusingpost]]
+=== errorHtml
+....
+POST /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**201**|Created|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusingget]]
+=== errorHtml
+....
+GET /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusingput]]
+=== errorHtml
+....
+PUT /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**201**|Created|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusingdelete]]
+=== errorHtml
+....
+DELETE /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**204**|No Content|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|===
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusingpatch]]
+=== errorHtml
+....
+PATCH /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**204**|No Content|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusinghead]]
+=== errorHtml
+....
+HEAD /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**204**|No Content|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_errorhtmlusingoptions]]
+=== errorHtml
+....
+OPTIONS /error
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_modelandview,ModelAndView>>
+|**204**|No Content|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `text/html`
+
+
+==== Tags
+
+* basic-error-controller
+
+
+[[_getpagecontentbypageusingget]]
+=== Get PageContent for a given Page id
+....
+GET /page-contents/by-page/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on page's project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If user cannot access page content, exception raise : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE with page id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_pagecontent,PageContent>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+Cannot access page content : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-content-controller
+
+
+[[_deletescreenshotbyauditusingput]]
+=== Delete all screenshots for a given Audit id
+....
+PUT /page-contents/delete-screenshot-by-audit/{id}
+....
+
+
+==== Description
+User must have DELETE_AUDIT authority on audit's project
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-content-controller
+
+
+[[_getfirstbyauditusingget]]
+=== Get first PageContent for a given Audit id
+....
+GET /page-contents/first-by-audit/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+If audit not found exception raise : AUDIT_NOT_FOUND with audit id
+If user cannot access page content for the audit, exception raise : CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_pagecontent,PageContent>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot access page content for audit : CANNOT_ACCESS_PAGE_CONTENT_FOR_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-content-controller
+
+
+[[_getpaginatedpagesbyauditusingget]]
+=== Get paginated Page for a given Audit id
+....
+GET /pages/by-audit-paginated/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+If user cannot access pages for the audit, exception raise : CANNOT_ACCESS_PAGES_FOR_AUDIT
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Path**|**shareCode** +
+__optional__|shareCode|string|
+|**Query**|**isAsc** +
+__optional__|isAsc|boolean|`"true"`
+|**Query**|**name** +
+__optional__|name|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"id"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_3112053291008fec829c0671e142b4cc,Page«Page»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Cannot access pages for audit : CANNOT_ACCESS_PAGES_FOR_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-controller
+
+
+[[_getpagesbyauditusingget]]
+=== Get all Page for a given Audit id
+....
+GET /pages/by-audit/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on audit's project or a valid sharecode
+If user cannot access pages for the audit, exception raise : CANNOT_ACCESS_PAGES_FOR_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_page,Page>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Cannot access pages for audit : CANNOT_ACCESS_PAGES_FOR_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-controller
+
+
+[[_exportpageusingget]]
+=== Get a json file with the page information
+....
+GET /pages/export/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_resource,Resource>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* page-controller
+
+
+[[_getpageusingget]]
+=== Get Page for a given id
+....
+GET /pages/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on page's project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If user cannot access page content, exception raise : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE with page id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_page,Page>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+Cannot access page content for page : CANNOT_ACCESS_PAGE_CONTENT_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* page-controller
+
+
+[[_createprojectusingpost]]
+=== Create a Project
+....
+POST /projects/
+....
+
+
+==== Description
+User must have CREATE_PROJECT authority on Contract
+If contract not found, exception raise : CONTRACT_NOT_FOUND with contract id
+If project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number
+If the project domain is invalid, exception raise : INVALID_DOMAIN with project domain
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**project** +
+__required__|project|<<_projectdto,ProjectDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_project,Project>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+Project limit for contract : PROJECT_LIMIT_FOR_CONTRACT error
+Invalid domain : INVALID_DOMAIN error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findbyauditidusingget]]
+=== Get Project for a given Audit id
+....
+GET /projects/by-audit/{id}/{shareCode}
+....
+
+
+==== Description
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_project,Project>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findallwithauthoritiesbycontractusingget]]
+=== Get All projects current user has authority on for a given Contract id
+....
+GET /projects/by-contract/{id}
+....
+
+
+==== Description
+User must must have SHOW_CONTRACT authority on contract
+If contract not found, exception raise : CONTRACT_NOT_FOUND with contract id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_9373eaa025cb2bd1104083916182f239,Page«Project»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findallbycontractandcurrentuserismemberofnotownerusingget]]
+=== Get page of projects current user is member and not owner
+....
+GET /projects/member-of
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**order** +
+__optional__|order|enum (asc, desc)|`"asc"`
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**search** +
+__optional__|search|string|
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|enum (name, create_date, last_audit)|`"name"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_9373eaa025cb2bd1104083916182f239,Page«Project»>>
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findallbycontractandcurrentuserismemberofusingget]]
+=== Get All projects current user is member of for a given Contract id
+....
+GET /projects/member-of/by-contract/{id}
+....
+
+
+==== Description
+User must must have SHOW_CONTRACT authority on contract
+If contract not found, exception raise : CONTRACT_NOT_FOUND with contract id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_9373eaa025cb2bd1104083916182f239,Page«Project»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findmyprojectsusingget]]
+=== findMyProjects
+....
+GET /projects/my-projects
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**order** +
+__optional__|order|enum (asc, desc)|`"asc"`
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**search** +
+__optional__|search|string|
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|enum (name, create_date, last_audit)|`"name"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_9373eaa025cb2bd1104083916182f239,Page«Project»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findmysharedprojectsusingget]]
+=== findMySharedProjects
+....
+GET /projects/my-shared-projects
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**order** +
+__optional__|order|enum (asc, desc)|`"asc"`
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**search** +
+__optional__|search|string|
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|enum (name, create_date, last_audit)|`"name"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_9373eaa025cb2bd1104083916182f239,Page«Project»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findbyidusingget_1]]
+=== Get Project by id
+....
+GET /projects/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_project,Project>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_modifyprojectusingput]]
+=== Modify a Project
+....
+PUT /projects/{id}
+....
+
+
+==== Description
+User must have CREATE_PROJECT authority on Contract
+If contract not found, exception raise : CONTRACT_NOT_FOUND with contract id
+If the project domain is invalid, exception raise : INVALID_DOMAIN with project domain
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Body**|**projectDto** +
+__required__|projectDto|<<_projectdto,ProjectDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_project,Project>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found : CONTRACT_NOT_FOUND error
+Invalid domain : INVALID_DOMAIN error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_deleteprojectusingdelete]]
+=== Delete a Project
+....
+DELETE /projects/{id}
+....
+
+
+==== Description
+User must have DELETE_PROJECT authority on Contract
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_findauthoritiesbyprojectidusingget]]
+=== Get current User authorities on project
+....
+GET /projects/{id}/authorities
+....
+
+
+==== Description
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< string > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_addmemberusingput_1]]
+=== Add a member to a Project
+....
+PUT /projects/{projectId}/add-member/{userId}
+....
+
+
+==== Description
+User must have INVITE_MEMBER authority on Project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+If user not found, exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**projectId** +
+__required__|projectId|integer (int64)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_projectappuser,ProjectAppUser>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error
+User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_promotememberusingput_1]]
+=== Promote a member of a Project
+....
+PUT /projects/{projectId}/promote-member/{userId}/to/{projectRole}
+....
+
+
+==== Description
+User must have PROMOTE_MEMBER authority on Project
+If user try to promote himself, exception raise : CANNOT_PROMOTE_YOURSELF
+If project cannot promote user, exception raise : PROJECT_CANNOT_PROMOTE_USER
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+If user not found, exception raise : USER_NOT_FOUND with user id
+If user is not found, for the project, exception raise : USER_NOT_FOUND_FOR_PROJECT with user id and project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**projectId** +
+__required__|projectId|integer (int64)
+|**Path**|**projectRole** +
+__required__|projectRole|enum (PROJECT_VISITOR, PROJECT_GUEST, PROJECT_USER, PROJECT_MANAGER)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_projectappuser,ProjectAppUser>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or try to self promote|No Content
+|**404**|Cannot promote yourself : CANNOT_PROMOTE_YOURSELF error
+Project cannot promote user ; PROJECT_CANNOT_PROMOTE_USER error
+Project not found : PROJECT_NOT_FOUND error
+User not found : USER_NOT_FOUND error
+User not found for the project : USER_NOT_FOUND_FOR_PROJECT error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_removememberusingput_1]]
+=== Remove a member of a Project
+....
+PUT /projects/{projectId}/remove-member/{userId}
+....
+
+
+==== Description
+User must have REMOVE_MEMBER authority on Project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+If user not found, exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**projectId** +
+__required__|projectId|integer (int64)
+|**Path**|**userId** +
+__required__|userId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error
+User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* project-controller
+
+
+[[_createresourceusingpost]]
+=== Create Resource for a given project id
+....
+POST /resources/
+....
+
+
+==== Description
+User must have ADD_RESOURCE authority on Project
+If project not found, exception raise : PROJECT_NOT_FOUND with project id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**resourceDTO** +
+__required__|resourceDTO|<<_resourcedto,ResourceDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_resource,Resource>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* resource-controller
+
+
+[[_getallbyprojectusingget]]
+=== Get all Resource for a given project id
+....
+GET /resources/by-project/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on Project
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_resource,Resource>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* resource-controller
+
+
+[[_getresourceusingget]]
+=== Get Resource for a given id
+....
+GET /resources/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on Project
+If resource not found, exception raise : RESOURCE_NOT_FOUND with resource id
+If user cannot access the resource, exception raise : USER_CANNOT_ACCESS_RESOURCE with resource id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_resource,Resource>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Resource not found : RESOURCE_NOT_FOUND error
+User cannot access resource : USER_CANNOT_ACCESS_RESOURCE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* resource-controller
+
+
+[[_deleteresourceusingdelete]]
+=== Delete Resource for a given id
+....
+DELETE /resources/{id}
+....
+
+
+==== Description
+User must have DELETE_RESOURCE authority on Project
+If resource not found, exception raise : RESOURCE_NOT_FOUND, with resource id
+If user cannot delete the resource, exception raise : USER_CANNOT_DELETE_RESOURCE with resource id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Resource not found : RESOURCE_NOT_FOUND error
+User cannot delete resource : USER_CANNOT_DELETE_RESOURCE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* resource-controller
+
+
+[[_createscenariousingpost]]
+=== Create Scenario for a given project id
+....
+POST /scenarios/
+....
+
+
+==== Description
+User must have ADD_SCENARIO authority on Project
+If project not found exception raise : PROJECT_NOT_FOUND with project id
+If invalid scenario content, exception raise : INVALID_SCENARIO_CONTENT
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**scenarioDTO** +
+__required__|scenarioDTO|<<_scenariodto,ScenarioDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_scenario,Scenario>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found : PROJECT_NOT_FOUND error
+Invalid scenario content : INVALID_SCENARIO_CONTENT error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* scenario-controller
+
+
+[[_getallbyprojectusingget_1]]
+=== Get all Scenario for a given project id
+....
+GET /scenarios/by-project/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on Project
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_scenario,Scenario>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* scenario-controller
+
+
+[[_getscenariousingget]]
+=== Get Scenario for a given id
+....
+GET /scenarios/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on Project
+If scenario not found, exception raise : SCENARIO_NOT_FOUND with scenario id
+If user cannot access the scenario, exception raise : USER_CANNOT_ACCESS_SCENARIO with scenario id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_scenario,Scenario>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Scenario not found : SCENARIO_NOT_FOUND error
+User cannot access scenario : USER_CANNOT_ACCESS_SCENARIO error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* scenario-controller
+
+
+[[_deleteauditusingdelete_1]]
+=== Delete Scenario for a given id
+....
+DELETE /scenarios/{id}
+....
+
+
+==== Description
+User must have DELETE_SCENARIO authority on Project
+If scenario not found, exception raise : SCENARIO_NOT_FOUND with scenario id
+If user cannot delete the scenario, exception raise : USER_CANNOT_DELETE_SCENARIO with scenario id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Scenario not found : SCENARIO_NOT_FOUND error
+User cannot delete scenario : USER_CANNOT_DELETE_SCENARIO error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* scenario-controller
+
+
+[[_getstatsusingget]]
+=== Get a json string with all the stats
+....
+GET /stats/
+....
+
+
+==== Description
+User must be super admin
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_statisticsdto,StatisticsDTO>>
+|**401**|Unauthorized|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getaveragenberrorsforpagebyperiodusingget]]
+=== Get the average number of errors by page audited over a period
+....
+GET /stats/average-page-error-period/{startDate}/{endDate}
+....
+
+
+==== Description
+User must be SUPER_ADMIN
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**endDate** +
+__required__|endDate|string (date-time)
+|**Path**|**startDate** +
+__required__|startDate|string (date-time)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|number (double)
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getnbfilesauditedbyperiodusingget]]
+=== Get the number of files audited over a period
+....
+GET /stats/nb-file-audited/{startDate}/{endDate}
+....
+
+
+==== Description
+User must be SUPER_ADMIN
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**endDate** +
+__required__|endDate|string (date-time)
+|**Path**|**startDate** +
+__required__|startDate|string (date-time)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|integer (int32)
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getnbpageauditedbyperiodusingget]]
+=== Get the number of pages audited over a period
+....
+GET /stats/nb-page-audited/{startDate}/{endDate}
+....
+
+
+==== Description
+User must be SUPER_ADMIN
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**endDate** +
+__required__|endDate|string (date-time)
+|**Path**|**startDate** +
+__required__|startDate|string (date-time)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|integer (int32)
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getnbscenarioauditedbyperiodusingget]]
+=== Get the number of scenario audited over a period
+....
+GET /stats/nb-scenario-audited/{startDate}/{endDate}
+....
+
+
+==== Description
+User must be SUPER_ADMIN
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**endDate** +
+__required__|endDate|string (date-time)
+|**Path**|**startDate** +
+__required__|startDate|string (date-time)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|integer (int32)
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getnbsiteauditedbyperiodusingget]]
+=== Get the number of website audited over a period
+....
+GET /stats/nb-site-audited/{startDate}/{endDate}
+....
+
+
+==== Description
+User must be SUPER_ADMIN
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**endDate** +
+__required__|endDate|string (date-time)
+|**Path**|**startDate** +
+__required__|startDate|string (date-time)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|integer (int32)
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* stats-controller
+
+
+[[_getbypageandtesthierarchyusingget]]
+=== Get a StatusResult for a given Page id and TestHierarchy id
+....
+GET /status-results/by-page-and-test-hierarchy/{pageId}/{testHierarchyId}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If user cannot access page result, exception raise : USER_CANNOT_ACCESS_PAGE_RESULT with page id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+If cannot find test hierarchy for page, exception raise : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE with page id and test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**pageId** +
+__required__|pageId|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_statusresultdto,StatusResultDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+User cannot access page result : USER_CANNOT_ACCESS_PAGE_RESULT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Cannot find test hierarchy for page : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* status-result-controller
+
+
+[[_getmaintesthierarchyresultbyauditusingget]]
+=== Get all main StatusResult for a given Audit id
+....
+GET /status-results/main-result-by-audit/{id}/{sharecode}
+....
+
+
+==== Description
+The main result is the one associated with the main reference chosen for the audit. User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot find main reference for audit, exception raise : CANNOT_FIND_MAIN_REFERENCE_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_statusresultdto,StatusResultDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Cannot find main reference for audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* status-result-controller
+
+
+[[_getmainstatusresultbypageusingget]]
+=== Get the main StatusResult for a given Page id
+....
+GET /status-results/main-result-by-page/{id}/{sharecode}
+....
+
+
+==== Description
+The main result is the one associated with the main reference chosen for the audit. User must have SHOW_AUDIT authority on project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If cannot find main reference for audit, exception raise : CANNOT_FIND_MAIN_REFERENCE_AUDIT with audit id
+If cannot find main hierarchy result for given page, exception raise : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_statusresultdto,StatusResultDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Cannot find main reference for audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error
+Cannot find main hierarchy result for given page : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* status-result-controller
+
+
+[[_createtanagurutestusingpost]]
+=== Create a TanaguruTest
+....
+POST /tanaguru-tests/
+....
+
+
+==== Description
+User must have CREATE_TEST authority
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**tanaguruTest** +
+__required__|tanaguruTest|<<_tanagurutest,TanaguruTest>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_tanagurutestdto,TanaguruTestDTO>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* tanaguru-test-controller
+
+
+[[_getbyreferenceidusingget]]
+=== Get all TanaguruTest for a given reference id
+....
+GET /tanaguru-tests/by-reference/{id}
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_tanagurutestdto,TanaguruTestDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* tanaguru-test-controller
+
+
+[[_getbytesthierarchyidusingget]]
+=== Get all TanaguruTest for a given TestHierarchy id
+....
+GET /tanaguru-tests/by-test-hierarchy/{id}
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_tanagurutestdto,TanaguruTestDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* tanaguru-test-controller
+
+
+[[_getbyidusingget_1]]
+=== Get TanaguruTest for a given id
+....
+GET /tanaguru-tests/{id}
+....
+
+
+==== Description
+If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_tanagurutestdto,TanaguruTestDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|TanaguruTest not found : TANAGURU_TEST_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* tanaguru-test-controller
+
+
+[[_createtesthierarchyusingpost]]
+=== Create a TestHierarchy
+....
+POST /test-hierarchies/
+....
+
+
+==== Description
+User must have CREATE_REFERENCE authority
+If try to create multiples references, exception raise : CANNOT_CREATE_MULTIPLE_REFERENCES with test hierarchy code
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**testHierarchyDTO** +
+__required__|testHierarchyDTO|<<_testhierarchydto,TestHierarchyDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchydto,TestHierarchyDTO>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Cannot create multiple references : CANNOT_CREATE_MULTIPLE_REFERENCES error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getreferencebyauditusingget]]
+=== Get all references for a given audit id
+....
+GET /test-hierarchies/by-audit/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchydto,TestHierarchyDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getbyparentidusingget]]
+=== Get all TestHierarchy children of a given TestHierarchy id
+....
+GET /test-hierarchies/by-parent/{id}
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchydto,TestHierarchyDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|TestHierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getbytestandreferenceusingget]]
+=== Get all TestHierarchy for a given TanaguruTest id and TestHierarchy id
+....
+GET /test-hierarchies/by-test-and-reference/{testId}/{referenceId}
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**referenceId** +
+__required__|referenceId|integer (int64)
+|**Path**|**testId** +
+__required__|testId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchydto,TestHierarchyDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|TestHierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Tanaguru test not found : TANAGURU_TEST_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getmainreferencebyauditusingget]]
+=== Get the main reference for a given audit id
+....
+GET /test-hierarchies/main-reference-by-audit/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchydto,TestHierarchyDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getreferencebynameusingget]]
+=== Get a reference for a given name
+....
+GET /test-hierarchies/reference-by-code/{code}
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**code** +
+__required__|code|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchydto,TestHierarchyDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_deletereferenceusingdelete]]
+=== Delete a TestHierarchy and children
+....
+DELETE /test-hierarchies/reference/{id}
+....
+
+
+==== Description
+User must have DELETE_REFERENCE authority
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|TestHierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getreferencesusingget]]
+=== Get all TestHierarchy parent
+....
+GET /test-hierarchies/references
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`5`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_122982667a0ace8c8e1209056152e366,Page«TestHierarchyDTO»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Reference not found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getnotdeletedreferencesusingget]]
+=== Get all TestHierarchy for a given non deleted reference id
+....
+GET /test-hierarchies/references-not-deleted
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchydto,TestHierarchyDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Reference not found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getbyidusingget_2]]
+=== Get TestHierarchy for a given id
+....
+GET /test-hierarchies/{id}
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchydto,TestHierarchyDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|TestHierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_addtestlisttotesthierarchyusingput]]
+=== Add a TanaguruTest list to a given TestHierarchy
+....
+PUT /test-hierarchies/{testHierarchyId}/add-test-list
+....
+
+
+==== Description
+User must have CREATE_REFERENCE authority
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|**Body**|**tanaguruTestIds** +
+__required__|tanaguruTestIds|< integer (int64) > array
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_addtesttotesthierarchyusingput]]
+=== Add a TanaguruTest to a given TestHierarchy
+....
+PUT /test-hierarchies/{testHierarchyId}/add-test/{testId}
+....
+
+
+==== Description
+User must have CREATE_REFERENCE authority
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+If tanaguru test not found, exception raise : TANAGURU_TEST_NOT_FOUND with tanaguru test id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|**Path**|**testId** +
+__required__|testId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Tanaguru test not found : TANAGURU_TEST_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-controller
+
+
+[[_getbypageandtesthierarchyusingget_1]]
+=== Get a TestHierarchyResult for a given Page id and TestHierarchy id
+....
+GET /test-hierarchy-results/by-page-and-test-hierarchy/{pageId}/{testHierarchyId}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If user cannot access page result, exception raise : USER_CANNOT_ACCESS_PAGE_RESULT with page id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+If cannot find test hierarchy for page, exception raise : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE with page id and test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**pageId** +
+__required__|pageId|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchyresultdto,TestHierarchyResultDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+User cannot access page result : USER_CANNOT_ACCESS_PAGE_RESULT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Cannot find test hierarchy for the page : CANNOT_FIND_TEST_HIERARCHY_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getbyparentusingget]]
+=== Get all TestHierarchyResult for a given parent TestHierarchyResult id
+....
+GET /test-hierarchy-results/by-parent/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If test hierarchy result not found, exception raise : TEST_HIERARCHY_RESULT_NOT_FOUND with test hierarchy result id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchyresultdto,TestHierarchyResultDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Test hierarchy result not found : TEST_HIERARCHY_RESULT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getteststatusbyauditandtesthierarchyusingget]]
+=== Get status of the test hierarchy for all the pages of a given Audit id and reference id
+....
+GET /test-hierarchy-results/global-test-status-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**auditId** +
+__required__|auditId|integer (int64)
+|**Path**|**referenceId** +
+__required__|referenceId|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< string, string > map
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getmaintesthierarchyresultbyauditusingget_1]]
+=== Get all main TestHierarchyResult for a given Audit id
+....
+GET /test-hierarchy-results/main-result-by-audit/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If cannot find main reference of the audit, exception raise : CANNOT_FIND_MAIN_REFERENCE_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchyresultdto,TestHierarchyResultDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Cannot find main reference of the audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getmaintesthierarchyresultbypageusingget]]
+=== Get the main TestHierarchyResult for a given Page id
+....
+GET /test-hierarchy-results/main-result-by-page/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If cannot find main reference audit, exception raise : CANNOT_FIND_MAIN_REFERENCE_AUDIT with audit id
+If cannot find main hierarchy result for page, exception raise : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchyresultdto,TestHierarchyResultDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Cannot find main reference audit : CANNOT_FIND_MAIN_REFERENCE_AUDIT error
+Cannot find main hierarchy result for page : CANNOT_FIND_MAIN_HIERARCHY_RESULT_FOR_PAGE error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getreducedchildrentesthierarchyresultbyauditusingget]]
+=== Get all reduced children TestHierarchyResult for a given Audit id and TestHierarchy id
+....
+GET /test-hierarchy-results/reduced-children-test-hierarchy-result-by-audit/{testHierarchyId}/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchyresultdto,TestHierarchyResultDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getreducedtesthierarchyresultbyauditusingget]]
+=== Get a reduced TestHierarchyResult for a given Audit id and TestHierarchy id
+....
+GET /test-hierarchy-results/reduced-test-hierarchy-result-by-audit/{testHierarchyId}/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_testhierarchyresultdto,TestHierarchyResultDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getsynthesisbyauditandtesthierarchyusingget]]
+=== Get a paginated audit synthesis for a given Audit id and reference id
+....
+GET /test-hierarchy-results/synthesis-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode. Warning, this function is resource heavy
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**auditId** +
+__required__|auditId|integer (int64)|
+|**Path**|**referenceId** +
+__required__|referenceId|integer (int64)|
+|**Path**|**sharecode** +
+__optional__|sharecode|string|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_auditsynthesisdto,AuditSynthesisDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_gettesthierarchyresultbyauditusingget]]
+=== Get all TestHierarchyResult for a given Audit id and TestHierarchy id
+....
+GET /test-hierarchy-results/test-hierarchy-result-by-audit/{testHierarchyId}/{id}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|**Path**|**testHierarchyId** +
+__required__|testHierarchyId|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testhierarchyresultdto,TestHierarchyResultDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
+[[_getalltestresultbypageusingget]]
+=== Get all TestResult for a given Page id
+....
+GET /test-results/by-page/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If user cannot access result page, exception raise : USER_CANNOT_ACCESS_PAGE_RESULT with page id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testresult,TestResult>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Page not found : PAGE_NOT_FOUND error
+User cannot access page result : USER_CANNOT_ACCESS_PAGE_RESULT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-result-controller
+
+
+[[_getalltestresultbyreferenceusingget]]
+=== Get all TestResult for a given reference id and Page id
+....
+GET /test-results/by-reference-and-page/{referenceId}/{pageId}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+If page not found, exception raise : PAGE_NOT_FOUND with page id
+If cannot access result audit, exception raise : CANNOT_ACCESS_RESULT_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**pageId** +
+__required__|pageId|integer (int64)
+|**Path**|**referenceId** +
+__required__|referenceId|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testresult,TestResult>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error
+Page not found : PAGE_NOT_FOUND error
+Cannot access result audit : CANNOT_ACCESS_RESULT_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-result-controller
+
+
+[[_getalltestresultbytesthierarchyresultusingget]]
+=== Get all TestResult for a given TestHierarchyResult id
+....
+GET /test-results/by-test-hierarchy-result/{id}/{shareCode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If test hierarchy result not found, exception raise : TEST_HIERARCHY_RESULT_NOT_FOUND with test hierarchy result id
+If cannot access result audit, exception raise : CANNOT_ACCESS_RESULT_AUDIT with audit id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|**Path**|**shareCode** +
+__optional__|shareCode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_testresult,TestResult>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Test hierarchy result not found : TEST_HIERARCHY_RESULT_NOT_FOUND error
+Cannot access result audit : CANNOT_ACCESS_RESULT_AUDIT error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-result-controller
+
+
+[[_createuserusingpost]]
+=== Create a User
+....
+POST /users/
+....
+
+
+==== Description
+User must have CREATE_USER authority
+If username already exists, exception raise : USERNAME_ALREADY_EXISTS
+If email already exists, exception raise : EMAIL_ALREADY_EXISTS
+If invalid password, exception raise : INVALID_PASSWORD
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**create-contract** +
+__optional__|create-contract|boolean|`"false"`
+|**Body**|**user** +
+__required__|user|<<_userdto,UserDTO>>|
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_detaileduserdto,DetailedUserDTO>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Username already exists : USERNAME_ALREADY_EXISTS error
+Email already exists : EMAIL_ALREADY_EXISTS error
+Invalid password : INALID_PASSWORD error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_getallusersusingget]]
+=== Get all User
+....
+GET /users/
+....
+
+
+==== Description
+User must have SHOW_USER authority
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_detaileduserdto,DetailedUserDTO>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_modifyuserusingput]]
+=== Modify a User
+....
+PUT /users/
+....
+
+
+==== Description
+User must have MODIFY_USER authority
+If user not found, exception raise : USER_NOT_FOUND with user id
+If App role not found, exception raise : APP_ROLE_NOT_FOUND with app role
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**user** +
+__required__|user|<<_userdto,UserDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_detaileduserdto,DetailedUserDTO>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND error
+App role not found : APP_ROLE_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_findallbycontractpaginatedusingget]]
+=== Get all User paginated for a given Contract id
+....
+GET /users/by-contract-paginated/{id}
+....
+
+
+==== Description
+User must have SHOW_CONTRACT authority on Contract
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Path**|**id** +
+__required__|id|integer (int64)|
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"user.username"`
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_1731593f51dc16554dd0473369db48d9,Page«ContractAppUser»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_findallbycontractusingget]]
+=== Get all User for a given Contract id
+....
+GET /users/by-contract/{id}
+....
+
+
+==== Description
+User must have SHOW_CONTRACT authority on Contract
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_contractappuser,ContractAppUser>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Contract not found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_getuserusingget]]
+=== Get User for a given username
+....
+GET /users/by-name/{username}
+....
+
+
+==== Description
+User must have SHOW_USER authority
+If user not found, exception raise : USER_NOT_FOUND with username
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**username** +
+__required__|username|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_detaileduserdto,DetailedUserDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_findallbyprojectusingget]]
+=== Get all User for a given Project id
+....
+GET /users/by-project/{id}
+....
+
+
+==== Description
+User must have SHOW_PROJECT authority on Project
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< <<_projectappuser,ProjectAppUser>> > array
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Project not found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_changepasswordusingput]]
+=== Change a User password
+....
+PUT /users/change-password
+....
+
+
+==== Description
+User must have MODIFY_USER authority or must be current User
+If user not found, exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**changePasswordCommandDTO** +
+__required__|changePasswordCommandDTO|<<_changepasswordcommanddto,ChangePasswordCommandDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_user,User>>
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND error
+Cannot modify user password : CANNOT_MODIFY_USER_PASSWORD error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_forgotpasswordusingput]]
+=== Send a reset password email to the given email address
+....
+PUT /users/forgot-password
+....
+
+
+==== Description
+If error sending mail, exception raise : ERROR_SENDING_MAIL
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**forgotEmailDTO** +
+__required__|forgotEmailDTO|<<_forgotemaildto,ForgotEmailDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized|No Content
+|**403**|Forbidden|No Content
+|**404**|Not Found|No Content
+|**500**|Error while sending email : ERROR_SENDING_EMAIL error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_getcurrentuserusingget]]
+=== Get current User
+....
+GET /users/me
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_detaileduserdto,DetailedUserDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_modifycurrentuserusingput]]
+=== Modify current User
+....
+PUT /users/me
+....
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**user** +
+__required__|user|<<_userdto,UserDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|object
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_getallusersusingget_1]]
+=== Get a page of User
+....
+GET /users/paginated
+....
+
+
+==== Description
+User must have SHOW_USER authority
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a,.^2a"]
+|===
+|Type|Name|Description|Schema|Default
+|**Query**|**isAsc** +
+__optional__|isAsc|boolean|`"true"`
+|**Query**|**page** +
+__optional__|page|integer (int32)|`0`
+|**Query**|**size** +
+__optional__|size|integer (int32)|`10`
+|**Query**|**sortBy** +
+__optional__|sortBy|string|`"username"`
+|**Query**|**usernameOrEmail** +
+__optional__|usernameOrEmail|string|
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_79e7a203af808f943603483fbdf6923d,Page«DetailedUserDTO»>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_getuserusingget_1]]
+=== Get a User by id
+....
+GET /users/{id}
+....
+
+
+==== Description
+User must have SHOW_USER authority or be the current User
+If user not found, exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|<<_detaileduserdto,DetailedUserDTO>>
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|User not found : USER_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_deleteuserusingdelete]]
+=== Delete current User
+....
+DELETE /users/{id}
+....
+
+
+==== Description
+User must have DELETE_USER authority
+If cannot delete current user, exception raise : CANNOT_DELETE_CURRENT_USER
+If user not found, exception raise : USER_NOT_FOUND with user id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**id** +
+__required__|id|integer (int64)
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|No Content
+|**204**|No Content|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or try to self delete|No Content
+|**404**|User not found : USER_NOT_FOUND error
+Cannot delete current user : CANNOT_DELETE_CURRENT_USER error|No Content
+|===
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* user-controller
+
+
+[[_createwebextentionversionusingpost]]
+=== Upload a webextention version associated with test hierarchy
+....
+POST /webextention/version
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**webextentionDto** +
+__required__|webextentionDto|<<_webextentiondto,WebextentionDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* webextention-controller
+
+
+[[_getwebextentionversionusingget]]
+=== Get the webextention version used by engine
+....
+GET /webextention/version
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* webextention-controller
+
+
+
+
+[[_definitions]]
+== Definitions
+
+[[_appaccounttype]]
+=== AppAccountType
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|enum (DEFAULT, FREE, PREMIUM)
+|===
+
+
+[[_appauthority]]
+=== AppAuthority
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|===
+
+
+[[_approle]]
+=== AppRole
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**authorities** +
+__optional__|< <<_appauthority,AppAuthority>> > array
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|enum (USER, ADMIN, SUPER_ADMIN)
+|**overrideContractRole** +
+__optional__|<<_contractrole,ContractRole>>
+|**overrideProjectRole** +
+__optional__|<<_projectrole,ProjectRole>>
+|===
+
+
+[[_audit]]
+=== Audit
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**dateEnd** +
+__optional__|string (date-time)
+|**dateStart** +
+__optional__|string (date-time)
+|**deleted** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**private** +
+__optional__|boolean
+|**shareCode** +
+__optional__|string
+|**status** +
+__optional__|enum (PENDING, RUNNING, PENDING_CONSOLIDATION, CONSOLIDATING, DONE, ERROR, STOPPED)
+|**type** +
+__optional__|enum (SITE, PAGE, UPLOAD, SCENARIO)
+|===
+
+
+[[_auditcommanddto]]
+=== AuditCommandDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**mainReference** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**parameters** +
+__optional__|< string, string > map
+|**projectId** +
+__optional__|integer (int64)
+|**references** +
+__optional__|< integer (int64) > array
+|**type** +
+__optional__|enum (SITE, PAGE, UPLOAD, SCENARIO)
+|===
+
+
+[[_auditlog]]
+=== AuditLog
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**audit** +
+__optional__|<<_audit,Audit>>
+|**date** +
+__optional__|string (date-time)
+|**id** +
+__optional__|integer (int64)
+|**level** +
+__optional__|enum (INFO, WARNING, ERROR)
+|**message** +
+__optional__|string
+|===
+
+
+[[_auditparameter]]
+=== AuditParameter
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**auditParameterFamily** +
+__optional__|<<_auditparameterfamily,AuditParameterFamily>>
+|**code** +
+__optional__|enum (SCENARIO_ID, DOM_ID, SITE_SEEDS, PAGE_URLS, WAIT_TIME, BASICAUTH_URL, BASICAUTH_LOGIN, BASICAUTH_PASSWORD, ENABLE_SCREENSHOT, CRAWLER_MAX_DEPTH, CRAWLER_MAX_DURATION, CRAWLER_MAX_DOCUMENT, CRAWLER_EXCLUSION_REGEX, CRAWLER_INCLUSION_REGEX, WEBDRIVER_RESOLUTIONS, WEBDRIVER_BROWSER)
+|**id** +
+__optional__|integer (int64)
+|===
+
+
+[[_auditparameterfamily]]
+=== AuditParameterFamily
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**code** +
+__optional__|enum (SITE, SCENARIO, UPLOAD, PAGE, GENERAL, WEBDRIVER, CRAWLER, RULE)
+|**id** +
+__optional__|integer (int64)
+|===
+
+
+[[_auditparametervalue]]
+=== AuditParameterValue
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**auditParameter** +
+__optional__|<<_auditparameter,AuditParameter>>
+|**default** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**value** +
+__optional__|string
+|===
+
+
+[[_auditscheduler]]
+=== AuditScheduler
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**audit** +
+__optional__|<<_audit,Audit>>
+|**id** +
+__optional__|integer (int64)
+|**lastExecution** +
+__optional__|string (date-time)
+|**scheduler** +
+__optional__|integer (int32)
+|===
+
+
+[[_auditschedulerdto]]
+=== AuditSchedulerDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**auditId** +
+__optional__|integer (int64)
+|**auditSchedulerId** +
+__optional__|integer (int64)
+|**timer** +
+__optional__|integer (int32)
+|===
+
+
+[[_auditsynthesisdto]]
+=== AuditSynthesisDTO
+__Type__ : object
+
+
+[[_changepasswordcommanddto]]
+=== ChangePasswordCommandDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**password** +
+__optional__|string
+|**token** +
+__optional__|string
+|**userId** +
+__optional__|integer (int64)
+|===
+
+
+[[_contract]]
+=== Contract
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**allowCreateProject** +
+__optional__|boolean
+|**allowModifyProject** +
+__optional__|boolean
+|**auditLimit** +
+__optional__|integer (int32)
+|**dateEnd** +
+__optional__|string (date-time)
+|**dateStart** +
+__optional__|string (date-time)
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**projectLimit** +
+__optional__|integer (int32)
+|**restrictDomain** +
+__optional__|boolean
+|===
+
+
+[[_contractappuser]]
+=== ContractAppUser
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**contract** +
+__optional__|<<_contract,Contract>>
+|**contractRole** +
+__optional__|<<_contractrole,ContractRole>>
+|**id** +
+__optional__|integer (int64)
+|**user** +
+__optional__|<<_user,User>>
+|===
+
+
+[[_contractauthority]]
+=== ContractAuthority
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|===
+
+
+[[_contractdto]]
+=== ContractDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**auditLimit** +
+__optional__|integer (int32)
+|**dateEnd** +
+__optional__|string (date-time)
+|**name** +
+__optional__|string
+|**ownerId** +
+__optional__|integer (int64)
+|**projectLimit** +
+__optional__|integer (int32)
+|**restrictDomain** +
+__optional__|boolean
+|===
+
+
+[[_contractrole]]
+=== ContractRole
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**authorities** +
+__optional__|< <<_contractauthority,ContractAuthority>> > array
+|**hidden** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|enum (CONTRACT_OWNER, CONTRACT_USER, CONTRACT_MANAGER, CONTRACT_GUEST, CONTRACT_VISITOR)
+|===
+
+
+[[_detaileduserdto]]
+=== DetailedUserDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**accountNonLocked** +
+__optional__|boolean
+|**appAccountType** +
+__optional__|<<_appaccounttype,AppAccountType>>
+|**appRole** +
+__optional__|<<_approle,AppRole>>
+|**email** +
+__optional__|string
+|**enabled** +
+__optional__|boolean
+|**expired** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**username** +
+__optional__|string
+|===
+
+
+[[_elementresult]]
+=== ElementResult
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**accessibleName** +
+__optional__|string
+|**background** +
+__optional__|string
+|**canBeReachedUsingKeyboardWith** +
+__optional__|< string > array
+|**cssSelector** +
+__optional__|string
+|**foreground** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**isNotExposedDueTo** +
+__optional__|< string > array
+|**isNotVisibleDueTo** +
+__optional__|< string > array
+|**ratio** +
+__optional__|number (float)
+|**role** +
+__optional__|<<_elementrole,ElementRole>>
+|**size** +
+__optional__|string
+|**sourceCode** +
+__optional__|string
+|**status** +
+__optional__|string
+|**tag** +
+__optional__|string
+|**testResult** +
+__optional__|<<_testresult,TestResult>>
+|**text** +
+__optional__|string
+|**valid** +
+__optional__|<<_elementvalid,ElementValid>>
+|**weight** +
+__optional__|integer (int32)
+|**xpath** +
+__optional__|string
+|===
+
+
+[[_elementrole]]
+=== ElementRole
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**explicit** +
+__optional__|string
+|**implicit** +
+__optional__|string
+|===
+
+
+[[_elementvalid]]
+=== ElementValid
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**status** +
+__optional__|number (double)
+|**target** +
+__optional__|number (double)
+|===
+
+
+[[_file]]
+=== File
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**absolute** +
+__optional__|boolean
+|**absoluteFile** +
+__optional__|<<_file,File>>
+|**absolutePath** +
+__optional__|string
+|**canonicalFile** +
+__optional__|<<_file,File>>
+|**canonicalPath** +
+__optional__|string
+|**directory** +
+__optional__|boolean
+|**file** +
+__optional__|boolean
+|**freeSpace** +
+__optional__|integer (int64)
+|**hidden** +
+__optional__|boolean
+|**name** +
+__optional__|string
+|**parent** +
+__optional__|string
+|**parentFile** +
+__optional__|<<_file,File>>
+|**path** +
+__optional__|string
+|**totalSpace** +
+__optional__|integer (int64)
+|**usableSpace** +
+__optional__|integer (int64)
+|===
+
+
+[[_forgotemaildto]]
+=== ForgotEmailDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**email** +
+__optional__|string
+|===
+
+
+[[_inputstream]]
+=== InputStream
+__Type__ : object
+
+
+[[_jwtrequest]]
+=== JwtRequest
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**password** +
+__optional__|string
+|**username** +
+__optional__|string
+|===
+
+
+[[_jwtresponse]]
+=== JwtResponse
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**jwttoken** +
+__optional__|string
+|===
+
+
+[[_link]]
+=== Link
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**href** +
+__optional__|string
+|**templated** +
+__optional__|boolean
+|===
+
+
+[[_53d375507d198e9157717964970e1987]]
+=== Map«string,Link»
+__Type__ : < string, <<_link,Link>> > map
+
+
+[[_mark]]
+=== Mark
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**attrs** +
+__optional__|< string > array
+|===
+
+
+[[_modelandview]]
+=== ModelAndView
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**empty** +
+__optional__|boolean
+|**model** +
+__optional__|object
+|**modelMap** +
+__optional__|< string, object > map
+|**reference** +
+__optional__|boolean
+|**status** +
+__optional__|enum (100 CONTINUE, 101 SWITCHING_PROTOCOLS, 102 PROCESSING, 103 CHECKPOINT, 200 OK, 201 CREATED, 202 ACCEPTED, 203 NON_AUTHORITATIVE_INFORMATION, 204 NO_CONTENT, 205 RESET_CONTENT, 206 PARTIAL_CONTENT, 207 MULTI_STATUS, 208 ALREADY_REPORTED, 226 IM_USED, 300 MULTIPLE_CHOICES, 301 MOVED_PERMANENTLY, 302 FOUND, 302 MOVED_TEMPORARILY, 303 SEE_OTHER, 304 NOT_MODIFIED, 305 USE_PROXY, 307 TEMPORARY_REDIRECT, 308 PERMANENT_REDIRECT, 400 BAD_REQUEST, 401 UNAUTHORIZED, 402 PAYMENT_REQUIRED, 403 FORBIDDEN, 404 NOT_FOUND, 405 METHOD_NOT_ALLOWED, 406 NOT_ACCEPTABLE, 407 PROXY_AUTHENTICATION_REQUIRED, 408 REQUEST_TIMEOUT, 409 CONFLICT, 410 GONE, 411 LENGTH_REQUIRED, 412 PRECONDITION_FAILED, 413 PAYLOAD_TOO_LARGE, 413 REQUEST_ENTITY_TOO_LARGE, 414 URI_TOO_LONG, 414 REQUEST_URI_TOO_LONG, 415 UNSUPPORTED_MEDIA_TYPE, 416 REQUESTED_RANGE_NOT_SATISFIABLE, 417 EXPECTATION_FAILED, 418 I_AM_A_TEAPOT, 419 INSUFFICIENT_SPACE_ON_RESOURCE, 420 METHOD_FAILURE, 421 DESTINATION_LOCKED, 422 UNPROCESSABLE_ENTITY, 423 LOCKED, 424 FAILED_DEPENDENCY, 425 TOO_EARLY, 426 UPGRADE_REQUIRED, 428 PRECONDITION_REQUIRED, 429 TOO_MANY_REQUESTS, 431 REQUEST_HEADER_FIELDS_TOO_LARGE, 451 UNAVAILABLE_FOR_LEGAL_REASONS, 500 INTERNAL_SERVER_ERROR, 501 NOT_IMPLEMENTED, 502 BAD_GATEWAY, 503 SERVICE_UNAVAILABLE, 504 GATEWAY_TIMEOUT, 505 HTTP_VERSION_NOT_SUPPORTED, 506 VARIANT_ALSO_NEGOTIATES, 507 INSUFFICIENT_STORAGE, 508 LOOP_DETECTED, 509 BANDWIDTH_LIMIT_EXCEEDED, 510 NOT_EXTENDED, 511 NETWORK_AUTHENTICATION_REQUIRED)
+|**view** +
+__optional__|<<_view,View>>
+|**viewName** +
+__optional__|string
+|===
+
+
+[[_page]]
+=== Page
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**audit** +
+__optional__|<<_audit,Audit>>
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**rank** +
+__optional__|integer (int32)
+|**url** +
+__optional__|string
+|===
+
+
+[[_pagecontent]]
+=== PageContent
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**page** +
+__optional__|<<_page,Page>>
+|**screenshot** +
+__optional__|string
+|**source** +
+__optional__|string
+|===
+
+
+[[_pageable]]
+=== Pageable
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**offset** +
+__optional__|integer (int64)
+|**pageNumber** +
+__optional__|integer (int32)
+|**pageSize** +
+__optional__|integer (int32)
+|**paged** +
+__optional__|boolean
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**unpaged** +
+__optional__|boolean
+|===
+
+
+[[_411aacd029beb69a3aa2a5418d04390e]]
+=== Page«AuditLog»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_auditlog,AuditLog>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_265fc65bf3b65e0bb70fe2df2b6a0387]]
+=== Page«Audit»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_audit,Audit>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_1731593f51dc16554dd0473369db48d9]]
+=== Page«ContractAppUser»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_contractappuser,ContractAppUser>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_cd2329a62a48f99cee6d5d96f7111d18]]
+=== Page«Contract»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_contract,Contract>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_79e7a203af808f943603483fbdf6923d]]
+=== Page«DetailedUserDTO»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_detaileduserdto,DetailedUserDTO>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_4a3a40dd9f1f78280e07c52be986d482]]
+=== Page«ElementResult»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_elementresult,ElementResult>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_3112053291008fec829c0671e142b4cc]]
+=== Page«Page»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_page,Page>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_9373eaa025cb2bd1104083916182f239]]
+=== Page«Project»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_project,Project>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_122982667a0ace8c8e1209056152e366]]
+=== Page«TestHierarchyDTO»
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|< <<_testhierarchydto,TestHierarchyDTO>> > array
+|**empty** +
+__optional__|boolean
+|**first** +
+__optional__|boolean
+|**last** +
+__optional__|boolean
+|**number** +
+__optional__|integer (int32)
+|**numberOfElements** +
+__optional__|integer (int32)
+|**pageable** +
+__optional__|<<_pageable,Pageable>>
+|**size** +
+__optional__|integer (int32)
+|**sort** +
+__optional__|<<_sort,Sort>>
+|**totalElements** +
+__optional__|integer (int64)
+|**totalPages** +
+__optional__|integer (int32)
+|===
+
+
+[[_project]]
+=== Project
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**allowPageAudit** +
+__optional__|boolean
+|**allowScenarioAudit** +
+__optional__|boolean
+|**allowSiteAudit** +
+__optional__|boolean
+|**allowUploadAudit** +
+__optional__|boolean
+|**contract** +
+__optional__|<<_contract,Contract>>
+|**domain** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**trial** +
+__optional__|boolean
+|===
+
+
+[[_projectappuser]]
+=== ProjectAppUser
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**contractAppUser** +
+__optional__|<<_contractappuser,ContractAppUser>>
+|**project** +
+__optional__|<<_project,Project>>
+|**projectRole** +
+__optional__|<<_projectrole,ProjectRole>>
+|===
+
+
+[[_projectauthority]]
+=== ProjectAuthority
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|===
+
+
+[[_projectdto]]
+=== ProjectDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**allowPageAudit** +
+__optional__|boolean
+|**allowScenarioAudit** +
+__optional__|boolean
+|**allowSiteAudit** +
+__optional__|boolean
+|**allowUploadAudit** +
+__optional__|boolean
+|**contractId** +
+__optional__|integer (int64)
+|**domain** +
+__optional__|string
+|**istrial** +
+__optional__|boolean
+|**name** +
+__optional__|string
+|===
+
+
+[[_projectrole]]
+=== ProjectRole
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**authorities** +
+__optional__|< <<_projectauthority,ProjectAuthority>> > array
+|**hidden** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|enum (PROJECT_VISITOR, PROJECT_GUEST, PROJECT_USER, PROJECT_MANAGER)
+|===
+
+
+[[_resource]]
+=== Resource
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**deleted** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**project** +
+__optional__|<<_project,Project>>
+|===
+
+
+[[_resourcedto]]
+=== ResourceDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|string
+|**name** +
+__optional__|string
+|**projectId** +
+__optional__|integer (int64)
+|===
+
+
+[[_scenario]]
+=== Scenario
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|string
+|**deleted** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**project** +
+__optional__|<<_project,Project>>
+|===
+
+
+[[_scenariodto]]
+=== ScenarioDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**content** +
+__optional__|string
+|**name** +
+__optional__|string
+|**projectId** +
+__optional__|integer (int64)
+|===
+
+
+[[_sort]]
+=== Sort
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**empty** +
+__optional__|boolean
+|**sorted** +
+__optional__|boolean
+|**unsorted** +
+__optional__|boolean
+|===
+
+
+[[_statisticsdto]]
+=== StatisticsDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**meanNbAuditsByProject** +
+__optional__|number (double)
+|**meanNbErrorsAudit** +
+__optional__|number (double)
+|**meanNbErrorsPage** +
+__optional__|number (double)
+|**meanNbErrorsProject** +
+__optional__|number (double)
+|**meanNbUsersByProject** +
+__optional__|number (double)
+|**nbAudits** +
+__optional__|integer (int32)
+|**nbContracts** +
+__optional__|integer (int32)
+|**nbPageAudit** +
+__optional__|integer (int32)
+|**nbProjects** +
+__optional__|integer (int32)
+|**nbScenarioAudit** +
+__optional__|integer (int32)
+|**nbSiteAudit** +
+__optional__|integer (int32)
+|**nbUploadAudit** +
+__optional__|integer (int32)
+|**nbUsers** +
+__optional__|integer (int32)
+|===
+
+
+[[_statusresultdto]]
+=== StatusResultDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**nbECT** +
+__optional__|integer (int32)
+|**nbEF** +
+__optional__|integer (int32)
+|**nbEP** +
+__optional__|integer (int32)
+|**nbET** +
+__optional__|integer (int32)
+|**nbEU** +
+__optional__|integer (int32)
+|**nbTCT** +
+__optional__|integer (int32)
+|**nbTF** +
+__optional__|integer (int32)
+|**nbTI** +
+__optional__|integer (int32)
+|**nbTP** +
+__optional__|integer (int32)
+|**nbTU** +
+__optional__|integer (int32)
+|**page** +
+__optional__|integer (int64)
+|**reference** +
+__optional__|integer (int64)
+|===
+
+
+[[_tanagurutest]]
+=== TanaguruTest
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**analyzeElements** +
+__optional__|string
+|**code** +
+__optional__|string
+|**contrast** +
+__optional__|string
+|**deleted** +
+__optional__|boolean
+|**description** +
+__optional__|string
+|**expectedNbElements** +
+__optional__|string
+|**filter** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**lang** +
+__optional__|string
+|**mark** +
+__optional__|<<_mark,Mark>>
+|**name** +
+__optional__|string
+|**node** +
+__optional__|string
+|**number** +
+__optional__|integer (int32)
+|**query** +
+__optional__|string
+|**status** +
+__optional__|string
+|**tags** +
+__optional__|< string > array
+|**testStatus** +
+__optional__|string
+|===
+
+
+[[_tanagurutestdto]]
+=== TanaguruTestDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**code** +
+__optional__|string
+|**description** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**lang** +
+__optional__|string
+|**mark** +
+__optional__|<<_mark,Mark>>
+|**name** +
+__optional__|string
+|**node** +
+__optional__|string
+|**number** +
+__optional__|integer (int32)
+|**status** +
+__optional__|string
+|**tags** +
+__optional__|< string > array
+|**testStatus** +
+__optional__|string
+|===
+
+
+[[_testhierarchydto]]
+=== TestHierarchyDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**code** +
+__optional__|string
+|**deleted** +
+__optional__|boolean
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|string
+|**parentId** +
+__optional__|integer (int64)
+|**rank** +
+__optional__|integer (int32)
+|**referenceId** +
+__optional__|integer (int64)
+|**urls** +
+__optional__|< string > array
+|===
+
+
+[[_testhierarchyresultdto]]
+=== TestHierarchyResultDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**nbCT** +
+__optional__|integer (int32)
+|**nbECT** +
+__optional__|integer (int32)
+|**nbEF** +
+__optional__|integer (int32)
+|**nbEP** +
+__optional__|integer (int32)
+|**nbET** +
+__optional__|integer (int32)
+|**nbF** +
+__optional__|integer (int32)
+|**nbI** +
+__optional__|integer (int32)
+|**nbP** +
+__optional__|integer (int32)
+|**nbTCT** +
+__optional__|integer (int32)
+|**nbTF** +
+__optional__|integer (int32)
+|**nbTI** +
+__optional__|integer (int32)
+|**nbTP** +
+__optional__|integer (int32)
+|**nbU** +
+__optional__|integer (int32)
+|**status** +
+__optional__|string
+|**testHierarchy** +
+__optional__|<<_testhierarchydto,TestHierarchyDTO>>
+|===
+
+
+[[_testresult]]
+=== TestResult
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**marks** +
+__optional__|< string, < string > array > map
+|**nbElementCantTell** +
+__optional__|integer (int32)
+|**nbElementFailed** +
+__optional__|integer (int32)
+|**nbElementPassed** +
+__optional__|integer (int32)
+|**nbElementTested** +
+__optional__|integer (int32)
+|**nbElementUntested** +
+__optional__|integer (int32)
+|**page** +
+__optional__|<<_page,Page>>
+|**status** +
+__optional__|string
+|**tanaguruTest** +
+__optional__|<<_tanagurutest,TanaguruTest>>
+|===
+
+
+[[_uri]]
+=== URI
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**absolute** +
+__optional__|boolean
+|**authority** +
+__optional__|string
+|**fragment** +
+__optional__|string
+|**host** +
+__optional__|string
+|**opaque** +
+__optional__|boolean
+|**path** +
+__optional__|string
+|**port** +
+__optional__|integer (int32)
+|**query** +
+__optional__|string
+|**rawAuthority** +
+__optional__|string
+|**rawFragment** +
+__optional__|string
+|**rawPath** +
+__optional__|string
+|**rawQuery** +
+__optional__|string
+|**rawSchemeSpecificPart** +
+__optional__|string
+|**rawUserInfo** +
+__optional__|string
+|**scheme** +
+__optional__|string
+|**schemeSpecificPart** +
+__optional__|string
+|**userInfo** +
+__optional__|string
+|===
+
+
+[[_url]]
+=== URL
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**authority** +
+__optional__|string
+|**content** +
+__optional__|object
+|**defaultPort** +
+__optional__|integer (int32)
+|**file** +
+__optional__|string
+|**host** +
+__optional__|string
+|**path** +
+__optional__|string
+|**port** +
+__optional__|integer (int32)
+|**protocol** +
+__optional__|string
+|**query** +
+__optional__|string
+|**ref** +
+__optional__|string
+|**userInfo** +
+__optional__|string
+|===
+
+
+[[_user]]
+=== User
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**appAccountType** +
+__optional__|<<_appaccounttype,AppAccountType>>
+|**appRole** +
+__optional__|<<_approle,AppRole>>
+|**dateCreation** +
+__optional__|string (date-time)
+|**enabled** +
+__optional__|boolean
+|**firstname** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**lastname** +
+__optional__|string
+|**username** +
+__optional__|string
+|===
+
+
+[[_userdto]]
+=== UserDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**accountNonLocked** +
+__optional__|boolean
+|**appRole** +
+__optional__|enum (USER, ADMIN, SUPER_ADMIN)
+|**email** +
+__optional__|string
+|**enabled** +
+__optional__|boolean
+|**expired** +
+__optional__|boolean
+|**firstname** +
+__optional__|string
+|**id** +
+__optional__|integer (int64)
+|**lastname** +
+__optional__|string
+|**password** +
+__optional__|string
+|**username** +
+__optional__|string
+|===
+
+
+[[_view]]
+=== View
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**contentType** +
+__optional__|string
+|===
+
+
+[[_webextentiondto]]
+=== WebextentionDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**testHierarchyId** +
+__optional__|integer (int64)
+|**version** +
+__optional__|string
+|===
+
+
+
+
+
