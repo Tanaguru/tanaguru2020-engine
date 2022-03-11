@@ -14,6 +14,8 @@ Four kinds of audit:
 
 (That's the DOM that is tested, thus dealing with JS/AJAX/ARIA)
 
+Link to API Documentation : [API Documentation](tanaguru-rest/src/main/resources/docs/api-doc.adoc)
+
 ## Vision
 
 1. Automate as much as we can and even more :)
