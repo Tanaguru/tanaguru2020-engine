@@ -129,9 +129,10 @@ pipeline {
                 script{
                     unstash 'version'
                     def devDockerEnv = createDockerEnvFileContent('647f5360-4c98-456b-aa1f-0d2a3ea62f43');
-                    sh "echo $devDockerEnv > .env"
+                    writeFile file: "./.env", text: devDockerEnv
                     sh '''
                     REST_VERSION=$(cat version.txt)
+                    cat ./.env
 
                     docker stop tanaguru2020-rest-prod || true
                     docker image prune -f
@@ -143,7 +144,7 @@ pipeline {
                         --label "traefik.enable=true" \
                         --label "traefik.frontend.redirect.entryPoint=secure" \
                         --label "traefik.http.routers.tanaguru-rest-prod.entrypoints=secure" \
-                        --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(`prodapi.tanaguru.com`)" \
+                        --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(\\`prodapi.tanaguru.com\\`)" \
                         --label "traefik.http.routers.tanaguru-rest-prod.tls=true" \
                         --label "traefik.port=9002" \
                         --network=web \

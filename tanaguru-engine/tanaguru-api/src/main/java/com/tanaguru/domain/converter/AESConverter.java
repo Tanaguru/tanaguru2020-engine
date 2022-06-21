@@ -6,8 +6,6 @@ import com.tanaguru.helper.AESEncrypt;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-;
-
 @Converter
 public class AESConverter implements AttributeConverter<String, String> {
 
