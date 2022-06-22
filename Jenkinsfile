@@ -35,7 +35,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
              "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
              "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER'] + "\n" +
-             "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY']
+             "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY'] + "\n" +
+             "SPRING_PROFILE_ACTIVE=" + props['SPRING_PROFILE_ACTIVE']
     }
 }
 
