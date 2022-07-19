@@ -513,5 +513,33 @@ public class ProjectController {
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);
     }
+    
+    /**
+     * Generate a new Api key. This key can authenticate the user and return the corresponding project.
+     * @param user_id
+     * @param project_id
+     * @return api key
+     */
+    @ApiOperation(
+            value = "Generate a new Api key. This key can authenticate the user and return the corresponding project.",
+            notes = "If user not found, exception raise : USER_NOT_FOUND error"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND error"
+                    + "\nIf cannot generate api key, exception raise : CANNOT_GENERATE_API_KEY error")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error"
+                    + "\nCannot generate api key : CANNOT_GENERATE_API_KEY error")
+    })
+    @GetMapping(value = "/api-key/{user_id}/{project_id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String getApiKey(@PathVariable long user_id, @PathVariable long project_id) {
+        User user = userRepository.findById(user_id)
+                                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+        Project project = this.projectRepository.findById(project_id)
+                            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, project_id));
+        return this.projectService.generateApiKey(user, project);
+    }
 
 }

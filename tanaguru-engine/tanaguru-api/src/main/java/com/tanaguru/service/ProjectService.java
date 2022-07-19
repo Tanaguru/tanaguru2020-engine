@@ -132,4 +132,12 @@ public interface ProjectService {
     Project modifyProject(Project project, String name, String domain);
     
     boolean projectAcceptThisAuditType(EAuditType auditType, Project project);
+    
+    /**
+     * Generate a new Api key. This key can authenticate the user and return the corresponding project.
+     * @param user
+     * @param project
+     * @return api key
+     */
+    String generateApiKey(User user, Project project);
 }

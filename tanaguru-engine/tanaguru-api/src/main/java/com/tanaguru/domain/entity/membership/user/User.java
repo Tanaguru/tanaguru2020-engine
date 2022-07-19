@@ -99,6 +99,9 @@ public class User implements Serializable {
     @NotNull
     private boolean expired = false;
     
+    @Column
+    private String apiKey;
+    
     public long getId() {
         return id;
     }
@@ -217,6 +220,14 @@ public class User implements Serializable {
 
     public void setExpired(boolean expired) {
         this.expired = expired;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
     
 }
