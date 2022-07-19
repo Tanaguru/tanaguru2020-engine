@@ -100,6 +100,7 @@ public class User implements Serializable {
     private boolean expired = false;
     
     @Column
+    @JsonIgnore
     private String apiKey;
     
     public long getId() {

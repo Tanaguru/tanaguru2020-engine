@@ -64,6 +64,7 @@ public class Project implements Serializable {
     private Boolean istrial = false;
     
     @Column
+    @JsonIgnore
     private String apiKey;
     
     public long getId() {

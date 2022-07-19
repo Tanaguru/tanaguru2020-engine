@@ -541,5 +541,27 @@ public class ProjectController {
                             .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, project_id));
         return this.projectService.generateApiKey(user, project);
     }
+    
+    /**
+     * Get project by api key.
+     * @param api key
+     * @return project
+     */
+    @ApiOperation(
+            value = "Get Project by api key",
+            notes = "If project not found, exception raise : PROJECT_NOT_FOUND"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
+    })
+    @GetMapping(value = "/by-api-key/{apiKey}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Project findByApiKey(@PathVariable String apiKey) {
+        return projectRepository.findByApiKey(apiKey)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND));
+    }
 
 }

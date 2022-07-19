@@ -195,4 +195,21 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
     }
     
+    public UserDetails loadUserByApiKey(String apiKey) throws CustomEntityNotFoundException {
+        User user = userRepository.findByApiKey(apiKey)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND));
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                user.isAccountNonLocked(),
+                user.getAppRole().getAuthorities().stream()
+                        .map(appAuthority ->
+                                new SimpleGrantedAuthority(appAuthority.getName())
+                        ).collect(Collectors.toList())
+        );
+    }
+    
 }
