@@ -47,6 +47,4 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Stream<Project> getAll();
   
     Collection<Project> findAllByDomain(@Param("domain") String domain);
-    
-    Optional<Project> findByApiKey(@Param("apiKey") String apiKey);
 }

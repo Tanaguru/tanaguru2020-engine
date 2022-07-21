@@ -25,5 +25,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Collection<User> findAllByAppAccountTypeNameAndExpired(EAppAccountType accountType, boolean expired);
     
-    Optional<User> findByApiKey(String apiKey);
 }

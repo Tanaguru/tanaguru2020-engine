@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author rcharre
@@ -98,10 +99,6 @@ public class User implements Serializable {
     @Column(nullable = false)
     @NotNull
     private boolean expired = false;
-    
-    @Column
-    @JsonIgnore
-    private String apiKey;
     
     public long getId() {
         return id;
@@ -223,12 +220,4 @@ public class User implements Serializable {
         this.expired = expired;
     }
 
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-    
 }

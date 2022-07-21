@@ -13,6 +13,7 @@ import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.project.ProjectAuthority;
 import com.tanaguru.domain.entity.membership.project.ProjectRole;
+import com.tanaguru.domain.entity.membership.user.ApiKey;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
@@ -51,6 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final AuditService auditService;
     private final AsyncAuditService asyncAuditService;
     private final UserRepository userRepository;
+    private final ApiKeyRepository apiKeyRepository;
 
     private Map<EProjectRole, ProjectRole> projectRoleMap = new EnumMap<>(EProjectRole.class);
     private Map<EProjectRole, Collection<String>> projectRoleAuthorityMap = new EnumMap<>(EProjectRole.class);
@@ -66,7 +68,8 @@ public class ProjectServiceImpl implements ProjectService {
             ContractUserRepository contractUserRepository, 
             AuditService auditService, 
             AsyncAuditService asyncAuditService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ApiKeyRepository apiKeyRepository) {
         this.appRoleRepository = appRoleRepository;
         this.projectRepository = projectRepository;
         this.projectUserRepository = projectUserRepository;
@@ -76,6 +79,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.auditService = auditService;
         this.asyncAuditService = asyncAuditService;
         this.userRepository = userRepository;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @PostConstruct
@@ -310,23 +314,28 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     /**
-     * Generate a new Api key. This key can authenticate the user and return the corresponding project.
+     * Generate a new Api key. The key is store with the user and the project.
+     * This key can authenticate the user and return the corresponding project.
      * @param user
      * @param project
      * @return api key
      */
     @Override
     public String generateApiKey(User user, Project project) {
-        String apiKey = "";
+        String apiKeyValue = "";
         if(user != null && project != null) {
-            apiKey = RandomStringUtils.random(20, true, true);
-            project.setApiKey(apiKey);
-            user.setApiKey(apiKey);
-            this.projectRepository.save(project);
-            this.userRepository.save(user);
+            apiKeyValue = RandomStringUtils.random(20, true, true);
+            Optional<ApiKey> oldApiKey = this.apiKeyRepository.findByUserAndProject(user, project);
+            if(oldApiKey.isPresent()) {
+                oldApiKey.get().setKey(apiKeyValue);
+                this.apiKeyRepository.save(oldApiKey.get());
+            }else {
+                ApiKey apiKey = new ApiKey(user, project, apiKeyValue);
+                this.apiKeyRepository.save(apiKey);
+            }
         }else {
             throw new CustomEntityNotFoundException(CustomError.CANNOT_GENERATE_API_KEY);
         }
-        return apiKey;
+        return apiKeyValue;
     }
 }

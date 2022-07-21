@@ -5,6 +5,7 @@ import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
+import com.tanaguru.domain.entity.membership.user.ApiKey;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ActRepository actRepository;
     private final AppAccountTypeRepository appAccountTypeRepository;
+    private final ApiKeyRepository apiKeyRepository;
 
     @Autowired
     public TanaguruUserDetailsServiceImpl(ContractService contractService, 
@@ -60,7 +63,8 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             AppRoleRepository appRoleRepository, 
             BCryptPasswordEncoder bCryptPasswordEncoder, 
             ActRepository actRepository,
-            AppAccountTypeRepository appAccountTypeRepository) {
+            AppAccountTypeRepository appAccountTypeRepository,
+            ApiKeyRepository apiKeyRepository) {
         this.contractService = contractService;
         this.projectService = projectService;
         this.contractRepository = contractRepository;
@@ -73,6 +77,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.actRepository = actRepository;
         this.appAccountTypeRepository = appAccountTypeRepository;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @PostConstruct
@@ -195,9 +200,14 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
         return auditSchedulerService.userCanScheduleOnAudit(getCurrentUser(), audit);
     }
     
-    public UserDetails loadUserByApiKey(String apiKey) throws CustomEntityNotFoundException {
-        User user = userRepository.findByApiKey(apiKey)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND));
+    public UserDetails loadUserByApiKey(String apiKeyValue) throws CustomEntityNotFoundException {
+        Optional<ApiKey> apiKey = this.apiKeyRepository.findByKey(apiKeyValue);
+        User user = null;
+        if(apiKey.isPresent()) {
+            user = apiKey.get().getUser();
+        }else{
+            throw new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND);
+        }
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

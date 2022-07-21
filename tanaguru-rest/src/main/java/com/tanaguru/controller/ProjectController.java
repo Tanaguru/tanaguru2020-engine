@@ -43,7 +43,8 @@ public class ProjectController {
     private final UserRepository userRepository;
     private final AuditRepository auditRepository;
     private final ContractService contractService;
-
+    private final ApiKeyRepository apiKeyRepository;
+    
     @Autowired
     public ProjectController(
             ProjectService projectService,
@@ -51,7 +52,11 @@ public class ProjectController {
             ProjectRepository projectRepository,
             ContractRepository contractRepository,
             ContractUserRepository contractUserRepository,
-            ProjectUserRepository projectUserRepository, UserRepository userRepository, AuditRepository auditRepository, ContractService contractService) {
+            ProjectUserRepository projectUserRepository, 
+            UserRepository userRepository, 
+            AuditRepository auditRepository, 
+            ContractService contractService,
+            ApiKeyRepository apiKeyRepository) {
 
         this.projectService = projectService;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
@@ -62,6 +67,7 @@ public class ProjectController {
         this.userRepository = userRepository;
         this.auditRepository = auditRepository;
         this.contractService = contractService;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @ApiOperation(
@@ -560,8 +566,8 @@ public class ProjectController {
     @GetMapping(value = "/by-api-key/{apiKey}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Project findByApiKey(@PathVariable String apiKey) {
-        return projectRepository.findByApiKey(apiKey)
-                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND));
+        return apiKeyRepository.findByKey(apiKey)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND)).getProject();
     }
 
 }

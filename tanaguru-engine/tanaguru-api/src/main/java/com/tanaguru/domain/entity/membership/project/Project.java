@@ -63,10 +63,6 @@ public class Project implements Serializable {
     @Column
     private Boolean istrial = false;
     
-    @Column
-    @JsonIgnore
-    private String apiKey;
-    
     public long getId() {
         return id;
     }
@@ -169,14 +165,6 @@ public class Project implements Serializable {
 
     public void setTrial(Boolean istrial) {
         this.istrial = istrial;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
     }
     
 }
