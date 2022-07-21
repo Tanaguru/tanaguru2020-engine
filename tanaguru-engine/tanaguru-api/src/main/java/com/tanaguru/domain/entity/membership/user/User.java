@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author rcharre
@@ -218,5 +219,5 @@ public class User implements Serializable {
     public void setExpired(boolean expired) {
         this.expired = expired;
     }
-    
+
 }

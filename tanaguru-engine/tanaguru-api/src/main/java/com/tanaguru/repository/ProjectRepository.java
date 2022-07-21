@@ -1,20 +1,18 @@
 package com.tanaguru.repository;
 
-import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.contract.Contract;
 import com.tanaguru.domain.entity.membership.project.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.persistence.QueryHint;
 
 /**
  * @author rcharre

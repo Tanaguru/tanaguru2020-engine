@@ -13,6 +13,7 @@ import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.project.ProjectAuthority;
 import com.tanaguru.domain.entity.membership.project.ProjectRole;
+import com.tanaguru.domain.entity.membership.user.ApiKey;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
@@ -21,6 +22,8 @@ import com.tanaguru.repository.*;
 import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import com.tanaguru.service.ProjectService;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ContractUserRepository contractUserRepository;
     private final AuditService auditService;
     private final AsyncAuditService asyncAuditService;
+    private final UserRepository userRepository;
+    private final ApiKeyRepository apiKeyRepository;
 
     private Map<EProjectRole, ProjectRole> projectRoleMap = new EnumMap<>(EProjectRole.class);
     private Map<EProjectRole, Collection<String>> projectRoleAuthorityMap = new EnumMap<>(EProjectRole.class);
@@ -55,9 +60,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(
-            AppRoleRepository appRoleRepository, ProjectRepository projectRepository,
+            AppRoleRepository appRoleRepository, 
+            ProjectRepository projectRepository,
             ProjectUserRepository projectUserRepository,
-            ProjectRoleRepository projectRoleRepository, ActRepository actRepository, ContractUserRepository contractUserRepository, AuditService auditService, AsyncAuditService asyncAuditService) {
+            ProjectRoleRepository projectRoleRepository, 
+            ActRepository actRepository, 
+            ContractUserRepository contractUserRepository, 
+            AuditService auditService, 
+            AsyncAuditService asyncAuditService,
+            UserRepository userRepository,
+            ApiKeyRepository apiKeyRepository) {
         this.appRoleRepository = appRoleRepository;
         this.projectRepository = projectRepository;
         this.projectUserRepository = projectUserRepository;
@@ -66,6 +78,8 @@ public class ProjectServiceImpl implements ProjectService {
         this.contractUserRepository = contractUserRepository;
         this.auditService = auditService;
         this.asyncAuditService = asyncAuditService;
+        this.userRepository = userRepository;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @PostConstruct
@@ -297,5 +311,31 @@ public class ProjectServiceImpl implements ProjectService {
             projectAllowThisTypeOfAudit = project.isAllowUploadAudit();
         }
         return projectAllowThisTypeOfAudit;
+    }
+
+    /**
+     * Generate a new Api key. The key is store with the user and the project.
+     * This key can authenticate the user and return the corresponding project.
+     * @param user
+     * @param project
+     * @return api key
+     */
+    @Override
+    public String generateApiKey(User user, Project project) {
+        String apiKeyValue = "";
+        if(user != null && project != null) {
+            apiKeyValue = RandomStringUtils.random(20, true, true);
+            Optional<ApiKey> oldApiKey = this.apiKeyRepository.findByUserAndProject(user, project);
+            if(oldApiKey.isPresent()) {
+                oldApiKey.get().setKey(apiKeyValue);
+                this.apiKeyRepository.save(oldApiKey.get());
+            }else {
+                ApiKey apiKey = new ApiKey(user, project, apiKeyValue);
+                this.apiKeyRepository.save(apiKey);
+            }
+        }else {
+            throw new CustomEntityNotFoundException(CustomError.CANNOT_GENERATE_API_KEY);
+        }
+        return apiKeyValue;
     }
 }

@@ -48,4 +48,16 @@ public class AuthenticationController {
         String token = jwtTokenUtil.generateToken(userDetails);
         return new JwtResponse(token);
     }
+    
+    /**
+     * Authenticate user by api key and return jwt token
+     * @param apiKey
+     * @return jwt token
+     */
+    @PostMapping(value = "/api-key/{apiKey}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public JwtResponse createAuthentTokenForApiKey(@PathVariable String apiKey) {
+        UserDetails userDetails = tanaguruUserDetailsService.loadUserByApiKey(apiKey);
+        String token = jwtTokenUtil.generateToken(userDetails);
+        return new JwtResponse(token);
+    }
 }
