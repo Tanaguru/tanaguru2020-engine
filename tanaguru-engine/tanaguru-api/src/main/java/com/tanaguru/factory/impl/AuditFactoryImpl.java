@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,7 +46,9 @@ public class AuditFactoryImpl implements AuditFactory {
             AuditRepository auditRepository,
             AuditParameterService auditParameterService,
             AuditAuditParameterValueRepository auditAuditParameterValueRepository,
-            AuditService auditService, AuditReferenceRepository auditReferenceRepository, ActRepository actRepository) {
+            AuditService auditService, 
+            AuditReferenceRepository auditReferenceRepository, 
+            ActRepository actRepository) {
         this.auditRepository = auditRepository;
         this.auditParameterService = auditParameterService;
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
@@ -108,15 +112,28 @@ public class AuditFactoryImpl implements AuditFactory {
 
     public Audit createFromAudit(Audit from){
         Audit audit = new Audit();
-        audit.setName(from.getName() + " - " + new Date().toString());
+        String distinctName = from.getName().substring(0, from.getName().length()-17);
+        distinctName = distinctName + " - "+  new SimpleDateFormat("dd-MM-yyyy HH:mm").format(new Date());
+        audit.setName(distinctName);
         audit.setType(from.getType());
         audit.setPrivate(from.isPrivate());
+        audit.setShareCode(String.valueOf(new Date().hashCode()));
         audit = auditRepository.save(audit);
 
+        Collection<AuditReference> auditReferencesCopy = new ArrayList<>();
+        for (AuditReference auditRef : this.auditReferenceRepository.findAllByAudit(from)) {
+            AuditReference auditReferenceCopy = new AuditReference();
+            auditReferenceCopy.setAudit(audit);
+            auditReferenceCopy.setTestHierarchy(auditRef.getTestHierarchy());
+            auditReferenceCopy.setMain(auditRef.isMain());
+            auditReferencesCopy.add(auditReferenceRepository.save(auditReferenceCopy));
+        }
+        audit.setAuditReferences(auditReferencesCopy);
+        
         Collection<AuditAuditParameterValue> auditAuditParameterValues = new ArrayList<>();
-        for(AuditAuditParameterValue auditAuditParameterValueFrom : from.getParameters()){
+        for(AuditAuditParameterValue auditAuditParameterValueFrom : this.auditAuditParameterValueRepository.findAllByAudit(from)){
             AuditAuditParameterValue auditAuditParameterValue = new AuditAuditParameterValue();
-            auditAuditParameterValue.setAudit(from);
+            auditAuditParameterValue.setAudit(audit);
             auditAuditParameterValue.setAuditParameterValue(auditAuditParameterValueFrom.getAuditParameterValue());
             auditAuditParameterValues.add(auditAuditParameterValueRepository.save(auditAuditParameterValue));
         }

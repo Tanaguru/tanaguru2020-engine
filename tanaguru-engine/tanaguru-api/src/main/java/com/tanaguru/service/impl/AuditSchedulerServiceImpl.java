@@ -71,10 +71,14 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
         AuditScheduler auditScheduler = new AuditScheduler();
         auditScheduler.setAudit(audit);
         auditScheduler.setScheduler(timer);
+        auditScheduler.setLastExecution(new Date());
+        
+        auditSchedulerRepository.save(auditScheduler);
         synchronized (schedulersMap) {
             schedulersMap.put(auditScheduler.getId(), auditScheduler);
         }
-        return auditSchedulerRepository.save(auditScheduler);
+        
+        return auditScheduler;
     }
 
     public AuditScheduler modifyAuditScheduler(AuditScheduler auditScheduler, int timer, Date lastExecution){

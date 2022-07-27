@@ -51,7 +51,9 @@ public class AuditSchedulerLauncherServiceImpl implements AuditSchedulerLauncher
         synchronized (auditSchedulerService.getSchedulersMap()){
 
             for(AuditScheduler auditScheduler : auditSchedulerService.getSchedulersMap().values()){
-                calendar.setTime(auditScheduler.getLastExecution());
+                if(auditScheduler.getLastExecution() != null) {
+                    calendar.setTime(auditScheduler.getLastExecution());
+                }
                 calendar.add(Calendar.SECOND, auditScheduler.getScheduler());
 
                 if(now.after(calendar.getTime())){
