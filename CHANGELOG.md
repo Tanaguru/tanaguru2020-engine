@@ -42,3 +42,6 @@
 - Fix endpoint : source code value added to the result test
 - Demo project with specific domain : only one site audit allowed
 - Users with Free account type : expired after 1 month, audits pages (and results) deleted
+- Fix script timeout on some pages
+- Add API key for wordpress plugin
+- Fix scheduled audits
