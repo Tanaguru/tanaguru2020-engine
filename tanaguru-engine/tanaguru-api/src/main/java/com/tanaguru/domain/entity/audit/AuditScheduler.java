@@ -25,7 +25,7 @@ public class AuditScheduler {
     private Audit audit;
 
     @Column
-    @Min(86400)
+    @Min(900)
     private int scheduler;
 
     @Column
