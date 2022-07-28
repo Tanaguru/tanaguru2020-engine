@@ -81,23 +81,37 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
     private Runner getRunner() {
         Runner runner = new Runner();
         CommandFactory cf = runner.getCommandFactory();
-        cf.registerCommandFactory((index, name, args) -> {
-            ICommand res;
-            switch (name) {
-                case "click":
-                    res = new SeleneseClick(this, index, name, args);
-                    break;
-                case "store":
-                    res = new SeleneseAudit(this, index, name, args);
-                    break;
-                case "open":
-                    res = new SeleneseOpen(this, index, name, args);
-                    break;
-                default:
-                    res = null;
-            }
-            return res;
-        });
+        if(scenarioContainsStoreCommand()) {
+            cf.registerCommandFactory((index, name, args) -> {
+                ICommand res;
+                switch (name) {
+                    case "store":
+                        res = new SeleneseAudit(this, index, name, args);
+                        break;
+                    default:
+                        res = null;
+                }
+                return res;
+            });
+        }else {
+            cf.registerCommandFactory((index, name, args) -> {
+                ICommand res;
+                switch (name) {
+                    case "click":
+                        res = new SeleneseClick(this, index, name, args);
+                        break;
+                    case "store":
+                        res = new SeleneseAudit(this, index, name, args);
+                        break;
+                    case "open":
+                        res = new SeleneseOpen(this, index, name, args);
+                        break;
+                    default:
+                        res = null;
+                }
+                return res;
+            });
+        }
         runner.setDriver(getTanaguruDriver());
         return runner;
     }
@@ -109,5 +123,8 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
         return selenese;
     }
 
+    private boolean scenarioContainsStoreCommand() {
+        return scenario.contains("\"command\": \"store\"");
+    }
 }
 
