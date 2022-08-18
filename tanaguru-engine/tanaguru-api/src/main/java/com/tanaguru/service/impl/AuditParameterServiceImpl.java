@@ -230,7 +230,7 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                     if (urls.length > 0) {
                         result = Arrays.stream(urls).allMatch((url) -> {
                             boolean match = UrlHelper.isValid(url);
-                            if (project != null && !project.getContract().isRestrictDomain() && project.getDomain() != null && !project.getDomain().isEmpty()) {
+                            if (project != null && project.getContract().isRestrictDomain() && project.getDomain() != null && !project.getDomain().isEmpty()) {
                                 WebURL sourceDomain = new WebURL();
                                 sourceDomain.setURL(project.getDomain());
                                 WebURL target = new WebURL();
