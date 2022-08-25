@@ -7,9 +7,11 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.TestHierarchyResult;
+import com.tanaguru.domain.entity.pageresult.TestResult;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.repository.*;
+import com.tanaguru.service.ExportCsvService;
 import com.tanaguru.service.TanaguruUserDetailsService;
 import com.tanaguru.service.TestHierarchyResultService;
 import io.swagger.annotations.ApiOperation;
@@ -21,11 +23,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author rcharre
@@ -40,6 +46,7 @@ public class TestHierarchyResultController {
     private final AuditRepository auditRepository;
     private final AuditReferenceRepository auditReferenceRepository;
     private final TestHierarchyResultService testHierarchyResultService;
+    private final ExportCsvService exportCsvService;
 
     @Autowired
     public TestHierarchyResultController(
@@ -49,7 +56,8 @@ public class TestHierarchyResultController {
             PageRepository pageRepository,
             AuditRepository auditRepository,
             AuditReferenceRepository auditReferenceRepository,
-            TestHierarchyResultService testHierarchyResultService) {
+            TestHierarchyResultService testHierarchyResultService,
+            ExportCsvService exportCsvService) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.testHierarchyResultRepository = testHierarchyResultRepository;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
@@ -57,6 +65,7 @@ public class TestHierarchyResultController {
         this.auditRepository = auditRepository;
         this.auditReferenceRepository = auditReferenceRepository;
         this.testHierarchyResultService = testHierarchyResultService;
+        this.exportCsvService = exportCsvService;
     }
 
     /**
@@ -380,5 +389,43 @@ public class TestHierarchyResultController {
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
         
         return testHierarchyResultService.getTestStatusByAuditAndTestHierarchy(audit, testHierarchy);
+    }
+    
+    @ApiOperation(
+            value = "Export to csv file the synthesis of the audit results",
+            notes = "User must have SHOW_AUDIT authority on project or a valid sharecode"
+                    + "\nIf audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
+                    + "\nIf cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session or invalid sharecode"),
+            @ApiResponse(code = 404, message = "Audit not found : AUDIT_NOT_FOUND error"
+                    + "\nCannot show audit : CANNOT_SHOW_AUDIT error"
+                    + "\nTest hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
+    })
+    @GetMapping("/csv-export/{auditId}/{referenceId}/{sharecode}")
+    public void getCsvSynthesisByAuditAndTestHierarchy(
+            @PathVariable long auditId,
+            @PathVariable long referenceId,
+            @ApiParam(required = false) @PathVariable(required = false) String sharecode,
+            HttpServletResponse servletResponse) throws IOException {
+        Audit audit = auditRepository.findById(auditId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, auditId ));
+        
+        if(!tanaguruUserDetailsService.currentUserCanShowAudit(audit, sharecode)){
+            throw new CustomForbiddenException(CustomError.CANNOT_SHOW_AUDIT, audit.getId() );
+        }
+
+        TestHierarchy testHierarchy = testHierarchyRepository.findById(referenceId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, referenceId ));
+
+        AuditSynthesisDTO auditSynthesis = testHierarchyResultService.getAuditSynthesisForTestHierarchy(audit, testHierarchy, PageRequest.of(0, audit.getPages().size(), Sort.by(Sort.Direction.ASC, "id")));
+
+        servletResponse.setContentType("text/csv");
+        servletResponse.addHeader("Content-Disposition","attachment; filename=\""+audit.getName()+".csv\"");
+        servletResponse.setCharacterEncoding("UTF-8");
+        this.exportCsvService.writeAuditResultsToCsv(servletResponse.getWriter(), audit, testHierarchy, auditSynthesis);
     }
 }
