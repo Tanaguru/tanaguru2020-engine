@@ -28,7 +28,8 @@ public class AuditRunnerFile extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String accessibilityScript) {
         super(
                 audit,
                 driver,
@@ -38,7 +39,8 @@ public class AuditRunnerFile extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
         this.fileContent = fileContent;
     }
 

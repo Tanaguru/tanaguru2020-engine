@@ -24,8 +24,9 @@ public class AuditRunnerPage extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
-        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
+            boolean enableScreenShot,
+            String accessibilityScript) {
+        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot, accessibilityScript);
         this.urls = urls;
     }
 

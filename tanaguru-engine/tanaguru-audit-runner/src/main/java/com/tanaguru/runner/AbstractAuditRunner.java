@@ -3,7 +3,9 @@ package com.tanaguru.runner;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.tanaguru.domain.constant.EAuditLogLevel;
+import com.tanaguru.domain.constant.EAuditParameter;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.parameter.AuditParameterValue;
 import com.tanaguru.helper.ImageHelper;
 import com.tanaguru.runner.listener.AuditRunnerListener;
 import com.tanaguru.webextresult.WebextPageResult;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Map;
 
 public abstract class AbstractAuditRunner implements AuditRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuditRunner.class);
@@ -40,6 +43,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     private final Gson gson = new Gson();
     private final long waitTime;
     private final String coreScript;
+    
+    private final String accessibilityScript;
 
     private boolean stop = false;
     private int currentRank = 1;
@@ -53,7 +58,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String accessibilityScript) {
         this.audit = audit;
         this.tanaguruDriver = driver;
         this.waitTime = waitTime;
@@ -63,6 +69,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         this.basicAuthPassword = basicAuthPassword;
         this.enableScreenShot = enableScreenShot;
         this.coreScript = coreScript;
+        this.accessibilityScript = accessibilityScript;
     }
 
     public WebDriver getTanaguruDriver() {
@@ -163,6 +170,21 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
 
             try {
+                Map<EAuditParameter, AuditParameterValue> parameters = this.audit.getParametersAsMap();
+                AuditParameterValue accessibilityPageParam  = parameters.get(EAuditParameter.ACCESSIBILITY_PAGE_URL);
+                boolean isAccessibilityPage = false;
+                if(accessibilityPageParam != null) {
+                    if(url.equals(accessibilityPageParam.getValue())) {
+                        isAccessibilityPage = true;
+
+                    }
+                }
+                if( url.contains("/accessibilite/") || isAccessibilityPage ) {
+                    System.out.println("Script special à executer : " + accessibilityScript);
+                    String scriptResult = (String) tanaguruDriver.executeScript(accessibilityScript);
+                    System.out.println("Résultat du script : "+scriptResult);
+                }
+                
                 String result = (String) tanaguruDriver.executeScript(coreScript);
                 String source = tanaguruDriver.getPageSource();
                 for (AuditRunnerListener tanaguruDriverListener : listeners) {

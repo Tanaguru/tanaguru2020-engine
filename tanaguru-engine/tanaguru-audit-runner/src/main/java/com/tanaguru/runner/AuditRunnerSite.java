@@ -25,8 +25,9 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
-        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot);
+            boolean enableScreenShot,
+            String accessibilityScript) {
+        super(audit, driver, coreScript, waitTime, resolutions, basicAuthUrl, basicAuthLogin, basicAuthPassword, enableScreenShot, accessibilityScript);
         this.crawlerController = crawlerController;
     }
 

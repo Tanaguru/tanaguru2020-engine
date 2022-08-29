@@ -22,5 +22,7 @@ public enum EAuditParameter {
     CRAWLER_INCLUSION_REGEX,
 
     WEBDRIVER_RESOLUTIONS,
-    WEBDRIVER_BROWSER;
+    WEBDRIVER_BROWSER,
+    
+    ACCESSIBILITY_PAGE_URL  //param page lancement audit avec l'url de la page accesibilité par exemple
 }

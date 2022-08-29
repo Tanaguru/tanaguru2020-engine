@@ -1,0 +1,1 @@
+return "L'url de la page est : " + window.location.href;

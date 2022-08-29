@@ -37,7 +37,8 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
             String basicAuthUrl,
             String basicAuthLogin,
             String basicAuthPassword,
-            boolean enableScreenShot) {
+            boolean enableScreenShot,
+            String accessibilityScript) {
         super(audit,
                 driver,
                 coreScript,
@@ -46,7 +47,8 @@ public class AuditRunnerSelenese extends AbstractAuditRunner {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
         this.scenario = scenario;
     }
 

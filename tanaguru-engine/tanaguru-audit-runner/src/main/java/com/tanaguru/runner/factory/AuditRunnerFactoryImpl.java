@@ -43,6 +43,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
     private final ScriptFactory scriptFactory;
 
     private final String coreScript;
+    private final String accessibilityScript;  //chargement du script dans le constructeur avec @Autowired qui detecte le nom du bean associé
     private static final String CHROME = "chrome";
     private static final String FIREFOX = "firefox";
 
@@ -53,7 +54,11 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
             AuditService auditService,
             ScenarioRepository scenarioRepository,
             ResourceRepository resourceRepository,
-            TanaguruTestRepository tanaguruTestRepository, AuditReferenceRepository auditReferenceRepository, ScriptFactory scriptFactory, String coreScript) {
+            TanaguruTestRepository tanaguruTestRepository, 
+            AuditReferenceRepository auditReferenceRepository, 
+            ScriptFactory scriptFactory, 
+            String coreScript,
+            String accessibilityScript) {
 
         this.tanaguruDriverFactory = tanaguruDriverFactory;
         this.tanaguruCrawlerControllerFactory = tanaguruCrawlerControllerFactory;
@@ -64,6 +69,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
         this.auditReferenceRepository = auditReferenceRepository;
         this.scriptFactory = scriptFactory;
         this.coreScript = coreScript;
+        this.accessibilityScript = accessibilityScript;
     }
 
     @Override
@@ -206,7 +212,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
     }
 
     public AuditRunner createSeleneseRunner(
@@ -231,7 +238,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
     }
 
     public AuditRunner createSiteRunner(
@@ -269,7 +277,8 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
     }
 
     public AuditRunner createFileRunner(
@@ -294,6 +303,7 @@ public class AuditRunnerFactoryImpl implements AuditRunnerFactory {
                 basicAuthUrl,
                 basicAuthLogin,
                 basicAuthPassword,
-                enableScreenShot);
+                enableScreenShot,
+                accessibilityScript);
     }
 }
