@@ -3839,10 +3839,10 @@ function getDuplicateID() {
     var ids = [];
     var query = null;
     nodelist.forEach(node => {
-        if (node.id.trim().length > 0) {
-            if(ids[node.id] && ids[node.id] < 2) {
+        if (node.getAttribute('id').trim().length > 0) {
+            if(ids[node.getAttribute('id')] && ids[node.getAttribute('id')] < 2) {
                 var startDigit = /^\d/;
-                var id = node.id;
+                var id = node.getAttribute('id');
 
                 if(id.match(startDigit)) {
                     id = '\\3'+id.substring(0, 1)+' '+id.substring(1, id.length).replace(/[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g, "\\$&");
@@ -3854,11 +3854,11 @@ function getDuplicateID() {
                 query += '[id='+id+'],'
             }
 
-            if (!ids[node.id]) {
-                ids[node.id] = 0;
+            if (!ids[node.getAttribute('id')]) {
+                ids[node.getAttribute('id')] = 0;
             }
 
-            ids[node.id]++;
+            ids[node.getAttribute('id')]++;
         }
     });
 
@@ -3871,7 +3871,7 @@ function getDuplicateID() {
  */
  function getHeadingsMap() {
     initTanaguru();
-    var collection = document.body.querySelectorAll('h1[data-tng-el-exposed="true"]:not([role]), h2[data-tng-el-exposed="true"]:not([role]), h3[data-tng-el-exposed="true"]:not([role]), h4[data-tng-el-exposed="true"]:not([role]), h5[data-tng-el-exposed="true"]:not([role]), h6[data-tng-el-exposed="true"]:not([role]), [role="heading"][data-tng-el-exposed="true"][aria-level]');
+    var collection = document.querySelectorAll('h1[data-tng-el-exposed="true"]:not([role]), h2[data-tng-el-exposed="true"]:not([role]), h3[data-tng-el-exposed="true"]:not([role]), h4[data-tng-el-exposed="true"]:not([role]), h5[data-tng-el-exposed="true"]:not([role]), h6[data-tng-el-exposed="true"]:not([role]), [role="heading"][data-tng-el-exposed="true"][aria-level]');
     collection = Array.from(collection).sort((a,b) => {
         return a.getAttribute('data-tng-pos') - b.getAttribute('data-tng-pos');
     });
@@ -4203,7 +4203,7 @@ function getXPath(element) {
         }
     }
 
-    return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') && !element.id.includes('/') ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') && !element.getAttribute('class').includes('/') ? '[@class="' + element.getAttribute('class') + '"]' : '');
+    return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') && !element.getAttribute('id').match(/[\/\[\]]/g) ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') && !element.getAttribute('class').match(/[\/\[\]]/g) ? '[@class="' + element.getAttribute('class') + '"]' : '');
 }
 
 function initTanaguru() {
@@ -4743,8 +4743,6 @@ if (!HTMLElement.prototype.hasOwnProperty('canBeReachedUsingKeyboardWith')) Obje
  */
 if (!('isString1MatchString2' in HTMLElement.prototype)) HTMLElement.prototype.isString1MatchString2 = isString1MatchString2;
 if (!('isString1MatchString2' in SVGElement.prototype)) SVGElement.prototype.isString1MatchString2 = isString1MatchString2;
-
-
 var statuses = ['failed', 'cantTell', 'passed'];
 var interactiveRoles = ["button", "checkbox", "combobox", "link", "listbox", "menuitem", "menuitemcheckbox", "menuitemradio", "option", "radio", "searchbox", "slider", "spinbutton", "switch", "tab", "textbox"];
 // var DOM_archi;
@@ -4883,186 +4881,11 @@ function addDataTng() {
 }
 
 /**
- * ? Check if page has images, frames, media, tables, links & form fields
- */
-function isNACat(currentCat) {
-    if(currentCat === 'images') {
-        return !document.body.querySelector('img, [role="img"], area, input[type="image"], svg, object[type^="image/"], embed[type^="image/"], canvas');
-    }
-
-    if(currentCat === 'frames') {
-        return !document.body.querySelector('iframe:not([role="presentation"]), frame:not([role="presentation"])');
-    }
-
-    if(currentCat === 'media') {
-        return !document.body.querySelector('video, audio, object[type^="video/"], object[type^="audio/"], object[type="application/ogg"], embed[type^="video/"], embed[type^="audio/"]');
-    }
-
-    if(currentCat === 'tables') {
-        return !document.body.querySelector('table, [role="table]');
-    }
-
-    if(currentCat === 'links') {
-        return !document.body.querySelector('a[href], [role="link"]');
-    }
-
-    if(currentCat === 'forms') {
-        return !document.body.querySelector('form, [role="form"], input[type="text"]:not([role]), input[type="password"]:not([role]), input[type="search"]:not([role]), input[type="email"]:not([role]), input[type="number"]:not([role]), input[type="tel"]:not([role]), input[type="url"]:not([role]), textarea:not([role]), input[type="checkbox"]:not([role]), input[type="radio"]:not([role]), input[type="date"]:not([role]), input[type="range"]:not([role]), input[type="color"]:not([role]), input[type="time"]:not([role]), input[type="month"]:not([role]), input[type="week"]:not([role]), input[type="datetime-local"]:not([role]), select:not([role]), datalist:not([role]), input[type="file"]:not([role]), progress:not([role]), meter:not([role]), input:not([type]):not([role]), [role="progressbar"], [role="slider"], [role="spinbutton"], [role="textbox"], [role="listbox"], [role="searchbox"], [role="combobox"], [role="option"], [role="checkbox"], [role="radio"], [role="switch"], [contenteditable="true"]:not([role])');
-    }
-
-    return false;
-}
-
-/**
- * ? Filters the tests by the user's chosen status
- */
-function filterAllTestsByStatus() {
-    filterTestsByStatus(statusUser);
-}
-
-/**
  * ? remove all [data-tng-*]
  */
 function removeAllDataTNG() {
-        removeDataTNG(document.querySelector('html'));
-        document.querySelectorAll('*').forEach(e => removeDataTNG(e));
-};
-
-/**
- * ? filter tests list according user choices
- */
-function filterCat() {
-    /**
-     * ? Filters tests according current category request , before launching tests
-     */
-    if(cat.length > 0) {
-        function matchFilters(test) {
-            return test.tags && test.tags.includes(cat);
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchFilters);
-    }
-}
-
-function filterStatus() {
-    if(statusUser.length === 0) {
-        tanaguruTestsList = [];
-        return;
-    }
-
-    if(isNACat(cat)) {
-        tanaguruTestsList = tanaguruTestsList.map(function(test) {
-            test.status = "inapplicable";
-            test.na = cat;
-            return test;
-        });
-    }
-
-    if(!statusUser.match('untested')) {
-        function matchUntested(test) {
-            if(test.status && test.status === 'untested') {
-                return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchUntested);
-    }
-
-    if(!statusUser.match('inapplicable')) {
-        function matchInapplicable(test) {
-            if((test.status && test.status === 'inapplicable') || (test.testStatus && test.testStatus === 'inapplicable')) {
-                if(test.depStatus) {
-                    let dep = false;
-                    test.depStatus.forEach(e => {
-                        if(statusUser.match(e)) dep = true;
-                    });
-
-                    return dep;
-                } else return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchInapplicable);
-    }
-
-    if(!statusUser.match('cantTell')) {
-        function matchCantTell(test) {
-            if(test.testStatus && test.testStatus === 'cantTell') {
-                if(test.depStatus) {
-                    let dep = false;
-                    test.depStatus.forEach(e => {
-                        if(statusUser.match(e)) dep = true;
-                    });
-
-                    return dep;
-                } else return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchCantTell);
-    }
-
-    if(!statusUser.match('failed')) {
-        function matchFailed(test) {
-            if(test.testStatus && test.testStatus === 'failed') {
-                if(test.depStatus) {
-                    let dep = false;
-                    test.depStatus.forEach(e => {
-                        if(statusUser.match(e)) dep = true;
-                    });
-
-                    return dep;
-                } else return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchFailed);
-    }
-
-    if(!statusUser.match('passed')) {
-        function matchPassed(test) {
-            if(test.testStatus && test.testStatus === 'passed') {
-                if(test.depStatus) {
-                    let dep = false;
-                    test.depStatus.forEach(e => {
-                        if(statusUser.match(e)) dep = true;
-                    });
-
-                    return dep;
-                } else return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchPassed);
-    }
-
-    if(!statusUser.match('passed') && !statusUser.match('failed')) {
-        function matchPassedFailed(test) {
-            if(test.expectedNbElements) {
-                if(test.depStatus) {
-                    test.depStatus.forEach(e => {
-                        if(statusUser.match(e)) return true;
-                    });
-                }
-
-                return false;
-            } else {
-                return true;
-            }
-        }
-        
-        tanaguruTestsList = tanaguruTestsList.filter(matchPassedFailed);
-    }
+    removeDataTNG(document.querySelector('html'));
+    document.querySelectorAll('*').forEach(e => removeDataTNG(e));
 }
 
 /**
@@ -5237,11 +5060,7 @@ function getIntersectionPoint(a, b, c, d) {
     return arr;
 }
 
-
 if(document.querySelector('[sdata-tng-hindex]')) cleanSDATA();
-
-// localStorage.setItem("DOM", JSON.stringify(getElementProperties(document.documentElement, 1, null, null)));
-// DOM_archi = JSON.parse(localStorage.getItem("DOM"));
 
 getElementProperties(document.documentElement, 1, null, null);
 
