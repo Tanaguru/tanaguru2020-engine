@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -230,55 +227,23 @@ public abstract class AbstractAuditRunner implements AuditRunner {
         stop = true;
     }
 
-    /**
-     * Check if the connection to url is valid with status code 200
-     * @param urlToCheck
-     * @return true if connection is valid
-     */
-    private boolean isStatus200(String urlToCheck) {
-        boolean status = false;
-        int code = -1;
-        try {
-            URL url = new URL(urlToCheck);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
-            code = connection.getResponseCode();
-
-        } catch (IOException e) {
-            LOGGER.debug("Error status code for url {}", urlToCheck);
-        }
-        if(code == 200) {
-            status = true;
-        }
-        return status;
-    }
-    
     public void webDriverGet(String url) {
-        if(isStatus200(url)) {
-            try {
-                tanaguruDriver.get(url);
-            } catch (TimeoutException e) {
-                LOGGER.debug("Webdriver timeout for url {}", url);
-                auditLog(EAuditLogLevel.WARNING, "Webdriver automatic wait time timed out when loading page " + url + ". This is not an error, it just means that the browser does not have the time to load the page with your current configuration. If you see this WARNING more often you should probably increase the wait time in your server configuration and check how long your website takes to load on a fresh installed browser.");
-            }
-                
-            try {
-                LOGGER.debug("Custom wait time {}", waitTime);
-                auditLog(EAuditLogLevel.INFO, "Custom wait time " + waitTime);
-                Thread.sleep(waitTime);
-                onGetNewPage(url, tanaguruDriver.getTitle(), false);
-                    
-            } catch (InterruptedException e) {
-                LOGGER.debug("Waiting time interrupted for url {}", url);
-                auditLog(EAuditLogLevel.ERROR, "Thread interrupted while waiting content to load");
-            }
-                
-        }else {
-            LOGGER.info("Error status code for url {}", url);
-            auditLog(EAuditLogLevel.ERROR, "Error status code for url " + url);
+        try {
+            tanaguruDriver.get(url);
+        } catch (TimeoutException e) {
+            LOGGER.debug("Webdriver timeout for url {}", url);
+            auditLog(EAuditLogLevel.WARNING, "Webdriver automatic wait time timed out when loading page " + url + ". This is not an error, it just means that the browser does not have the time to load the page with your current configuration. If you see this WARNING more often you should probably increase the wait time in your server configuration and check how long your website takes to load on a fresh installed browser.");
         }
-         
+
+        try {
+            LOGGER.debug("Custom wait time {}", waitTime);
+            auditLog(EAuditLogLevel.INFO, "Custom wait time " + waitTime);
+            Thread.sleep(waitTime);
+            onGetNewPage(url, tanaguruDriver.getTitle(), false);
+        } catch (InterruptedException e) {
+            LOGGER.debug("Waiting time interrupted for url {}", url);
+            auditLog(EAuditLogLevel.ERROR, "Thread interrupted while waiting content to load");
+        }
     }
 
     protected void auditLog(EAuditLogLevel logLevel, String message) {
