@@ -231,12 +231,12 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     }
 
     /**
-     * Check if the connection to url is valid with status code 200
+     * Check if the connection to url is valid
      * @param urlToCheck
      * @return true if connection is valid
      */
-    private boolean isStatus200(String urlToCheck) {
-        boolean status = false;
+    private boolean checkConnection(String urlToCheck) {
+        boolean connect= false;
         int code = -1;
         try {
             URL url = new URL(urlToCheck);
@@ -244,18 +244,17 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             connection.setRequestMethod("GET");
             connection.connect();
             code = connection.getResponseCode();
-
         } catch (IOException e) {
-            LOGGER.debug("Error status code for url {}", urlToCheck);
+            LOGGER.debug("Error connection to url {}", urlToCheck);
         }
-        if(code == 200) {
-            status = true;
+        if(code != -1) {
+            connect = true;
         }
-        return status;
+        return connect;
     }
     
     public void webDriverGet(String url) {
-        if(isStatus200(url)) {
+        if(checkConnection(url)) {
             try {
                 tanaguruDriver.get(url);
             } catch (TimeoutException e) {
@@ -275,8 +274,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
                 
         }else {
-            LOGGER.info("Error status code for url {}", url);
-            auditLog(EAuditLogLevel.ERROR, "Error status code for url " + url);
+            LOGGER.info("Error connection to url {}", url);
+            auditLog(EAuditLogLevel.ERROR, "Error connection to url " + url);
         }
          
     }
