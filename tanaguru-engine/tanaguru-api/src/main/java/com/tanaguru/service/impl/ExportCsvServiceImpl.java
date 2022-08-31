@@ -25,6 +25,7 @@ import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.repository.TestHierarchyResultRepository;
 import com.tanaguru.service.ExportCsvService;
+import com.tanaguru.service.TestHierarchyResultService;
 
 @Service
 public class ExportCsvServiceImpl implements ExportCsvService{
@@ -32,12 +33,15 @@ public class ExportCsvServiceImpl implements ExportCsvService{
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportCsvServiceImpl.class);
     private final TestHierarchyRepository testHierarchyRepository;
     private final TestHierarchyResultRepository testHierarchyResultRepository;
+    private final TestHierarchyResultService testHierarchyResultService;
     
     @Autowired
     public ExportCsvServiceImpl(TestHierarchyRepository testHierarchyRepository,
-            TestHierarchyResultRepository testHierarchyResultRepository) {
+            TestHierarchyResultRepository testHierarchyResultRepository,
+            TestHierarchyResultService testHierarchyResultService) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.testHierarchyResultRepository = testHierarchyResultRepository;
+        this.testHierarchyResultService = testHierarchyResultService;
     }
 
     /**
@@ -51,6 +55,9 @@ public class ExportCsvServiceImpl implements ExportCsvService{
     public void writeAuditResultsToCsv(Writer writer, Audit audit, TestHierarchy testHierarchyReference,
             AuditSynthesisDTO auditSynthesis) {
         
+        //resultat des tests sur l'ensemble des pages
+        Map<String,String> testsStatusAllPages = testHierarchyResultService.getTestStatusByAuditAndTestHierarchy(audit, testHierarchyReference);
+        
         String[] headers = { "test", "intitule", "nom page", "url", "statut", "details"};
         Collection<Page> pages = audit.getPages();
         Map<String, Map<Long, TestHierarchyResultDTO>> content = auditSynthesis.getContent();
@@ -58,6 +65,7 @@ public class ExportCsvServiceImpl implements ExportCsvService{
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.TDF.withHeader(headers))) { //TDF Format = separator TAB
             for(String testHierarchyCode : content.keySet()) {
                 Optional<TestHierarchy> th = this.testHierarchyRepository.findByCodeAndReference(testHierarchyCode, testHierarchyReference);
+                csvPrinter.printRecord(testHierarchyCode, th.get().getName(), "Ensemble des pages", "", this.getFrenchStatusName(testsStatusAllPages.get(testHierarchyCode)) ,"");
                 for(Long pageId : content.get(testHierarchyCode).keySet()) {
                     TestHierarchyResultDTO thrDTO = content.get(testHierarchyCode).get(pageId);
                     Page page = this.getPageWithId(pages, pageId);
