@@ -45,3 +45,5 @@
 - Fix script timeout on some pages
 - Add API key for wordpress plugin
 - Fix scheduled audits
+- Csv export of audit synthesis
+- Scenario audit : store command to keep only certain pages
