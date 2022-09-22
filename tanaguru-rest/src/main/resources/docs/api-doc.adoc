@@ -2999,6 +2999,7 @@ __required__|projectDto|<<_projectdto,ProjectDTO>>
 |**401**|Unauthorized : ACCESS_DENIED message|No Content
 |**403**|Forbidden for current session|No Content
 |**404**|Contract not found : CONTRACT_NOT_FOUND error
+
 Invalid domain : INVALID_DOMAIN error|No Content
 |===
 

@@ -3,6 +3,8 @@
 Tanaguru is an opensource (AGPL license) website assessment tool. It is dedicated to accessibility (a11y) audits, and
 focuses on reliability and high level of automation.
 
+To start the installation : [Installation guide](https://github.com/Tanaguru/tanaguru2020-engine/wiki/Installation-Guide)
+
 ## Features
 
 Four kinds of audit:
