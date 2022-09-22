@@ -17,6 +17,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "MAIL_PORT=" + props['MAIL_PORT'] + "\n" +
              "MAIL_USERNAME=" + props['MAIL_USERNAME'] + "\n" +
              "MAIL_PASSWORD=" + props['MAIL_PASSWORD'] + "\n" +
+             "MAIL_TTLS_ENABLED=false\n" +
+             "MAIL_SMTP_AUTH=false\n" +
              "CRYPTO_KEY=" + props['CRYPTO_KEY'] + "\n" +
              "PASSWORD_TOKEN_VALIDITY=" + props['PASSWORD_TOKEN_VALIDITY'] + "\n" +
              "AUDITRUNNER_PROXY_EXCLUSION_URLS=" + props['AUDITRUNNER_PROXY_EXCLUSION_URLS'] + "\n" +
@@ -33,7 +35,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "WEBAPP_URL=" + props['WEBAPP_URL'] + "\n" +
              "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
              "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER'] + "\n" +
-             "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY']
+             "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY'] + "\n" +
+             "SPRING_PROFILE_ACTIVE=" + props['SPRING_PROFILE_ACTIVE']
     }
 }
 
@@ -68,7 +71,7 @@ pipeline {
                 }
             }
             steps {
-                git(url: "https://github.com/Tanaguru/tanaguru2020-docker", branch: "master", credentialsId: "github-rcharre")
+                git(url: "https://github.com/Tanaguru/tanaguru2020-docker", branch: "master", credentialsId: "f310470a-0f9a-44d3-8738-0b57bfa91fa6")
                 unstash 'tanaguru2020-rest'
                 unstash 'version'
                 sh '''
@@ -76,8 +79,8 @@ pipeline {
                 mv tanaguru-rest/target/tanaguru2020-rest-*.tar.gz ./tanaguru2020-rest/image/tanaguru2020-rest-${REST_VERSION}.tar.gz
                 docker build -t tanaguru2020-rest:${REST_VERSION} \
                     --build-arg TANAGURU_REST_ARCHIVE_PATH=tanaguru2020-rest-${REST_VERSION}.tar.gz \
-                    --build-arg FIREFOX_VERSION=83.0 \
-                    --build-arg GECKODRIVER_VERSION=0.21.0 \
+                    --build-arg FIREFOX_VERSION=93.0 \
+                    --build-arg GECKODRIVER_VERSION=0.29.1 \
                     ./tanaguru2020-rest/image/
                 '''
             }
@@ -127,9 +130,10 @@ pipeline {
                 script{
                     unstash 'version'
                     def devDockerEnv = createDockerEnvFileContent('647f5360-4c98-456b-aa1f-0d2a3ea62f43');
-                    sh "echo $devDockerEnv > .env"
+                    writeFile file: "./.env", text: devDockerEnv
                     sh '''
                     REST_VERSION=$(cat version.txt)
+                    cat ./.env
 
                     docker stop tanaguru2020-rest-prod || true
                     docker image prune -f
@@ -141,7 +145,7 @@ pipeline {
                         --label "traefik.enable=true" \
                         --label "traefik.frontend.redirect.entryPoint=secure" \
                         --label "traefik.http.routers.tanaguru-rest-prod.entrypoints=secure" \
-                        --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(`prodapi.tanaguru.com`)" \
+                        --label "traefik.http.routers.tanaguru-rest-prod.rule=Host(\\`prodapi.tanaguru.com\\`)" \
                         --label "traefik.http.routers.tanaguru-rest-prod.tls=true" \
                         --label "traefik.port=9002" \
                         --network=web \

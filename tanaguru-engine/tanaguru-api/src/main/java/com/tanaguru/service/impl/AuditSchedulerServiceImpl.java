@@ -28,7 +28,7 @@ import java.util.Optional;
 @Transactional
 public class AuditSchedulerServiceImpl implements AuditSchedulerService {
     private final Logger LOGGER = LoggerFactory.getLogger(AuditSchedulerServiceImpl.class);
-    public final int MIN_TIMER = 86400;
+    public final int MIN_TIMER = 900; //15min
 
     private final AuditSchedulerRepository auditSchedulerRepository;
     private final ActRepository actRepository;
@@ -71,10 +71,14 @@ public class AuditSchedulerServiceImpl implements AuditSchedulerService {
         AuditScheduler auditScheduler = new AuditScheduler();
         auditScheduler.setAudit(audit);
         auditScheduler.setScheduler(timer);
+        auditScheduler.setLastExecution(new Date());
+        
+        auditSchedulerRepository.save(auditScheduler);
         synchronized (schedulersMap) {
             schedulersMap.put(auditScheduler.getId(), auditScheduler);
         }
-        return auditSchedulerRepository.save(auditScheduler);
+        
+        return auditScheduler;
     }
 
     public AuditScheduler modifyAuditScheduler(AuditScheduler auditScheduler, int timer, Date lastExecution){

@@ -96,8 +96,8 @@ public abstract class AbstractAuditRunner implements AuditRunner {
             }
             this.runImpl();
         } catch (Exception e) {
-            LOGGER.error("Error during run : " + e.getMessage());
-            auditLog(EAuditLogLevel.ERROR, "Error during run : " + e.getMessage());
+            e.printStackTrace();
+            auditLog(EAuditLogLevel.ERROR, "Tanaguru encountered an issue, please contact an administrator of the platform.");
         }
 
         try {
@@ -119,13 +119,19 @@ public abstract class AbstractAuditRunner implements AuditRunner {
     public final void onGetNewPage(String url, String name, boolean auditIfAlreadyVisited) {
         int firstHash = url.indexOf('#');
         int lastSlash = url.lastIndexOf('/');
-
+        url = url.trim();
+        url = url.replace("\n","");
+                
         //Cut anchor but keep url for framework that use hash in url as Vue.js
         if (firstHash != -1 && lastSlash != -1 && lastSlash < firstHash) {
             url = url.substring(0, firstHash);
         }
-
-        boolean alreadyVisited = visitedUrl.contains(url);
+        //warning http:// and http://www. same page
+        boolean alreadyVisited = false;
+        if(visitedUrl.contains(url) || visitedUrl.contains(url.replace("www.", "")) || visitedUrl.contains(url.replace("://", "://www."))){
+            alreadyVisited = true;
+        }
+        
 
         if (alreadyVisited) {
             if (auditIfAlreadyVisited) {

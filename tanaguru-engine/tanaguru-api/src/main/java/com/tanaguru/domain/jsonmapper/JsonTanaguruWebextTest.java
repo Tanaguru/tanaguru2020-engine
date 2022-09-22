@@ -14,6 +14,8 @@ public class JsonTanaguruWebextTest implements Serializable {
     private String expectedNbElements;
     private String filter;
     private String analyzeElements;
+    private String status;
+    private int number;
     private Collection<String> tags;
     private Map<String, Collection<String>> ressources;
 
@@ -80,5 +82,22 @@ public class JsonTanaguruWebextTest implements Serializable {
     public void setRessources(Map<String, Collection<String>> ressources) {
         this.ressources = ressources;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+    
 }
 

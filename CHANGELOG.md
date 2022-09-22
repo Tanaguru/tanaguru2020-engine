@@ -29,3 +29,21 @@
 - Add statistics page for super-admin and config key (statistics.fixedDelay)
 - Upgrade logging
 - Fix audit and user deletion
+
+## 1.0.4
+- Fix modify project
+- Wcag updated with the latest version
+- Engine updated to work with the latest version of the rgaa
+- Correction of discrepancies between engine and web extension
+- Endpoint : web extension version used
+- Fix site audit : duplicate audited web page
+- Update management of contrast tests
+- Fix endpoint : global test result for all pages (synthesis page)
+- Fix endpoint : source code value added to the result test
+- Demo project with specific domain : only one site audit allowed
+- Users with Free account type : expired after 1 month, audits pages (and results) deleted
+- Fix script timeout on some pages
+- Add API key for wordpress plugin
+- Fix scheduled audits
+- Csv export of audit synthesis
+- Scenario audit : store command to keep only certain pages

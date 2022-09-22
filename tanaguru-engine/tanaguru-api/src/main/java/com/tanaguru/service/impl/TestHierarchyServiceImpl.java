@@ -3,11 +3,13 @@ package com.tanaguru.service.impl;
 import com.google.gson.Gson;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
+import com.tanaguru.domain.entity.audit.Webextention;
 import com.tanaguru.domain.jsonmapper.JsonTanaguruWebextTest;
 import com.tanaguru.domain.jsonmapper.JsonTestHierarchy;
 import com.tanaguru.repository.AuditReferenceRepository;
 import com.tanaguru.repository.TanaguruTestRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
+import com.tanaguru.repository.WebextentionRepository;
 import com.tanaguru.service.TestHierarchyService;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     private final TestHierarchyRepository testHierarchyRepository;
     private final AuditReferenceRepository auditReferenceRepository;
     private final TanaguruTestRepository tanaguruTestRepository;
+    private final WebextentionRepository webextentionRepository;
 
     @Value("references/wcag-definition.json")
     private ClassPathResource wcagResource;
@@ -40,10 +43,15 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
     private ClassPathResource actTestsPath;
 
     @Autowired
-    public TestHierarchyServiceImpl(TestHierarchyRepository testHierarchyRepository, AuditReferenceRepository auditReferenceRepository, TanaguruTestRepository tanaguruTestRepository) {
+    public TestHierarchyServiceImpl(
+            TestHierarchyRepository testHierarchyRepository, 
+            AuditReferenceRepository auditReferenceRepository, 
+            TanaguruTestRepository tanaguruTestRepository,
+            WebextentionRepository webextentionRepository) {
         this.testHierarchyRepository = testHierarchyRepository;
         this.auditReferenceRepository = auditReferenceRepository;
         this.tanaguruTestRepository = tanaguruTestRepository;
+        this.webextentionRepository = webextentionRepository;
     }
 
     @PostConstruct
@@ -59,6 +67,10 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
         if (!testHierarchyRepository.findByCodeAndParentIsNull(wcag.getCode()).isPresent()) {
             LOGGER.info("Create reference " + wcag.getCode());
             TestHierarchy actRef = importTestHierarchy(wcag, null);
+            Webextention webext = new Webextention();
+            webext.setTestHierarchy(actRef);
+            webext.setVersion("4.0.0");
+            this.webextentionRepository.save(webext);
             String actJson = StreamUtils.copyToString(
                     actTestsPath.getInputStream(),
                     Charset.defaultCharset());
@@ -75,6 +87,8 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
                 test.setAnalyzeElements(webextTest.getAnalyzeElements());
                 test.setDescription(webextTest.getDescription());
                 test.setFilter(webextTest.getFilter());
+                test.setNumber(webextTest.getNumber());
+                test.setStatus(webextTest.getStatus());
                 test = tanaguruTestRepository.save(test);
 
                 for (String referenceName : webextTest.getRessources().keySet()) {

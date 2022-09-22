@@ -19,10 +19,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +41,9 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     private final PageRepository pageRepository;
 
     @Autowired
-    public TestHierarchyResultServiceImpl(TestHierarchyResultRepository testHierarchyResultRepository, PageRepository pageRepository) {
+    public TestHierarchyResultServiceImpl(
+            TestHierarchyResultRepository testHierarchyResultRepository, 
+            PageRepository pageRepository) {
         this.testHierarchyResultRepository = testHierarchyResultRepository;
         this.pageRepository = pageRepository;
     }
@@ -153,4 +161,67 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         results.put("status", testHierarchyResult.getStatus());
         return results;
     }
+    
+    /**
+     * Return a map with test hierarchy code in key and status of the test in value
+     * @param audit the audit
+     * @param testHierarchyResult the reference test hierarchy
+     * @return map<string, string> with test hierarchy code in key and status of the test in value
+     */
+    @Override
+    public Map<String,String> getTestStatusByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy) {
+        Map<String, String> mapResult = new TreeMap<String, String>();
+        Map<String, Set<String>> testCodeWithStatusAllPage = new HashMap<String, Set<String>>();
+        Collection<Page> pages = audit.getPages();
+        for(Page page : pages) {
+            Collection<TestHierarchyResult> thResults = page.getTestHierarchyResults();
+            for(TestHierarchyResult th : thResults) {
+                TestHierarchy testH = th.getTestHierarchy();
+                if(testH != null && testH.getReference() != null && testH.getReference().equals(testHierarchy)) {
+                    this.addInMapTestHierarchyCodeAndStatus(testCodeWithStatusAllPage, th.getTestHierarchy().getCode(), th.getStatus());
+                }
+            }
+        }
+        for(String code : testCodeWithStatusAllPage.keySet()) {
+            String status = getGlobalStatus(testCodeWithStatusAllPage.get(code));
+            mapResult.put(code, status);
+        }
+        return mapResult;
+    }
+    
+    /**
+     * Add in the map passed in param the code of the test hierarchy and it status
+     * @param map containing test hierarchy code and it status
+     * @param code to add
+     * @param status to add
+     */
+    private void addInMapTestHierarchyCodeAndStatus(Map<String, Set<String>> map, String code, String status) {
+        if(map.containsKey(code)) {
+            map.get(code).add(status);
+        }else {
+            Set<String> allStatus = new HashSet<String>();
+            allStatus.add(status);
+            map.put(code, allStatus);
+        }
+    }
+    
+    /**
+     * Calculate the final status from a list of test status
+     * @param allStatus intermediate status
+     * @return status final status
+     */
+    private String getGlobalStatus(Set<String> allStatus){
+        if(allStatus.contains(TestStatusName.STATUS_FAILED)) {
+            return TestStatusName.STATUS_FAILED;
+        }else if(allStatus.contains(TestStatusName.STATUS_CANT_TELL)){
+            return TestStatusName.STATUS_CANT_TELL;
+        }else if(allStatus.contains(TestStatusName.STATUS_SUCCESS)) {
+            return TestStatusName.STATUS_SUCCESS;
+        }else if(allStatus.contains(TestStatusName.STATUS_INAPPLICABLE) && !allStatus.contains(TestStatusName.STATUS_NOT_TESTED)){
+            return TestStatusName.STATUS_INAPPLICABLE;
+        }else {
+            return TestStatusName.STATUS_NOT_TESTED;
+        }
+    }
+    
 }

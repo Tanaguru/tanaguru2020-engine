@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        
+    <changeSet id="element_result_add_four_column_contrast" author="lpedrau">
+        <addColumn tableName="element_result">
+            <column name="text" type="varchar(200)" defaultValue="null"/>
+            <column name="background" type="varchar(50)" defaultValue="null"/>
+            <column name="foreground" type="varchar(50)" defaultValue="null"/>
+            <column name="valid" type="jsonb"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="element_result" columnName="text"/>
+            <dropColumn tableName="element_result" columnName="background"/>
+            <dropColumn tableName="element_result" columnName="foreground"/>
+            <dropColumn tableName="element_result" columnName="valid"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

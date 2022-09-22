@@ -1,8 +1,11 @@
 package com.tanaguru.domain.dto;
 
 public class AuditSchedulerDTO {
+    
     private long auditSchedulerId;
+    
     private long auditId;
+    
     private int timer;
 
     public long getAuditSchedulerId() {

@@ -1,0 +1,17 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    
+    <changeSet id="update_contract_allow_create_project" author="lpedrau">
+        <addColumn tableName="contract">
+            <column name="allow_create_project" type="boolean" defaultValueBoolean="true"/>
+            <column name="allow_modify_project" type="boolean" defaultValueBoolean="true"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="contract" columnName="allowCreateContract"/>
+            <dropColumn tableName="contract" columnName="allowModifyContract"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

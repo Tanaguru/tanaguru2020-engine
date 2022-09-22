@@ -2,6 +2,7 @@ package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.AppAuthorityName;
 import com.tanaguru.domain.constant.CustomError;
+import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.dto.ChangePasswordCommandDTO;
 import com.tanaguru.domain.dto.DetailedUserDTO;
@@ -271,7 +272,10 @@ public class UserController {
                 user.getPassword(),
                 approle,
                 user.isEnabled(),
-                createContract));
+                createContract,
+                null,
+                null,
+                EAppAccountType.DEFAULT));
     }
 
     /**

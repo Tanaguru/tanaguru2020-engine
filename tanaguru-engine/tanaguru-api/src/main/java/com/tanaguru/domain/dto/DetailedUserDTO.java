@@ -1,5 +1,6 @@
 package com.tanaguru.domain.dto;
 
+import com.tanaguru.domain.entity.membership.user.AppAccountType;
 import com.tanaguru.domain.entity.membership.user.AppRole;
 import com.tanaguru.domain.entity.membership.user.User;
 
@@ -15,6 +16,10 @@ public class DetailedUserDTO {
     private boolean isEnabled;
 
     private boolean accountNonLocked;
+    
+    private AppAccountType appAccountType;
+    
+    private boolean expired;
 
     public DetailedUserDTO() {
     }
@@ -25,16 +30,20 @@ public class DetailedUserDTO {
                 user.getEmail(),
                 user.getAppRole(),
                 user.isEnabled(),
-                user.isAccountNonLocked());
+                user.isAccountNonLocked(),
+                user.getAppAccountType(),
+                user.isExpired());
     }
 
-    public DetailedUserDTO(long id, String username, String email, AppRole appRole, boolean isEnabled, boolean accountNonLocked) {
+    public DetailedUserDTO(long id, String username, String email, AppRole appRole, boolean isEnabled, boolean accountNonLocked, AppAccountType appAccountType, boolean expired) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.appRole = appRole;
         this.isEnabled = isEnabled;
         this.accountNonLocked = accountNonLocked;
+        this.appAccountType = appAccountType;
+        this.expired = expired;
     }
 
 
@@ -90,4 +99,21 @@ public class DetailedUserDTO {
         this.email = null;
         return this;
     }
+
+    public AppAccountType getAppAccountType() {
+        return appAccountType;
+    }
+
+    public void setAppAccountType(AppAccountType appAccountType) {
+        this.appAccountType = appAccountType;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+    
 }

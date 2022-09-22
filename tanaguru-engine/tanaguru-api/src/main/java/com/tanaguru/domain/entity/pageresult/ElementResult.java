@@ -58,6 +58,34 @@ public class ElementResult implements Serializable {
     @Column
     private String cssSelector;
 
+    @Column
+    private String tag;
+
+    @Column
+    private String size;
+
+    @Column
+    private int weight = -1;
+
+    @Column
+    private float ratio = -1;
+    
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private ElementValid valid;
+    
+    @Column
+    private String text;
+    
+    @Column
+    private String background;
+    
+    @Column
+    private String foreground;
+
+    @Column
+    private String sourceCode;
+    
     public String getAccessibleName() {
         return accessibleName;
     }
@@ -137,4 +165,77 @@ public class ElementResult implements Serializable {
     public void setCssSelector(String cssSelector) {
         this.cssSelector = cssSelector;
     }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public float getRatio() {
+        return ratio;
+    }
+
+    public void setRatio(float ratio) {
+        this.ratio = ratio;
+    }
+
+    public ElementValid getValid() {
+        return valid;
+    }
+
+    public void setValid(ElementValid valid) {
+        this.valid = valid;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public String getForeground() {
+        return foreground;
+    }
+
+    public void setForeground(String foreground) {
+        this.foreground = foreground;
+    }
+
+    public String getSourceCode() {
+        return sourceCode;
+    }
+
+    public void setSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
+    }
+    
 }

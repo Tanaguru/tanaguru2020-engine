@@ -3,7 +3,7 @@ package com.tanaguru.domain.exception;
 import com.tanaguru.domain.constant.CustomError;
 import org.openqa.selenium.InvalidArgumentException;
 
-public class CustomInvalidArgumentException extends InvalidArgumentException {
+public class CustomInvalidArgumentException extends RuntimeException {
 
     private String content[];
     

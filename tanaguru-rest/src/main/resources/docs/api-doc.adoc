@@ -49,6 +49,7 @@ __BasePath__ : /
 * test-result-controller : Test Result Controller
 * user-controller : User Controller
 * web-mvc-links-handler : Web Mvc Links Handler
+* webextention-controller : Webextention Controller
 
 
 
@@ -2963,7 +2964,7 @@ __required__|id|integer (int64)
 
 
 [[_modifyprojectusingput]]
-=== Create a Project
+=== Modify a Project
 ....
 PUT /projects/{id}
 ....
@@ -2972,7 +2973,6 @@ PUT /projects/{id}
 ==== Description
 User must have CREATE_PROJECT authority on Contract
 If contract not found, exception raise : CONTRACT_NOT_FOUND with contract id
-If project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number
 If the project domain is invalid, exception raise : INVALID_DOMAIN with project domain
 
 
@@ -2999,7 +2999,7 @@ __required__|projectDto|<<_projectdto,ProjectDTO>>
 |**401**|Unauthorized : ACCESS_DENIED message|No Content
 |**403**|Forbidden for current session|No Content
 |**404**|Contract not found : CONTRACT_NOT_FOUND error
-Project limit for contract : PROJECT_LIMIT_FOR_CONTRACT error
+
 Invalid domain : INVALID_DOMAIN error|No Content
 |===
 
@@ -4926,6 +4926,59 @@ Cannot show audit : CANNOT_SHOW_AUDIT error|No Content
 * test-hierarchy-result-controller
 
 
+[[_getteststatusbyauditandtesthierarchyusingget]]
+=== Get status of the test hierarchy for all the pages of a given Audit id and reference id
+....
+GET /test-hierarchy-results/global-test-status-by-audit-and-test-hierarchy/{auditId}/{referenceId}/{sharecode}
+....
+
+
+==== Description
+User must have SHOW_AUDIT authority on project or a valid sharecode
+If audit not found, exception raise : AUDIT_NOT_FOUND with audit id
+If cannot show audit, exception raise : CANNOT_SHOW_AUDIT with audit id
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Path**|**auditId** +
+__required__|auditId|integer (int64)
+|**Path**|**referenceId** +
+__required__|referenceId|integer (int64)
+|**Path**|**sharecode** +
+__optional__|sharecode|string
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|< string, string > map
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session or invalid sharecode|No Content
+|**404**|Audit not found : AUDIT_NOT_FOUND error
+Cannot show audit : CANNOT_SHOW_AUDIT error
+Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* test-hierarchy-result-controller
+
+
 [[_getmaintesthierarchyresultbyauditusingget_1]]
 === Get all main TestHierarchyResult for a given Audit id
 ....
@@ -6048,10 +6101,103 @@ Cannot delete current user : CANNOT_DELETE_CURRENT_USER error|No Content
 * user-controller
 
 
+[[_createwebextentionversionusingpost]]
+=== Upload a webextention version associated with test hierarchy
+....
+POST /webextention/version
+....
+
+
+==== Description
+If test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id
+
+
+==== Parameters
+
+[options="header", cols=".^2a,.^3a,.^9a,.^4a"]
+|===
+|Type|Name|Description|Schema
+|**Body**|**webextentionDto** +
+__required__|webextentionDto|<<_webextentiondto,WebextentionDTO>>
+|===
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**201**|Created|No Content
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error|No Content
+|===
+
+
+==== Consumes
+
+* `application/json`
+
+
+==== Produces
+
+* `application/json`
+
+
+==== Tags
+
+* webextention-controller
+
+
+[[_getwebextentionversionusingget]]
+=== Get the webextention version used by engine
+....
+GET /webextention/version
+....
+
+
+==== Responses
+
+[options="header", cols=".^2a,.^14a,.^4a"]
+|===
+|HTTP Code|Description|Schema
+|**200**|OK|string
+|**400**|Invalid parameters|No Content
+|**401**|Unauthorized : ACCESS_DENIED message|No Content
+|**403**|Forbidden for current session|No Content
+|**404**|Not Found|No Content
+|===
+
+
+==== Produces
+
+* `\*/*`
+
+
+==== Tags
+
+* webextention-controller
+
+
 
 
 [[_definitions]]
 == Definitions
+
+[[_appaccounttype]]
+=== AppAccountType
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**id** +
+__optional__|integer (int64)
+|**name** +
+__optional__|enum (DEFAULT, FREE, PREMIUM)
+|===
+
 
 [[_appauthority]]
 === AppAuthority
@@ -6255,6 +6401,10 @@ __optional__|integer (int64)
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
+|**allowCreateProject** +
+__optional__|boolean
+|**allowModifyProject** +
+__optional__|boolean
 |**auditLimit** +
 __optional__|integer (int32)
 |**dateEnd** +
@@ -6348,11 +6498,15 @@ __optional__|enum (CONTRACT_OWNER, CONTRACT_USER, CONTRACT_MANAGER, CONTRACT_GUE
 |Name|Schema
 |**accountNonLocked** +
 __optional__|boolean
+|**appAccountType** +
+__optional__|<<_appaccounttype,AppAccountType>>
 |**appRole** +
 __optional__|<<_approle,AppRole>>
 |**email** +
 __optional__|string
 |**enabled** +
+__optional__|boolean
+|**expired** +
 __optional__|boolean
 |**id** +
 __optional__|integer (int64)
@@ -6369,9 +6523,13 @@ __optional__|string
 |Name|Schema
 |**accessibleName** +
 __optional__|string
+|**background** +
+__optional__|string
 |**canBeReachedUsingKeyboardWith** +
 __optional__|< string > array
 |**cssSelector** +
+__optional__|string
+|**foreground** +
 __optional__|string
 |**id** +
 __optional__|integer (int64)
@@ -6379,12 +6537,26 @@ __optional__|integer (int64)
 __optional__|< string > array
 |**isNotVisibleDueTo** +
 __optional__|< string > array
+|**ratio** +
+__optional__|number (float)
 |**role** +
 __optional__|<<_elementrole,ElementRole>>
+|**size** +
+__optional__|string
+|**sourceCode** +
+__optional__|string
 |**status** +
+__optional__|string
+|**tag** +
 __optional__|string
 |**testResult** +
 __optional__|<<_testresult,TestResult>>
+|**text** +
+__optional__|string
+|**valid** +
+__optional__|<<_elementvalid,ElementValid>>
+|**weight** +
+__optional__|integer (int32)
 |**xpath** +
 __optional__|string
 |===
@@ -6400,6 +6572,19 @@ __optional__|string
 __optional__|string
 |**implicit** +
 __optional__|string
+|===
+
+
+[[_elementvalid]]
+=== ElementValid
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**status** +
+__optional__|number (double)
+|**target** +
+__optional__|number (double)
 |===
 
 
@@ -6498,6 +6683,17 @@ __optional__|boolean
 [[_53d375507d198e9157717964970e1987]]
 === Map«string,Link»
 __Type__ : < string, <<_link,Link>> > map
+
+
+[[_mark]]
+=== Mark
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**attrs** +
+__optional__|< string > array
+|===
 
 
 [[_modelandview]]
@@ -6865,6 +7061,14 @@ __optional__|integer (int32)
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
+|**allowPageAudit** +
+__optional__|boolean
+|**allowScenarioAudit** +
+__optional__|boolean
+|**allowSiteAudit** +
+__optional__|boolean
+|**allowUploadAudit** +
+__optional__|boolean
 |**contract** +
 __optional__|<<_contract,Contract>>
 |**domain** +
@@ -6873,6 +7077,8 @@ __optional__|string
 __optional__|integer (int64)
 |**name** +
 __optional__|string
+|**trial** +
+__optional__|boolean
 |===
 
 
@@ -6910,10 +7116,20 @@ __optional__|string
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
+|**allowPageAudit** +
+__optional__|boolean
+|**allowScenarioAudit** +
+__optional__|boolean
+|**allowSiteAudit** +
+__optional__|boolean
+|**allowUploadAudit** +
+__optional__|boolean
 |**contractId** +
 __optional__|integer (int64)
 |**domain** +
 __optional__|string
+|**istrial** +
+__optional__|boolean
 |**name** +
 __optional__|string
 |===
@@ -7095,6 +7311,8 @@ __optional__|integer (int64)
 |Name|Schema
 |**analyzeElements** +
 __optional__|string
+|**code** +
+__optional__|string
 |**contrast** +
 __optional__|string
 |**deleted** +
@@ -7107,12 +7325,24 @@ __optional__|string
 __optional__|string
 |**id** +
 __optional__|integer (int64)
+|**lang** +
+__optional__|string
+|**mark** +
+__optional__|<<_mark,Mark>>
 |**name** +
 __optional__|string
+|**node** +
+__optional__|string
+|**number** +
+__optional__|integer (int32)
 |**query** +
+__optional__|string
+|**status** +
 __optional__|string
 |**tags** +
 __optional__|< string > array
+|**testStatus** +
+__optional__|string
 |===
 
 
@@ -7122,14 +7352,28 @@ __optional__|< string > array
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
+|**code** +
+__optional__|string
 |**description** +
 __optional__|string
 |**id** +
 __optional__|integer (int64)
+|**lang** +
+__optional__|string
+|**mark** +
+__optional__|<<_mark,Mark>>
 |**name** +
+__optional__|string
+|**node** +
+__optional__|string
+|**number** +
+__optional__|integer (int32)
+|**status** +
 __optional__|string
 |**tags** +
 __optional__|< string > array
+|**testStatus** +
+__optional__|string
 |===
 
 
@@ -7308,14 +7552,20 @@ __optional__|string
 [options="header", cols=".^3a,.^4a"]
 |===
 |Name|Schema
+|**appAccountType** +
+__optional__|<<_appaccounttype,AppAccountType>>
 |**appRole** +
 __optional__|<<_approle,AppRole>>
 |**dateCreation** +
 __optional__|string (date-time)
 |**enabled** +
 __optional__|boolean
+|**firstname** +
+__optional__|string
 |**id** +
 __optional__|integer (int64)
+|**lastname** +
+__optional__|string
 |**username** +
 __optional__|string
 |===
@@ -7335,8 +7585,14 @@ __optional__|enum (USER, ADMIN, SUPER_ADMIN)
 __optional__|string
 |**enabled** +
 __optional__|boolean
+|**expired** +
+__optional__|boolean
+|**firstname** +
+__optional__|string
 |**id** +
 __optional__|integer (int64)
+|**lastname** +
+__optional__|string
 |**password** +
 __optional__|string
 |**username** +
@@ -7351,6 +7607,19 @@ __optional__|string
 |===
 |Name|Schema
 |**contentType** +
+__optional__|string
+|===
+
+
+[[_webextentiondto]]
+=== WebextentionDTO
+
+[options="header", cols=".^3a,.^4a"]
+|===
+|Name|Schema
+|**testHierarchyId** +
+__optional__|integer (int64)
+|**version** +
 __optional__|string
 |===
 

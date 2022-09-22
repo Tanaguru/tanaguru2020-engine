@@ -34,5 +34,21 @@
     <include file="db/changelogs/20210722_changelog_tanaguru_test_contrast.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210722_changelog_updateProject.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20210730_changelog_updateUser.xml" relativeToChangelogFile="false"/>
-
+    <include file="db/changelogs/20210803_changelog_updateElementResult.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210805_changelog_updateUsers_firstName_lastName.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210806_changelog_updateProject_allowAuditType.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20210831_changelog_updateContract_allowCreateProject_allowModifyProject.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211019_changelog_tanaguru_test_status.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211020_changelog_tanaguru_test_code_number.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211020_changelog_update_tanaguru_test_number.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211021_changelog_update_element_result_contrast.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211021_changelog_update_element_result_column_type.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211025_changelog_webextention_version.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211026_changelog_update_element_result_source_code.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20211220_changelog_usersAccountType.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220113_changelog_updateProjectsTrial.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220114_changelog_updateUsers_expired.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220308_changelog_update_tanaguru_test_testStatus.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220308_changelog_update_tanaguru_test_node_mark_lang.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20220718_changelog_apiKey.xml" relativeToChangelogFile="false"/>           
 </databaseChangeLog>

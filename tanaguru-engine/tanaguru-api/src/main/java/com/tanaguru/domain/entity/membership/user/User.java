@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author rcharre
@@ -67,6 +68,18 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn
     private AppRole appRole;
+    
+    @Column
+    private String firstname;
+    
+    @Column
+    private String lastname;
+    
+    @NotNull
+    @Valid
+    @ManyToOne
+    @JoinColumn
+    private AppAccountType appAccountType;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -81,6 +94,11 @@ public class User implements Serializable {
     @Column(columnDefinition = "jsonb")
     @JsonIgnore
     private Collection<Attempt> attempts = new ArrayList<>();
+    
+    @JsonIgnore
+    @Column(nullable = false)
+    @NotNull
+    private boolean expired = false;
     
     public long getId() {
         return id;
@@ -169,4 +187,37 @@ public class User implements Serializable {
     public void setAttempts(Collection<Attempt> attempts) {
         this.attempts = attempts;
     }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public AppAccountType getAppAccountType() {
+        return appAccountType;
+    }
+
+    public void setAppAccountType(AppAccountType appAccountType) {
+        this.appAccountType = appAccountType;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
 }

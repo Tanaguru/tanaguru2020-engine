@@ -43,7 +43,8 @@ public class ProjectController {
     private final UserRepository userRepository;
     private final AuditRepository auditRepository;
     private final ContractService contractService;
-
+    private final ApiKeyRepository apiKeyRepository;
+    
     @Autowired
     public ProjectController(
             ProjectService projectService,
@@ -51,7 +52,11 @@ public class ProjectController {
             ProjectRepository projectRepository,
             ContractRepository contractRepository,
             ContractUserRepository contractUserRepository,
-            ProjectUserRepository projectUserRepository, UserRepository userRepository, AuditRepository auditRepository, ContractService contractService) {
+            ProjectUserRepository projectUserRepository, 
+            UserRepository userRepository, 
+            AuditRepository auditRepository, 
+            ContractService contractService,
+            ApiKeyRepository apiKeyRepository) {
 
         this.projectService = projectService;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
@@ -62,6 +67,7 @@ public class ProjectController {
         this.userRepository = userRepository;
         this.auditRepository = auditRepository;
         this.contractService = contractService;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @ApiOperation(
@@ -321,12 +327,16 @@ public class ProjectController {
                         !UrlHelper.isValid(project.getDomain()))) {
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, project.getDomain());
         }
-
+        
+        if(!contract.isAllowCreateProject()) {
+            throw new CustomInvalidEntityException(CustomError.CANNOT_CREATE_PROJECT_FOR_THIS_CONTRACT);
+        }
+        
         // If the current user is an admin that is not member of the contract, set the contract owner as default member of the project
         ContractAppUser contractAppUser = contractUserRepository.findByContractAndUser(contract, user)
                 .orElseGet(() -> contractUserRepository.findByContractAndContractRoleName_Owner(contract));
 
-        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain());
+        Project newProject = projectService.createProject(contract, project.getName(), project.getDomain(), true, true, true, true, false);
         ProjectAppUser projectAppUser = new ProjectAppUser();
         projectAppUser.setProjectRole(projectService.getProjectRole(EProjectRole.PROJECT_MANAGER));
         projectAppUser.setContractAppUser(contractAppUser);
@@ -337,10 +347,9 @@ public class ProjectController {
     }
 
     @ApiOperation(
-            value = "Create a Project",
+            value = "Modify a Project",
             notes = "User must have CREATE_PROJECT authority on Contract"
                     + "\nIf contract not found, exception raise : CONTRACT_NOT_FOUND with contract id"
-                    + "\nIf project limit is greater or equals than the number of project, exception raise : PROJECT_LIMIT_FOR_CONTRACT with contract id and the limit number"
                     + "\nIf the project domain is invalid, exception raise : INVALID_DOMAIN with project domain"
     )
     @ApiResponses(value = {
@@ -348,7 +357,6 @@ public class ProjectController {
             @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
             @ApiResponse(code = 403, message = "Forbidden for current session"),
             @ApiResponse(code = 404, message = "Contract not found : CONTRACT_NOT_FOUND error"
-                    + "\nProject limit for contract : PROJECT_LIMIT_FOR_CONTRACT error"
                     + "\nInvalid domain : INVALID_DOMAIN error")
     })
     @PreAuthorize(
@@ -358,13 +366,15 @@ public class ProjectController {
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public @ResponseBody
     Project modifyProject(@RequestBody @Valid ProjectDTO projectDto, @PathVariable long id) {
-        User user = tanaguruUserDetailsService.getCurrentUser();
-
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
 
         Contract contract = project.getContract();
-
+        
+        if(!contract.isAllowModifyProject()) {
+            throw new CustomInvalidEntityException(CustomError.CANNOT_MODIFY_PROJECT_FOR_THIS_CONTRACT);
+        }
+        
         if ((contract.isRestrictDomain() &&
                 !projectDto.getDomain().isEmpty() &&
                 !UrlHelper.isValid(projectDto.getDomain())) ||
@@ -373,7 +383,7 @@ public class ProjectController {
             throw new CustomInvalidEntityException(CustomError.INVALID_DOMAIN, projectDto.getDomain());
         }
 
-        return projectService.modifyProject(project, project.getName(), projectDto.getDomain());
+        return projectService.modifyProject(project, projectDto.getName(), projectDto.getDomain());
     }
 
     @ApiOperation(
@@ -508,6 +518,56 @@ public class ProjectController {
 
         target.setProjectRole(projectService.getProjectRole(projectRole));
         return projectUserRepository.save(target);
+    }
+    
+    /**
+     * Generate a new Api key. This key can authenticate the user and return the corresponding project.
+     * @param user_id
+     * @param project_id
+     * @return api key
+     */
+    @ApiOperation(
+            value = "Generate a new Api key. This key can authenticate the user and return the corresponding project.",
+            notes = "If user not found, exception raise : USER_NOT_FOUND error"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND error"
+                    + "\nIf cannot generate api key, exception raise : CANNOT_GENERATE_API_KEY error")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error"
+                    + "\nUser not found : USER_NOT_FOUND error"
+                    + "\nCannot generate api key : CANNOT_GENERATE_API_KEY error")
+    })
+    @GetMapping(value = "/api-key/{user_id}/{project_id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String getApiKey(@PathVariable long user_id, @PathVariable long project_id) {
+        User user = userRepository.findById(user_id)
+                                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+        Project project = this.projectRepository.findById(project_id)
+                            .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, project_id));
+        return this.projectService.generateApiKey(user, project);
+    }
+    
+    /**
+     * Get project by api key.
+     * @param api key
+     * @return project
+     */
+    @ApiOperation(
+            value = "Get Project by api key",
+            notes = "If project not found, exception raise : PROJECT_NOT_FOUND"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
+    })
+    @GetMapping(value = "/by-api-key/{apiKey}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public @ResponseBody
+    Project findByApiKey(@PathVariable String apiKey) {
+        return apiKeyRepository.findByKey(apiKey)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND)).getProject();
     }
 
 }

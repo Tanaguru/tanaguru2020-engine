@@ -7,10 +7,12 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
+import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
+import com.tanaguru.domain.exception.CustomInvalidArgumentException;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
@@ -18,6 +20,7 @@ import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.ActRepository;
 import com.tanaguru.repository.AuditRepository;
+import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
 import com.tanaguru.service.*;
@@ -61,6 +64,7 @@ public class AuditController {
     private final AsyncAuditService asyncAuditService;
     private final ProjectService projectService;
     private final TanaguruUserDetailsService tanaguruUserDetailsService;
+    private final ContractUserRepository contractUserRepository;
 
     @Autowired
     public AuditController(
@@ -69,7 +73,11 @@ public class AuditController {
             AuditRunnerService auditRunnerService,
             ProjectRepository projectRepository,
             ActRepository actRepository,
-            TestHierarchyRepository testHierarchyRepository, AsyncAuditService asyncAuditService, ProjectService projectService, TanaguruUserDetailsService tanaguruUserDetailsService) {
+            TestHierarchyRepository testHierarchyRepository, 
+            AsyncAuditService asyncAuditService, 
+            ProjectService projectService, 
+            TanaguruUserDetailsService tanaguruUserDetailsService,
+            ContractUserRepository contractUserRepository) {
 
         this.auditRepository = auditRepository;
         this.auditService = auditService;
@@ -81,6 +89,7 @@ public class AuditController {
         this.asyncAuditService = asyncAuditService;
         this.projectService = projectService;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
+        this.contractUserRepository = contractUserRepository;
     }
 
     /**
@@ -326,10 +335,29 @@ public class AuditController {
         Project project = projectRepository.findById(auditCommand.getProjectId())
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, auditCommand.getProjectId()));
 
+        if(project.isTrial() != null && project.isTrial()) {
+            Collection<ContractAppUser> contractAppUsers = this.contractUserRepository.findAllByContract(project.getContract());
+            for(ContractAppUser contractAppUser : contractAppUsers) {
+                if(contractAppUser.getUser().isExpired()) {
+                    throw new CustomForbiddenException(CustomError.USER_FREE_EXPIRED);
+                }
+            }
+        }
+        
         if (new Date().after(project.getContract().getDateEnd())) {
             throw new CustomForbiddenException(CustomError.CONTRACT_DATE_PASSED);
         }
-
+        
+        if(!projectService.projectAcceptThisAuditType(auditCommand.getType(), project)) {
+            throw new CustomInvalidArgumentException(CustomError.AUDIT_TYPE_NOT_ACCEPTED_BY_PROJECT);
+        }else {
+            //projet perso de demo (domaine specifique) ne peut lancer qu'un seul audit de site
+            if(project.isTrial() != null && project.isTrial() && auditCommand.getType().equals(EAuditType.SITE)) {
+                project.setAllowSiteAudit(false);
+                projectRepository.save(project);
+            }
+        }
+        
         TestHierarchy main = null;
         ArrayList<TestHierarchy> references = new ArrayList<>();
         for (Long referenceId : auditCommand.getReferences()) {

@@ -144,7 +144,7 @@ public class ContractServiceImpl implements ContractService {
         return result;
     }
 
-    public Contract createContract(User owner, String name, int auditLimit, int projectLimit, boolean restrictDomain, Date contractEnd) {
+    public Contract createContract(User owner, String name, int auditLimit, int projectLimit, boolean restrictDomain, Date contractEnd, boolean allowCreateProject, boolean allowModifyProject) {
         LOGGER.info("Create contract {} for with owner {}", name, owner.getId());
         Contract contract = new Contract();
         contract.setAuditLimit(auditLimit);
@@ -153,6 +153,8 @@ public class ContractServiceImpl implements ContractService {
         contract.setDateEnd(contractEnd);
         contract.setDateStart(new Date());
         contract.setName(name);
+        contract.setAllowCreateProject(allowCreateProject);
+        contract.setAllowModifyProject(allowModifyProject);
         contract = contractRepository.save(contract);
 
         ContractAppUser contractAppUser = new ContractAppUser();

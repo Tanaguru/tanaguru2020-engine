@@ -123,25 +123,27 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
 
             Collection<ElementResult> elementResults = new ArrayList<>();
             for (ElementResult elementResult : webextTestResult.getData()) {
-                elementResult.setTestResult(testResult);
-                switch (elementResult.getStatus()) {
-                    case TestStatusName.STATUS_FAILED:
-                        testResult.setNbElementFailed(testResult.getNbElementFailed() + 1);
-                        break;
+                if(elementResult.getStatus() != null) {
+                    elementResult.setTestResult(testResult);
+                    switch (elementResult.getStatus()) {
+                        case TestStatusName.STATUS_FAILED:
+                            testResult.setNbElementFailed(testResult.getNbElementFailed() + 1);
+                            break;
 
-                    case TestStatusName.STATUS_SUCCESS:
-                        testResult.setNbElementPassed(testResult.getNbElementPassed() + 1);
-                        break;
+                        case TestStatusName.STATUS_SUCCESS:
+                            testResult.setNbElementPassed(testResult.getNbElementPassed() + 1);
+                            break;
 
-                    case TestStatusName.STATUS_CANT_TELL:
-                        testResult.setNbElementCantTell(testResult.getNbElementCantTell() + 1);
-                        break;
-                    case TestStatusName.STATUS_NOT_TESTED:
-                        testResult.setNbElementUntested(testResult.getNbElementUntested() + 1);
-                        break;
-                    default:
+                        case TestStatusName.STATUS_CANT_TELL:
+                            testResult.setNbElementCantTell(testResult.getNbElementCantTell() + 1);
+                            break;
+                        case TestStatusName.STATUS_NOT_TESTED:
+                            testResult.setNbElementUntested(testResult.getNbElementUntested() + 1);
+                            break;
+                        default:
+                    }
+                    elementResults.add(elementResultRepository.save(elementResult));
                 }
-                elementResults.add(elementResultRepository.save(elementResult));
             }
             testResult.setElementResults(elementResults);
             testResultByTestId.put(webextTestResult.getId(), testResultRepository.save(testResult));
@@ -163,6 +165,10 @@ public class ResultAnalyzerServiceImpl implements ResultAnalyzerService {
         Collection<TestResult> testResults = new ArrayList<>();
         for (TanaguruTest tanaguruTest : testHierarchy.getTanaguruTests()) {
             TestResult testResult = testResultByTestId.get(tanaguruTest.getId());
+            if(testResult == null){
+                LOGGER.warn("[Test {}] Missing result", tanaguruTest.getId());
+                continue;
+            }
             switch (testResult.getStatus()) {
                 case TestStatusName.STATUS_FAILED:
                     testHierarchyResult.setNbTestFailed(testHierarchyResult.getNbTestFailed() + 1);

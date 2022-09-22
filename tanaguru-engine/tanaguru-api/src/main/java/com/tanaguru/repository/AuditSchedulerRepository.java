@@ -13,4 +13,5 @@ import java.util.Optional;
 @Repository
 public interface AuditSchedulerRepository extends JpaRepository<AuditScheduler, Long> {
     Optional<AuditScheduler> findByAudit(Audit audit);
+    Optional<AuditScheduler> findByAuditId(long id);
 }

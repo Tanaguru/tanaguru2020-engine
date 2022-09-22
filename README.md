@@ -18,6 +18,8 @@ Four kinds of audit:
 
 Link to API Documentation : [API Documentation](tanaguru-rest/src/main/resources/docs/api-doc.adoc)
 
+To start the installation : [Installation guide](https://github.com/Tanaguru/tanaguru2020-engine/wiki/Rest-server-setup)
+
 ## Vision
 
 1. Automate as much as we can and even more :)

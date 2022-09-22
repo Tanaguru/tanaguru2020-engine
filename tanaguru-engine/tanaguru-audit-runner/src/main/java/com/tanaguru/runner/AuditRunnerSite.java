@@ -39,12 +39,7 @@ public class AuditRunnerSite extends AbstractAuditRunner implements TanaguruCraw
 
     @Override
     public synchronized void onCrawlNewPage(String url) {
-        try{
             webDriverGet(url);
-        }catch (Exception e){
-            LOGGER.error("Error happened while auditing page {} : {}", url, e.getMessage());
-            auditLog(EAuditLogLevel.ERROR, "Error happened while auditing page " + url + " : " + e.getMessage());
-        }
     }
 
     @Override

@@ -70,7 +70,8 @@ public class AuditSchedulerController {
 
     @ApiOperation(
             value = "Create audit scheduler",
-            notes = "If audit not found, exception raise : AUDIT_NOT_FOUND with audit id",
+            notes = "If audit not found, exception raise : AUDIT_NOT_FOUND with audit id"
+                    + "The current user must have START_AUDIT authority or PUBLIC_SCHEDULE_ACCESS",
             response = AuditScheduler.class
     )
     @ApiResponses(value = {
@@ -80,7 +81,7 @@ public class AuditSchedulerController {
             @ApiResponse(code = 404, message = "Audit scheduler not found : AUDIT_NOT_FOUND error")
     })
     @PreAuthorize(
-            "@tanaguruUserDetailsServiceImpl.currentUserCanScheduleOnAudit(#auditSchedulerDTO.getAuditId())")
+            "@tanaguruUserDetailsServiceImpl.getCurrentUser() != null && @tanaguruUserDetailsServiceImpl.currentUserCanScheduleOnAudit(#auditSchedulerDTO.getAuditId())")
     @PostMapping("/")
     public @ResponseBody
     AuditScheduler createAuditScheduler(@RequestBody @Valid AuditSchedulerDTO auditSchedulerDTO) {
@@ -148,5 +149,34 @@ public class AuditSchedulerController {
         )){
             throw new CustomForbiddenException(CustomError.CANNOT_ACCESS_SCHEDULER, auditScheduler.getId() );
         }
+        auditSchedulerService.deleteAuditScheduler(auditScheduler);
     }
+    
+    @ApiOperation(
+            value = "Get audit scheduler by audit id",
+            notes = "If audit scheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with audit id"
+                    + "\n Or if the current user doesn't have access to the scheduler, exception raise : CURRENT_USER_NO_ACCESS_SCHEDULER with audit id",
+            response = AuditScheduler.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Audit scheduler not found : AUDIT_SCHEDULER_NOT_FOUND error"
+                    + "\nCurrent user cannot access scheduler : CURRENT_USER_NO_ACCESS_SCHEDULER error")
+    })
+    @GetMapping("/by-audit/{id}, {shareCode}")
+    public @ResponseBody
+    AuditScheduler getByAuditId(
+            @PathVariable long id,
+            @PathVariable(required = false) @ApiParam(required = false) String shareCode) {
+        AuditScheduler auditScheduler = auditSchedulerRepository.findByAuditId(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND,id ));
+        if(!tanaguruUserDetailsService.currentUserCanShowAudit(id, shareCode)){
+            throw new CustomForbiddenException(CustomError.CURRENT_USER_NO_ACCESS_SCHEDULER, id );
+        }
+
+        return auditScheduler;
+    }
+    
 }

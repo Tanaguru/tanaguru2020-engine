@@ -68,4 +68,12 @@ public interface TanaguruUserDetailsService extends UserDetailsService{
      * @return user details
      */
     UserDetails loadUserByEmail(String email);
+    
+    
+    /**
+     * Get the user's details from their api key
+     * @param apiKey
+     * @return user details
+     */
+    UserDetails loadUserByApiKey(String apiKey);
 }
