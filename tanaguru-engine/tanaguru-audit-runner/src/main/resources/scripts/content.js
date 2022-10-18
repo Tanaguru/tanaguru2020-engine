@@ -302,7 +302,7 @@ function getOpacity(element) {
 /**
  ** Get element's visibility
  * @param {node} element 
- * @returns 
+ * @returns
  */
  function getVisibility(element) {
 	var opacity = element.hasAttribute('data-tng-opacity') ? element.getAttribute('data-tng-opacity') : getOpacity(element);
@@ -347,22 +347,30 @@ function getOpacity(element) {
 
 	var regexClipP = /.{6,7}\(0px|.{6,7}\(.+[, ]0px/g; // circle(0) || ellipse(0)
 	var regexClip = /rect\([01]px,[01]px,[01]px,[01]px\)/; // rect(0) // rect(1)
+
+	/**
+	 ** checks if the element is hidden with :
+	 * width: < 2 && overflow: hidden
+	 * height: < 2 && overflow: hidden
+	 */
+	if((element.offsetWidth <= 1 && window.getComputedStyle(element, null).getPropertyValue('overflow').trim() === 'hidden')
+	|| (element.offsetHeight <= 1 && window.getComputedStyle(element, null).getPropertyValue('overflow').trim() === 'hidden')) {
+		element.setAttribute('data-tng-el-visible', 'false');
+		return false;
+	}
 	
 	/**
 	 ** checks if the element is hidden with :
+	 * display: none
+	 * opacity: 0
 	 * clip-path: circle(0) || ellipse(0)
 	 * clip: (rect(0,0,0,0) || rect(1px,1px,1px,1px)) && position: absolute
-	 * width: < 2 && overflow: hidden
-	 * height: < 2 && overflow: hidden
 	 */
 	while(element && element.tagName != 'HTML') {
 		var opacityZero = window.getComputedStyle(element, null).getPropertyValue('opacity').trim() == 0;
 
 		if(
-			window.getComputedStyle(element, null).getPropertyValue('display').trim() === 'none'
-			|| opacityZero
-			|| (element.offsetWidth <= 1 && window.getComputedStyle(element, null).getPropertyValue('overflow').trim() === 'hidden')
-			|| (element.offsetHeight <= 1 && window.getComputedStyle(element, null).getPropertyValue('overflow').trim() === 'hidden')
+			window.getComputedStyle(element, null).getPropertyValue('display').trim() === 'none' || opacityZero
 			|| window.getComputedStyle(element, null).getPropertyValue('clip-path').match(regexClipP)
 			|| (window.getComputedStyle(element, null).getPropertyValue('clip').replace(/ /g, '').match(regexClip) && window.getComputedStyle(element, null).getPropertyValue('position').trim() === 'absolute')
 		) {
@@ -644,7 +652,7 @@ function getTextNodeContrast() {
 				size: size,
 				weight: weight,
 				foreground: (results && results.color) ? results.color[0] : window.getComputedStyle(element, null).getPropertyValue('color'),
-				background: (results && results.background) ? results.background[0] : null,
+				background:  (results && results.background) ? results.background[0] : null,
 				ratio: results ? results.ratio : null,
 				xpath: getXPath(element),
 				valid: validContrast(size, weight, results ? results.ratio : null),
@@ -3840,25 +3848,30 @@ function getDuplicateID() {
     var query = null;
     nodelist.forEach(node => {
         if (node.getAttribute('id').trim().length > 0) {
-            if(ids[node.getAttribute('id')] && ids[node.getAttribute('id')] < 2) {
-                var startDigit = /^\d/;
-                var id = node.getAttribute('id');
+            if(!node.getAttribute('id').match(/\s/)) {
+                if(ids[node.getAttribute('id')] && ids[node.getAttribute('id')] < 2) {
+                    var startDigit = /^\d/;
+                    var id = node.getAttribute('id');
 
-                if(id.match(startDigit)) {
-                    id = '\\3'+id.substring(0, 1)+' '+id.substring(1, id.length).replace(/[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g, "\\$&");
-                } else {
-                    id = id.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g, "\\$&");
+                    if(id.match(startDigit)) {
+                        id = '\\3'+id.substring(0, 1)+' '+id.substring(1, id.length).replace(/[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g, "\\$&");
+                    } else {
+                        id = id.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g, "\\$&");
+                    }
+    
+                    query = query === null ? '' : query;
+                    query += '[id='+id+'],'
                 }
-
-                query = query === null ? '' : query;
-                query += '[id='+id+'],'
+    
+                if (!ids[node.getAttribute('id')]) {
+                    ids[node.getAttribute('id')] = 0;
+                }
+    
+                ids[node.getAttribute('id')]++;
             }
-
-            if (!ids[node.getAttribute('id')]) {
-                ids[node.getAttribute('id')] = 0;
-            }
-
-            ids[node.getAttribute('id')]++;
+            
+            else node.setAttribute('data-tng-invalid-id', 'true');
+            
         }
     });
 
@@ -4203,7 +4216,7 @@ function getXPath(element) {
         }
     }
 
-    return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') && !element.getAttribute('id').match(/[\/\[\]]/g) ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') && !element.getAttribute('class').match(/[\/\[\]]/g) ? '[@class="' + element.getAttribute('class') + '"]' : '');
+    return (element.parentNode.nodeType == 1 ? getXPath(element.parentNode) : '') + '/' + element.tagName.toLowerCase() + '[' + (position ? position : '1') + ']' + (element.hasAttribute('id') && !element.getAttribute('id').match(/[\/\[\]]/g) && !element.id.match(/\s/) ? '[@id="' + element.getAttribute('id') + '"]' : '') + (element.hasAttribute('class') && !element.getAttribute('class').match(/[\/\[\]]/g) ? '[@class="' + element.getAttribute('class') + '"]' : '');
 }
 
 function initTanaguru() {
@@ -4259,7 +4272,25 @@ function removeDataTNG(element) {
     });
 }
 
-function manageOutput(element, an) {
+function getFakeElement(clone) {
+    removeDataTNG(clone);
+
+    let fakeChildren = clone.querySelectorAll('*');
+    for(let i = 0; i < fakeChildren.length; i++) {
+        removeDataTNG(fakeChildren[i]);
+    }
+
+    var e = document.createElement(clone.tagName.toLowerCase());
+    if (e && e.outerHTML.indexOf("/") != -1) {
+        if (clone.innerHTML.length > 300) {
+            clone.innerHTML =  '[...]';
+        }
+    }
+
+    return clone;
+}
+
+function manageOutput(element, an, related) {
     var status = element.status ? element.status : 'cantTell';
     element.status = undefined;
     an = an ? element.fullAccessibleName : null;
@@ -4277,22 +4308,53 @@ function manageOutput(element, an) {
         var isNotExposedDueTo = element.hasAttribute('data-tng-notExposed') ? element.getAttribute('data-tng-notExposed') : '';
 
         var fakeelement = element.cloneNode(true);
-        removeDataTNG(fakeelement);
-        
-        let fakeChildren = fakeelement.querySelectorAll('*');
-        for(let i = 0; i < fakeChildren.length; i++) {
-            removeDataTNG(fakeChildren[i]);
-        }
+        fakeelement = getFakeElement(fakeelement);
 
-        var e = document.createElement(fakeelement.tagName.toLowerCase());
-        if (e && e.outerHTML.indexOf("/") != -1) {
-            if (fakeelement.innerHTML.length > 300) {
-                fakeelement.innerHTML =  '[...]';
+        var fakerelated = null;
+
+        if(related) {
+            var att_rgx = /(!!!)(?<att>.*)(!!!)/;
+            var relatedHasVariable =  false;
+            var relatedElement = null;
+
+            if(related.match(att_rgx)) {
+                relatedHasVariable = true;
+                var att = related.match(att_rgx).groups.att;
+                if(att && element.hasAttribute(att)) {
+                    var selector = related.replace(att_rgx, element.getAttribute(att));
+                    try {
+                        relatedElement = document.querySelector(selector);
+                    } catch(error) {
+                        console.log(error);
+                    }
+                }
+                
+            } else {
+                try {
+                    relatedElement = document.querySelector(related);
+                } catch(error) {
+                    console.log(error);
+                }
+            }
+
+            if(relatedElement) {
+                fakerelated = relatedElement.cloneNode(true);
+                fakerelated = getFakeElement(fakerelated);
             }
         }
     }
 
-    return { status: status, sourceCode: e ? fakeelement.outerHTML : fakeelement, anDetails: an, cssSelector : e ? getUniqueSelector(getXPath(element)) : '', xpath: e ? getXPath(element) : null, canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith, isVisible: isVisible, isNotExposedDueTo: [isNotExposedDueTo]};
+    return { 
+        status: status,
+        sourceCode: element.nodeType !== 10 ? fakeelement.outerHTML : fakeelement,
+        outerRelated: element.nodeType !== 10 && fakerelated ? fakerelated.outerHTML : null,
+        anDetails: an,
+        cssSelector :  element.nodeType !== 10 ? getUniqueSelector(getXPath(element)) : '',
+        xpath: element.nodeType !== 10 ? getXPath(element) : null,
+        canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith,
+        isVisible: isVisible,
+        isNotExposedDueTo: [isNotExposedDueTo]
+    };
 }
 
 function getUniqueSelector(xpath) {
@@ -4404,6 +4466,7 @@ for (var prop in sub_regexes) {
 
 validation_re = validation_re.replace(/\?P<node>|\?P<idvalue>|\?P<nav>|\?P<tag>|\?P<matched>|\?P<mattr>|\?P<mvalue>|\?P<contained>|\?P<cattr>|\?P<cvalue>|\?P<nth>/gi, '');
 
+
 function createTanaguruTag(tag, status) {
     if (!window.tanaguru.tags[tag]) {
         window.tanaguru.tags[tag] = { id: tag, status: status, nbfailures: 0, isNA: 0 };
@@ -4471,6 +4534,7 @@ function createTanaguruTest(test) {
             var elements = document.querySelectorAll(test.query);
         }
 
+        // Traitement du test et ses résultats
         if (elements) {
             // Statut du test par défaut.
             var status = 'inapplicable';
@@ -4483,9 +4547,7 @@ function createTanaguruTest(test) {
                     createTanaguruTag(test.tags[i], status);
                 }
             }
-            else {
-                createTanaguruTag('others', status);
-            }
+            else createTanaguruTag('others', status);
 
             // Gestion du compteur d'éléments testés (avant filtre).
             var counter = null;
@@ -4599,8 +4661,19 @@ function createTanaguruTest(test) {
             // Chargement du résultat.
             var outputelements = [];
             if(!test.hasOwnProperty('contrast')) {
-                if(!an) outputelements = elements.map(e => manageOutput(e, false));
-                else outputelements = elements.map(e => manageOutput(e, true));
+                let related = null;
+                if (test.hasOwnProperty('mark') && test.mark.constructor == Function) {
+                    let mark = test.mark();
+                    if(mark.hasOwnProperty('related') && mark.related.hasOwnProperty('element')) {
+                        related = mark.related.element;
+                    }
+                }
+
+                if(!an) {
+                    outputelements = elements.map(e => manageOutput(e, false, related));
+                } else {
+                    outputelements = elements.map(e => manageOutput(e, true, related));
+                }
             }
             
             if(test.hasOwnProperty('contrast')) {
@@ -4623,39 +4696,49 @@ function createTanaguruTest(test) {
                 data: outputelements,
                 tags: []
             };
-            if (test.hasOwnProperty('id')) {
+
+            if(test.hasOwnProperty('id')) {
                 result.id = test.id;
             }
-            if (test.hasOwnProperty('lang')) {
+
+            if(test.hasOwnProperty('lang')) {
                 result.lang = test.lang;
             }
-            if (test.hasOwnProperty('description')) {
+
+            if(test.hasOwnProperty('description')) {
                 result.description = test.description;
             }
-            if (test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(status)) {
+
+            if(test.hasOwnProperty('explanations') && test.explanations.hasOwnProperty(status)) {
                 result.explanation = test.explanations[status];
             }
-            if (test.hasOwnProperty('mark')) {
-                result.mark = test.mark;
+
+            if(test.hasOwnProperty('mark') && test.mark.constructor == Function) {
+                result.mark = test.mark();
             }
+
             result.tags = test.hasOwnProperty('tags') ? test.tags : ['others'];
-            
-            if (test.hasOwnProperty('ressources')) {
+
+            if(test.hasOwnProperty('ressources')) {
                 result.ressources = test.ressources;
             }
-            if (counter) {
+
+            if(test.hasOwnProperty('warning')) {
+                result.warning = test.warning;
+            }
+
+            if(counter) {
                 result.counter = counter;
             }
-            if (failedincollection) {
+
+            if(failedincollection) {
                 result.failedincollection = failedincollection;
             }
             
             addResultSet("Nouvelle syntaxe d'écriture des tests", result);
-            // Intégrer chaque résultat dans window.tanaguru.tests.
         }
-        else {
-            // Erreur : valeur de la propriété query.
-        }
+
+        else console.log("Requête invalide, vérifier le sélecteur CSS: "+test.query);
     }
 }
 /**
@@ -4881,11 +4964,186 @@ function addDataTng() {
 }
 
 /**
+ * ? Check if page has images, frames, media, tables, links & form fields
+ */
+function isNACat(currentCat) {
+    if(currentCat === 'images') {
+        return !document.body.querySelector('img, [role="img"], area, input[type="image"], svg, object[type^="image/"], embed[type^="image/"], canvas');
+    }
+
+    if(currentCat === 'frames') {
+        return !document.body.querySelector('iframe:not([role="presentation"]), frame:not([role="presentation"])');
+    }
+
+    if(currentCat === 'media') {
+        return !document.body.querySelector('video, audio, object[type^="video/"], object[type^="audio/"], object[type="application/ogg"], embed[type^="video/"], embed[type^="audio/"]');
+    }
+
+    if(currentCat === 'tables') {
+        return !document.body.querySelector('table, [role="table]');
+    }
+
+    if(currentCat === 'links') {
+        return !document.body.querySelector('a[href], [role="link"]');
+    }
+
+    if(currentCat === 'forms') {
+        return !document.body.querySelector('form, [role="form"], input[type="text"]:not([role]), input[type="password"]:not([role]), input[type="search"]:not([role]), input[type="email"]:not([role]), input[type="number"]:not([role]), input[type="tel"]:not([role]), input[type="url"]:not([role]), textarea:not([role]), input[type="checkbox"]:not([role]), input[type="radio"]:not([role]), input[type="date"]:not([role]), input[type="range"]:not([role]), input[type="color"]:not([role]), input[type="time"]:not([role]), input[type="month"]:not([role]), input[type="week"]:not([role]), input[type="datetime-local"]:not([role]), select:not([role]), datalist:not([role]), input[type="file"]:not([role]), progress:not([role]), meter:not([role]), input:not([type]):not([role]), [role="progressbar"], [role="slider"], [role="spinbutton"], [role="textbox"], [role="listbox"], [role="searchbox"], [role="combobox"], [role="option"], [role="checkbox"], [role="radio"], [role="switch"], [contenteditable="true"]:not([role])');
+    }
+
+    return false;
+}
+
+/**
+ * ? Filters the tests by the user's chosen status
+ */
+function filterAllTestsByStatus() {
+    filterTestsByStatus(statusUser);
+}
+
+/**
  * ? remove all [data-tng-*]
  */
 function removeAllDataTNG() {
     removeDataTNG(document.querySelector('html'));
     document.querySelectorAll('*').forEach(e => removeDataTNG(e));
+};
+
+/**
+ * ? filter tests list according user choices
+ */
+function filterCat() {
+    /**
+     * ? Filters tests according current category request , before launching tests
+     */
+    if(cat.length > 0) {
+        function matchFilters(test) {
+            return test.tags && test.tags.includes(cat);
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchFilters);
+    }
+}
+
+function filterStatus() {
+    if(statusUser.length === 0) {
+        tanaguruTestsList = [];
+        return;
+    }
+
+    if(isNACat(cat)) {
+        tanaguruTestsList = tanaguruTestsList.map(function(test) {
+            test.status = "inapplicable";
+            test.na = cat;
+            return test;
+        });
+    }
+
+    if(!statusUser.match('untested')) {
+        function matchUntested(test) {
+            if(test.status && test.status === 'untested') {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchUntested);
+    }
+
+    if(!statusUser.match('inapplicable')) {
+        function matchInapplicable(test) {
+            if((test.status && test.status === 'inapplicable') || (test.testStatus && test.testStatus === 'inapplicable')) {
+                if(test.depStatus) {
+                    let dep = false;
+                    test.depStatus.forEach(e => {
+                        if(statusUser.match(e)) dep = true;
+                    });
+
+                    return dep;
+                } else return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchInapplicable);
+    }
+
+    if(!statusUser.match('cantTell')) {
+        function matchCantTell(test) {
+            if(test.testStatus && test.testStatus === 'cantTell') {
+                if(test.depStatus) {
+                    let dep = false;
+                    test.depStatus.forEach(e => {
+                        if(statusUser.match(e)) dep = true;
+                    });
+
+                    return dep;
+                } else return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchCantTell);
+    }
+
+    if(!statusUser.match('failed')) {
+        function matchFailed(test) {
+            if(test.testStatus && test.testStatus === 'failed') {
+                if(test.depStatus) {
+                    let dep = false;
+                    test.depStatus.forEach(e => {
+                        if(statusUser.match(e)) dep = true;
+                    });
+
+                    return dep;
+                } else return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchFailed);
+    }
+
+    if(!statusUser.match('passed')) {
+        function matchPassed(test) {
+            if(test.testStatus && test.testStatus === 'passed') {
+                if(test.depStatus) {
+                    let dep = false;
+                    test.depStatus.forEach(e => {
+                        if(statusUser.match(e)) dep = true;
+                    });
+
+                    return dep;
+                } else return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchPassed);
+    }
+
+    if(!statusUser.match('passed') && !statusUser.match('failed')) {
+        function matchPassedFailed(test) {
+            if(test.expectedNbElements) {
+                if(test.depStatus) {
+                    test.depStatus.forEach(e => {
+                        if(statusUser.match(e)) return true;
+                    });
+                }
+
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        tanaguruTestsList = tanaguruTestsList.filter(matchPassedFailed);
+    }
 }
 
 /**
@@ -4898,7 +5156,7 @@ function domTab(arr) {
 
         if(pos != i) {
             arr[i].el.setAttribute('data-tng-tab-dom-error', 'true');
-            arr = moveArrVal(arr, i, pos);
+            arr = arr.splice(pos, 0, arr.splice(i, 1)[0]);
             relaunch = true;
             break;
         }
@@ -5050,17 +5308,10 @@ function getIntersectionPoint(a, b, c, d) {
     return false;
 }
 
-/**
- * ? move array value
- */
- function moveArrVal(arr, from, to) {
-    var elem = arr.splice(from, 1)[0];
-    if (to < 0) to += 1;
-    arr.splice(to, 0, elem);
-    return arr;
-}
-
 if(document.querySelector('[sdata-tng-hindex]')) cleanSDATA();
+
+// localStorage.setItem("DOM", JSON.stringify(getElementProperties(document.documentElement, 1, null, null)));
+// DOM_archi = JSON.parse(localStorage.getItem("DOM"));
 
 getElementProperties(document.documentElement, 1, null, null);
 
