@@ -47,3 +47,6 @@
 - Fix scheduled audits
 - Csv export of audit synthesis
 - Scenario audit : store command to keep only certain pages
+
+## 1.0.5
+- update tests to 5.1.0
