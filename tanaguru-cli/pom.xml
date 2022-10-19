@@ -5,7 +5,7 @@
     <parent>
         <artifactId>tanaguru2020</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.5</version>
+        <version>1.0.6-SNAPSHOT</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-api</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-audit-runner</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
