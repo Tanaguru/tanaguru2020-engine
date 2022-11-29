@@ -11,7 +11,6 @@
 
     <packaging>jar</packaging>
     <artifactId>tanaguru-audit-runner-server</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -34,10 +33,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-audit-runner</artifactId>
-            <version>1.0.6-SNAPSHOT</version>
+            <version>${tanaguru-version}</version>
         </dependency>
     </dependencies>
 
@@ -48,6 +48,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springboot-version}</version>
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -59,5 +60,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

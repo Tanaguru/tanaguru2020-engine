@@ -21,6 +21,7 @@
         <kafka-version>2.4.0</kafka-version>
         <maven-compiler-version>3.8.1</maven-compiler-version>
         <jackson-version>2.10.5</jackson-version>
+        <tanaguru-version>1.0.6-SNAPSHOT</tanaguru-version>
     </properties>
 
     <dependencyManagement>

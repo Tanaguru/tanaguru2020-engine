@@ -7,14 +7,15 @@
         <groupId>com.tanaguru</groupId>
         <version>1.0.6-SNAPSHOT</version>
     </parent>
+    
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>tanaguru-data-formatting</artifactId>
+    
     <dependencies>
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-api</artifactId>
-            <version>1.0.6-SNAPSHOT</version>
+            <version>${tanaguru-version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -32,6 +33,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
