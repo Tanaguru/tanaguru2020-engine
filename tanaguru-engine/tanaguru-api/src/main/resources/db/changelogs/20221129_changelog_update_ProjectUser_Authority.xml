@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="update_projectUser_authority" author="severineFF">
+        <insert tableName="project_role_project_authority">
+            <column name="project_role_id" valueComputed="(SELECT id FROM project_role WHERE name = 'PROJECT_USER')"/>
+            <column name="project_authority_id" valueComputed="(SELECT id FROM project_authority WHERE name = 'ADD_SCENARIO')"/>
+        </insert>
+        <insert tableName="project_role_project_authority">
+            <column name="project_role_id" valueComputed="(SELECT id FROM project_role WHERE name = 'PROJECT_USER')"/>
+            <column name="project_authority_id" valueComputed="(SELECT id FROM project_authority WHERE name = 'ADD_RESOURCE')"/>
+        </insert>
+        <rollback>
+            <sql>
+                DELETE FROM project_role_project_authority
+                WHERE project_role_id = (SELECT id FROM project_role WHERE name = 'PROJECT_USER')
+                AND project_authority_id IN ((SELECT id FROM project_authority WHERE name = 'ADD_RESOURCE'), (SELECT id FROM project_authority WHERE name = 'ADD_SCENARIO'));
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -63,7 +63,6 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka_2.13</artifactId>
                 <version>${kafka-version}</version>
-
             </dependency>
 
             <dependency>
@@ -118,8 +117,6 @@
                 <version>2.0.5</version>
                 <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
-
 </project>
