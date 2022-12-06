@@ -1,4 +1,8 @@
 [
+   {
+      "webextVersion":"5.1.0"
+   },
+   [
       {
          "lang":"en",
          "name":"Button has an empty accessible name.",
@@ -777,7 +781,6 @@
          "name":"Element with aria-hidden has no focusable content.",
          "description":"This rule checks that elements with an aria-hidden attribute do not contain focusable elements.",
          "query":"[aria-hidden=\"true\"]",
-         "status":"untested",
          "expectedNbElements":0,
          "filter":"function (item, HTML){\n\t\tvar exposedState = item.isNotExposedDueTo;\n\t\tif (exposedState.indexOf('css:display') == -1 && exposedState.indexOf('css:visibility') == -1) {\n\t\t\tvar focusables = item.querySelectorAll(HTML.getFocusableElementsSelector());\n\t\t\tif (focusables.length == 0) {\n\t\t\t\tfocusables = [];\n\t\t\t\tvar elementsWithTabindex = item.querySelectorAll('[tabindex]');\n\t\t\t\tfor (var i = 0; i < elementsWithTabindex.length; i++) {\n\t\t\t\t\tif (/^[1-9]{1}\\d*$/.test(elementsWithTabindex[i].getAttribute('tabindex'))) {\n\t\t\t\t\t\tfocusables.push(elementsWithTabindex[i]);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn focusables.length > 0;\n\t\t}\n\t\telse {\n\t\t\treturn false;\n\t\t}\n\t}",
          "ressources":{
@@ -1369,4 +1372,5 @@
          "comments":"Partially Implemented. Hum, Accessibility Supported?",
          "number":67
       }
+   ]
 ]
