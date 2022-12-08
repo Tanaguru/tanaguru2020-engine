@@ -36,7 +36,20 @@ def createDockerEnvFileContent(String propertyFileName){
              "SESSION_TIMEOUT=" + props['SESSION_TIMEOUT'] + "\n" +
              "AUDITRUNNER_ACTIVE_BROWSER=" + props['AUDITRUNNER_ACTIVE_BROWSER'] + "\n" +
              "STATISTICS_FIXED_DELAY=" + props['STATISTICS_FIXED_DELAY'] + "\n" +
-             "SPRING_PROFILE_ACTIVE=" + props['SPRING_PROFILE_ACTIVE']
+             "SPRING_PROFILE_ACTIVE=" + props['SPRING_PROFILE_ACTIVE'] + "\n" +
+             "OAUTH2_ENABLED=" + props['OAUTH2_ENABLED'] + "\n" +
+             "OAUTH2_USER_INFO_URI=" + props['OAUTH2_USER_INFO_URI'] + "\n" +
+             "OAUTH2_CLIENT_ID=" + props['OAUTH2_CLIENT_ID'] + "\n" +
+             "OAUTH2_CLIENT_SECRET=" + props['OAUTH2_CLIENT_SECRET'] + "\n" +
+             "OAUTH2_REDIRECT_URI=" + props['OAUTH2_REDIRECT_URI'] + "\n" +
+             "OAUTH2_TOKEN_URI=" + props['OAUTH2_TOKEN_URI'] + "\n" +
+             "OAUTH2_OIDC_ENABLED=" + props['OAUTH2_OIDC_ENABLED'] + "\n" +
+             "OAUTH2_OIDC_JWK=" + props['OAUTH2_OIDC_JWK'] + "\n" +
+             "OAUTH2_USER_CREATE_IF_NOT_FOUND=" + props['OAUTH2_USER_CREATE_IF_NOT_FOUND'] + "\n" + 
+             "OAUTH2_USER_CREATE_CONTRACT=" + props['OAUTH2_USER_CREATE_CONTRACT'] + "\n" +
+             "OAUTH2_TOKEN_VALIDITY=" + props['OAUTH2_TOKEN_VALIDITY'] + "\n" +
+             "OAUTH2_JWT_SECRET=" + props['OAUTH2_JWT_SECRET'] + "\n" +
+             "OAUTH2_OIDC_ISS=" + props['OAUTH2_OIDC_ISS']
     }
 }
 

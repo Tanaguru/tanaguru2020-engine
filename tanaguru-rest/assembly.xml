@@ -22,6 +22,7 @@
                 <include>common.properties</include>
                 <include>audit-runner.properties</include>
                 <include>rest.properties</include>
+                <include>oauth2.properties</include>
             </includes>
         </fileSet>
         <fileSet>
