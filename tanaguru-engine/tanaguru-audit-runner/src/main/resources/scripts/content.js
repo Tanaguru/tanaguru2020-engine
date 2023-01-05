@@ -652,7 +652,7 @@ function getTextNodeContrast() {
 				size: size,
 				weight: weight,
 				foreground: (results && results.color) ? results.color[0] : window.getComputedStyle(element, null).getPropertyValue('color'),
-				background:  (results && results.background) ? results.background[0] : null,
+				background: (results && results.background) ? results.background[0] : null,
 				ratio: results ? results.ratio : null,
 				xpath: getXPath(element),
 				valid: validContrast(size, weight, results ? results.ratio : null),
@@ -2668,7 +2668,7 @@ var htmlData = {
     }
 };
 
-var HTML = {
+var focusableSelector = {
     getFocusableElementsSelector: function () {
         var elements = [];
         let htmlDataElLength = htmlData.elements.length;
@@ -3367,7 +3367,7 @@ var getComputedAriaRole = function () {
                 }
                 if (computedRole) {
                     if (computedRole == 'presentation' || computedRole == 'none') {
-                        if (this.matches(HTML.getFocusableElementsSelector())) {
+                        if (this.matches(focusableSelector.getFocusableElementsSelector())) {
                             return this.getImplicitAriaRole();
                         }
                     }
@@ -3381,7 +3381,7 @@ var getComputedAriaRole = function () {
                 role = new ARIA.Role(role);
                 if (role.isValid()) {
                     if (role.role == 'presentation' || role.role == 'none') {
-                        if (this.matches(HTML.getFocusableElementsSelector())) {
+                        if (this.matches(focusableSelector.getFocusableElementsSelector())) {
                             return this.getImplicitAriaRole();
                         }
                     }
@@ -4349,7 +4349,7 @@ function manageOutput(element, an, related) {
         sourceCode: element.nodeType !== 10 ? fakeelement.outerHTML : fakeelement,
         outerRelated: element.nodeType !== 10 && fakerelated ? fakerelated.outerHTML : null,
         anDetails: an,
-        cssSelector :  element.nodeType !== 10 ? getUniqueSelector(getXPath(element)) : '',
+        cssSelector : element.nodeType !== 10 ? getUniqueSelector(getXPath(element)) : '',
         xpath: element.nodeType !== 10 ? getXPath(element) : null,
         canBeReachedUsingKeyboardWith: canBeReachedUsingKeyboardWith,
         isVisible: isVisible,
