@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>tanaguru-engine</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </parent>
+    
     <modelVersion>4.0.0</modelVersion>
+    <artifactId>tanaguru-api</artifactId>
 
     <properties>
-        <liquibase.version>3.8.5</liquibase.version>
+        <liquibase-version>3.8.5</liquibase-version>
     </properties>
 
-    <artifactId>tanaguru-api</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -25,10 +27,18 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            
+            <!-- <plugin>
+		        <groupId>org.liquibase</groupId>
+		        <artifactId>liquibase-maven-plugin</artifactId>
+		        <version>${liquibase-version}</version>
+		        <configuration>
+		            <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+		        </configuration>
+		    </plugin> -->
         </plugins>
     </build>
     <dependencies>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -82,12 +92,13 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.version}</version>
+            <version>${liquibase-version}</version>
         </dependency>
+        
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-helper</artifactId>
-            <version>1.0.5</version>
+            <version>${tanaguru-version}</version>
         </dependency>
 
         <dependency>
@@ -148,7 +159,6 @@
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.powermock</groupId>

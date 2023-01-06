@@ -5,11 +5,12 @@
     <parent>
         <artifactId>tanaguru-engine</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </parent>
+    
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>tanaguru-audit-runner</artifactId>
+    
     <build>
         <plugins>
             <plugin>
@@ -55,13 +56,13 @@
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-helper</artifactId>
-            <version>1.0.5</version>
+            <version>${tanaguru-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-api</artifactId>
-            <version>1.0.5</version>
+            <version>${tanaguru-version}</version>
         </dependency>
 
         <dependency>
@@ -92,12 +93,10 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

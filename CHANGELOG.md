@@ -50,3 +50,8 @@
 
 ## 1.0.5
 - update tests to 5.1.0
+
+## 1.0.6
+- New feature : SSO
+- Update project_user authorities : add ressources
+- update tests to 5.1.1
