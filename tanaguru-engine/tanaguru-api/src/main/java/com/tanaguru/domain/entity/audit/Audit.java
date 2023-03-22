@@ -77,7 +77,7 @@ public class Audit implements Serializable {
     private AuditScheduler auditScheduler;
     
     @Column
-    private long scheduledBy;
+    private Long scheduledBy;
 
     @JsonIgnore
     public Map<EAuditParameter, AuditParameterValue> getParametersAsMap() {
