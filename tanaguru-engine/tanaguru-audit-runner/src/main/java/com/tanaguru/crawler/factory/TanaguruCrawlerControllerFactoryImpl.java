@@ -2,11 +2,17 @@ package com.tanaguru.crawler.factory;
 
 import com.tanaguru.crawler.TanaguruCrawlerController;
 import com.tanaguru.crawler.TanaguruCrawlerControllerImpl;
+
+import crawlercommons.filters.basic.BasicURLNormalizer;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.url.SleepycatWebURLFactory;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,21 +64,24 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
             int maxPage,
             int maxDepth,
             String basicAuthUrl,
-            String basicAuthPassword,
-            String basicAuthLogin) throws Exception {
+            String basicAuthLogin,
+            String basicAuthPassword) throws Exception {
 
         LOGGER.debug("Create crawler controller");
         this.prepareEnv();
         CrawlConfig crawlerConfig = getCrawlerConfig(maxDepth, basicAuthUrl, basicAuthLogin, basicAuthPassword, seeds);
-        PageFetcher pageFetcher = new PageFetcher(crawlerConfig);
+        BasicURLNormalizer normalizer = BasicURLNormalizer.newBuilder().idnNormalization(BasicURLNormalizer.IdnNormalization.NONE).build();
+        PageFetcher pageFetcher = new PageFetcher(crawlerConfig, normalizer);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         robotstxtConfig.setUserAgentName(USER_AGENT_NAME);
         robotstxtConfig.setEnabled(followRobots);
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
+        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher, new SleepycatWebURLFactory());
         TanaguruCrawlerController crawlerController = new TanaguruCrawlerControllerImpl(
                 crawlerConfig,
+                normalizer,
                 pageFetcher,
                 robotstxtServer,
+                new SleepycatFrontierConfiguration(crawlerConfig),
                 maxDuration,
                 maxPage,
                 exclusionRegex,
@@ -89,13 +98,18 @@ public class TanaguruCrawlerControllerFactoryImpl implements TanaguruCrawlerCont
     private CrawlConfig getCrawlerConfig(int maxDepth, String basicAuthUrl, String basicAuthLogin, String basicAuthPassword, Collection<String> seeds) throws Exception {
         CrawlConfig crawlerConfig = new CrawlConfig();
         String auditDir = String.valueOf(new Date().getTime());
+	    File crawlStorage = new File(outputDir + auditDir);
+	    FileUtils.forceMkdir(crawlStorage);
         crawlerConfig.setCrawlStorageFolder(outputDir + auditDir);
         crawlerConfig.setMaxDepthOfCrawling(maxDepth);
         crawlerConfig.setFollowRedirects(true);
         crawlerConfig.setIncludeHttpsPages(true);
         crawlerConfig.setUserAgentString(USER_AGENT_NAME);
+        crawlerConfig.setPolitenessDelay(10);
+        crawlerConfig.setRespectNoFollow(false);
+        crawlerConfig.setRespectNoIndex(false);
 
-        if (!basicAuthLogin.isEmpty()) {
+        if (!basicAuthUrl.isEmpty() && !basicAuthLogin.isEmpty() && !basicAuthPassword.isEmpty()) {
             crawlerConfig.addAuthInfo(
                     new BasicAuthInfo(basicAuthLogin, basicAuthPassword, basicAuthUrl)
             );

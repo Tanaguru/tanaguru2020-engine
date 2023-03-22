@@ -2,6 +2,7 @@ package com.tanaguru.crawler;
 
 import com.tanaguru.crawler.listener.TanaguruCrawlerListener;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ public interface TanaguruCrawlerController {
 
     void removeListener(TanaguruCrawlerListener tanaguruCrawlerListener);
 
-    void addSeed(String url);
+    void addSeed(String url) throws IOException, InterruptedException;
 
     void waitUntilFinish();
 

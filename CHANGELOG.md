@@ -57,4 +57,4 @@
 - update tests to 5.1.1
 
 ## 1.0.7
-- Fix basic authentication on page audits
+- Fix basic authentication on all type of audit

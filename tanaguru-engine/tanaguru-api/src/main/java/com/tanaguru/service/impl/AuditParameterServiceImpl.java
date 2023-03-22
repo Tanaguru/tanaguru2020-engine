@@ -20,6 +20,8 @@ import com.tanaguru.helper.UrlHelper;
 import com.tanaguru.repository.*;
 import com.tanaguru.service.AuditParameterService;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.url.WebURLImpl;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -231,9 +233,9 @@ public class AuditParameterServiceImpl implements AuditParameterService {
                         result = Arrays.stream(urls).allMatch((url) -> {
                             boolean match = UrlHelper.isValid(url);
                             if (project != null && project.getContract().isRestrictDomain() && project.getDomain() != null && !project.getDomain().isEmpty()) {
-                                WebURL sourceDomain = new WebURL();
+                                WebURL sourceDomain = new WebURLImpl();
                                 sourceDomain.setURL(project.getDomain());
-                                WebURL target = new WebURL();
+                                WebURL target = new WebURLImpl();
                                 target.setURL(url);
                                 match &= target.getDomain().equals(sourceDomain.getDomain());
                             }
