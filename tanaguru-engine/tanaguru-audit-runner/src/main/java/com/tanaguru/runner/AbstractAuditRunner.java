@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -82,9 +83,9 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 StringBuilder strb = new StringBuilder();
                 strb.append(url.getProtocol());
                 strb.append("://");
-                strb.append(basicAuthLogin);
+                strb.append(URLEncoder.encode(basicAuthLogin, "UTF-8"));
                 strb.append(":");
-                strb.append(basicAuthPassword);
+                strb.append(URLEncoder.encode(basicAuthPassword, "UTF-8"));
                 strb.append("@");
                 strb.append(url.getHost());
                 if (url.getPort() != -1) {
@@ -94,6 +95,7 @@ public abstract class AbstractAuditRunner implements AuditRunner {
                 strb.append(url.getPath());
                 tanaguruDriver.get(strb.toString());
             }
+
             this.runImpl();
         } catch (Exception e) {
             e.printStackTrace();
