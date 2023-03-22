@@ -52,4 +52,5 @@
     <include file="db/changelogs/20220308_changelog_update_tanaguru_test_node_mark_lang.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20220718_changelog_apiKey.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20221129_changelog_update_ProjectUser_Authority.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20230214_changelog_add_scheduledby_audit.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

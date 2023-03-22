@@ -57,4 +57,7 @@
 - update tests to 5.1.1
 
 ## 1.0.7
-- Fix basic authentication on all type of audit
+- Fixes:
+  - basic authentication on all type of audit
+  - remove project with apiKey
+- add getAuditsByAuditScheduler && getLastAuditByScheduledByAndAuditStatus routes

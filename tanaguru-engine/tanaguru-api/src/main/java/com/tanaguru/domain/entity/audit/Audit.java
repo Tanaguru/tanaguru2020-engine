@@ -75,6 +75,9 @@ public class Audit implements Serializable {
     @JsonIgnore
     @OneToOne(mappedBy = "audit", cascade = CascadeType.REMOVE)
     private AuditScheduler auditScheduler;
+    
+    @Column
+    private long scheduledBy;
 
     @JsonIgnore
     public Map<EAuditParameter, AuditParameterValue> getParametersAsMap() {
@@ -176,7 +179,15 @@ public class Audit implements Serializable {
         this.auditScheduler = auditScheduler;
     }
 
-    public String getShareCode() {
+    public long getScheduledBy() {
+		return scheduledBy;
+	}
+
+	public void setScheduledBy(long scheduledBy) {
+		this.scheduledBy = scheduledBy;
+	}
+
+	public String getShareCode() {
         return shareCode;
     }
 

@@ -2,8 +2,8 @@ package com.tanaguru.controller;
 
 import com.tanaguru.domain.constant.*;
 import com.tanaguru.domain.dto.AuditCommandDTO;
-import com.tanaguru.domain.dto.DemoCommandDTO;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.AuditScheduler;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.membership.Act;
@@ -13,13 +13,12 @@ import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.domain.exception.CustomInvalidArgumentException;
-import com.tanaguru.domain.exception.CustomEntityNotFoundException;
-import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.factory.AuditFactory;
 import com.tanaguru.helper.JsonHttpHeaderBuilder;
 import com.tanaguru.repository.ActRepository;
 import com.tanaguru.repository.AuditRepository;
+import com.tanaguru.repository.AuditSchedulerRepository;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.TestHierarchyRepository;
@@ -59,6 +58,7 @@ public class AuditController {
     private final AuditFactory auditFactory;
     private final AuditRunnerService auditRunnerService;
     private final ProjectRepository projectRepository;
+    private final AuditSchedulerRepository auditSchedulerRepository;
     private final ActRepository actRepository;
     private final TestHierarchyRepository testHierarchyRepository;
     private final AsyncAuditService asyncAuditService;
@@ -72,6 +72,7 @@ public class AuditController {
             AuditService auditService, AuditFactory auditFactory,
             AuditRunnerService auditRunnerService,
             ProjectRepository projectRepository,
+            AuditSchedulerRepository auditSchedulerRepository,
             ActRepository actRepository,
             TestHierarchyRepository testHierarchyRepository, 
             AsyncAuditService asyncAuditService, 
@@ -84,6 +85,7 @@ public class AuditController {
         this.auditFactory = auditFactory;
         this.auditRunnerService = auditRunnerService;
         this.projectRepository = projectRepository;
+        this.auditSchedulerRepository = auditSchedulerRepository;
         this.actRepository = actRepository;
         this.testHierarchyRepository = testHierarchyRepository;
         this.asyncAuditService = asyncAuditService;
@@ -298,6 +300,66 @@ public class AuditController {
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, id));
         Optional<Act> actOptional = actRepository.findFirstByProjectAndAudit_TypeOrderByDateDesc(project, type);
         return actOptional.map(Act::getAudit).orElse(null);
+    }
+    
+    /**
+     * Get all @see Audit paginated for a given auditScheduler id
+     *
+     * @param id The id of the @see AuditScheduler
+     * @return A collection of @see Audit
+     */
+    @ApiOperation(
+            value = "Get all audits for a given AuditScheduler id",
+            notes = "User must have SHOW_AUDIT authority on AuditScheduler's audit"
+                    + "\nIf auditScheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with auditScheduler id"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "AuditScheduler not found : AUDIT_SCHEDULER_NOT_FOUND error")
+    })
+    @GetMapping("/by-audit-scheduler-paginated/{id}")
+    public @ResponseBody
+    org.springframework.data.domain.Page<Audit> getAuditsByAuditScheduler(@PathVariable long id,
+    		@RequestParam(defaultValue = "0") @ApiParam(required = false) int page,
+            @RequestParam(defaultValue = "5") @ApiParam(required = false) int size,
+            @RequestParam(defaultValue = "id") @ApiParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "false") @ApiParam(required = false) boolean isAsc
+    ) {
+    	Direction direction = (isAsc) ? Direction.ASC : Direction.DESC;
+    	AuditScheduler auditScheduler = auditSchedulerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND,id ));
+    	
+        if(!tanaguruUserDetailsService.currentUserCanShowAudit(auditScheduler.getAudit(), null)){
+            throw new CustomForbiddenException(CustomError.CURRENT_USER_NO_ACCESS_SCHEDULER, id );
+        }
+
+    	return auditRepository.findAllByScheduledBy(auditScheduler.getId(), PageRequest.of(page, size, Sort.by(direction, sortBy)));
+    }
+    
+    @ApiOperation(
+            value = "Get last Audit by AuditScheduler id and audit status",
+            notes = "User must have SHOW_AUDIT authority on AuditScheduler's audit"
+                    + "\nIf AuditScheduler not found, exception raise : AUDIT_SCHEDULER_NOT_FOUND with project id",
+            response = Audit.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "AuditScheduler not found : AUDIT_SCHEDULER_NOT_FOUND error")
+    })
+    @GetMapping("/last-by-audit-scheduler/{id}/{status}")
+    public @ResponseBody
+    Audit getLastAuditByScheduledByAndAuditStatus(@PathVariable long id, @PathVariable EAuditStatus status) {
+    	AuditScheduler auditScheduler = auditSchedulerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_SCHEDULER_NOT_FOUND, id));
+    	
+    	if(!tanaguruUserDetailsService.currentUserCanShowAudit(auditScheduler.getAudit(), null)){
+            throw new CustomForbiddenException(CustomError.CURRENT_USER_NO_ACCESS_SCHEDULER, id );
+        }
+    	
+        return auditRepository.findFirstByScheduledByAndStatusOrderByDateStartDesc(auditScheduler.getId(), status);
     }
 
     /**
