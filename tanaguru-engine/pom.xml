@@ -31,6 +31,12 @@
                 <artifactId>crawler4j-with-sleepycat</artifactId>
                 <version>4.8.0</version>
                 <type>pom</type>
+                <exclusions>
+			      <exclusion> 
+			        <groupId>org.apache.logging.log4j</groupId>
+			        <artifactId>log4j-slf4j-impl</artifactId>
+			      </exclusion>
+		      	</exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

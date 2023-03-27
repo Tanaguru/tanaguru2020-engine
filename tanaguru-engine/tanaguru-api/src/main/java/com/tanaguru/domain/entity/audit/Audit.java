@@ -179,11 +179,11 @@ public class Audit implements Serializable {
         this.auditScheduler = auditScheduler;
     }
 
-    public long getScheduledBy() {
+    public Long getScheduledBy() {
 		return scheduledBy;
 	}
 
-	public void setScheduledBy(long scheduledBy) {
+	public void setScheduledBy(Long scheduledBy) {
 		this.scheduledBy = scheduledBy;
 	}
 

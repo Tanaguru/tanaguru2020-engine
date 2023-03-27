@@ -60,4 +60,4 @@
 - Fixes:
   - basic authentication on all type of audit
   - remove project with apiKey
-- add getAuditsByAuditScheduler && getLastAuditByScheduledByAndAuditStatus routes
+- add getAuditsByAuditScheduler && getLastAuditByScheduledByAndAuditStatus audit endpoints
