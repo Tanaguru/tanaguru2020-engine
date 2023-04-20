@@ -3,6 +3,8 @@ package com.tanaguru.crawler;
 import com.tanaguru.helper.CrawlerRegexBuilder;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.url.WebURLImpl;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +33,11 @@ public class TanaguruCrawlerImplTest {
 
     @Test
     public void checkSameDomainTest_Valid(){
-        WebURL webURL = new WebURL();
+        WebURL webURL = new WebURLImpl();
         webURL.setURL("http://test.com/");
         Page referringPage = new Page(webURL);
 
-        WebURL toCheck = new WebURL();
+        WebURL toCheck = new WebURLImpl();
         toCheck.setURL("http://test.com/test");
 
         Assert.assertTrue(tanaguruCrawler.checkSameDomain(referringPage, toCheck));
@@ -43,11 +45,11 @@ public class TanaguruCrawlerImplTest {
 
     @Test
     public void checkSameDomainTest_Invalid(){
-        WebURL webURL = new WebURL();
+        WebURL webURL = new WebURLImpl();
         webURL.setURL("http://test.com/");
         Page referringPage = new Page(webURL);
 
-        WebURL toCheck = new WebURL();
+        WebURL toCheck = new WebURLImpl();
         toCheck.setURL("http://test2.com/test");
 
         Assert.assertFalse(tanaguruCrawler.checkSameDomain(referringPage, toCheck));

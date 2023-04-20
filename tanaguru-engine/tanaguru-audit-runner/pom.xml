@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>tanaguru-engine</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
     </parent>
-    
+
     <modelVersion>4.0.0</modelVersion>
     <artifactId>tanaguru-audit-runner</artifactId>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -50,7 +49,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>[24.1.1,)</version>
+            <version>24.0-jre</version>
         </dependency>
 
         <dependency>
@@ -66,9 +65,11 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.uci.ics</groupId>
-            <artifactId>crawler4j</artifactId>
+            <groupId>de.hs-heilbronn.mi</groupId>
+            <artifactId>crawler4j-with-sleepycat</artifactId>
+            <type>pom</type>
         </dependency>
+
 
         <dependency>
             <groupId>org.slf4j</groupId>

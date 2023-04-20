@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>tanaguru2020</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
     </parent>
-    
+
     <modelVersion>4.0.0</modelVersion>
     <artifactId>tanaguru-engine</artifactId>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>tanaguru-helper</module>
         <module>tanaguru-api</module>
@@ -28,9 +27,16 @@
             </dependency>
 
             <dependency>
-                <groupId>edu.uci.ics</groupId>
-                <artifactId>crawler4j</artifactId>
-                <version>4.4.0</version>
+                <groupId>de.hs-heilbronn.mi</groupId>
+                <artifactId>crawler4j-with-sleepycat</artifactId>
+                <version>4.8.0</version>
+                <type>pom</type>
+                <exclusions>
+			      <exclusion> 
+			        <groupId>org.apache.logging.log4j</groupId>
+			        <artifactId>log4j-slf4j-impl</artifactId>
+			      </exclusion>
+		      	</exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

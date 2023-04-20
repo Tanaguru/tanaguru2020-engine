@@ -1,9 +1,12 @@
 package com.tanaguru.crawler;
 
 import com.tanaguru.crawler.listener.TanaguruCrawlerListener;
+
+import crawlercommons.filters.basic.BasicURLNormalizer;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +29,15 @@ public class TanaguruCrawlerControllerImpl extends CrawlController implements Ta
     private Collection<TanaguruCrawlerListener> listeners = new ArrayList<>();
 
     public TanaguruCrawlerControllerImpl(CrawlConfig crawlerConfig,
+    									 BasicURLNormalizer normalizer,
                                          PageFetcher pageFetcher,
                                          RobotstxtServer robotstxtServer,
+                                         SleepycatFrontierConfiguration frontierConfig,
                                          long maxCrawlTime,
                                          int maxDocument,
                                          String exclusionRegex,
                                          String inclusionRegex) throws Exception {
-        super(crawlerConfig, pageFetcher, robotstxtServer);
+        super(crawlerConfig, normalizer, pageFetcher, robotstxtServer, frontierConfig);
         this.maxDocument = maxDocument;
         this.maxCrawlTime = maxCrawlTime * 1000;
         this.exclusionRegex = Pattern.compile(exclusionRegex);

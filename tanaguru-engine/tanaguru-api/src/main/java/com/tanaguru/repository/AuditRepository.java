@@ -1,7 +1,10 @@
 package com.tanaguru.repository;
 
+import com.tanaguru.domain.constant.EAuditStatus;
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.entity.audit.Audit;
+import com.tanaguru.domain.entity.audit.AuditScheduler;
+import com.tanaguru.domain.entity.membership.user.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,4 +38,8 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     Stream<Audit> getAll();
     
     Page<Audit> findAllByIsPrivateIsFalseAndDeletedIsFalse(Pageable pageable);
+    
+    Page<Audit> findAllByScheduledBy(long schedulerId, Pageable pageable);
+    
+    Audit findFirstByScheduledByAndStatusOrderByDateStartDesc(long schedulerId, EAuditStatus status);
 }

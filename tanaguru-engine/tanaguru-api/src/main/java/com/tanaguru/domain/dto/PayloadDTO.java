@@ -1,10 +1,7 @@
 package com.tanaguru.domain.dto;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class PayloadDTO {
-
+	
 	private String sub;
 	
 	private String name;
@@ -13,7 +10,7 @@ public class PayloadDTO {
 		
 	private String iss;
 	
-	private String aud;
+	private Object aud;
 	
 	private long iat;
 	
@@ -53,11 +50,11 @@ public class PayloadDTO {
 		this.iss = iss;
 	}
 
-	public String getAud() {
+	public Object getAud() {
 		return aud;
 	}
 
-	public void setAud(String aud) {
+	public void setAud(Object aud) {
 		this.aud = aud;
 	}
 

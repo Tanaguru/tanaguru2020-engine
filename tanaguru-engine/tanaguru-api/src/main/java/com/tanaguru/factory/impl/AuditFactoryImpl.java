@@ -117,6 +117,7 @@ public class AuditFactoryImpl implements AuditFactory {
         audit.setName(distinctName);
         audit.setType(from.getType());
         audit.setPrivate(from.isPrivate());
+        audit.setScheduledBy(from.getAuditScheduler().getId());
         audit.setShareCode(String.valueOf(new Date().hashCode()));
         audit = auditRepository.save(audit);
 

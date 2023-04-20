@@ -5,6 +5,7 @@ import com.tanaguru.domain.entity.audit.Resource;
 import com.tanaguru.domain.entity.audit.Scenario;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.contract.Contract;
+import com.tanaguru.domain.entity.membership.user.ApiKey;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -47,6 +48,10 @@ public class Project implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Scenario> scenarios;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
+    private Collection<ApiKey> apikeys;
 
     @Column
     private boolean allowPageAudit = true;

@@ -25,6 +25,6 @@ public interface TanaguruCrawlerControllerFactory {
                                                int maxPage,
                                                int maxDepth,
                                                String basicAuthUrl,
-                                               String basicAuthPassword,
-                                               String basicAuthLogin) throws Exception;
+                                               String basicAuthLogin,
+                                               String basicAuthPassword) throws Exception;
 }
