@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
@@ -13,7 +13,7 @@
 
     <groupId>com.tanaguru</groupId>
     <artifactId>tanaguru2020</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
 
     <properties>
         <springboot-version>2.2.6.RELEASE</springboot-version>
@@ -21,7 +21,7 @@
         <kafka-version>2.4.0</kafka-version>
         <maven-compiler-version>3.8.1</maven-compiler-version>
         <jackson-version>2.10.5</jackson-version>
-        <tanaguru-version>1.0.7</tanaguru-version>
+        <tanaguru-version>1.0.8-SNAPSHOT</tanaguru-version>
     </properties>
 
     <dependencyManagement>

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.tanaguru</groupId>
         <artifactId>tanaguru2020</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.8-SNAPSHOT</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -33,7 +32,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.tanaguru</groupId>
             <artifactId>tanaguru-audit-runner</artifactId>
@@ -48,7 +47,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springboot-version}</version>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
