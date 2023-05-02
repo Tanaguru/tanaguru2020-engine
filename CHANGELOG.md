@@ -61,3 +61,6 @@
   - basic authentication on all type of audit
   - remove project with apiKey
 - add getAuditsByAuditScheduler && getLastAuditByScheduledByAndAuditStatus audit endpoints
+
+## 1.0.8
+- add logout endpoint
