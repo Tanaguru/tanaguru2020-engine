@@ -4,7 +4,7 @@
     <parent>
         <artifactId>tanaguru2020</artifactId>
         <groupId>com.tanaguru</groupId>
-        <version>1.0.8</version>
+        <version>1.0.9-SNAPSHOT</version>
     </parent>
 
     <packaging>jar</packaging>
