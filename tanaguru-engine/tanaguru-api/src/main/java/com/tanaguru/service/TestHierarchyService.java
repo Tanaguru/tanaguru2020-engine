@@ -18,6 +18,14 @@ public interface TestHierarchyService {
     void deleteReference(TestHierarchy reference);
     
     /**
+     * Set isDefault to true for a given reference
+     * If existing previous default reference, set isDefault to false for it
+     *
+     * @param reference
+     */
+    void changeDefaultReference(TestHierarchy reference);
+    
+    /**
      * Return a json object with the information of the test hierarchy
      * @param testHierarchy The given @see TestHierarchy
      * @return json object

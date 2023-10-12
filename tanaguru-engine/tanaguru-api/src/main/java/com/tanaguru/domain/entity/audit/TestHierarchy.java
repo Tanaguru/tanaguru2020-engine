@@ -60,6 +60,9 @@ public class TestHierarchy implements Serializable {
 
     @Column
     private boolean isDeleted = false;
+    
+    @Column
+    private boolean isDefault = false;
 
     public long getId() {
         return id;
@@ -139,5 +142,13 @@ public class TestHierarchy implements Serializable {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+    
+    public boolean getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean isDefault) {
+        this.isDefault = isDefault;
     }
 }
