@@ -31,6 +31,9 @@ public class ProjectAppUser implements Serializable {
     @NotNull
     @Valid
     private ProjectRole projectRole;
+    
+    @Column
+    private boolean mailEnabled = true;
 
     public Project getProject() {
         return project;
@@ -54,6 +57,14 @@ public class ProjectAppUser implements Serializable {
 
     public void setProjectRole(ProjectRole projectRole) {
         this.projectRole = projectRole;
+    }
+    
+    public boolean getMaildEnabled() {
+        return mailEnabled;
+    }
+
+    public void setMaildEnabled(boolean mailEnabled) {
+        this.mailEnabled = mailEnabled;
     }
 
 }

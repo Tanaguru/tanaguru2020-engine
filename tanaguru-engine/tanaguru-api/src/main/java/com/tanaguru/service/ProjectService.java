@@ -141,4 +141,6 @@ public interface ProjectService {
      * @return api key
      */
     String generateApiKey(User user, Project project);
+    
+    void setMailSubscription(ProjectAppUser projectAppUser, boolean mailEnabled);
 }

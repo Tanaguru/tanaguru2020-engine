@@ -20,6 +20,7 @@ public interface ProjectUserRepository extends JpaRepository<ProjectAppUser, Lon
 
     Collection<ProjectAppUser> findAllByProject(Project project);
     Collection<ProjectAppUser> findAllByProject_Id(long id);
+    Collection<ProjectAppUser> findAllByProjectAndMailEnabledIsTrue(Project project);
 
     Collection<ProjectAppUser> findAllByProject_ContractAndContractAppUser_User(Contract contract, User user);
 
@@ -34,4 +35,5 @@ public interface ProjectUserRepository extends JpaRepository<ProjectAppUser, Lon
     Page<ProjectAppUser> findSharedWith(@Param("user")User user, @Param("search")String search, Pageable pageable);
 
     void deleteAllByProject(Project project);
+    Optional<ProjectAppUser> findByProject_IdAndContractAppUser_User(long projectId, User user);
 }

@@ -569,5 +569,58 @@ public class ProjectController {
         return apiKeyRepository.findByKey(apiKey)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND)).getProject();
     }
+    
+    /**
+     * @param projectId The id of the @see Project
+     */
+    @ApiOperation(
+            value = "Get current User mail subscription on the given project.",
+            notes = "User must have SHOW_PROJECT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
+                    "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_PROJECT, " +
+                    "#projectId)")
+    @GetMapping("/{projectId}/my-mail-subscription")
+    public @ResponseBody
+    boolean getCurrentUserMailSubscription(@PathVariable long projectId) {
+        return projectUserRepository.findByProject_IdAndContractAppUser_User(projectId, tanaguruUserDetailsService.getCurrentUser())
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId))
+                .getMaildEnabled();
+    }
+    
+    /**
+     * @param projectId The id of the @see Project
+     */
+    @ApiOperation(
+            value = "Set mail subscription on the given project for the current user.",
+            notes = "User must have SHOW_PROJECT authority on project"
+                    + "\nIf project not found, exception raise : PROJECT_NOT_FOUND with project id"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Project not found : PROJECT_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "@tanaguruUserDetailsServiceImpl.currentUserHasAuthorityOnProject(" +
+                    "T(com.tanaguru.domain.constant.ProjectAuthorityName).SHOW_PROJECT, " +
+                    "#projectId)")
+    @PutMapping("/{projectId}/my-mail-subscription/{mailEnabled}")
+    public @ResponseBody
+    void setCurrentUserMailSubscription(@PathVariable long projectId, @PathVariable boolean mailEnabled) {
+        ProjectAppUser projectUser = projectUserRepository.findByProject_IdAndContractAppUser_User(projectId, tanaguruUserDetailsService.getCurrentUser())
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.PROJECT_NOT_FOUND, projectId));
+        
+        projectService.setMailSubscription(projectUser, mailEnabled);
+    }
 
 }
