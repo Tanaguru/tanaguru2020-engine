@@ -49,7 +49,8 @@ def createDockerEnvFileContent(String propertyFileName){
              "OAUTH2_USER_CREATE_CONTRACT=" + props['OAUTH2_USER_CREATE_CONTRACT'] + "\n" +
              "OAUTH2_TOKEN_VALIDITY=" + props['OAUTH2_TOKEN_VALIDITY'] + "\n" +
              "OAUTH2_JWT_SECRET=" + props['OAUTH2_JWT_SECRET'] + "\n" +
-             "OAUTH2_OIDC_ISS=" + props['OAUTH2_OIDC_ISS']
+             "OAUTH2_OIDC_ISS=" + props['OAUTH2_OIDC_ISS'] + "\n" +
+             "MESSAGE_LANG=" + props['MESSAGE_LANG']
     }
 }
 
