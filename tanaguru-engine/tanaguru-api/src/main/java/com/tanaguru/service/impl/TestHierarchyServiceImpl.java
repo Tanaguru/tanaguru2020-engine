@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.tanaguru.domain.entity.audit.TanaguruTest;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.audit.Webextention;
+import com.tanaguru.domain.entity.membership.user.User;
 import com.tanaguru.domain.jsonmapper.JsonTanaguruWebextTest;
 import com.tanaguru.domain.jsonmapper.JsonTestHierarchy;
 import com.tanaguru.repository.AuditReferenceRepository;
@@ -144,6 +145,27 @@ public class TestHierarchyServiceImpl implements TestHierarchyService {
         }
         testHierarchy.setChildren(children);
         return testHierarchy;
+    }
+    
+    /**
+     * Set isDefault to true for a given reference
+     * 
+     * If existing previous default reference, set isDefault to false for it
+     *
+     * @param reference
+     */
+    public void changeDefaultReference(TestHierarchy reference) {
+        TestHierarchy currentDefaultReference = this.testHierarchyRepository.findByIsDefaultIsTrue().orElse(null);
+        
+        LOGGER.info("[Reference {}] set as default.", reference.getCode());
+    	
+        if(currentDefaultReference != null) {
+        	currentDefaultReference.setIsDefault(false);
+        	this.testHierarchyRepository.save(currentDefaultReference);
+        }
+
+        reference.setIsDefault(true);
+        this.testHierarchyRepository.save(reference);
     }
 
     public void deleteReference(TestHierarchy reference) {

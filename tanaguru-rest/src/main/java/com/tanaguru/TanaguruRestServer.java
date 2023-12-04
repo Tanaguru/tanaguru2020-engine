@@ -1,5 +1,6 @@
 package com.tanaguru;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,10 +30,13 @@ public class TanaguruRestServer {
         SpringApplication.run(TanaguruRestServer.class, args);
     }
     
+    @Value("${message.lang}")
+    private String language;
+    
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(Locale.ENGLISH);
+        slr.setDefaultLocale(getDefaultLocale());
         return slr;
     }
     
@@ -41,6 +45,8 @@ public class TanaguruRestServer {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasenames("classpath:messages");
         messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setFallbackToSystemLocale(false);
+        messageSource.setDefaultLocale(getDefaultLocale());
         return messageSource;
     }
 
@@ -52,5 +58,13 @@ public class TanaguruRestServer {
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("Async-");
         return executor;
+    }
+    
+    private Locale getDefaultLocale() {
+    	if(language.equals("fr")) {
+    		return Locale.FRENCH;
+    	} else {
+    		return Locale.ENGLISH;
+    	}
     }
 }

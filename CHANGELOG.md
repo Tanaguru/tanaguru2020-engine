@@ -64,3 +64,10 @@
 
 ## 1.0.8
 - add logout endpoint
+
+## 2.0.0
+- New features:
+  - choose default reference
+  - subscribe/unsubscribe option for project audit completion emails
+- Update:
+  - default language (en/fr) can now be set via the new environment variable "message.lang"

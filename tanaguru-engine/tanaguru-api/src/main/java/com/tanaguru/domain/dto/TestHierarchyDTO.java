@@ -14,6 +14,7 @@ public class TestHierarchyDTO {
     private String code;
     private Integer rank;
     private Boolean isDeleted;
+	private boolean isDefault;
 
     public TestHierarchyDTO() {
     }
@@ -32,6 +33,7 @@ public class TestHierarchyDTO {
         this.code = testHierarchy.getCode();
         this.rank = testHierarchy.getRank();
         this.isDeleted = testHierarchy.isDeleted();
+        this.isDefault = testHierarchy.getIsDefault();
     }
 
     public Long getId() {
@@ -96,5 +98,13 @@ public class TestHierarchyDTO {
 
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
+    }
+    
+    public boolean getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean isDefault) {
+        this.isDefault = isDefault;
     }
 }

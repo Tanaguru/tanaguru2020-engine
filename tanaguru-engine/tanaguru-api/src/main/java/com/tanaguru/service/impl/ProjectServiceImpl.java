@@ -338,4 +338,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
         return apiKeyValue;
     }
+    
+    public void setMailSubscription(ProjectAppUser projectAppUser, boolean mailEnabled) {
+    	LOGGER.info("User {} set mail subscription to {} on {} project.", projectAppUser.getContractAppUser().getUser().getUsername(), mailEnabled, projectAppUser.getProject().getName());
+    	projectAppUser.setMaildEnabled(mailEnabled);
+    	projectUserRepository.save(projectAppUser);
+    }
 }

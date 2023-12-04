@@ -41,5 +41,7 @@ public interface TestHierarchyRepository extends JpaRepository<TestHierarchy, Lo
     Page<TestHierarchy> findAllByParentIsNullAndIsDeletedIsFalse(Pageable pageable);
     
     Collection<TestHierarchy> findAllByReferenceId(Long reference_id);
+    
+    Optional<TestHierarchy> findByIsDefaultIsTrue();
 
 }

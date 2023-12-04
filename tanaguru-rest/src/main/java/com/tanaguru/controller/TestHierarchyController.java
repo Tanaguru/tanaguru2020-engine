@@ -402,4 +402,28 @@ public class TestHierarchyController {
         testHierarchy.setTanaguruTests(currentTanaguruTests);
         testHierarchyRepository.save(testHierarchy);
     }
+    
+    /**
+     * @param testHierarchyId The id of the @see TestHierarchy to modify
+     */
+    @ApiOperation(
+            value = "Set a given reference as the default.",
+            notes = "User must have CREATE_REFERENCE authority"
+                    + "\nIf test hierarchy not found, exception raise : TEST_HIERARCHY_NOT_FOUND with test hierarchy id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "Test hierarchy not found : TEST_HIERARCHY_NOT_FOUND error")
+    })
+    @PreAuthorize(
+            "hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).CREATE_REFERENCE)")
+    @PutMapping("/set-as-default/{testHierarchyId}")
+    public @ResponseBody
+    void setReferenceAsDefault(@PathVariable long testHierarchyId) {
+        TestHierarchy testHierarchy = testHierarchyRepository.findByIdAndIsDeletedIsFalseAndParentIsNull(testHierarchyId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TEST_HIERARCHY_NOT_FOUND, testHierarchyId));
+
+        testHierarchyService.changeDefaultReference(testHierarchy);
+    }
 }
