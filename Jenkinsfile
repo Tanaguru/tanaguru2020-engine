@@ -115,7 +115,8 @@ pipeline {
                     REST_VERSION=$(cat version.txt)
                     cat ./.env
 
-                    docker stop tanaguru2020-rest-dev || true
+                    docker rename tanaguru2020-rest-dev tanaguru2020-rest-dev-old || true
+                    docker stop tanaguru2020-rest-dev-old || true
                     docker image prune -f
 
                     docker run -d --rm \
@@ -149,7 +150,8 @@ pipeline {
                     REST_VERSION=$(cat version.txt)
                     cat ./.env
 
-                    docker stop tanaguru2020-rest-prod || true
+                    docker rename tanaguru2020-rest-prod tanaguru2020-rest-prod-old || true
+                    docker stop tanaguru2020-rest-prod-old || true
                     docker image prune -f
 
                     docker run -d --rm \
