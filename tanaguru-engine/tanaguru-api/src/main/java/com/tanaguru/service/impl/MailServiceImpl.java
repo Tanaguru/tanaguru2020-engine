@@ -45,7 +45,7 @@ public class MailServiceImpl implements MailService {
             InternetAddress email = new InternetAddress(to, false);
             helper.setTo(email);
             helper.setSubject(subject);
-            String body = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/></head><body><p>"+text+"</p></body></html>";
+            String body = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/></head><body><main>"+text+"</main></body></html>";
             helper.setText(body, true); //true indicate html support with mime message
             javaMailSender.send(message);
         } catch (MessagingException e) {
