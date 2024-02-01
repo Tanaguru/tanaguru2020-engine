@@ -42,9 +42,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.tanaguru.domain.constant.CustomError.FORBIDDEN_STOP_AUDIT;
 
@@ -55,6 +59,7 @@ import static com.tanaguru.domain.constant.CustomError.FORBIDDEN_STOP_AUDIT;
 @RequestMapping("/audits")
 public class AuditController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
     private final AuditRepository auditRepository;
     private final AuditService auditService;
     private final AuditFactory auditFactory;
@@ -94,6 +99,12 @@ public class AuditController {
         this.projectService = projectService;
         this.tanaguruUserDetailsService = tanaguruUserDetailsService;
         this.contractUserRepository = contractUserRepository;
+    }
+
+    @PostConstruct
+    private void startDeletedAuditCleanup() {    	
+    	LOGGER.info("Resume audit deletion");
+        auditRepository.findAllByDeletedIsTrue().forEach(asyncAuditService::deleteAudit);
     }
 
     /**
