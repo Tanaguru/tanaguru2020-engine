@@ -1,7 +1,6 @@
 package com.tanaguru.service.impl;
 
 import com.tanaguru.domain.entity.audit.Audit;
-import com.tanaguru.repository.AuditRepository;
 import com.tanaguru.service.AsyncAuditService;
 import com.tanaguru.service.AuditService;
 import org.slf4j.Logger;
@@ -26,22 +25,20 @@ import java.util.Set;
 @Service
 @Transactional
 public class AsyncAuditServiceImpl implements AsyncAuditService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncAuditServiceImpl.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncAuditServiceImpl.class);
     private final AuditService auditService;
-    private final AuditRepository auditRepository;
     private final Set<Audit> deletionSet = Collections.synchronizedSet( new HashSet<>());
     @Autowired
     private final Environment environment;
 
-    public AsyncAuditServiceImpl(AuditService auditService, AuditRepository auditRepository, Environment environment) {
+    public AsyncAuditServiceImpl(AuditService auditService, Environment environment) {
         this.auditService = auditService;
-        this.auditRepository = auditRepository;
         this.environment = environment;
     }
 
     @PostConstruct
-    private void startDeletedAuditCleanup() {
+    private void UpdateDatabaseCleanupProperties() {
     	LOGGER.info("Update database cleanup properties.");
     	Integer totalPurge = auditService.getAllAuditIncorrectlyDeleted().size();
     	
@@ -49,9 +46,6 @@ public class AsyncAuditServiceImpl implements AsyncAuditService {
             String status = 0 == totalPurge ? "useless" : "topurge";
             updatePurgeProperties(status, totalPurge);
     	}
-    	
-    	LOGGER.info("Resume audit deletion");
-        auditRepository.findAllByDeletedIsTrue().forEach(this::deleteAudit);
     }
     
     public void updatePurgeProperties(String status, int total) {
