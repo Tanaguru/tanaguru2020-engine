@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Date;
 import java.util.Optional;
 
 @Repository
@@ -33,7 +33,11 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
     
     @Query(value = "SELECT COALESCE(avg(nbElementFailed*1.0),0) FROM StatusResult")
     double getAverageNumberOfErrorsByPage();
+        
+    @Query("select sum(sr.nbElementFailed) from StatusResult sr, Page p, Audit a where a.deleted = false and a.id = p.audit and p.id = sr.page")
+    int getSumNumberOfErrorsForPages();
     
-    @Query(value = "SELECT COALESCE(sum(nbElementFailed),0) FROM StatusResult WHERE id in :ids")
-    int getSumNumberOfErrorsForPages(@Param("ids") List<Long> pageIdList);
+    @Query("select sum(sr.nbElementFailed) from StatusResult sr, Page p, Audit a where a.dateStart <= :endDate and a.dateEnd >= :startDate and a.deleted = false and a.id = p.audit and p.id = sr.page")
+    int getSumNumberOfErrorsForPagesByDatesInterval(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    
 }

@@ -2,8 +2,6 @@ package com.tanaguru.service.impl;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.tanaguru.domain.constant.EAuditType;
 import com.tanaguru.domain.dto.StatisticsDTO;
-import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.repository.AuditRepository;
@@ -23,7 +20,6 @@ import com.tanaguru.repository.PageRepository;
 import com.tanaguru.repository.ProjectRepository;
 import com.tanaguru.repository.StatusResultRepository;
 import com.tanaguru.repository.UserRepository;
-import com.tanaguru.service.AuditService;
 import com.tanaguru.service.StatsService;
 
 @Service
@@ -33,20 +29,18 @@ public class StatsServiceImpl implements StatsService {
 	private final UserRepository userRepository;
 	private final StatusResultRepository statusResultRepository;
 	private final AuditRepository auditRepository;
-	private final AuditService auditService;
 	private final ContractRepository contractRepository;
 	private final PageRepository pageRepository;
 	private StatisticsDTO stats = new StatisticsDTO();
 
 	@Autowired
 	public StatsServiceImpl(ProjectRepository projectRepository, UserRepository userRepository,
-			StatusResultRepository statusResultRepository, AuditRepository auditRepository, AuditService auditService,
+			StatusResultRepository statusResultRepository, AuditRepository auditRepository,
 			ContractRepository contractRepository, PageRepository pageRepository) {
 		this.projectRepository = projectRepository;
 		this.userRepository = userRepository;
 		this.statusResultRepository = statusResultRepository;
 		this.auditRepository = auditRepository;
-		this.auditService = auditService;
 		this.contractRepository = contractRepository;
 		this.pageRepository = pageRepository;
 	}
@@ -58,13 +52,18 @@ public class StatsServiceImpl implements StatsService {
 
 	@Scheduled(fixedDelayString = "${statistics.fixedDelay}")
 	public void createStatsScheduled() {
-		this.stats.setNbProjects((int) this.projectRepository.count());
+		double projectCount = this.projectRepository.count();
+		double auditCount = this.auditRepository.count();
+		Integer sumNumberOfErrorsForPages = this.statusResultRepository.getSumNumberOfErrorsForPages();
+		
+		this.stats.setNbProjects((int) projectCount);
 		this.stats.setNbUsers((int) this.userRepository.count());
-		this.stats.setNbAudits((int) this.auditRepository.count());
+		this.stats.setNbAudits((int) auditCount);
 		this.stats.setNbContracts((int) this.contractRepository.count());
+		
 		this.stats.setMeanNbErrorsPage(this.statusResultRepository.getAverageNumberOfErrorsByPage());
-		this.stats.setMeanNbErrorsAudit(this.getAverageNbErrorsByAudit());
-		this.stats.setMeanNbErrorsProject(this.getAverageNbErrorsByProject());
+		this.stats.setMeanNbErrorsAudit(this.getAverageNbErrorsBy(auditCount, sumNumberOfErrorsForPages));
+		this.stats.setMeanNbErrorsProject(this.getAverageNbErrorsBy(projectCount, sumNumberOfErrorsForPages));
 
 		this.stats.setNbPageAudit(this.auditRepository.numberOfAuditByType(EAuditType.PAGE));
 		this.stats.setNbSiteAudit(this.auditRepository.numberOfAuditByType(EAuditType.SITE));
@@ -98,43 +97,16 @@ public class StatsServiceImpl implements StatsService {
 		return projectStream.map(project -> project.getActs()).mapToDouble(act -> act.size()).average().orElse(0.0);
 	}
 
-	/***
-	 * Returns the average number of errors per audit
-	 *
-	 * @return the average number of errors per audit
-	 */
-	@Transactional
-	private double getAverageNbErrorsByAudit() {
-		Stream<Audit> auditStream = this.auditRepository.getAll();
-		List<Long> pagesId = auditStream.flatMap(audit -> audit.getPages().stream()).map(page -> page.getId())
-				.collect(Collectors.toList());
-		Integer error = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
-		double nbAudits = this.auditRepository.count();
-		double average = 0.0;
-
-		if(nbAudits != 0 && error != null) {
-			average = (double) error / nbAudits;
-		}
-
-		return average;
-	}
-
 	/**
-	 * Return the average number of errors per project
+	 * Return the average number of errors per count
 	 *
-	 * @return the average number of errors per project
+	 * @return the average number of errors per count
 	 */
-	private double getAverageNbErrorsByProject() {
-		Stream<Project> projectStream = this.projectRepository.getAll();
-		List<Long> pagesId = projectStream.flatMap(project -> this.auditService.findAllByProject(project).stream())
-				.flatMap(audit -> audit.getPages().stream()).map(page -> page.getId()).collect(Collectors.toList());
-
-		Integer error = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
-		double nbProjects = this.projectRepository.count();
+	private double getAverageNbErrorsBy(double count, Integer error) {
 		double average = 0.0;
 
-		if(error != null && nbProjects != 0) {
-			average = (double) error / nbProjects;
+		if(error != null && count != 0) {
+			average = (double) error / count;
 		}
 
 		return average;
@@ -164,16 +136,9 @@ public class StatsServiceImpl implements StatsService {
 	public double getAverageNbErrorsForPageByPeriod(Date startDate, Date endDate) {
 		Collection<Page> pages = pageRepository
 				.findAllByAuditDateStartLessThanEqualAndAuditDateEndGreaterThanEqual(endDate, startDate);
-		List<Long> pagesId = pages.stream().map(page -> page.getId()).collect(Collectors.toList());
 
-		Integer errorSum = this.statusResultRepository.getSumNumberOfErrorsForPages(pagesId);
-		double nbPages = pagesId.size();
-		double avg = 0.0;
-
-		if(errorSum != null && nbPages != 0) {
-			avg = (double) errorSum / nbPages;
-		}
-
-		return avg;
+		Integer errorSum = this.statusResultRepository.getSumNumberOfErrorsForPagesByDatesInterval(startDate, endDate);
+		
+		return getAverageNbErrorsBy(pages.size(), errorSum);
 	}
 }
