@@ -48,21 +48,6 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
         this.pageRepository = pageRepository;
     }
 
-    @Override
-    public void deleteTestHierarchyResult(TestHierarchyResult testHierarchyResult) {
-        LOGGER.info("[TestHierarchyResult " + testHierarchyResult.getId() + "] delete");
-        testHierarchyResult.getChildren().forEach(testHierarchyResultRepository::delete);
-        testHierarchyResultRepository.delete(testHierarchyResult);
-    }
-
-    @Override
-    public void deleteTestHierarchyResultByPage(Page page) {
-        LOGGER.info("[Page " + page.getId() + "] delete test hierarchy results");
-        for(TestHierarchyResult testHierarchyResult : testHierarchyResultRepository.findAllByPage(page)){
-            deleteTestHierarchyResult(testHierarchyResult);
-        }
-    }
-
     public AuditSynthesisDTO getAuditSynthesisForTestHierarchy(Audit audit, TestHierarchy testHierarchy, Pageable pageable ){
         Map<String, Map<Long, TestHierarchyResultDTO>> result = new LinkedHashMap<>();
         org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByAudit_Id(audit.getId(), pageable);
