@@ -18,7 +18,10 @@ import java.util.Collection;
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
-@Table(name = "element_result")
+@Table(name = "element_result", indexes = {
+		@Index(columnList = "id"),
+		@Index(columnList = "test_result_id"),
+})
 @Entity
 public class ElementResult implements Serializable {
     @Id
@@ -65,10 +68,10 @@ public class ElementResult implements Serializable {
     private String size;
 
     @Column
-    private int weight = -1;
+    private Integer weight = -1;
 
     @Column
-    private float ratio = -1;
+    private Float ratio = (float) -1;
     
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -182,19 +185,19 @@ public class ElementResult implements Serializable {
         this.size = size;
     }
 
-    public int getWeight() {
+    public Integer getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(Integer weight) {
         this.weight = weight;
     }
 
-    public float getRatio() {
+    public Float getRatio() {
         return ratio;
     }
 
-    public void setRatio(float ratio) {
+    public void setRatio(Float ratio) {
         this.ratio = ratio;
     }
 
