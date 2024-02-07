@@ -1,5 +1,6 @@
 package com.tanaguru.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tanaguru.domain.entity.audit.*;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.CascadeType;
+import javax.persistence.OneToMany;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -70,6 +73,15 @@ public class PageServiceImpl implements PageService {
     @Override
     public void deletePage(Page page) {
         LOGGER.info("[Page {}] delete", page.getId());
+        
+        testHierarchyResultService.deleteTestHierarchyResultByPage(page);        
+        page.getStatusResults().forEach(statusResultRepository::delete);
+        
+        for( TestResult tr : page.getTestResults()) {
+        	tr.getElementResults().forEach(elementResultRepository::delete);
+        	testResultRepository.delete(tr);
+        }
+        
         pageRepository.delete(page);
     }
 
@@ -79,7 +91,6 @@ public class PageServiceImpl implements PageService {
         for (Page page : pageRepository.findAllByAudit_Id(audit.getId())) {
             deletePage(page);
         }
-
     }
 
     /**

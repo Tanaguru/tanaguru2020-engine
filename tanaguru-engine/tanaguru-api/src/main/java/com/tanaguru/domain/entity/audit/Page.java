@@ -35,15 +35,15 @@ public class Page implements Serializable {
     private Audit audit;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "page", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "page")
     private Collection<TestHierarchyResult> testHierarchyResults;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "page", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "page")
     private Collection<StatusResult> statusResults;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "page", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "page")
     private Collection<TestResult> testResults;
 
     @Column

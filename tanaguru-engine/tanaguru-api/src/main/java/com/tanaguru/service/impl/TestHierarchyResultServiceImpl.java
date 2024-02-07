@@ -51,6 +51,7 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     @Override
     public void deleteTestHierarchyResult(TestHierarchyResult testHierarchyResult) {
         LOGGER.info("[TestHierarchyResult " + testHierarchyResult.getId() + "] delete");
+        testHierarchyResult.getChildren().forEach(testHierarchyResultRepository::delete);
         testHierarchyResultRepository.delete(testHierarchyResult);
     }
 
@@ -58,7 +59,7 @@ public class TestHierarchyResultServiceImpl implements TestHierarchyResultServic
     public void deleteTestHierarchyResultByPage(Page page) {
         LOGGER.info("[Page " + page.getId() + "] delete test hierarchy results");
         for(TestHierarchyResult testHierarchyResult : testHierarchyResultRepository.findAllByPage(page)){
-            testHierarchyResultRepository.delete(testHierarchyResult);
+            deleteTestHierarchyResult(testHierarchyResult);
         }
     }
 
