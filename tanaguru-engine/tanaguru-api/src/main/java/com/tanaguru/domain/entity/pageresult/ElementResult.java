@@ -18,10 +18,7 @@ import java.util.Collection;
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
-@Table(name = "element_result", indexes = {
-		@Index(columnList = "id"),
-		@Index(columnList = "test_result_id"),
-})
+@Table(name = "element_result")
 @Entity
 public class ElementResult implements Serializable {
     @Id
