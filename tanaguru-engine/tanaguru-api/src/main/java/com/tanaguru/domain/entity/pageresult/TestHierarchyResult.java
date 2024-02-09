@@ -14,10 +14,7 @@ import java.util.Collection;
 /**
  * @author rcharre
  */
-@Table(name = "test_hierarchy_result", indexes = {
-		@Index(columnList = "page_id"),
-		@Index(columnList = "page_id, test_hierarchy_id"),
-})
+@Table(name = "test_hierarchy_result")
 @Entity
 public class TestHierarchyResult implements Serializable {
     @Id
