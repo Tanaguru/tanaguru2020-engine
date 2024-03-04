@@ -164,7 +164,6 @@ public class AuditController {
     /*
      * @return @see number of audits incorrectly deleted
      */
-    @ApiIgnore
     @ApiOperation(
             value = "Get number of audits incorrectly deleted.",
             notes = "User must be SUPER_ADMIN")

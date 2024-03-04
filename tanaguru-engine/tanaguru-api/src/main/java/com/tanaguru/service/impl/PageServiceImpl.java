@@ -71,14 +71,7 @@ public class PageServiceImpl implements PageService {
     public void deletePage(Page page) {
         LOGGER.info("[Page {}] delete", page.getId());
         
-        testHierarchyResultRepository.deleteAllInBatchByPage(page);
-        statusResultRepository.deleteAllInBatchByPage(page);
-        
-        for( TestResult tr : page.getTestResults()) {
-        	elementResultRepository.deleteAllInBatchByTestResult(tr);
-        	testResultRepository.delete(tr);
-        }
-        
+        page.getTestResults().forEach(elementResultRepository::deleteByTestResult);
         pageRepository.delete(page);
     }
 

@@ -17,9 +17,6 @@ import java.util.Collection;
 public interface ElementResultRepository extends JpaRepository<ElementResult, Long> {
     Collection<ElementResult> findAllByIdIn(Collection<Long> ids);
     Page<ElementResult> findAllByTestResult(TestResult testResult, Pageable pageable);
-    
-    @Modifying
-    @Transactional
-    @Query("delete from ElementResult where testResult = :testResult")
-    void deleteAllInBatchByTestResult(@Param("testResult") TestResult testResult);
+    Collection<ElementResult> findAllByTestResult(TestResult testResult);
+    void deleteByTestResult(TestResult testResult);
 }

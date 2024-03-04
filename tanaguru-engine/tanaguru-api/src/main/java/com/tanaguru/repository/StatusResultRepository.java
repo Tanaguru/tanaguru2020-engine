@@ -5,11 +5,9 @@ import com.tanaguru.domain.entity.audit.Page;
 import com.tanaguru.domain.entity.audit.TestHierarchy;
 import com.tanaguru.domain.entity.pageresult.StatusResult;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Date;
@@ -32,11 +30,8 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
      * @return The collection of @see StatusResult
      */
     Collection<StatusResult> findAllByReferenceAndPage_Audit(TestHierarchy reference, Audit audit);
-    
-    @Modifying
-    @Transactional
-    @Query("delete from StatusResult where page = :page")
-    void deleteAllInBatchByPage(@Param("page") Page page);
+
+    Collection<StatusResult> findAllByPage(Page page);
     
     @Query(value = "SELECT COALESCE(avg(nbElementFailed*1.0),0) FROM StatusResult")
     double getAverageNumberOfErrorsByPage();

@@ -49,8 +49,4 @@ public class AuditSynthesisDTO{
     public void setTotalPages(long totalPages) {
         this.totalPages = totalPages;
     }
-
-    public void setTotalPages(int totalPages) {
-        this.totalPages = totalPages;
-    }
 }
