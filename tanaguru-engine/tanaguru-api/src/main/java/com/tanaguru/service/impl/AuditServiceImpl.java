@@ -162,10 +162,8 @@ public class AuditServiceImpl implements AuditService {
      * @return @see Audit list
      */
     public Collection <Audit> getAllAuditIncorrectlyDeleted() {
-    	Collection <Audit> audits = auditRepository.findAll();
-    	int total = audits.size();
-    	
-    	audits.removeIf(audit -> actRepository.findByAudit(audit).isPresent());
+    	Collection <Audit> audits = auditRepository.findAllWithoutAct();
+    	int total = auditRepository.numberTotalOfAudit();
     	
     	LOGGER.info("{} audits incorrectly deleted on {} audits", audits.size(), total);
     	

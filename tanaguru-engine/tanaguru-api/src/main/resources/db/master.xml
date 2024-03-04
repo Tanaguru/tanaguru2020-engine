@@ -56,4 +56,5 @@
     <include file="db/changelogs/20231011_changelog_update_TestHierarchy_default.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20231013_changelog_update_projectAppUser_mailEnabled.xml" relativeToChangelogFile="false"/>
     <include file="db/changelogs/20240209_changelog_index_test_result_on_element_result.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelogs/20240304_changelog_index_page_to_its_onetomany_relations.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
