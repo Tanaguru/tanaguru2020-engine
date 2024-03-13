@@ -283,12 +283,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project) {
         LOGGER.info("[Project {}] delete", project.getId());
-        actRepository.deleteAllByProject(project);
+        auditService.findAllByProject(project).forEach(asyncAuditService::deleteAudit);
+        project.getActs().forEach(actRepository::delete);
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());
-
-        auditService.findAllByProject(project)
-                .forEach(asyncAuditService::deleteAudit);
     }
 
     public Project modifyProject(Project project, String name, String domain) {

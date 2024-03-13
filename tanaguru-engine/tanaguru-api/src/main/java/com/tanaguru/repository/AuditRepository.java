@@ -42,4 +42,10 @@ public interface AuditRepository extends JpaRepository<Audit, Long> {
     Page<Audit> findAllByScheduledBy(long schedulerId, Pageable pageable);
     
     Audit findFirstByScheduledByAndStatusOrderByDateStartDesc(long schedulerId, EAuditStatus status);
+
+    @Query("select a from Audit a where (select count(act) from Act act where act.audit = a.id) = 0")
+    Collection <Audit> findAllWithoutAct();
+
+    @Query("select count(*) from Audit")
+    int numberTotalOfAudit();
 }

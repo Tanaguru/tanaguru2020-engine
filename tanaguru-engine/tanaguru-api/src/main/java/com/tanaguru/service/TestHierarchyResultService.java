@@ -12,10 +12,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.springframework.data.domain.Pageable;
 
-public interface TestHierarchyResultService {
-    
-    void deleteTestHierarchyResult(TestHierarchyResult testHierarchyResult);
-    
+public interface TestHierarchyResultService {    
     AuditSynthesisDTO getAuditSynthesisForTestHierarchy(Audit audit, TestHierarchy testHierarchy, Pageable pageable);
 
     TestHierarchyResultDTO getReducedResultByAudit(Audit audit, TestHierarchy testHierarchy);
@@ -23,8 +20,6 @@ public interface TestHierarchyResultService {
     String getStatusByTestsStatus(boolean hasFailed, boolean hasSuccess, boolean hasNotApplicable, boolean hasCantTell);
     
     JSONObject toJson(TestHierarchyResult testHierarchyResult);
-
-    void deleteTestHierarchyResultByPage(Page page);
     
     Map<String, String> getTestStatusByAuditAndTestHierarchy(Audit audit, TestHierarchy testHierarchy);
 }

@@ -70,6 +70,8 @@ public class PageServiceImpl implements PageService {
     @Override
     public void deletePage(Page page) {
         LOGGER.info("[Page {}] delete", page.getId());
+        
+        page.getTestResults().forEach(elementResultRepository::deleteByTestResult);
         pageRepository.delete(page);
     }
 
@@ -79,7 +81,6 @@ public class PageServiceImpl implements PageService {
         for (Page page : pageRepository.findAllByAudit_Id(audit.getId())) {
             deletePage(page);
         }
-
     }
 
     /**

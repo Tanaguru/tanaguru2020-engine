@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,9 @@ public class AuditServiceImpl implements AuditService {
         this.auditAuditParameterValueRepository = auditAuditParameterValueRepository;
         this.testHierarchyRepository = testHierarchyRepository;
     }
+    
+    @Autowired
+    private Environment environment;
 
     public Collection<Audit> findAllByProject(Project project) {
         return actRepository.findAllByProject(project).stream()
@@ -152,10 +156,33 @@ public class AuditServiceImpl implements AuditService {
         }
         return jsonAuditObject;
     }
+    
+    /**
+     * Get all audits incorrectly deleted
+     * @return @see Audit list
+     */
+    public Collection <Audit> getAllAuditIncorrectlyDeleted() {
+    	Collection <Audit> audits = auditRepository.findAllWithoutAct();
+    	int total = auditRepository.numberTotalOfAudit();
+    	
+    	LOGGER.info("{} audits incorrectly deleted on {} audits", audits.size(), total);
+    	
+        return audits;
+    }
 
     @Override
     public org.springframework.data.domain.Page<Audit> findAllByProjectAndType(Project project, EAuditType type,
             Pageable pageable) {
         return actRepository.findAllAuditByProjectAndAudit_Type(project, type, pageable);
     }
+
+	@Override
+	public String getTotalAuditsToBePurged() {
+		return environment.getProperty("purge.total");
+	}
+
+	@Override
+	public String getPurgeStatus() {
+		return environment.getProperty("purge.status");
+	}
 }

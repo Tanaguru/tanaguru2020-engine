@@ -60,7 +60,7 @@ public class TestResult implements Serializable {
     private int nbElementUntested = 0;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "testResult", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "testResult")
     private Collection<ElementResult> elementResults;
 
     @Type(type = "jsonb")

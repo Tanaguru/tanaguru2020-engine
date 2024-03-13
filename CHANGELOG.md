@@ -71,3 +71,11 @@
   - subscribe/unsubscribe option for project audit completion emails
 - Update:
   - default language (en/fr) can now be set via the new environment variable "message.lang"
+
+## 2.1.0
+- Temporary feature (partially implemented): purge database (delete all orphaned audits)
+- Update:
+  - removal of audits
+  - statistics services
+  - audit completion email
+  - add many indexes to the database

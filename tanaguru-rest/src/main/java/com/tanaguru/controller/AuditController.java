@@ -27,6 +27,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,9 +42,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.tanaguru.domain.constant.CustomError.FORBIDDEN_STOP_AUDIT;
 
@@ -53,6 +59,7 @@ import static com.tanaguru.domain.constant.CustomError.FORBIDDEN_STOP_AUDIT;
 @RequestMapping("/audits")
 public class AuditController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
     private final AuditRepository auditRepository;
     private final AuditService auditService;
     private final AuditFactory auditFactory;
@@ -94,6 +101,12 @@ public class AuditController {
         this.contractUserRepository = contractUserRepository;
     }
 
+    @PostConstruct
+    private void startDeletedAuditCleanup() {    	
+    	LOGGER.info("Resume audit deletion");
+        auditRepository.findAllByDeletedIsTrue().forEach(asyncAuditService::deleteAudit);
+    }
+
     /**
      * @param id        The id of the @see Audit
      * @param shareCode the share code of the @see Audit
@@ -120,6 +133,94 @@ public class AuditController {
         return auditRepository.findById(id)
                 .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.AUDIT_NOT_FOUND, id));
     }
+    
+
+    //! START TEMPORARY FIX
+    /* use for clean db, before v2.0.1 project's audits has not removed on project remove*/
+    @ApiIgnore
+    @ApiOperation(
+            value = "Delete all previously incorrectly deleted audits.",
+            notes = "User must be SUPER_ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
+    @GetMapping("/clean")
+    public @ResponseBody
+    void cleanAudits() {
+    	Collection <Audit> audits = this.auditService.getAllAuditIncorrectlyDeleted();
+    	
+    	asyncAuditService.updatePurgeProperties("purging", Integer.parseInt(auditService.getTotalAuditsToBePurged()));
+    	audits.forEach((Audit audit) -> {
+    		if (audit.getStatus() == EAuditStatus.DONE || audit.getStatus() == EAuditStatus.ERROR) {
+                audit.setDeleted(true);
+                audit = auditRepository.save(audit);
+                asyncAuditService.deleteAudit(audit);
+            }
+    	});
+    }
+    
+    /*
+     * @return @see number of audits incorrectly deleted
+     */
+    @ApiOperation(
+            value = "Get number of audits incorrectly deleted.",
+            notes = "User must be SUPER_ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
+    @GetMapping("/count-incorrectly-deleted")
+    public @ResponseBody
+    Integer getNumberOfAuditsIncorrectlyDeleted() {
+    	Integer count = this.auditService.getAllAuditIncorrectlyDeleted().size();
+    	
+    	if(0 == count && this.auditService.getPurgeStatus().equals("purging")) {
+    		asyncAuditService.updatePurgeProperties("purged", Integer.parseInt(auditService.getTotalAuditsToBePurged()));
+    	}
+    	
+    	return count;
+    }
+    
+    /*
+     * total audits to be purged
+     */
+    @ApiIgnore
+    @ApiOperation(
+            value = "Get total audits to be purged.",
+            notes = "User must be SUPER_ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
+    @GetMapping("/total-purge")
+    public @ResponseBody
+    Integer getTotalAuditsToBePurged() {
+    	return Integer.parseInt(auditService.getTotalAuditsToBePurged());
+    }
+    
+    /*
+     * audits purge status
+     */
+    @ApiIgnore
+    @ApiOperation(
+            value = "Get total audits to be purged.",
+            notes = "User must be SUPER_ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session")
+    })
+    @PreAuthorize("hasAuthority(T(com.tanaguru.domain.constant.AppAuthorityName).SHOW_STATISTICS)")
+    @GetMapping("/status-purge")
+    public @ResponseBody
+    String getAuditsPurgeStatus() {
+    	return this.auditService.getPurgeStatus();
+    }
+    
+    //! END TEMPORARY FIX
 
     /**
      * @param id        The id of the @see Audit
