@@ -1,5 +1,7 @@
 package com.tanaguru.service;
 
+import java.util.Date;
+
 import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.user.User;
@@ -77,4 +79,6 @@ public interface UserService {
      * @param username
      */
     void unlock(User user);
+
+    String generateUserToken(User user, Date expiration);
 }

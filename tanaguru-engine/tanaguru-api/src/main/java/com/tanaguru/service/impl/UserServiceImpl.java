@@ -4,16 +4,22 @@ import com.tanaguru.domain.constant.CustomError;
 import com.tanaguru.domain.constant.EAppAccountType;
 import com.tanaguru.domain.constant.EAppRole;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
+import com.tanaguru.domain.entity.membership.project.Project;
+import com.tanaguru.domain.entity.membership.user.ApiKey;
 import com.tanaguru.domain.entity.membership.user.Attempt;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.entity.membership.user.UserToken;
+import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomInvalidEntityException;
 import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.UserRepository;
+import com.tanaguru.repository.UserTokenRepository;
 import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.ContractService;
 import com.tanaguru.service.MailService;
 import com.tanaguru.service.UserService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +32,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 
 /**
@@ -45,6 +52,8 @@ public class UserServiceImpl implements UserService {
     private final UserFactory userFactory;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private final UserTokenRepository userTokenRepository;
+
     private static final int FIRST_STEP_ATTEMPTS = 3;
     private static final int SECOND_STEP_ATTEMPTS = 5;
     private static final int MAX_ATTEMPTS = 7;
@@ -57,7 +66,8 @@ public class UserServiceImpl implements UserService {
                            AppRoleService appRoleService,
                            ContractService contractService, MailService mailService,
                            MessageService messageService, UserFactory userFactory,
-                           BCryptPasswordEncoder bCryptPasswordEncoder) {
+                           BCryptPasswordEncoder bCryptPasswordEncoder,
+                           UserTokenRepository userTokenRepository) {
         this.userRepository = userRepository;
         this.contractUserRepository = contractUserRepository;
         this.appRoleService = appRoleService;
@@ -66,6 +76,7 @@ public class UserServiceImpl implements UserService {
         this.messageService = messageService;
         this.userFactory = userFactory;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userTokenRepository = userTokenRepository;
     }
 
     public boolean checkUsernameIsUsed(String username) {
@@ -293,5 +304,31 @@ public class UserServiceImpl implements UserService {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MILLISECOND, miliseconds);
         return calendar.getTime();
+    }
+
+    /**
+     * Generate a new Api key. The key is store with the user.
+     * This key can authenticate the user.
+     * @param user
+     * @return user token
+     */
+    @Override
+    public String generateUserToken(User user, Date expiration) {
+        String userTokenValue = "";
+        if(user != null) {
+            userTokenValue = RandomStringUtils.random(20, true, true);
+            Optional<UserToken> oldUserToken = this.userTokenRepository.findByUser(user);
+            if(oldUserToken.isPresent()) {
+                oldUserToken.get().setToken(userTokenValue);
+                oldUserToken.get().setExpiration(expiration);
+                this.userTokenRepository.save(oldUserToken.get());
+            }else {
+                UserToken userToken = new UserToken(user, userTokenValue, expiration);
+                this.userTokenRepository.save(userToken);
+            }
+        }else {
+            throw new CustomEntityNotFoundException(CustomError.CANNOT_GENERATE_API_KEY);
+        }
+        return userTokenValue;
     }
 }
