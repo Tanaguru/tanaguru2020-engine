@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author rcharre
@@ -99,8 +98,12 @@ public class User implements Serializable {
     @Column(nullable = false)
     @NotNull
     private boolean expired = false;
-    
-    public long getId() {
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private UserToken userToken;
+
+	public long getId() {
         return id;
     }
 
@@ -220,4 +223,11 @@ public class User implements Serializable {
         this.expired = expired;
     }
 
+    public UserToken getUserToken() {
+		return userToken;
+	}
+
+	public void setUserToken(UserToken userToken) {
+		this.userToken = userToken;
+	}
 }

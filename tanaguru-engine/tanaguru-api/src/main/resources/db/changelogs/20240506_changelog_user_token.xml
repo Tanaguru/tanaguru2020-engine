@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create_userToken" author="sfoucherferet">
+        <createTable tableName="user_token">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="app_user_id" type="bigint"/>
+            <column name="token" type="varchar(200)"/>
+            <column name="expiration" type="timestamp" defaultOnNull="true"/>
+        </createTable>
+        <addPrimaryKey tableName="user_token" columnNames="id"/>
+        <addNotNullConstraint tableName="user_token" columnName="app_user_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_token"
+                baseColumnNames="app_user_id"
+                constraintName="fk_user_token_user_id_user_id"
+                referencedTableName="app_user"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="user_token"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="update_appuser_add_usertoken" author="sfoucherferet">
+        <addColumn tableName="app_user">
+            <column name="user_token" type="varchar(200)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="app_user" columnName="user_token"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
