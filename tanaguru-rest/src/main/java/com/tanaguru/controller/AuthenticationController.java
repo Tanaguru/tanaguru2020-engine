@@ -71,4 +71,17 @@ public class AuthenticationController {
 		String token = jwtTokenUtil.generateToken(userDetails);
 		return new JwtResponse(token);
 	}
+
+	/**
+	 * Authenticate user by user token and return jwt token
+	 *
+	 * @param userToken
+	 * @return jwt token
+	 */
+	@PostMapping(value = "/user-token/{userToken}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public JwtResponse createAuthenticationTokenByUserToken(@PathVariable String userToken) {
+		UserDetails userDetails = tanaguruUserDetailsService.loadUserByUserToken(userToken);
+		String token = jwtTokenUtil.generateToken(userDetails);
+		return new JwtResponse(token);
+	}
 }

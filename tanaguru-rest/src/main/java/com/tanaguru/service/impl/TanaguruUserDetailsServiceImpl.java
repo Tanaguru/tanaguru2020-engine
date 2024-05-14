@@ -7,6 +7,7 @@ import com.tanaguru.domain.entity.audit.Audit;
 import com.tanaguru.domain.entity.membership.Act;
 import com.tanaguru.domain.entity.membership.user.ApiKey;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.entity.membership.user.UserToken;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomIllegalStateException;
 import com.tanaguru.repository.*;
@@ -50,6 +51,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     private final ActRepository actRepository;
     private final AppAccountTypeRepository appAccountTypeRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private UserTokenRepository userTokenRepository;
 
     @Autowired
     public TanaguruUserDetailsServiceImpl(ContractService contractService, 
@@ -64,7 +66,8 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
             BCryptPasswordEncoder bCryptPasswordEncoder, 
             ActRepository actRepository,
             AppAccountTypeRepository appAccountTypeRepository,
-            ApiKeyRepository apiKeyRepository) {
+            ApiKeyRepository apiKeyRepository,
+            UserTokenRepository userTokenRepository) {
         this.contractService = contractService;
         this.projectService = projectService;
         this.contractRepository = contractRepository;
@@ -78,6 +81,7 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
         this.actRepository = actRepository;
         this.appAccountTypeRepository = appAccountTypeRepository;
         this.apiKeyRepository = apiKeyRepository;
+        this.userTokenRepository = userTokenRepository;
     }
 
     @PostConstruct
@@ -221,5 +225,26 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
                         ).collect(Collectors.toList())
         );
     }
-    
+
+    public UserDetails loadUserByUserToken(String userTokenValue) throws CustomEntityNotFoundException {
+        Optional<UserToken> userToken = this.userTokenRepository.findByToken(userTokenValue);
+        User user = null;
+        if(userToken.isPresent()) {
+            user = userToken.get().getUser();
+        }else{
+            throw new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND);
+        }
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                user.isAccountNonLocked(),
+                user.getAppRole().getAuthorities().stream()
+                        .map(appAuthority ->
+                                new SimpleGrantedAuthority(appAuthority.getName())
+                        ).collect(Collectors.toList())
+        );
+    }
 }
