@@ -555,7 +555,7 @@ public class UserController {
     @GetMapping(value = "/token/{user_id}/{expiration}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public String generateUserToken(@PathVariable long user_id, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date expiration) {
         User user = userRepository.findById(user_id)
-                                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
 
         return this.userService.generateUserToken(user, expiration);
     }
@@ -580,7 +580,7 @@ public class UserController {
         		.orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
 
         UserToken userToken = userTokenRepository.findByUser(user)
-        		.orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+        		.orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TOKEN_NOT_FOUND));
         
         return userToken.getExpiration().getTime();
     }

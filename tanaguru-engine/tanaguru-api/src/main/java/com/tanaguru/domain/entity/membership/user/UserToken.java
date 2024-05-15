@@ -61,8 +61,4 @@ public class UserToken {
     public void setExpiration(Date expiration) {
         this.expiration = expiration;
     }
-    
-    public Boolean isValid() {
-        return 0 >= expiration.compareTo(new Date());
-    }
 }

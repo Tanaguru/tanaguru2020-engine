@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -227,24 +228,26 @@ public class TanaguruUserDetailsServiceImpl implements TanaguruUserDetailsServic
     }
 
     public UserDetails loadUserByUserToken(String userTokenValue) throws CustomEntityNotFoundException {
-        Optional<UserToken> userToken = this.userTokenRepository.findByToken(userTokenValue);
-        User user = null;
-        if(userToken.isPresent()) {
-            user = userToken.get().getUser();
-        }else{
-            throw new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND);
+        UserToken userToken = userTokenRepository.findByToken(userTokenValue)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TOKEN_NOT_FOUND));
+
+        if(0 < userToken.getExpiration().compareTo(new Date())) {
+            User user = userToken.getUser();
+
+            return new org.springframework.security.core.userdetails.User(
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.isEnabled(),
+                    true,
+                    true,
+                    user.isAccountNonLocked(),
+                    user.getAppRole().getAuthorities().stream()
+                            .map(appAuthority ->
+                                    new SimpleGrantedAuthority(appAuthority.getName())
+                            ).collect(Collectors.toList())
+            );
+        } else {
+            throw new CustomEntityNotFoundException(CustomError.TOKEN_EXPIRED);
         }
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
-                true,
-                true,
-                user.isAccountNonLocked(),
-                user.getAppRole().getAuthorities().stream()
-                        .map(appAuthority ->
-                                new SimpleGrantedAuthority(appAuthority.getName())
-                        ).collect(Collectors.toList())
-        );
     }
 }
