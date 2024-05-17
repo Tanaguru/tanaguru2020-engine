@@ -43,7 +43,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } catch (ExpiredJwtException e) {
                 logger.debug("JWT Token has expired");
             } catch( SignatureException e) {
-            	logger.debug("JWT Token signature not valid for classic JWT filter");
+            	logger.trace("JWT Token signature not valid for classic JWT filter");
             }
         } else {
             logger.trace("JWT Token does not begin with Bearer String");
