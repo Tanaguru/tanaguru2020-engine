@@ -153,7 +153,15 @@ public abstract class AbstractAuditRunnerService implements AuditRunnerListener,
                     String projectName = projectAppUser.getProject().getName();
                     String mailUnsubscriptionUrl = webappUrl + "projects/" + projectId + "/unsubscribe";
                     try {
-                        boolean emailSent = mailService.sendMimeMessage(user.getEmail(), messageService.getMessage("mail.auditEnd.subject"), messageService.getMessage("mail.auditEnd.body").replace("domain", domain).replaceAll("url", url).replace("currentproject", projectName).replace("disabledmaillink", mailUnsubscriptionUrl));
+                        boolean emailSent = mailService.sendMimeMessage(
+							user.getEmail(), 
+							messageService.getMessage("mail.auditEnd.subject"), 
+							messageService.getMessage("mail.auditEnd.body")
+								.replace("domain", domain)
+								.replaceAll("url", url)
+								.replace("currentproject", projectName)
+								.replaceAll("disabledmaillink", mailUnsubscriptionUrl)
+						);
 
 						if(emailSent) {
 							auditService.log(auditRunner.getAudit(), EAuditLogLevel.INFO,
