@@ -76,4 +76,11 @@ public interface TanaguruUserDetailsService extends UserDetailsService{
      * @return user details
      */
     UserDetails loadUserByApiKey(String apiKey);
+
+    /**
+     * Get the user's details from their user token
+     * @param userToken
+     * @return user details
+     */
+    UserDetails loadUserByUserToken(String userToken);
 }

@@ -9,14 +9,17 @@ import com.tanaguru.domain.dto.DetailedUserDTO;
 import com.tanaguru.domain.dto.ForgotEmailDTO;
 import com.tanaguru.domain.dto.UserDTO;
 import com.tanaguru.domain.entity.membership.contract.ContractAppUser;
+import com.tanaguru.domain.entity.membership.project.Project;
 import com.tanaguru.domain.entity.membership.project.ProjectAppUser;
 import com.tanaguru.domain.entity.membership.user.User;
+import com.tanaguru.domain.entity.membership.user.UserToken;
 import com.tanaguru.domain.exception.CustomEntityNotFoundException;
 import com.tanaguru.domain.exception.CustomForbiddenException;
 import com.tanaguru.factory.UserFactory;
 import com.tanaguru.repository.ContractUserRepository;
 import com.tanaguru.repository.ProjectUserRepository;
 import com.tanaguru.repository.UserRepository;
+import com.tanaguru.repository.UserTokenRepository;
 import com.tanaguru.security.JwtTokenUtil;
 import com.tanaguru.service.AppRoleService;
 import com.tanaguru.service.MailService;
@@ -34,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,6 +59,7 @@ public class UserController {
 
     private final TanaguruUserDetailsService userDetailsService;
     private final UserRepository userRepository;
+    private final UserTokenRepository userTokenRepository;
     private final UserService userService;
     private final UserFactory userFactory;
 
@@ -76,6 +81,7 @@ public class UserController {
     public UserController(
             TanaguruUserDetailsService userDetailsService,
             UserRepository userRepository,
+            UserTokenRepository userTokenRepository,
             UserService userService,
             UserFactory userFactory,
             AppRoleService appRoleService,
@@ -87,6 +93,7 @@ public class UserController {
             JwtTokenUtil jwtTokenUtil) {
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
+        this.userTokenRepository = userTokenRepository;
         this.userService = userService;
         this.userFactory = userFactory;
         this.appRoleService = appRoleService;
@@ -526,5 +533,55 @@ public class UserController {
         } else {
             throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, changePasswordCommandDTO.getUserId());
         }
+    }
+    
+    /**
+     * Generate a new User token. This key can authenticate the user.
+     * @param user_id
+     * @param expiration yyyy-MM-dd
+     * @return user token
+     */
+    @ApiOperation(
+            value = "Generate a new User token. This key can authenticate the user.",
+            notes = "If user not found, exception raise : USER_NOT_FOUND error"
+                    + "\nIf cannot generate token, exception raise : CANNOT_GENERATE_API_KEY error")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "PUser not found : USER_NOT_FOUND error"
+                    + "\nCannot generate api key : CANNOT_GENERATE_API_KEY error")
+    })
+    @GetMapping(value = "/token/{user_id}/{expiration}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String generateUserToken(@PathVariable long user_id, @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date expiration) {
+        User user = userRepository.findById(user_id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+
+        return this.userService.generateUserToken(user, expiration);
+    }
+    
+    /**
+     * Get the user token expiration date.
+     * @param user_id
+     * @return user token
+     */
+    @ApiOperation(
+            value = "Get the user token expiration date.",
+            notes = "If user or token not found, exception raise : USER_NOT_FOUND error")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error")
+    })
+    @GetMapping(value = "/token-expiration/{user_id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public long getUserTokenExpiration(@PathVariable long user_id) {
+        User user = userRepository.findById(user_id)
+        		.orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+
+        UserToken userToken = userTokenRepository.findByUser(user)
+        		.orElseThrow(() -> new CustomEntityNotFoundException(CustomError.TOKEN_NOT_FOUND));
+        
+        return userToken.getExpiration().getTime();
     }
 }
