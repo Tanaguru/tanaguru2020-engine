@@ -79,3 +79,7 @@
   - statistics services
   - audit completion email
   - add many indexes to the database
+
+## 2.2.0
+- New feature: user token
+- Fix : footer link of audit end mail
