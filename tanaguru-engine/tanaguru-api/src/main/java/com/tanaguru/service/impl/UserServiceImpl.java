@@ -331,4 +331,11 @@ public class UserServiceImpl implements UserService {
         }
         return userTokenValue;
     }
+
+    @Override
+    public void removeUserToken(User user) {
+        if(user != null) {
+            this.userTokenRepository.deleteByUser(user);
+        }
+    }
 }

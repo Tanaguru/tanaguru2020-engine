@@ -584,4 +584,35 @@ public class UserController {
         
         return userToken.getExpiration().getTime();
     }
+
+    /**
+     * Remove current UserToken
+     *
+     * @param user_id The id of the user
+     */
+    @ApiOperation(
+            value = "Delete current UserToken",
+            notes = "User must have MODIFY_USER authority or must be current User"
+                    + "\nIf user not found, exception raise : USER_NOT_FOUND with user id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid parameters"),
+            @ApiResponse(code = 401, message = "Unauthorized : ACCESS_DENIED message"),
+            @ApiResponse(code = 403, message = "Forbidden for current session"),
+            @ApiResponse(code = 404, message = "User not found : USER_NOT_FOUND error"
+                    + "\nCannot modify current user : CANNOT_MODIFY_USER_PASSWORD error")
+    })
+    @DeleteMapping(value = "/token/{user_id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteUserToken(@PathVariable long user_id) {
+        User user = userRepository.findById(user_id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(CustomError.USER_NOT_FOUND, user_id));
+
+        User current = userDetailsService.getCurrentUser();
+        Boolean isCurrentUser = current != null && current.getId() == user_id;
+        Boolean currentUserHasAuthority = current != null && userService.hasAuthority(current, AppAuthorityName.MODIFY_USER);
+        if(isCurrentUser || currentUserHasAuthority) {
+            this.userService.removeUserToken(user);
+        } else {
+            throw new CustomForbiddenException(CustomError.CANNOT_MODIFY_USER_PASSWORD, user_id);
+        }
+    }
 }

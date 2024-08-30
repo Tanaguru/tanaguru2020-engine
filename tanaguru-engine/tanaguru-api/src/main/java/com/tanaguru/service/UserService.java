@@ -80,5 +80,17 @@ public interface UserService {
      */
     void unlock(User user);
 
+    /**
+     * Create UserToken for the user
+     * @param user
+     * @param expiration
+     * @return token
+     */
     String generateUserToken(User user, Date expiration);
+
+    /**
+     * Remove UserToken for the user
+     * @param user
+     */
+    void removeUserToken(User user);
 }
