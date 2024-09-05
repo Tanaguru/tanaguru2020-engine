@@ -32,6 +32,7 @@ public class UserToken {
     public UserToken(User user, String token, Date expiration) {
         this.user = user;
         this.token = token;
+        this.expiration = expiration;
     }
 
     public long getId() {
