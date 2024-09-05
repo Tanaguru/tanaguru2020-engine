@@ -83,3 +83,7 @@
 ## 2.2.0
 - New feature: user token
 - Fix : footer link of audit end mail
+
+## 2.2.1
+- Update : new endpoint deleteUserToken
+- Fix : UserToken constructor
