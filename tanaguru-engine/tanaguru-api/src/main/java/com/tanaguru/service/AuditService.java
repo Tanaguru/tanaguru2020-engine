@@ -77,22 +77,4 @@ public interface AuditService {
      * @return json object
      */
     JSONObject toJson(Audit audit);
-    
-    /**
-     * Get all audits incorrectly deleted
-     * @return @see Audit list
-     */
-    Collection <Audit> getAllAuditIncorrectlyDeleted();
-    
-    /**
-     * Get the total of audits to purge
-     * @return String total
-     */
-    String getTotalAuditsToBePurged();
-    
-    /**
-     * Get purge status
-     * @return String status
-     */
-    String getPurgeStatus();
 }
