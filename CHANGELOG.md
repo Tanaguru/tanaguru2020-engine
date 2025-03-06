@@ -87,3 +87,12 @@
 ## 2.2.1
 - Update : new endpoint deleteUserToken
 - Fix : UserToken constructor
+
+## 2.3.0
+- Remove temporary purge feature (see 2.1.0)
+- Update :
+  - new database indexes for TestHierarchyResult
+  - RGAA test file
+- New :
+  - HikariCP properties (common)
+  - thread pools properties (rest)
