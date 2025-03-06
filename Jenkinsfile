@@ -50,7 +50,14 @@ def createDockerEnvFileContent(String propertyFileName){
              "OAUTH2_TOKEN_VALIDITY=" + props['OAUTH2_TOKEN_VALIDITY'] + "\n" +
              "OAUTH2_JWT_SECRET=" + props['OAUTH2_JWT_SECRET'] + "\n" +
              "OAUTH2_OIDC_ISS=" + props['OAUTH2_OIDC_ISS'] + "\n" +
-             "MESSAGE_LANG=" + props['MESSAGE_LANG']
+             "MESSAGE_LANG=" + props['MESSAGE_LANG'] + "\n" +
+             "HIKARI_MIN_IDLE=" + props['HIKARI_MIN_IDLE'] + "\n" +
+             "HIKARI_MAX_POOL_SIZE=" + props['HIKARI_MAX_POOL_SIZE'] + "\n" +
+             "HIKARI_CONNECTION_TIMEOUT=" + props['HIKARI_CONNECTION_TIMEOUT'] + "\n" +
+             "HIKARI_IDLE_TIMEOUT=" + props['HIKARI_IDLE_TIMEOUT'] + "\n" +
+             "HIKARI_MAX_LIFETIME=" + props['HIKARI_MAX_LIFETIME'] + "\n" +
+             "TOMCAT_THREADS_MAX=" + props['TOMCAT_THREADS_MAX'] + "\n" +
+             "TOMCAT_THREADS_MIN_SPARE=" + props['TOMCAT_THREADS_MIN_SPARE']
     }
 }
 
@@ -239,14 +246,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            slackSend channel: '#jenkins',
-                color: COLOR_MAP[currentBuild.currentResult],
-                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nMore info at: ${env.BUILD_URL}"
         }
     }
 }
