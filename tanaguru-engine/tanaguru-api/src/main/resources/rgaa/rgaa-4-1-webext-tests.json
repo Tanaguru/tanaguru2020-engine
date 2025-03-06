@@ -613,7 +613,7 @@
          "query":"meta[http-equiv=\"refresh\"][content]",
          "testStatus":"failed",
          "filter":"function (item, HTML){\n        var content = item.getAttribute('content').trim();\n\n        if (content.length > 0) {\n            let redirect = /; *url=.+/i;\n            let refresh = /^(\\s*\\d+\\s*){1}/i;\n\n            if(redirect.test(content)) {\n                item.setAttribute('data-tng-redirect', true);\n                return;\n            } else if(refresh.test(content)) {\n                content = content.split(';')[0].trim();\n                return content > 0 && content < 72000;\n            }\n        }\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"http-equiv\",\n                value: \"refresh\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"content\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "meta",
@@ -632,7 +632,7 @@
          "query":"[data-tng-redirect]",
          "testStatus":"failed",
          "filter":"function (item, HTML){\n        var content = item.getAttribute('content').trim();\n        let time = content.match(/^\\d+/);\n        if(time) return time[0] > 0;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"http-equiv\",\n                value: \"refresh\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"content\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "meta",
@@ -980,7 +980,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.getAttribute('for').trim().length > 0) {\n            var startDigit = /^\\d/;\n            var id = item.getAttribute('for');\n\n            if(id.match(startDigit)) {\n                id = '\\\\3'+id.substring(0, 1)+' '+id.substring(1, id.length).replace(/[!\"#$%&'()*+,-./:;<=>?@[\\]^\\`{|}~]/g, \"\\\\$&\");\n            } else {\n                id = id.replace(/[!\"#$%&'()*+,-./:;<=>?@[\\]^\\`{|}~]/g, \"\\\\$&\");\n            }\n            \n            var fields = document.querySelectorAll('#'+id);\n\n            if(fields.length === 0 || fields.length > 1) {\n                return true;\n            } else {\n                let elCategory = fields[0].getImplicitAriaRoleCategory();\n                if(elCategory && elCategory === 'forms') {\n                    item.setAttribute('data-tng-label-related', 'true');\n                }\n                return;\n            }\n        }\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"for\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -997,7 +997,7 @@
          "name":"Liste des intitulés de champs de formulaire reliés à leur champ.",
          "query":"label[data-tng-label-related=\"true\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"for\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1037,7 +1037,7 @@
          "query":"[data-tng-has-label=\"title\"]:not([data-tng-visible-label])",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1056,7 +1056,7 @@
          "query":"[data-tng-has-label=\"describedby\"]:not([data-tng-visible-label])",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {\n                title: \"Passage de texte référencé par [aria-describedby].\", // desc displayed above the element\n                element: \"#!!!aria-describedby!!!\", //css selector\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1075,7 +1075,7 @@
          "filter":"function (item, HTML){\n        if(item.getAttribute('data-tng-label-related' === 'true')) return true;\n\n        if(item.hasChildNodes()) {\n            var children = item.childNodes;\n            var childrenLength = children.length;\n\n            for(var i = 0; i < childrenLength; i++) {\n                if(children[i].tagName) {\n                    let cat = children[i].getImplicitAriaRoleCategory();\n                    if(cat && cat === 'forms') return true;\n                }\n            }\n        }\n    }",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {\n                title: \"Champ associé au <label>.\",\n                element: \"#!!!for!!!\",\n                attrs: [],\n                tag: false,\n                content: false\n            },\n            tag: false,\n            content: true\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1093,7 +1093,7 @@
          "query":"[data-tng-formField][title][data-tng-el-exposed=\"true\"]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1111,7 +1111,7 @@
          "query":"[data-tng-formField][aria-label][data-tng-el-exposed=\"true\"]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1129,7 +1129,7 @@
          "query":"[data-tng-formField][aria-labelledby][data-tng-el-exposed=\"true\"]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {\n                title: \"Passage de texte associé au champ.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1319,7 +1319,7 @@
          "query":"[data-tng-fieldsgroup-legend]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte associé au champ.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms",
@@ -1368,7 +1368,7 @@
          "name":"Liste des éléments optgroup avec attribut label.",
          "query":"select optgroup[label][data-tng-el-exposed=\"true\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"label\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1389,7 +1389,7 @@
             "cantTell"
          ],
          "filter":"function (item, HTML){\n        if(item.getAttribute('label').trim().length > 0) {\n            item.setAttribute('data-tng-optgroup-label', 'true');\n            return;\n        } else {\n            return true;\n        }\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"label\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1407,7 +1407,7 @@
          "query":"[data-tng-optgroup-label]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"label\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1429,7 +1429,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"value\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte associé au champ.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms",
@@ -1447,7 +1447,7 @@
          "name":"Liste des boutons de formulaire sans intitulé.",
          "query":"[data-tng-formButton-an=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"alt\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"value\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {\n                title: \"Passage de texte associé au champ.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms",
@@ -1686,7 +1686,7 @@
          "query":"input[type=\"text\"][data-tng-el-exposed=\"true\"], input[type=\"password\"][data-tng-el-exposed=\"true\"], input[type=\"email\"][data-tng-el-exposed=\"true\"], input[type=\"tel\"][data-tng-el-exposed=\"true\"], input[type=\"url\"][data-tng-el-exposed=\"true\"], textarea[data-tng-el-exposed=\"true\"], input[type=\"date\"][data-tng-el-exposed=\"true\"], select[data-tng-el-exposed=\"true\"], input[data-tng-el-exposed=\"true\"]:not([type])",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"autocomplete\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1705,7 +1705,7 @@
          "query":"input[autocomplete][data-tng-el-exposed=\"true\"], textarea[autocomplete][data-tng-el-exposed=\"true\"], select[autocomplete][data-tng-el-exposed=\"true\"]",
          "testStatus":"failed",
          "filter":"function (item, HTML){\n        //? if na, return\n        if(item.disabled) return;\n        if(item.hasAttribute('aria-disabled') && item.getAttribute('aria-disabled') === 'true') return;\n\n        if(item.getAttribute('autocomplete') === 'on' || item.getAttribute('autocomplete') === 'off' || item.getAttribute('autocomplete').trim() === '') return;\n\n        if(item.tagName.toLowerCase() === 'input' && item.hasAttribute('type')) {\n            let notField = ['submit', 'reset', 'image', 'button'];\n            if(notField.includes(item.getAttribute('type').toLowerCase())) {\n                return;\n            }\n        }\n\n        if(item.hasAttribute('role') && item.getAttribute('role') === 'button') return;\n\n        //? else get autocomplete values\n        let autocomplete = item.getAttribute('autocomplete').toLowerCase().split(' ');\n\n        /**\n         *? Token groups\n         * order : 1.group, 2.Mode, 3.Hint, 4.Token\n         ** https://html.spec.whatwg.org/#autofill-field\n         */\n        let group = new RegExp(/section-*/);\n        let mode = ['shipping', 'billing'];\n        let hint = ['home', 'work', 'mobile', 'fax', 'pager']; // contact token only\n\n        let normalToken = ['name', 'honorific-prefix', 'given-name', 'additional-name', 'family-name', 'honorific-suffix', 'nickname', 'organization-title', 'username', 'new-password', 'current-password', 'one-time-code', 'organization', 'street-address', 'address-line1', 'address-line2', 'address-line3', 'address-level4', 'address-level3', 'address-level2', 'address-level1', 'country', 'country-name', 'postal-code', 'cc-name', 'cc-given-name', 'cc-additional-name', 'cc-family-name', 'cc-number', 'cc-exp', 'cc-exp-month', 'cc-exp-year', 'cc-csc', 'cc-type', 'transaction-currency', 'transaction-amount', 'language', 'bday', 'bday-day', 'bday-month', 'bday-year', 'sex', 'url', 'photo'];\n        let contactToken = ['tel', 'tel-country-code', 'tel-national', 'tel-area-code', 'tel-local', 'tel-local-prefix', 'tel-local-suffix', 'tel-extension', 'email', 'impp'];\n\n        //? Control groups\n        let textGroup = ['name', 'honorific-prefix', 'given-name', 'additional-name', 'family-name', 'honorific-suffix', 'nickname', 'organization-title', 'organization', 'address-line1', 'address-line2', 'address-line3','address-level4', 'address-level3', 'address-level2', 'address-level1', 'country', 'country-name', 'postal-code', 'cc-name', 'cc-given-name', 'cc-additional-name', 'cc-family-name', 'cc-number', 'cc-csc', 'cc-type', 'transaction-currency', 'language', 'sex', 'tel-country-code', 'tel-national', 'tel-area-code', 'tel-local', 'tel-local-prefix', 'tel-local-suffix', 'tel-extension'];\n        let usernameGroup = ['username', 'email'];\n        let passwordGroup = ['new-password', 'current-password', 'one-time-code'];\n        let multilineGroup = ['street-address'];\n        let monthGroup = ['cc-exp'];\n        let numericGroup = ['cc-exp-month', 'cc-exp-year', 'transaction-amount', 'bday-day', 'bday-month', 'bday-year'];\n        let dateGroup = ['bday'];\n        let urlGroup = ['url', 'photo', 'impp'];\n        let telGroup = ['tel'];\n\n        let controlGroups = [\n            ['text', textGroup],\n            ['email', usernameGroup],\n            ['password', passwordGroup],\n            ['multiline', multilineGroup],\n            ['month', monthGroup],\n            ['number', numericGroup],\n            ['date', dateGroup],\n            ['url', urlGroup],\n            ['tel', telGroup]\n        ];\n\n        /**\n         *? Check validity\n         */\n        if(autocomplete.length === 1) {\n            if(!normalToken.includes(autocomplete[0]) && !contactToken.includes(autocomplete[0])) return true;\n\n            controlGroups.forEach(el => {\n                if(el[1].includes(autocomplete[0])) {\n                    item.setAttribute('data-tng-autocomplete-group', el[0]);\n                    return;\n                }\n            });\n        }\n\n        if(autocomplete.length > 1) {\n            let mainTokenIndex = autocomplete.length - 1;\n            let mainToken = false;\n\n            //? check main token\n            if(normalToken.includes(autocomplete[mainTokenIndex])) {\n                mainToken = 'normal';\n            } else if(contactToken.includes(autocomplete[mainTokenIndex])) {\n                mainToken = 'contact';\n            } else {\n                return true;\n            }\n\n            //? check order tokens\n            if(mainToken === 'normal') {\n                if(autocomplete.length < 4 && !hint.some(x => autocomplete.includes(x))) {\n                    if(autocomplete.length === 2 && (!autocomplete[0].match(group) && !mode.includes(autocomplete[0]))) {\n                        return true;\n                    }\n\n                    if(autocomplete.length === 3) {\n                        if(!autocomplete[0].match(group) || !mode.includes(autocomplete[1])) {\n                            return true;\n                        }\n                    }\n                } else {\n                    return true;\n                }\n            }\n\n            if(mainToken === 'contact') {\n                if(autocomplete.length < 5) {\n                    if(autocomplete.length === 2 && (!autocomplete[0].match(group) && !mode.includes(autocomplete[0]) && !hint.includes(autocomplete[0]))) {\n                        return true;\n                    }\n\n                    if(autocomplete.length === 3) {\n                        if(autocomplete[0].match(group)) {\n                            if(!mode.includes(autocomplete[1]) && !hint.includes(autocomplete[1])) {\n                                return true;\n                            }\n                        } else if(mode.includes(autocomplete[0]) && !hint.includes(autocomplete[1])) {\n                            return true;\n                        } else if(hint.includes(autocomplete[0])) {\n                            return true;\n                        }\n                    }\n\n                    if(autocomplete.length === 4) {\n                        if(!autocomplete[0].match(group) || !mode.includes(autocomplete[1]) || !hint.includes(autocomplete[2])) {\n                            return true;\n                        }\n                    }\n                } else {\n                    return true;\n                }\n            }\n\n            controlGroups.forEach(el => {\n                if(el[1].includes(autocomplete[mainTokenIndex])) {\n                    item.setAttribute('data-tng-autocomplete-group', el[0]);\n                    return;\n                }\n            });\n        }\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"autocomplete\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1726,7 +1726,7 @@
             "cantTell"
          ],
          "filter":"function (item, HTML){\n        if(item.tagName.toLowerCase() === 'textarea' || item.tagName.toLowerCase() === 'select') {\n            item.setAttribute('data-tng-autocomplete', true);\n            return;\n        }\n\n        let group = item.getAttribute('data-tng-autocomplete-group');\n        let type = '';\n\n        if(item.hasAttribute('type')) {\n            type = item.getAttribute('type').toLowerCase();\n        } else {\n            type = 'text';\n        }\n\n        if(group === 'multiline') return true;\n\n        if(type === 'text' || type === 'search') {\n            item.setAttribute('data-tng-autocomplete', true);\n            return;\n        }\n\n        if(type === group) {\n            item.setAttribute('data-tng-autocomplete', true);\n            return;\n        }\n\n        return true;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"autocomplete\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"type\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1745,7 +1745,7 @@
          "description":"Vérifier que l'attribut autocomplete est pertinent au regard du type d'information attendue.",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"autocomplete\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "forms"
@@ -1762,7 +1762,7 @@
          "name":"Liste des cadres avec un attribut title",
          "query":"iframe[data-tng-el-exposed=\"true\"][title]:not([role=\"presentation\"]), frame[data-tng-el-exposed=\"true\"][title]:not([role=\"presentation\"])",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "frames"
@@ -1816,7 +1816,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "frames"
@@ -1833,7 +1833,7 @@
          "name":"Les cadres suivants ont un titre non pertinent",
          "query":"[data-tng-frameAlt]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "frames"
@@ -1874,7 +1874,7 @@
          "query":"img[data-tng-altLong], [role=\"img\"][data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -1916,7 +1916,7 @@
          "query":"area[data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -1959,7 +1959,7 @@
          "query":"input[type=\"image\"][data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "buttons",
@@ -1999,7 +1999,7 @@
          "name":"Liste de zones cliquables d'une image réactive côté serveur doublée d'un lien dans la page.",
          "query":"[data-tng-ismap-linked]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"href\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2061,7 +2061,7 @@
          "query":"svg[role=\"img\"][data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2124,7 +2124,7 @@
          "query":"object[type^=\"image/\"][data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2183,7 +2183,7 @@
          "query":"embed[type^=\"image/\"][data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2246,7 +2246,7 @@
          "query":"canvas[data-tng-altLong]",
          "description":"ce test vérifie si les images restituées par les technologies d'assistances ont un nom accessible",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2268,7 +2268,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\"\n            },\n            {\n                name: \"role\",\n                value: \"presentation\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2285,7 +2285,7 @@
          "name":"Liste d'images (balise img) de décoration non ignorées par les technologies d'assistance",
          "query":"img[data-tng-img-ignored=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"tabindex\",\n                value: \"-\",\n                valueState: \"startBy\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2306,7 +2306,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\"\n            },\n            {\n                name: \"role\",\n                value: \"presentation\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2323,7 +2323,7 @@
          "name":"Liste de zones non cliquable (balise area sans attribut href) de décoration non ignorées par les technologies d'assistance",
          "query":"area[data-tng-img-ignored=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\" //startBy || endBy, || contains || egal || notEmpty || any\n            },\n            {\n                name: \"tabindex\",\n                value: \"-\",\n                valueState: \"startBy\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2344,7 +2344,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2381,7 +2381,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2398,7 +2398,7 @@
          "name":"Liste d'image vectorielle (balise svg) de décoration non ignorées par les technologies d'assistance",
          "query":"svg[data-tng-img-ignored=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        //todo permettre de marquer les balises enfants <title> et <desc>\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\" //startBy || endBy, || contains || egal || notEmpty || any\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2419,7 +2419,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2436,7 +2436,7 @@
          "name":"Liste d'images bitmap (balise canvas) de décoration non ignorées par les technologies d'assistance",
          "query":"canvas[data-tng-img-ignored=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"false\",\n                valueState: \"egal\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2457,7 +2457,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"true\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2474,7 +2474,7 @@
          "name":"Liste d'images embarquées (balise embed avec l'attribut type=\"image/…\") de décoration non ignorées par les technologies d'assistance",
          "query":"embed[type^=\"image/\"][data-tng-img-ignored=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-hidden\",\n                value: \"false\",\n                valueState: \"egal\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -2493,7 +2493,7 @@
          "description":"La pertinence du nom accessible dépend du contexte de l'image, image porteuse d'information ou image-test/CAPTCHA.",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2513,7 +2513,7 @@
          "query":"img[data-tng-altLong][src]",
          "testStatus":"failed",
          "filter":"function (item, HTML){\n        let an = item.getAttribute('data-tng-anobject');\n        if(an && an[0] && item.src.length > 0) return an.includes(item.src);;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2533,7 +2533,7 @@
          "query":"area[data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2554,7 +2554,7 @@
          "query":"input[type=\"image\"][data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2574,7 +2574,7 @@
          "query":"input[type=\"image\"][data-tng-altLong][src]",
          "testStatus":"failed",
          "filter":"function (item, HTML){\n        let an = item.getAttribute('data-tng-anobject');\n        if(an && an[0] && item.src.length > 0) return an.includes(item.src);;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2594,7 +2594,7 @@
          "query":"object[data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2615,7 +2615,7 @@
          "query":"embed[data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2636,7 +2636,7 @@
          "query":"svg[data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2657,7 +2657,7 @@
          "query":"canvas[data-tng-altLong]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2714,7 +2714,7 @@
          "description":"Ce test vérifie si le nom accessible des images est inférieur à 80 caractère.",
          "query":"[data-tng-altLong=\"true\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2733,7 +2733,7 @@
          "query":"[data-tng-altLong=\"false\"]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"alt\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-labelledby\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images",
@@ -2905,7 +2905,7 @@
          "description":"Si ces images nécessitent une description détaillée, vérifier que l'attribut aria-describedby associe cette description.",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-describedby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte identifié par l'attribut aria-describedby\",\n                element: \"#!!!aria-describedby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "images"
@@ -3295,7 +3295,7 @@
          "description":"Vérifiez la pertinence des noms accessibles des liens",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte référencé par l'attribut aria-labelledby.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: true\n        }\n    }",
+         
          "tags":[
             "a11y",
             "links",
@@ -3315,7 +3315,7 @@
          "testStatus":"failed",
          "description":"Ces liens possèdent un attribut title dont la valeur ne reprend pas le « nom accessible » issu du contenu du lien",
          "filter":"function (item, HTML){\n        let anMatch = isString1MatchString2(item.getAttribute('title'), item.accessibleName());\n        if(anMatch === null) return;\n        return !anMatch;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: true\n        }\n    }",
+         
          "tags":[
             "a11y",
             "links",
@@ -3409,7 +3409,7 @@
          "testStatus":"failed",
          "description":"Ces liens images possèdent un attribut title dont la valeur ne reprend pas le « nom accessible » issu du contenu du lien",
          "filter":"function (item, HTML){\n        let anMatch = isString1MatchString2(item.getAttribute('title'), item.accessibleName());\n        if(anMatch === null) return;\n        return !anMatch;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "links",
@@ -3502,7 +3502,7 @@
          "testStatus":"failed",
          "description":"Ces liens composites possèdent un attribut title dont la valeur ne reprend pas le « nom accessible » issu du contenu du lien",
          "filter":"function (item, HTML){\n        let anMatch = isString1MatchString2(item.getAttribute('title'), item.accessibleName());\n        if(anMatch === null) return;\n        return !anMatch;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: true\n        }\n    }",
+         
          "tags":[
             "a11y",
             "links",
@@ -3721,7 +3721,7 @@
          "name":"Valeurs d'attribut id dupliqués dans la page",
          "code":"duplicate_id",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "code",
@@ -3739,7 +3739,7 @@
          "name":"La valeur de l'attribut id ne contient pas d'espace.",
          "query":"[data-tng-invalid-id]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "code",
@@ -3955,7 +3955,7 @@
             "failed":"La langue de la page n'est pas spécifiée."
          },
          "filter":"function (item, HTML){\n        if(item.hasAttribute('lang') || item.hasAttribute('xml:lang')) {\n            item.setAttribute('data-tng-haslang', true);\n            return true;\n        }\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -3977,7 +3977,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.hasAttribute('lang')) {\n            item.setAttribute('data-tng-lang', 'lang');\n            if(item.getAttribute('lang').length === 0) {\n                item.setAttribute('data-tng-emptylang', 'lang');\n            }\n        }\n\n        if (item.hasAttribute('xml:lang')) {\n            item.setAttribute('data-tng-lang', 'xml');\n            if(item.getAttribute('xml:lang').length === 0) {\n                if(item.hasAttribute('data-tng-emptylang')) {\n                    item.setAttribute('data-tng-emptylang', 'both');\n                } else {\n                    item.setAttribute('data-tng-emptylang', 'xml');\n                }\n            }\n        }\n        return item.hasAttribute('data-tng-emptylang');\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -3995,7 +3995,7 @@
          "name":"Page HTML avec un attribut lang non vide.",
          "query":"[data-tng-lang=\"lang\"]:not([data-tng-emptylang=\"lang\"]):not([data-tng-emptylang=\"both\"]), [data-tng-lang=\"xml\"]:not([data-tng-emptylang=\"xml\"]):not([data-tng-emptylang=\"both\"])",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4017,7 +4017,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        var lang1 = item.getAttribute('lang');\n        var lang2 = item.getAttribute('xml:lang');\n        if(lang1.length > 0 || lang2.length > 0) {\n            var langA = lang1.includes('-') ? lang1.split('-')[0] : lang1;\n            var langB = lang2.includes('-') ? lang2.split('-')[0] : lang2;\n            if(langA == langB) {\n                item.setAttribute('data-tng-samelangs', 'true');\n                return;\n            }\n            return true;\n        }\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4035,7 +4035,7 @@
          "name":"Page HTML avec des attributs lang et xml:lang dont les valeurs correspondent.\"",
          "query":"[data-tng-samelangs]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4057,7 +4057,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.hasAttribute('lang') && item.hasAttribute('xml:lang')) {\n            if(item.hasAttribute('data-tng-emptylang') && item.getAttribute('data-tng-emptylang') === 'both') {\n                return;\n            }\n        } else {\n            if(item.hasAttribute('data-tng-emptylang')) {\n                return;\n            }\n        }\n\n        if(item.hasValidLanguageCode()) {\n            item.setAttribute('data-tng-validlang', 'true');\n            return;\n        }\n\t\treturn true;\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4075,7 +4075,7 @@
          "name":"La langue de la page HTML est valide.",
          "query":"[data-tng-validlang]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4152,7 +4152,7 @@
          "query":"body [lang], body [xml\\\\:lang]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "mandatory"
@@ -4173,7 +4173,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.hasAttribute('lang') && !item.hasAttribute('xml:lang')) {\n            if(item.getAttribute('lang').length === 0) {\n                return true;\n            }\n        } else if (item.hasAttribute('xml:lang') && !item.hasAttribute('lang')) {\n            if(item.getAttribute('xml:lang').length === 0) {\n                return true;\n            }\n        } else {\n            let length1 = item.getAttribute('lang').length;\n            let length2 = item.getAttribute('xml:lang').length;\n            if(length1 === 0 || length2 === 0) {\n                if(length1 + length2 > 0) item.setAttribute('data-tng-el-notemptylang', 'true');\n                return true;\n            }\n        }\n\n        item.setAttribute('data-tng-el-notemptylang', 'true');\n        return;\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"egal\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4191,7 +4191,7 @@
          "name":"Elements avec un attribut lang non vide.",
          "query":"[data-tng-el-notemptylang]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4213,7 +4213,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.hasValidLanguageCode()) {\n            item.setAttribute('data-tng-el-validlang', 'true');\n            return;\n        }\n\n\t\treturn true;\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4231,7 +4231,7 @@
          "name":"Elements avec un attribut lang valide.",
          "query":"[data-tng-el-validlang]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"lang\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: 'xml\\\\:lang',\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "languages",
@@ -4287,7 +4287,7 @@
             "cantTell"
          ],
          "filter":"function (item, HTML){\n        var dirAttr = item.getAttribute('dir');\n\n        if(dirAttr === 'ltr' || dirAttr === 'rtl') {\n            item.setAttribute('data-tng-dirValid', 'true');\n            return;\n        }\n        else return true;\n    }",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"dir\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "mandatory"
@@ -4306,7 +4306,7 @@
          "query":"[data-tng-dirValid]",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"dir\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "mandatory"
@@ -4368,7 +4368,7 @@
          "description":"Vérifiez si ces éléments track sont des sous-titres synchronisés, si oui, ils devraient posséder un attribut [kind=\"captions\"].",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"kind\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "videos",
@@ -4386,7 +4386,7 @@
          "name":"Liste des sous-titres synchronisés diffusés via une balise  avec attribut kind=\"captions\"",
          "query":"video track[kind=\"captions\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"kind\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "videos",
@@ -4406,7 +4406,7 @@
          "description":"Vérifiez la pertinence des sous-titres",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"kind\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "videos",
@@ -5034,7 +5034,7 @@
          "name":"Liste des balises servant à la présentation de l'information présentes dans le code source généré de la page.",
          "query":"basefont[data-tng-el-exposed=\"true\"], blink[data-tng-el-exposed=\"true\"], center[data-tng-el-exposed=\"true\"], font[data-tng-el-exposed=\"true\"], marquee[data-tng-el-exposed=\"true\"], s[data-tng-el-exposed=\"true\"], strike[data-tng-el-exposed=\"true\"], tt[data-tng-el-exposed=\"true\"], big[data-tng-el-exposed=\"true\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {},\n            tag: true,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "presentation"
@@ -5052,7 +5052,7 @@
          "query":"[align][data-tng-el-exposed=\"true\"], [alink][data-tng-el-exposed=\"true\"], [background][data-tng-el-exposed=\"true\"], [bgcolor][data-tng-el-exposed=\"true\"], [border][data-tng-el-exposed=\"true\"], [cellpadding][data-tng-el-exposed=\"true\"], [cellspacing][data-tng-el-exposed=\"true\"], [char][data-tng-el-exposed=\"true\"], [charoff][data-tng-el-exposed=\"true\"], [clear][data-tng-el-exposed=\"true\"], [compact][data-tng-el-exposed=\"true\"], [color][data-tng-el-exposed=\"true\"], [frameborder][data-tng-el-exposed=\"true\"], [hspace][data-tng-el-exposed=\"true\"], [link][data-tng-el-exposed=\"true\"], [marginheight][data-tng-el-exposed=\"true\"], [marginwidth][data-tng-el-exposed=\"true\"], [text][data-tng-el-exposed=\"true\"], [valign][data-tng-el-exposed=\"true\"], [vlink][data-tng-el-exposed=\"true\"], [vspace][data-tng-el-exposed=\"true\"], [data-tng-el-exposed=\"true\"][size]:not([type=\"text\"]):not([type=\"password\"]), [data-tng-el-exposed=\"true\"]:not(img):not(object):not(embed):not(canvas):not(svg)[width], [data-tng-el-exposed=\"true\"]:not(img):not(object):not(embed):not(canvas):not(svg)[height]",
          "filter":"function (item, HTML){\n        if(item.tagName.toLowerCase() === 'input' && item.type) {\n            if(item.type.toLowerCase() === 'text' || item.type.toLowerCase() === 'password') {\n                return;\n            }\n        }\n\n        return true;\n    }",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"align\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"alink\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"background\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"bgcolor\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"border\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"cellpadding\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"cellspacing\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"char\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"charoff\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"clear\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"compact\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"color\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"frameborder\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"hspace\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"link\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"marginheight\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"marginwidth\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"text\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"valign\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"vlink\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"vspace\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"size\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"width\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"height\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "presentation"
@@ -5133,7 +5133,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"content\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "presentation",
@@ -5151,7 +5151,7 @@
          "name":"La meta viewport empêche le zoom.",
          "query":"meta[data-tng-scalable]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"content\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "presentation",
@@ -5961,7 +5961,7 @@
          "name":"Liste des tableaux complexes avec résumé.",
          "query":"[data-tng-tableCaptions]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {\n                title: \"Description référencée par l'attribut aria-describedby.\",\n                element: \"#!!!aria-describedby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -5980,7 +5980,7 @@
          "description":"Vérifiez la pertinence du résumé du tableau complexe",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [],\n            related: {\n                title: \"Description référencée par l'attribut aria-describedby.\",\n                element: \"#!!!aria-describedby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6021,7 +6021,7 @@
          "description":"Vérifiez que le contenu linéarisé reste compréhensible",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"role\",\n                value: \"presentation\",\n                valueState: \"egal\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6043,7 +6043,7 @@
             "failed",
             "cantTell"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {\n                title: \"Passage de texte associé à la table.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6060,7 +6060,7 @@
          "name":"Liste des tableaux de données avec un titre mal associé au tableau.",
          "query":"[data-tng-dataTableSummary=\"false\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6083,7 +6083,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            }],\n            related: {\n                title: \"Passage de texte associé à la table.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables",
@@ -6101,7 +6101,7 @@
          "name":"Liste des tableaux de données avec un titre non pertinent",
          "query":"[data-tng-tableAccessiblename=\"false\"][data-tng-el-exposed=\"true\"], [data-tng-tableAccessiblename=\"false\"][data-tng-el-visible=\"true\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"aria-label\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"aria-labelledby\",\n                value: \"\",\n                valueState: \"notEmpty\"\n            },\n            {\n                name: \"title\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {\n                title: \"Passage de texte associé à la table.\",\n                element: \"#!!!aria-labelledby!!!\",\n                attrs: [],\n                tag: false,\n                content: true\n            },\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6122,7 +6122,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6139,7 +6139,7 @@
          "name":"Liste des en-têtes d'une colonne complète d'un tableau de données, mal déclarés.",
          "query":"table *[data-tng-tableCol=\"bad\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6160,7 +6160,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6177,7 +6177,7 @@
          "name":"Liste des en-têtes d'une ligne complète d'un tableau de données, mal déclarés.",
          "query":"table *[data-tng-tableRow=\"bad\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6232,7 +6232,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        var table = item.closest('table');\n        var headers = item.getAttribute('headers').split(' ');\n        var count = 0;\n        var headersLength = headers.length;\n\n        for(var i = 0; i < headersLength; i++) {\n            var id = document.getElementById(headers[i]);\n\n            if(id) {\n                count = id.closest('table') == table ? count+1 : count;\n            }\n        }\n\n        if(count > 1) {\n            if(item.tagName.toLowerCase() !== 'td' && item.tagName.toLowerCase() !== 'th') {\n                return true;\n            }\n            item.setAttribute('data-tng-tableHeaders', 'true');\n        }\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"headers\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6249,7 +6249,7 @@
          "name":"Liste des cellules d'un tableau de données associées à plusieurs en-têtes, correctement balisées.",
          "query":"table *[data-tng-tableHeaders=\"true\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"headers\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6270,7 +6270,7 @@
             "passed"
          ],
          "filter":"function (item, HTML){\n        if(item.id.trim().length > 0) {\n            let thID = item.id;\n            item.id = \"\";\n            if(!document.getElementById(thID)) {\n                item.id = thID;\n                item.setAttribute('data-tng-tableHeader-uniqueID', 'true');\n                return;\n            }\n            item.id = thID;\n        }\n\n        return true;\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6287,7 +6287,7 @@
          "name":"Liste des en-têtes de tableau s'appliquant à toute une ligne ou colonne correctement associés aux cellules.",
          "query":"th[data-tng-table=\"headerColFull\"][scope], th[data-tng-table=\"headerColFull\"][role=\"columnheader\"], th[data-tng-table=\"headerColFull\"][data-tng-tableHeader-uniqueID=\"true\"], th[data-tng-table=\"headerRowFull\"][scope], th[data-tng-table=\"headerRowFull\"][role=\"rowheader\"], th[data-tng-table=\"headerRowFull\"][data-tng-tableHeader-uniqueID=\"true\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6309,7 +6309,7 @@
             "failed",
             "cantTell"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6330,7 +6330,7 @@
             "cantTell"
          ],
          "filter":"function (item, HTML){\n        if(item.getAttribute('data-tng-el-exposed') == 'false' && item.getAttribute('data-tng-el-visible') == 'false') return;\n\n\t\tvar scope = item.getAttribute('scope');\n\n        if(scope != 'row' && scope != 'col') {\n            item.setAttribute('data-tng-scope', 'invalid');\n            return true;\n        }\n\t}",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6349,7 +6349,7 @@
          "description":"Vérifier la pertinence de l'attribut scope.",
          "testStatus":"cantTell",
          "warning":false,
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6370,7 +6370,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6387,7 +6387,7 @@
          "name":"Liste des en-têtes de tableau ne s'appliquant pas à toute une ligne ou colonne mal associés aux cellules.",
          "query":"th[data-tng-table=\"headerColPart\"]:not([data-tng-partHeader-uniqueID=\"true\"]), th[data-tng-table=\"headerRowPart\"]:not([data-tng-partHeader-uniqueID=\"true\"])",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"scope\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"id\",\n                value: \"\",\n                valueState: \"any\"\n            },\n            {\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6408,7 +6408,7 @@
          "depStatus":[
             "failed"
          ],
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"headers\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6425,7 +6425,7 @@
          "name":"L'attribut Headers spécifié sur une cellule ne fait pas référence à des en-têtes du même élément de tableau.",
          "query":"table [data-tng-headerInTable=\"false\"][data-tng-el-exposed=\"true\"], table [data-tng-headerInTable=\"false\"][data-tng-el-visible=\"true\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"headers\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6442,7 +6442,7 @@
          "name":"Liste des en-têtes ARIA s'appliquant à toute une ligne ou colonne mal renseignés.",
          "query":"[role=\"rowheader\"][data-tng-table=\"headerColFull\"], [role=\"columnheader\"][data-tng-table=\"headerRowFull\"]",
          "testStatus":"failed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
@@ -6459,7 +6459,7 @@
          "name":"Liste des en-têtes ARIA s'appliquant à toute une ligne ou colonne correctement renseignés.",
          "query":"[role=\"columnheader\"][data-tng-table=\"headerColFull\"], [role=\"rowheader\"][data-tng-table=\"headerRowFull\"]",
          "testStatus":"passed",
-         "mark":"function (HTML){\n        return {\n            attrs: [{\n                name: \"role\",\n                value: \"\",\n                valueState: \"any\"\n            }],\n            related: {},\n            tag: false,\n            content: false\n        }\n    }",
+         
          "tags":[
             "a11y",
             "tables"
