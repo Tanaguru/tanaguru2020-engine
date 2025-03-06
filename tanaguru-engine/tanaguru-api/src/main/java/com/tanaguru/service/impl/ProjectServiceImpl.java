@@ -50,6 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ActRepository actRepository;
     private final ContractUserRepository contractUserRepository;
     private final AuditService auditService;
+    private final AuditRepository auditRepository;
     private final AsyncAuditService asyncAuditService;
     private final UserRepository userRepository;
     private final ApiKeyRepository apiKeyRepository;
@@ -60,13 +61,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(
-            AppRoleRepository appRoleRepository, 
+            AppRoleRepository appRoleRepository,
             ProjectRepository projectRepository,
             ProjectUserRepository projectUserRepository,
-            ProjectRoleRepository projectRoleRepository, 
-            ActRepository actRepository, 
-            ContractUserRepository contractUserRepository, 
-            AuditService auditService, 
+            ProjectRoleRepository projectRoleRepository,
+            ActRepository actRepository,
+            ContractUserRepository contractUserRepository,
+            AuditService auditService,
+            AuditRepository auditRepository,
             AsyncAuditService asyncAuditService,
             UserRepository userRepository,
             ApiKeyRepository apiKeyRepository) {
@@ -77,6 +79,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.actRepository = actRepository;
         this.contractUserRepository = contractUserRepository;
         this.auditService = auditService;
+        this.auditRepository = auditRepository;
         this.asyncAuditService = asyncAuditService;
         this.userRepository = userRepository;
         this.apiKeyRepository = apiKeyRepository;
@@ -283,7 +286,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void deleteProject(Project project) {
         LOGGER.info("[Project {}] delete", project.getId());
-        auditService.findAllByProject(project).forEach(asyncAuditService::deleteAudit);
+        for(Audit audit : auditService.findAllByProject(project)) {
+            audit.setDeleted(true);
+            audit = auditRepository.save(audit);
+            asyncAuditService.deleteAudit(audit);
+        }
         project.getActs().forEach(actRepository::delete);
         projectUserRepository.deleteAllByProject(project);
         projectRepository.deleteById(project.getId());

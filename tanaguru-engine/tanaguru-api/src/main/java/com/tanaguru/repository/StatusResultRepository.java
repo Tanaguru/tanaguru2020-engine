@@ -37,9 +37,9 @@ public interface StatusResultRepository extends JpaRepository<StatusResult, Long
     double getAverageNumberOfErrorsByPage();
         
     @Query("select sum(sr.nbElementFailed) from StatusResult sr, Page p, Audit a where a.deleted = false and a.id = p.audit and p.id = sr.page")
-    int getSumNumberOfErrorsForPages();
+    Integer getSumNumberOfErrorsForPages();
     
     @Query("select sum(sr.nbElementFailed) from StatusResult sr, Page p, Audit a where a.dateStart <= :endDate and a.dateEnd >= :startDate and a.deleted = false and a.id = p.audit and p.id = sr.page")
-    int getSumNumberOfErrorsForPagesByDatesInterval(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    Integer getSumNumberOfErrorsForPagesByDatesInterval(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
     
 }
